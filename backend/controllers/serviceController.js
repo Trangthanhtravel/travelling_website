@@ -1,4 +1,25 @@
 const { getDB, generateId, generateBookingNumber } = require('../config/database');
+const Service = require('../models/Service');
+const Category = require('../models/Category');
+const { r2Helpers } = require('../config/storage');
+const multer = require('multer');
+
+// Configure multer for memory storage (files will be uploaded to R2)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  }
+});
 
 // Get all services with filtering
 const getServices = async (req, res) => {
@@ -20,36 +41,42 @@ const getServices = async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
-    let query = 'SELECT * FROM services';
+    // Updated query to join with categories table
+    let query = `
+      SELECT s.*, c.name as category_name, c.slug as category_slug, c.icon as category_icon, c.color as category_color
+      FROM services s
+      LEFT JOIN categories c ON s.category_id = c.id
+    `;
     const conditions = [];
     const params = [];
 
     // Only show active services for non-admin users
     if (req.user?.role !== 'admin') {
-      conditions.push('status = ?');
+      conditions.push('s.status = ?');
       params.push('active');
     } else if (status) {
-      conditions.push('status = ?');
+      conditions.push('s.status = ?');
       params.push(status);
     }
 
+    // Filter by category slug or ID
     if (category) {
-      conditions.push('category = ?');
-      params.push(category);
+      conditions.push('(c.slug = ? OR s.category_id = ?)');
+      params.push(category, category);
     }
 
     if (serviceType) {
-      conditions.push('service_type = ?');
+      conditions.push('s.service_type = ?');
       params.push(serviceType);
     }
 
     if (featured !== undefined) {
-      conditions.push('featured = ?');
+      conditions.push('s.featured = ?');
       params.push(featured === 'true' ? 1 : 0);
     }
 
     if (search) {
-      conditions.push('(title LIKE ? OR subtitle LIKE ? OR description LIKE ?)');
+      conditions.push('(s.title LIKE ? OR s.subtitle LIKE ? OR s.description LIKE ?)');
       const searchTerm = `%${search}%`;
       params.push(searchTerm, searchTerm, searchTerm);
     }
@@ -63,7 +90,7 @@ const getServices = async (req, res) => {
     const validSortOrders = ['asc', 'desc'];
 
     if (validSortColumns.includes(sortBy) && validSortOrders.includes(sortOrder)) {
-      query += ` ORDER BY ${sortBy} ${sortOrder.toUpperCase()}`;
+      query += ` ORDER BY s.${sortBy} ${sortOrder.toUpperCase()}`;
     }
 
     // Add pagination
@@ -74,7 +101,11 @@ const getServices = async (req, res) => {
     const result = await db.prepare(query).bind(...params).all();
 
     // Get total count for pagination
-    let countQuery = 'SELECT COUNT(*) as total FROM services';
+    let countQuery = `
+      SELECT COUNT(*) as total 
+      FROM services s
+      LEFT JOIN categories c ON s.category_id = c.id
+    `;
     if (conditions.length > 0) {
       countQuery += ' WHERE ' + conditions.join(' AND ');
     }
@@ -82,7 +113,7 @@ const getServices = async (req, res) => {
     const countResult = await db.prepare(countQuery).bind(...params.slice(0, -2)).first();
     const total = countResult?.total || 0;
 
-    // Process results
+    // Process results and include category information
     const services = result.results?.map(service => ({
       ...service,
       images: service.images ? JSON.parse(service.images) : [],
@@ -91,7 +122,14 @@ const getServices = async (req, res) => {
       excluded: service.excluded ? JSON.parse(service.excluded) : [],
       itinerary: service.itinerary ? JSON.parse(service.itinerary) : [],
       location: service.location ? JSON.parse(service.location) : null,
-      featured: Boolean(service.featured)
+      featured: Boolean(service.featured),
+      category: service.category_id ? {
+        id: service.category_id,
+        name: service.category_name,
+        slug: service.category_slug,
+        icon: service.category_icon,
+        color: service.category_color
+      } : null
     })) || [];
 
     res.json({
@@ -121,8 +159,15 @@ const getServiceById = async (req, res) => {
 
     const { id } = req.params;
 
-    const result = await db.prepare('SELECT * FROM services WHERE id = ? AND (status = "active" OR ? = "admin")')
-      .bind(id, req.user?.role || '').first();
+    // Updated query to include category information
+    const query = `
+      SELECT s.*, c.name as category_name, c.slug as category_slug, c.icon as category_icon, c.color as category_color
+      FROM services s
+      LEFT JOIN categories c ON s.category_id = c.id
+      WHERE s.id = ? AND (s.status = "active" OR ? = "admin")
+    `;
+
+    const result = await db.prepare(query).bind(id, req.user?.role || '').first();
 
     if (!result) {
       return res.status(404).json({ success: false, message: 'Service not found' });
@@ -136,10 +181,17 @@ const getServiceById = async (req, res) => {
       excluded: result.excluded ? JSON.parse(result.excluded) : [],
       itinerary: result.itinerary ? JSON.parse(result.itinerary) : [],
       location: result.location ? JSON.parse(result.location) : null,
-      featured: Boolean(result.featured)
+      featured: Boolean(result.featured),
+      category: result.category_id ? {
+        id: result.category_id,
+        name: result.category_name,
+        slug: result.category_slug,
+        icon: result.category_icon,
+        color: result.category_color
+      } : null
     };
 
-    res.json({ success: true, data: { service } });
+    res.json({ success: true, data: service });
   } catch (error) {
     console.error('Error fetching service:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
@@ -413,11 +465,252 @@ const updateServiceBookingStatus = async (req, res) => {
   }
 };
 
+// Admin: Create new service
+const createService = async (req, res) => {
+  try {
+    const db = getDB(req);
+    if (!db) {
+      return res.status(500).json({ success: false, message: 'Database not available' });
+    }
+
+    const serviceData = req.body;
+    
+    // Parse JSON fields from FormData if they're strings
+    if (serviceData.included && typeof serviceData.included === 'string') {
+      serviceData.included = JSON.parse(serviceData.included);
+    }
+    if (serviceData.excluded && typeof serviceData.excluded === 'string') {
+      serviceData.excluded = JSON.parse(serviceData.excluded);
+    }
+    if (serviceData.features && typeof serviceData.features === 'string') {
+      serviceData.features = JSON.parse(serviceData.features);
+    }
+
+    // Create new service instance
+    const service = new Service({
+      title: serviceData.name,
+      subtitle: serviceData.subtitle || '',
+      description: serviceData.description,
+      price: parseFloat(serviceData.price),
+      duration: serviceData.duration,
+      category: serviceData.category,
+      service_type: serviceData.category, // Map category to service_type
+      included: serviceData.features || [],
+      excluded: serviceData.excluded || [],
+      status: serviceData.status || 'active',
+      featured: serviceData.featured || false
+    });
+
+    // Handle image uploads if files are provided
+    if (req.files && req.files.length > 0) {
+      try {
+        const uploadedImages = await service.updateImages(
+          process.env.R2_BUCKET_NAME,
+          req.files,
+          []
+        );
+        console.log(`Uploaded ${uploadedImages.length} images for service`);
+      } catch (imageError) {
+        console.error('Image upload error:', imageError);
+        return res.status(400).json({
+          success: false,
+          message: 'Error uploading images: ' + imageError.message
+        });
+      }
+    }
+
+    // Save service to database
+    const result = await service.save(db);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Service created successfully',
+      data: service.toJSON ? service.toJSON() : service
+    });
+  } catch (error) {
+    console.error('Create service error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating service: ' + error.message
+    });
+  }
+};
+
+// Admin: Update existing service
+const updateService = async (req, res) => {
+  try {
+    const db = getDB(req);
+    if (!db) {
+      return res.status(500).json({ success: false, message: 'Database not available' });
+    }
+
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Check if service exists
+    const existingService = await Service.findById(db, id);
+    if (!existingService) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
+    }
+
+    // Parse JSON fields if they're strings
+    if (updateData.included && typeof updateData.included === 'string') {
+      updateData.included = JSON.parse(updateData.included);
+    }
+    if (updateData.excluded && typeof updateData.excluded === 'string') {
+      updateData.excluded = JSON.parse(updateData.excluded);
+    }
+    if (updateData.features && typeof updateData.features === 'string') {
+      updateData.features = JSON.parse(updateData.features);
+    }
+
+    // Prepare update data
+    const serviceUpdateData = {
+      title: updateData.name || existingService.title,
+      subtitle: updateData.subtitle || existingService.subtitle,
+      description: updateData.description || existingService.description,
+      price: updateData.price ? parseFloat(updateData.price) : existingService.price,
+      duration: updateData.duration || existingService.duration,
+      category: updateData.category || existingService.category,
+      service_type: updateData.category || existingService.service_type,
+      included: updateData.features || existingService.included,
+      excluded: updateData.excluded || existingService.excluded,
+      status: updateData.status || existingService.status,
+      featured: updateData.featured !== undefined ? updateData.featured : existingService.featured,
+      updated_at: new Date().toISOString()
+    };
+
+    // Handle image uploads if new files are provided
+    if (req.files && req.files.length > 0) {
+      try {
+        const uploadedImages = await existingService.updateImages(
+          process.env.R2_BUCKET_NAME,
+          req.files,
+          existingService.images || []
+        );
+        serviceUpdateData.images = JSON.stringify(uploadedImages);
+        console.log(`Updated ${uploadedImages.length} images for service`);
+      } catch (imageError) {
+        console.error('Image update error:', imageError);
+        return res.status(400).json({
+          success: false,
+          message: 'Error updating images: ' + imageError.message
+        });
+      }
+    }
+
+    // Update service in database
+    await existingService.update(db, serviceUpdateData);
+
+    res.json({
+      success: true,
+      message: 'Service updated successfully',
+      data: { ...existingService, ...serviceUpdateData }
+    });
+  } catch (error) {
+    console.error('Update service error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating service: ' + error.message
+    });
+  }
+};
+
+// Admin: Delete service
+const deleteService = async (req, res) => {
+  try {
+    const db = getDB(req);
+    if (!db) {
+      return res.status(500).json({ success: false, message: 'Database not available' });
+    }
+
+    const { id } = req.params;
+
+    // Check if service exists
+    const service = await Service.findById(db, id);
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
+    }
+
+    // Delete service (this will also handle image cleanup)
+    await service.delete(db, process.env.R2_BUCKET_NAME);
+
+    res.json({
+      success: true,
+      message: 'Service deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete service error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting service: ' + error.message
+    });
+  }
+};
+
+// Admin: Update service status
+const updateServiceStatus = async (req, res) => {
+  try {
+    const db = getDB(req);
+    if (!db) {
+      return res.status(500).json({ success: false, message: 'Database not available' });
+    }
+
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['active', 'inactive'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status. Must be "active" or "inactive"'
+      });
+    }
+
+    // Check if service exists
+    const service = await Service.findById(db, id);
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
+    }
+
+    // Update status
+    await service.update(db, { 
+      status, 
+      updated_at: new Date().toISOString() 
+    });
+
+    res.json({
+      success: true,
+      message: 'Service status updated successfully'
+    });
+  } catch (error) {
+    console.error('Update service status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating service status: ' + error.message
+    });
+  }
+};
+
 module.exports = {
   getServices,
   getServiceById,
   createServiceBooking,
   getUserServiceBookings,
   getAllServiceBookings,
-  updateServiceBookingStatus
+  updateServiceBookingStatus,
+  // Admin functions
+  createService,
+  updateService,
+  deleteService,
+  updateServiceStatus,
+  upload // Export the multer upload middleware
 };

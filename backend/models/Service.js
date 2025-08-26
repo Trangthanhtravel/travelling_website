@@ -141,65 +141,82 @@ class Service {
     return services.map(service => new Service(service));
   }
 
-  // Update service
+  // Update service in database
   async update(db, updateData) {
     // Handle JSON fields
-    if (updateData.itinerary) {
-      updateData.itinerary = JSON.stringify(updateData.itinerary);
-    }
-    if (updateData.included) {
-      updateData.included = JSON.stringify(updateData.included);
-    }
-    if (updateData.excluded) {
-      updateData.excluded = JSON.stringify(updateData.excluded);
-    }
-    if (updateData.images) {
+    if (updateData.images && typeof updateData.images !== 'string') {
       updateData.images = JSON.stringify(updateData.images);
     }
-    if (updateData.videos) {
-      updateData.videos = JSON.stringify(updateData.videos);
+    if (updateData.included && typeof updateData.included !== 'string') {
+      updateData.included = JSON.stringify(updateData.included);
     }
-    if (updateData.featured !== undefined) {
-      updateData.featured = updateData.featured ? 1 : 0;
+    if (updateData.excluded && typeof updateData.excluded !== 'string') {
+      updateData.excluded = JSON.stringify(updateData.excluded);
     }
-    
-    return await dbHelpers.update(db, 'services', updateData, 'id = ?', [this.id]);
+    if (updateData.itinerary && typeof updateData.itinerary !== 'string') {
+      updateData.itinerary = JSON.stringify(updateData.itinerary);
+    }
+
+    const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(updateData);
+    const sql = `UPDATE services SET ${fields}, updated_at = datetime('now') WHERE id = ?`;
+
+    return await dbHelpers.run(sql, [...values, this.id]);
   }
 
-  // Delete service
+  // Delete service from database
   async delete(db, r2Bucket) {
-    // Delete images from R2 storage
-    if (this.images && this.images.length > 0) {
-      for (const imageUrl of this.images) {
-        await r2Helpers.deleteImage(r2Bucket, imageUrl);
+    try {
+      // Delete images from R2 storage
+      if (this.images && this.images.length > 0) {
+        for (const imageUrl of this.images) {
+          await r2Helpers.deleteImage(r2Bucket, imageUrl);
+        }
       }
+
+      // Delete videos from R2 storage if any
+      if (this.videos && this.videos.length > 0) {
+        for (const videoUrl of this.videos) {
+          await r2Helpers.deleteImage(r2Bucket, videoUrl); // Using same function for videos
+        }
+      }
+
+      // Delete from database
+      return await dbHelpers.query(db, 'DELETE FROM services WHERE id = ?', [this.id]);
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      throw error;
     }
-    
-    return await dbHelpers.delete(db, 'services', 'id = ?', [this.id]);
   }
 
-  // Get service statistics
+  // Get service stats
   static async getStats(db) {
-    const totalServices = await dbHelpers.query(db, 'SELECT COUNT(*) as count FROM services WHERE status = ?', ['active']);
-    const servicesByCategory = await dbHelpers.query(db, 'SELECT category, COUNT(*) as count FROM services WHERE status = ? GROUP BY category', ['active']);
-    const featuredServices = await dbHelpers.query(db, 'SELECT COUNT(*) as count FROM services WHERE featured = 1 AND status = ?', ['active']);
-    
-    return {
-      total: totalServices[0].count,
-      byCategory: servicesByCategory,
-      featured: featuredServices[0].count
-    };
+    try {
+      const totalServices = await dbHelpers.query(db, 'SELECT COUNT(*) as count FROM services WHERE status = ?', ['active']);
+      const featuredServices = await dbHelpers.query(db, 'SELECT COUNT(*) as count FROM services WHERE status = ? AND featured = ?', ['active', 1]);
+      const servicesByCategory = await dbHelpers.query(db, 'SELECT category, COUNT(*) as count FROM services WHERE status = ? GROUP BY category', ['active']);
+
+      return {
+        total: totalServices[0]?.count || 0,
+        featured: featuredServices[0]?.count || 0,
+        byCategory: servicesByCategory || []
+      };
+    } catch (error) {
+      console.error('Error getting service stats:', error);
+      throw error;
+    }
   }
 
   // Convert to JSON
   toJSON() {
     return {
       ...this,
-      itinerary: typeof this.itinerary === 'string' ? JSON.parse(this.itinerary) : this.itinerary,
-      included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
-      excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded,
       images: typeof this.images === 'string' ? JSON.parse(this.images) : this.images,
       videos: typeof this.videos === 'string' ? JSON.parse(this.videos) : this.videos,
+      included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
+      excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded,
+      itinerary: typeof this.itinerary === 'string' ? JSON.parse(this.itinerary) : this.itinerary,
+      location: typeof this.location === 'string' ? JSON.parse(this.location) : this.location,
       featured: Boolean(this.featured)
     };
   }

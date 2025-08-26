@@ -1,521 +1,331 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../components/common/Icons';
-import { carRentals } from '../data/carRentals';
-
-// Types for services
-interface ServiceItem {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  itinerary?: string[];
-  images: string[];
-  videos?: string[];
-  price: number;
-  duration?: string;
-  included: string[];
-  excluded?: string[];
-  category: 'domestic' | 'international' | 'car-rental' | 'other-services';
-  serviceType: 'tours' | 'car-rental' | 'other-services';
-  featured?: boolean;
-  status: 'active' | 'inactive';
-}
+import { useTheme } from '../contexts/ThemeContext';
 
 const Services: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Categories for services
-  const categories = [
-    { id: 'all', name: 'All Services', icon: Icons.FiGrid },
-    { id: 'domestic', name: 'Domestic Tours', icon: Icons.FiMapPin },
-    { id: 'international', name: 'International Tours', icon: Icons.FiGlobe },
-    { id: 'car-rental', name: 'Private Car Rental', icon: Icons.FiTruck },
-    { id: 'other-services', name: 'Other Travel Services', icon: Icons.FiSettings }
-  ];
-
-  // Convert car rentals to ServiceItem format and combine with other services
-  const carRentalServices: ServiceItem[] = carRentals.map(car => ({
-    id: car.id,
-    title: car.title,
-    subtitle: car.subtitle,
-    description: car.description,
-    images: car.images,
-    price: car.price,
-    duration: car.duration,
-    included: car.included,
-    excluded: car.excluded,
-    category: car.category,
-    serviceType: car.serviceType,
-    status: car.status
-  }));
-
-  // Mock services data (in real app, this would come from your API)
-  const mockServices: ServiceItem[] = [
-    // Domestic Tours
-    {
-      id: '1',
-      title: 'Vietnam Heritage Discovery',
-      subtitle: 'Explore Ancient Temples & Traditional Villages',
-      description: 'Immerse yourself in Vietnam\'s rich cultural heritage with visits to ancient temples, traditional craft villages, and UNESCO World Heritage sites.',
-      itinerary: [
-        'Day 1: Arrival in Hanoi - Old Quarter walking tour',
-        'Day 2: Temple of Literature & Vietnam Museum of Ethnology',
-        'Day 3: Bat Trang Ceramic Village & Traditional water puppet show',
-        'Day 4: Ha Long Bay day cruise with cave exploration',
-        'Day 5: Return to Hanoi - Departure'
-      ],
-      images: [
-        'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1539650116574-75c0c6d3b86f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-      ],
-      price: 450,
-      duration: '5 days 4 nights',
-      included: ['Accommodation', 'Local guide', 'All meals', 'Transportation', 'Entrance fees'],
-      excluded: ['International flights', 'Personal expenses', 'Travel insurance'],
-      category: 'domestic',
-      serviceType: 'tours',
-      featured: true,
-      status: 'active'
-    },
-    {
-      id: '2',
-      title: 'Mekong Delta Adventure',
-      subtitle: 'Floating Markets & River Life Experience',
-      description: 'Discover the vibrant Mekong Delta with its floating markets, traditional villages, and lush waterways.',
-      itinerary: [
-        'Day 1: Ho Chi Minh City to Can Tho',
-        'Day 2: Cai Rang Floating Market & local homestay',
-        'Day 3: Coconut candy workshop & boat cruise',
-        'Day 4: Return to Ho Chi Minh City'
-      ],
-      images: [
-        'https://images.unsplash.com/photo-1528127269322-539801943592?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-      ],
-      price: 320,
-      duration: '4 days 3 nights',
-      included: ['Accommodation', 'Boat trips', 'Local guide', 'All meals'],
-      excluded: ['Flights to Ho Chi Minh City', 'Personal expenses'],
-      category: 'domestic',
-      serviceType: 'tours',
-      status: 'active'
-    },
-    // International Tours
-    {
-      id: '3',
-      title: 'Japan Cultural Immersion',
-      subtitle: 'Tokyo to Kyoto: Modern Meets Traditional',
-      description: 'Experience the perfect blend of modern innovation and ancient traditions across Japan\'s most iconic cities.',
-      itinerary: [
-        'Day 1-3: Tokyo - Modern city exploration, Shibuya, Harajuku',
-        'Day 4-5: Mount Fuji region - Traditional ryokan stay',
-        'Day 6-8: Kyoto - Ancient temples, Geisha districts',
-        'Day 9-10: Osaka - Street food culture & departure'
-      ],
-      images: [
-        'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1528360983277-13d401cdc186?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-      ],
-      price: 2800,
-      duration: '10 days 9 nights',
-      included: ['Accommodation', 'JR Pass', 'English guide', 'Some meals', 'Cultural activities'],
-      excluded: ['International flights', 'All meals', 'Personal shopping', 'Travel insurance'],
-      category: 'international',
-      serviceType: 'tours',
-      featured: true,
-      status: 'active'
-    },
-    // Car Rental Services - now using shared data
-    ...carRentalServices,
-    // Other Services
-    {
-      id: '10',
-      title: 'Visa Processing Service',
-      subtitle: 'Hassle-free Visa Applications',
-      description: 'Complete visa processing service for all destinations with expert guidance and fast processing.',
-      images: [
-        'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-      ],
-      price: 50,
-      duration: '5-10 business days',
-      included: ['Document review', 'Application submission', 'Status tracking', 'Expert consultation'],
-      excluded: ['Government fees', 'Travel to embassy (if required)', 'Additional documents'],
-      category: 'other-services',
-      serviceType: 'other-services',
-      status: 'active'
-    },
-    {
-      id: '11',
-      title: 'Hotel Booking Service',
-      subtitle: 'Best Accommodation Worldwide',
-      description: 'Book the best hotels worldwide with our exclusive rates and personalized recommendations.',
-      images: [
-        'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-      ],
-      price: 0,
-      duration: 'Commission-based',
-      included: ['Best rate guarantee', 'Free cancellation', '24/7 support', 'Instant confirmation'],
-      excluded: ['Hotel charges', 'City taxes', 'Extras not included in booking'],
-      category: 'other-services',
-      serviceType: 'other-services',
-      status: 'active'
-    }
-  ];
-
-  // Filter services based on category and search
-  const filteredServices = mockServices.filter(service => {
-    const matchesCategory = activeCategory === 'all' || service.category === activeCategory;
-    const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.subtitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch && service.status === 'active';
+  const [filters, setFilters] = useState({
+    page: 1,
+    limit: 12,
+    sortBy: 'created_at',
+    sortOrder: 'desc' as 'asc' | 'desc'
   });
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors duration-200">
-      {/* Hero Section */}
-      <section className="relative h-96 bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-800 dark:to-primary-900">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-          <div className="text-white max-w-3xl">
-            <h1 className="text-5xl md:text-6xl font-bold font-serif mb-6">
-              Our Services
-            </h1>
-            <p className="text-xl md:text-2xl text-primary-100 mb-8">
-              Comprehensive travel solutions tailored to your needs
-            </p>
-            <p className="text-lg text-primary-50 max-w-2xl">
-              From domestic adventures to international journeys, car rentals to visa services -
-              we provide everything you need for the perfect travel experience.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Filters and Search */}
-      <section className="sticky top-0 z-40 bg-white dark:bg-dark-800 shadow-md border-b dark:border-dark-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-            {/* Category Filter */}
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
-                  className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                    activeCategory === category.id
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-600'
-                  }`}
-                >
-                  <Icon icon={category.icon} className="w-4 h-4 mr-2" />
-                  {category.name}
-                </button>
-              ))}
-            </div>
-
-            {/* Search and View Mode */}
-            <div className="flex items-center gap-4">
-              {/* Search */}
-              <div className="relative">
-                <Icon icon={Icons.FiSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search services..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* View Mode Toggle */}
-              <div className="flex bg-gray-100 dark:bg-dark-700 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-colors duration-200 ${
-                    viewMode === 'grid'
-                      ? 'bg-white dark:bg-dark-600 text-primary-600 dark:text-primary-400 shadow-sm'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                >
-                  <Icon icon={Icons.FiGrid} className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-colors duration-200 ${
-                    viewMode === 'list'
-                      ? 'bg-white dark:bg-dark-600 text-primary-600 dark:text-primary-400 shadow-sm'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                >
-                  <Icon icon={Icons.FiList} className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Active filters and results count */}
-          <div className="flex items-center justify-between mt-4 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-4">
-              <span>
-                {filteredServices.length} service{filteredServices.length !== 1 ? 's' : ''} found
-              </span>
-              {activeCategory !== 'all' && (
-                <span className="flex items-center">
-                  <span className="mr-2">Category:</span>
-                  <span className="bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 px-2 py-1 rounded-full text-xs">
-                    {categories.find(c => c.id === activeCategory)?.name}
-                  </span>
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Grid/List */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {filteredServices.length === 0 ? (
-            <div className="text-center py-16">
-              <Icon icon={Icons.FiSearch} className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">No services found</h3>
-              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                Try adjusting your search terms or category filters to find what you're looking for.
-              </p>
-            </div>
-          ) : (
-            <div className={viewMode === 'grid'
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
-              : 'space-y-6'
-            }>
-              {filteredServices.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  viewMode={viewMode}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </div>
-  );
-};
-
-// Service Card Component
-interface ServiceCardProps {
-  service: ServiceItem;
-  viewMode: 'grid' | 'list';
-}
-
-const ServiceCard: React.FC<ServiceCardProps> = ({ service, viewMode }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % service.images.length);
+  const getApiUrl = () => {
+    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   };
 
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + service.images.length) % service.images.length);
+  // Fetch categories from API
+  const { data: categoriesData } = useQuery({
+    queryKey: ['categories', 'service'],
+    queryFn: async () => {
+      const response = await fetch(`${getApiUrl()}/categories?type=service&status=active`);
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      return response.json();
+    },
+  });
+
+  // Fetch services from API with pagination
+  const { data: servicesData, isLoading, error } = useQuery({
+    queryKey: ['services', { category: activeCategory, search: searchTerm, ...filters }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (activeCategory !== 'all') params.append('category', activeCategory);
+      if (searchTerm) params.append('search', searchTerm);
+      params.append('status', 'active');
+      params.append('page', filters.page.toString());
+      params.append('limit', filters.limit.toString());
+      params.append('sortBy', filters.sortBy);
+      params.append('sortOrder', filters.sortOrder);
+
+      const response = await fetch(`${getApiUrl()}/services?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch services');
+      return response.json();
+    },
+  });
+
+  // Build categories list with dynamic data from API
+  const categories = [
+    { id: 'all', name: 'All Services', icon: Icons.FiGrid, slug: 'all' },
+    ...(categoriesData?.data?.map((cat: any) => ({
+      id: cat.slug,
+      name: cat.name,
+      icon: Icons[cat.icon as keyof typeof Icons] || Icons.FiTag,
+      slug: cat.slug,
+      color: cat.color
+    })) || [])
+  ];
+
+  const handlePageChange = (page: number) => {
+    setFilters(prev => ({ ...prev, page }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (viewMode === 'list') {
+  const handleSortChange = (sortValue: string) => {
+    const [sortBy, sortOrder] = sortValue.split('-');
+    setFilters(prev => ({
+      ...prev,
+      sortBy,
+      sortOrder: sortOrder as 'asc' | 'desc',
+      page: 1
+    }));
+  };
+
+  const handleSearchChange = (search: string) => {
+    setSearchTerm(search);
+    setFilters(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setActiveCategory(category);
+    setFilters(prev => ({ ...prev, page: 1 }));
+  };
+
+  const pagination = servicesData?.pagination;
+  const services = servicesData?.data || [];
+
+  if (error) {
     return (
-      <div className="bg-white dark:bg-dark-700 rounded-xl shadow-lg border dark:border-dark-600 overflow-hidden hover:shadow-2xl transition-all duration-300">
-        <div className="md:flex">
-          {/* Image Section */}
-          <div className="relative md:w-1/3 h-64 md:h-auto">
-            <img
-              src={service.images[currentImageIndex]}
-              alt={service.title}
-              className="w-full h-full object-cover"
-            />
-            {service.images.length > 1 && (
-              <>
-                <button
-                  onClick={prevImage}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
-                >
-                  <Icon icon={Icons.FiChevronLeft} className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
-                >
-                  <Icon icon={Icons.FiChevronRight} className="w-4 h-4" />
-                </button>
-              </>
-            )}
-            <div className="absolute top-4 left-4">
-              {service.featured && (
-                <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                  Featured
-                </span>
-              )}
-            </div>
-            <div className="absolute top-4 right-4 bg-white dark:bg-dark-800 text-primary-600 dark:text-primary-400 px-3 py-1 rounded-full text-sm font-medium">
-              ${service.price}{service.duration?.includes('day') ? '/day' : ''}
-            </div>
-          </div>
-
-          {/* Content Section */}
-          <div className="md:w-2/3 p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {service.title}
-                </h3>
-                <p className="text-lg text-primary-600 dark:text-primary-400 font-medium mb-3">
-                  {service.subtitle}
-                </p>
-              </div>
-            </div>
-
-            <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-              {service.description}
-            </p>
-
-            {service.duration && (
-              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
-                <Icon icon={Icons.FiClock} className="w-4 h-4 mr-2" />
-                <span>{service.duration}</span>
-              </div>
-            )}
-
-            {/* Included Items */}
-            <div className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Included:</h4>
-              <div className="flex flex-wrap gap-2">
-                {service.included.slice(0, 3).map((item, index) => (
-                  <span key={index} className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 px-2 py-1 rounded-full text-xs">
-                    {item}
-                  </span>
-                ))}
-                {service.included.length > 3 && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    +{service.included.length - 3} more
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                ${service.price}
-                <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-1">
-                  {service.duration?.includes('day') ? '/day' :
-                   service.category === 'other-services' && service.price === 0 ? 'Free booking' : ''}
-                </span>
-              </div>
-              <Link to={`/services/${service.id}`} className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
-                View Details
-              </Link>
-            </div>
-          </div>
+      <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
+        <div className="text-center py-12">
+          <Icon icon={Icons.FiAlertCircle} className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Error loading services</h3>
+          <p className="text-gray-600 dark:text-gray-400">Please try again later</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-dark-700 rounded-xl shadow-lg border dark:border-dark-600 overflow-hidden group hover:shadow-2xl transition-all duration-300">
-      {/* Image Section */}
-      <div className="relative h-64 overflow-hidden">
-        <img
-          src={service.images[currentImageIndex]}
-          alt={service.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-        />
-        {service.images.length > 1 && (
-          <>
-            <button
-              onClick={prevImage}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors opacity-0 group-hover:opacity-100"
-            >
-              <Icon icon={Icons.FiChevronLeft} className="w-4 h-4" />
-            </button>
-            <button
-              onClick={nextImage}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors opacity-0 group-hover:opacity-100"
-            >
-              <Icon icon={Icons.FiChevronRight} className="w-4 h-4" />
-            </button>
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-              {service.images.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                  }`}
-                />
-              ))}
-            </div>
-          </>
-        )}
-        <div className="absolute top-4 left-4">
-          {service.featured && (
-            <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-              Featured
-            </span>
-          )}
-        </div>
-        <div className="absolute top-4 right-4 bg-white dark:bg-dark-800 text-primary-600 dark:text-primary-400 px-3 py-1 rounded-full text-sm font-medium">
-          ${service.price}{service.duration?.includes('day') ? '/day' : ''}
+    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
+      {/* Hero Section */}
+      <div className="bg-accent-orange text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Travel Services</h1>
+            <p className="text-xl text-white/90 max-w-2xl mx-auto">
+              Comprehensive travel solutions for all your adventure needs
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Content Section */}
-      <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
-          {service.title}
-        </h3>
-        <p className="text-primary-600 dark:text-primary-400 font-medium mb-3">
-          {service.subtitle}
-        </p>
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
-          {service.description}
-        </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search and Filter */}
+        <div className={`rounded-lg shadow-lg p-6 mb-8 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'}`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                Search Services
+              </label>
+              <div className="relative">
+                <Icon icon={Icons.FiSearch} className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-400'}`} />
+                <input
+                  type="text"
+                  placeholder="Search services..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                />
+              </div>
+            </div>
 
-        {service.duration && (
-          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
-            <Icon icon={Icons.FiClock} className="w-4 h-4 mr-2" />
-            <span>{service.duration}</span>
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                View Mode
+              </label>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-accent-orange text-white'
+                      : isDarkMode
+                      ? 'text-dark-text-muted hover:text-dark-text-primary hover:bg-dark-700'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon icon={Icons.FiGrid} className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-accent-orange text-white'
+                      : isDarkMode
+                      ? 'text-dark-text-muted hover:text-dark-text-primary hover:bg-dark-700'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon icon={Icons.FiList} className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Category Navigation */}
+        <div className="flex flex-wrap gap-2 mb-8 justify-center">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setActiveCategory(category.id)}
+              className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                activeCategory === category.id
+                  ? 'bg-accent-orange text-white'
+                  : isDarkMode
+                  ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700 border border-dark-700'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+              }`}
+            >
+              <Icon icon={category.icon} className="w-4 h-4 mr-2" />
+              {category.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className={`rounded-xl shadow-lg animate-pulse ${isDarkMode ? 'bg-dark-800' : 'bg-white'}`}>
+                <div className={`h-48 rounded-t-xl ${isDarkMode ? 'bg-dark-700' : 'bg-gray-200'}`}></div>
+                <div className="p-6">
+                  <div className={`h-4 rounded mb-2 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-200'}`}></div>
+                  <div className={`h-6 rounded mb-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-200'}`}></div>
+                  <div className={`h-4 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-gray-200'}`}></div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Included Items */}
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-2">
-            {service.included.slice(0, 2).map((item, index) => (
-              <span key={index} className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 px-2 py-1 rounded-full text-xs">
-                {item}
-              </span>
-            ))}
-            {service.included.length > 2 && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1">
-                +{service.included.length - 2} more
-              </span>
-            )}
-          </div>
-        </div>
+        {/* Services Grid/List */}
+        {!isLoading && services.length > 0 && (
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}>
+            {services.map((service: any) => (
+              <div
+                key={service.id}
+                className={`group overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
+                  isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'
+                } ${viewMode === 'grid' ? 'rounded-xl' : 'rounded-lg flex flex-col sm:flex-row'}`}
+              >
+                <div className={`relative overflow-hidden ${
+                  viewMode === 'grid' ? 'h-48' : 'h-48 sm:h-auto sm:w-64 flex-shrink-0'
+                }`}>
+                  <img
+                    src={service.images?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
+                    alt={service.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                  <div className="absolute top-4 right-4 bg-accent-orange text-white rounded-full px-3 py-1 text-sm font-medium">
+                    ${service.price}
+                  </div>
+                  {service.featured && (
+                    <div className="absolute top-4 left-4 bg-warning text-white px-2 py-1 rounded text-xs font-medium">
+                      Featured
+                    </div>
+                  )}
+                </div>
 
-        <div className="flex items-center justify-between">
-          <div className="text-lg font-bold text-primary-600 dark:text-primary-400">
-            ${service.price}
-            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-1">
-              {service.duration?.includes('day') ? '/day' :
-               service.category === 'other-services' && service.price === 0 ? 'Free' : ''}
-            </span>
+                <div className="p-6 flex-1 flex flex-col">
+                  <div className={`flex items-center text-sm mb-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
+                    <Icon icon={Icons.FiTag} className="w-4 h-4 mr-1" />
+                    <span className="capitalize">{service.category.replace('-', ' ')}</span>
+                  </div>
+                  <h3 className={`font-bold mb-2 group-hover:text-accent-orange transition-colors duration-200 ${
+                    viewMode === 'grid' ? 'text-xl' : 'text-lg'
+                  } ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
+                    {service.title}
+                  </h3>
+                  <p className={`text-sm mb-4 line-clamp-2 flex-grow ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
+                    {service.description}
+                  </p>
+
+                  {service.duration && (
+                    <div className={`flex items-center text-sm mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
+                      <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
+                      <span>{service.duration}</span>
+                    </div>
+                  )}
+
+                  {/* View Details Button */}
+                  <Link
+                    to={`/services/${service.id}`}
+                    className="w-full bg-accent-orange hover:bg-accent-orange-hover text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center"
+                  >
+                    View Details
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
-          <Link to={`/services/${service.id}`} className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
-            View Details
-          </Link>
-        </div>
+        )}
+
+        {/* Pagination */}
+        {!isLoading && services.length > 0 && pagination && (
+          <div className="mt-8">
+            <div className={`flex justify-between items-center mb-4 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+              <div className="text-sm">
+                Showing {pagination.total > 0 ? (pagination.currentPage - 1) * pagination.limit + 1 : 0} -{' '}
+                {pagination.currentPage * pagination.limit > pagination.total ? pagination.total : pagination.currentPage * pagination.limit}{' '}
+                of {pagination.total} services
+              </div>
+
+              {/* Sort By */}
+              <div>
+                <label className="sr-only">Sort by</label>
+                <select
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className={`block appearance-none bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:border-dark-600 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}
+                >
+                  <option value="created_at-desc">Newest First</option>
+                  <option value="created_at-asc">Oldest First</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                onClick={() => handlePageChange(pagination.currentPage - 1)}
+                disabled={pagination.currentPage === 1}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors mr-2 ${isDarkMode ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              >
+                <Icon icon={Icons.FiChevronLeft} className="w-4 h-4 mr-2" />
+                Previous
+              </button>
+
+              <button
+                onClick={() => handlePageChange(pagination.currentPage + 1)}
+                disabled={pagination.currentPage * pagination.limit >= pagination.total}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              >
+                Next
+                <Icon icon={Icons.FiChevronRight} className="w-4 h-4 ml-2" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && services.length === 0 && (
+          <div className={`text-center py-12 rounded-lg ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'}`}>
+            <Icon icon={Icons.FiPackage} className={`w-12 h-12 mx-auto mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-400'}`} />
+            <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>
+              No services found
+            </h3>
+            <p className={`mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
+              Try adjusting your search or category filter.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

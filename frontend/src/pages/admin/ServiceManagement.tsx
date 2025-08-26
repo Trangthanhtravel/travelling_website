@@ -4,15 +4,24 @@ import { Icon, Icons } from '../../components/common/Icons';
 import toast from 'react-hot-toast';
 
 interface Service {
-  _id: string;
-  name: string;
-  description: string;
-  category: string;
-  price: number;
-  features: string[];
-  status: 'active' | 'inactive';
-  createdAt: string;
-  updatedAt: string;
+    id: string;
+    title: string;
+    subtitle?: string;
+    description: string;
+    price: number;
+    duration?: string;
+    category: 'tours' | 'car-rental' | 'hotel-booking' | 'train-booking' | 'cruise' | 'visa-service';
+    service_type?: string;
+    images: string[];
+    videos?: string[];
+    included: string[];
+    excluded: string[];
+    itinerary?: string[];
+    location?: any;
+    featured: boolean;
+    status: 'active' | 'inactive';
+    created_at: string;
+    updated_at: string;
 }
 
 const ServiceManagement: React.FC = () => {
@@ -228,11 +237,11 @@ const ServiceManagement: React.FC = () => {
               </thead>
               <tbody className="bg-white dark:bg-dark-800 divide-y divide-gray-200 dark:divide-dark-600">
                 {services.map((service) => (
-                  <tr key={service._id} className="hover:bg-gray-50 dark:hover:bg-dark-700">
+                  <tr key={service.id} className="hover:bg-gray-50 dark:hover:bg-dark-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {service.name}
+                          {service.title}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
                           {service.description}
@@ -249,7 +258,7 @@ const ServiceManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() => handleStatusToggle(service._id, service.status)}
+                        onClick={() => handleStatusToggle(service.id, service.status)}
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors duration-200 ${
                           service.status === 'active'
                             ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/30'
@@ -260,7 +269,7 @@ const ServiceManagement: React.FC = () => {
                       </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(service.createdAt).toLocaleDateString()}
+                      {new Date(service.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
@@ -271,7 +280,7 @@ const ServiceManagement: React.FC = () => {
                           <Icon icon={Icons.FiEdit} className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(service._id)}
+                          onClick={() => handleDelete(service.id)}
                           className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                         >
                           <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
@@ -300,7 +309,8 @@ const ServiceManagement: React.FC = () => {
             setEditingService(null);
           }}
         />
-      )}
+      )
+      }
     </div>
   );
 };
@@ -313,14 +323,27 @@ interface ServiceModalProps {
 }
 
 const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess }) => {
-  const [formData, setFormData] = useState({
-    name: service?.name || '',
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    category: "tours" | "car-rental" | "hotel-booking" | "train-booking" | "cruise" | "visa-service";
+    price: number;
+    itinerary: string[];
+    status: "active" | "inactive";
+    duration: string;
+    images: string[];
+  }>({
+    name: service?.title || '',
     description: service?.description || '',
     category: service?.category || 'tours',
     price: service?.price || 0,
-    features: service?.features || [''],
-    status: service?.status || 'active'
+    itinerary: service?.itinerary || [''],
+    status: service?.status || 'active',
+    duration: service?.duration || '',
+    images: service?.images || []
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const getApiUrl = () => {
     return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -329,7 +352,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
   const mutation = useMutation({
     mutationFn: async (data: any) => {
       const url = service
-        ? `${getApiUrl()}/admin/services/${service._id}`
+        ? `${getApiUrl()}/admin/services/${service.id}`
         : `${getApiUrl()}/admin/services`;
 
       const response = await fetch(url, {
@@ -357,7 +380,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
     e.preventDefault();
     const dataToSubmit = {
       ...formData,
-      features: formData.features.filter(feature => feature.trim() !== '')
+      features: formData.itinerary.filter(feature => feature.trim() !== '')
     };
     mutation.mutate(dataToSubmit);
   };
@@ -365,21 +388,21 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
   const addFeature = () => {
     setFormData(prev => ({
       ...prev,
-      features: [...prev.features, '']
+      itinerary: [...prev.itinerary, '']
     }));
   };
 
   const removeFeature = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      features: prev.features.filter((_, i) => i !== index)
+      itinerary: prev.itinerary.filter((_, i) => i !== index)
     }));
   };
 
   const updateFeature = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      features: prev.features.map((feature, i) => i === index ? value : feature)
+      itinerary: prev.itinerary.map((feature, i) => i === index ? value : feature)
     }));
   };
 
@@ -399,29 +422,47 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {/* Service Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Service Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                placeholder="Enter service name"
+              />
+            </div>
+
+            {/* Service Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Description *
+              </label>
+              <textarea
+                required
+                rows={4}
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                placeholder="Enter service description"
+              />
+            </div>
+
+            {/* Category and Price Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Service Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Category *
                 </label>
                 <select
-                  value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
                   required
+                  value={formData.category}
+                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as "tours" | "car-rental" | "hotel-booking" | "train-booking" | "cruise" | "visa-service" }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
                 >
                   <option value="tours">Tours</option>
                   <option value="car-rental">Car Rental</option>
@@ -431,46 +472,48 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
                   <option value="visa-service">Visa Service</option>
                 </select>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Description *
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Price ($) *
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Price (USD) *
                 </label>
                 <input
                   type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData(prev => ({ ...prev, price: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
                   required
                   min="0"
                   step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            {/* Duration and Status Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Duration
+                </label>
+                <input
+                  type="text"
+                  value={formData.duration || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                  placeholder="e.g., 2 hours, 1 day"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Status *
                 </label>
                 <select
+                  required
                   value={formData.status}
                   onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'active' | 'inactive' }))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                  required
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -478,54 +521,92 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
               </div>
             </div>
 
+            {/* Service Images */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Features
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Service Images
               </label>
-              <div className="space-y-2">
-                {formData.features.map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      value={feature}
-                      onChange={(e) => updateFeature(index, e.target.value)}
-                      placeholder="Enter feature"
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                    />
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  setSelectedFiles(files);
+                  // Note: In a real implementation, you would upload these files to your storage service
+                  // and get back URLs to store in formData.images
+                }}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Upload up to 10 images (JPG, PNG, WebP - Max 5MB each)
+              </p>
+              {selectedFiles.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Selected files: {selectedFiles.map(f => f.name).join(', ')}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Features */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Features/Included Services
+              </label>
+              {formData.itinerary.map((itinerary, index) => (
+                <div key={index} className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={itinerary}
+                    onChange={(e) => updateFeature(index, e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                    placeholder="Enter a feature or included service"
+                  />
+                  {formData.itinerary.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeFeature(index)}
-                      className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                      className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                     >
-                      <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
+                      <Icon icon={Icons.FiMinus} className="w-4 h-4" />
                     </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={addFeature}
-                  className="flex items-center text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
-                >
-                  <Icon icon={Icons.FiPlus} className="w-4 h-4 mr-1" />
-                  Add Feature
-                </button>
-              </div>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addFeature}
+                className="inline-flex items-center text-sm text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                <Icon icon={Icons.FiPlus} className="w-4 h-4 mr-1" />
+                Add Feature
+              </button>
             </div>
 
-            <div className="flex space-x-4 pt-4">
+            {/* Form Actions */}
+            <div className="flex items-center justify-end space-x-3 pt-6 border-t dark:border-dark-700">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-800"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {mutation.isPending ? 'Saving...' : service ? 'Update Service' : 'Create Service'}
+                {mutation.isPending ? (
+                  <div className="flex items-center">
+                    <Icon icon={Icons.FiLoader} className="animate-spin w-4 h-4 mr-2" />
+                    {service ? 'Updating...' : 'Creating...'}
+                  </div>
+                ) : (
+                  service ? 'Update Service' : 'Create Service'
+                )}
               </button>
             </div>
           </form>
