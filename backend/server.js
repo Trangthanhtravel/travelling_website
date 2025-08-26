@@ -14,6 +14,8 @@ const reviewRoutes = require('./routes/reviews');
 const contentRoutes = require('./routes/content');
 const paymentRoutes = require('./routes/payments');
 const adminRoutes = require('./routes/admin');
+const categoryRoutes = require('./routes/categories');
+const socialLinksRoutes = require('./routes/socialLinks');
 
 const app = express();
 
@@ -90,6 +92,8 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/social-links', socialLinksRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

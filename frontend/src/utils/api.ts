@@ -1,13 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
 import {
-  User,
-  Tour,
-  Booking,
-  Review,
-  Content,
-  TourFilters,
-  ApiResponse,
-  PaginationResponse
+    User,
+    Tour,
+    Booking,
+    Review,
+    Content,
+    TourFilters,
+    ApiResponse,
+    PaginationResponse, Service
 } from '../types';
 
 // Create axios instance
@@ -90,7 +90,7 @@ export const servicesAPI = {
   getServices: (): Promise<AxiosResponse<ApiResponse<any[]>>> =>
     api.get('/services'),
 
-  getServiceById: (id: string): Promise<AxiosResponse<ApiResponse<any>>> =>
+  getServiceById: (id: string): Promise<AxiosResponse<ApiResponse<Service>>> =>
     api.get(`/services/${id}`),
 };
 
