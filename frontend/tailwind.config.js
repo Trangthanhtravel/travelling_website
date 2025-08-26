@@ -7,63 +7,59 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Primary brand colors based on your palette
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#E6EFFF',   // medium light blue
+          100: '#F2F5FB',  // light blue
+          200: '#E6EFFF',  // medium light blue
+          300: '#D83713',  // orange for accents
+          400: '#D83713',  // orange
+          500: '#D83713',  // orange
+          600: '#B8300F',  // darker orange
+          700: '#9A280D',  // even darker orange
+          800: '#7C200A',  // very dark orange
+          900: '#5E1808',  // darkest orange
         },
-        secondary: {
-          50: '#f0fdfa',
-          100: '#ccfbf1',
-          200: '#99f6e4',
-          300: '#5eead4',
-          400: '#2dd4bf',
-          500: '#14b8a6',
-          600: '#0d9488',
-          700: '#0f766e',
-          800: '#115e59',
-          900: '#134e4a',
-        },
+        // Dark theme colors based on your palette
         dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          750: '#2a3441', // New: Lighter mix with more white
-          800: '#1e293b',
-          825: '#1c2530', // New: White-mixed variant
-          850: '#1a2332', // Mix of white and RGB(18, 41, 65)
-          875: '#162028', // New: Subtle white mixing
-          900: '#122941', // RGB(18, 41, 65)
-          925: '#0f1c2e', // New: Deeper with white hints
-          950: '#0f1f35', // Darker variant
+          // Main dark background
+          900: '#122941',  // dark blue - main dark background
+          800: '#1a3650',  // slightly lighter dark blue
+          700: '#22435f',  // lighter dark blue
+          600: '#2a506e',  // even lighter
+          500: '#325d7d',  // medium dark blue
+          // Text colors for dark theme
+          text: {
+            primary: '#FAFAFA',   // off white for main text
+            secondary: '#FFFFFF', // pure white for emphasis
+            muted: '#E6EFFF',     // medium light blue for muted text
+          }
         },
-        // Add new white-mixed variants for better contrast
-        'dark-white': {
-          50: '#fefefe',
-          100: '#fdfdfd',
-          200: '#fbfbfb',
-          300: '#f8f9fa',
-          400: '#f1f3f4',
-          500: '#e8eaed',
-          600: '#dadce0',
-          700: '#bdc1c6',
-          800: '#9aa0a6',
-          850: '#80868b',
-          900: '#5f6368',
-          950: '#3c4043',
-        }
+        // Light theme colors
+        light: {
+          // Backgrounds
+          50: '#FFFFFF',   // pure white
+          100: '#FAFAFA',  // off white
+          200: '#F2F5FB',  // light blue
+          300: '#E6EFFF',  // medium light blue
+          // Text colors for light theme
+          text: {
+            primary: '#000000',   // black for main text
+            secondary: '#122941', // dark blue for secondary text
+            muted: '#5A6B7D',     // muted gray-blue
+          }
+        },
+        // Accent colors
+        accent: {
+          orange: '#D83713',     // orange for buttons and highlights
+          'orange-hover': '#B8300F', // darker orange for hover states
+          'orange-light': '#E6451A', // lighter orange variant
+        },
+        // Semantic colors that work in both themes
+        success: '#10B981',
+        warning: '#F59E0B',
+        error: '#EF4444',
+        info: '#3B82F6',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
