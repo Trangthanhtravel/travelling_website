@@ -36,10 +36,6 @@ const Home: React.FC = () => {
   });
   const [statisticsVisible, setStatisticsVisible] = useState(false);
   const statisticsRef = useRef<HTMLDivElement>(null);
-  const [bookingModal, setBookingModal] = useState<{
-    isOpen: boolean;
-    item: { id: string; title: string; price: number; type: 'tour' | 'service' } | null;
-  }>({ isOpen: false, item: null });
   const carRentalsRef = useRef<HTMLDivElement>(null);
   const coreServicesRef = useRef<HTMLDivElement>(null);
 
@@ -59,36 +55,6 @@ const Home: React.FC = () => {
   // Use mock data for featured tours
   const featuredTours = getFeaturedTours();
   const toursLoading = false;
-
-  // Handle booking modal
-  const handleBooking = (tour: any) => {
-    setBookingModal({
-      isOpen: true,
-      item: {
-        id: tour.id,
-        title: tour.title,
-        price: tour.price,
-        type: 'tour',
-      },
-    });
-  };
-
-  // Handle car rental booking
-  const handleCarRentalBooking = (car: any) => {
-    setBookingModal({
-      isOpen: true,
-      item: {
-        id: car.id,
-        title: car.name,
-        price: car.price,
-        type: 'service',
-      },
-    });
-  };
-
-  const closeBookingModal = () => {
-    setBookingModal({ isOpen: false, item: null });
-  };
 
   // Fetch hero images from backend
   useEffect(() => {
@@ -650,7 +616,6 @@ const Home: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        handleBooking(tour);
                       }}
                       className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
                     >
@@ -704,7 +669,6 @@ const Home: React.FC = () => {
                       <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">{car.name}</h3>
                       <p className="text-gray-600 dark:text-gray-600 text-sm mb-4">{car.description}</p>
                       <button
-                        onClick={() => handleCarRentalBooking(car)}
                         className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
                       >
                         Book Now

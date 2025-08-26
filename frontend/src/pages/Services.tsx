@@ -76,16 +76,6 @@ const Services: React.FC = () => {
     }));
   };
 
-  const handleSearchChange = (search: string) => {
-    setSearchTerm(search);
-    setFilters(prev => ({ ...prev, page: 1 }));
-  };
-
-  const handleCategoryChange = (category: string) => {
-    setActiveCategory(category);
-    setFilters(prev => ({ ...prev, page: 1 }));
-  };
-
   const pagination = servicesData?.pagination;
   const services = servicesData?.data || [];
 
