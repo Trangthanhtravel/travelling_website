@@ -40,7 +40,7 @@ router.post('/', adminAuth, upload.array('images', 10), createTour);
 // @route   PUT /api/tours/:id
 // @desc    Update tour
 // @access  Private (Admin only)
-router.put('/:id', adminAuth, updateTour);
+router.put('/:id', adminAuth, upload.array('images', 10), updateTour);
 
 // @route   DELETE /api/tours/:id
 // @desc    Delete tour

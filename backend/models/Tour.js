@@ -1,61 +1,85 @@
-const { v4: uuidv4 } = require('uuid');
 const { query, get, all, run } = require('../config/database');
 const { r2Helpers } = require('../config/storage');
 
 class Tour {
   constructor(data) {
-    this.id = data.id || uuidv4();
+    this.id = data.id; // Remove UUID generation for DB compatibility
     this.title = data.title;
+    this.slug = data.slug;
     this.description = data.description;
     this.price = data.price;
     this.duration = data.duration;
     this.location = data.location;
     this.max_participants = data.max_participants;
-    this.difficulty_level = data.difficulty_level;
-    this.image_url = data.image_url;
+    this.category = data.category || 'domestic'; // Updated: only domestic, inbound, outbound
     this.images = data.images ? (typeof data.images === 'string' ? JSON.parse(data.images) : data.images) : [];
     this.itinerary = data.itinerary ? (typeof data.itinerary === 'string' ? JSON.parse(data.itinerary) : data.itinerary) : {};
     this.included = data.included ? (typeof data.included === 'string' ? JSON.parse(data.included) : data.included) : [];
     this.excluded = data.excluded ? (typeof data.excluded === 'string' ? JSON.parse(data.excluded) : data.excluded) : [];
     this.status = data.status || 'active';
-    this.featured = data.featured || false; // Add featured field
+    this.featured = data.featured || false;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }
 
+  // Generate slug from title
+  generateSlug() {
+    if (!this.slug && this.title) {
+      this.slug = this.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim('-');
+    }
+  }
+
+  // Validate category
+  validateCategory() {
+    const validCategories = ['domestic', 'inbound', 'outbound'];
+    if (!validCategories.includes(this.category)) {
+      throw new Error(`Invalid category. Must be one of: ${validCategories.join(', ')}`);
+    }
+  }
+
   // Save tour to database
   async save(db) {
+    this.generateSlug(); // Generate slug before saving
+    this.validateCategory(); // Validate category before saving
+
     const tourData = {
-      id: this.id,
       title: this.title,
+      slug: this.slug,
       description: this.description,
       price: this.price,
       duration: this.duration,
       location: this.location,
       max_participants: this.max_participants,
-      difficulty_level: this.difficulty_level,
-      image_url: this.image_url,
+      category: this.category, // Updated field name
       images: JSON.stringify(this.images),
       itinerary: JSON.stringify(this.itinerary),
       included: JSON.stringify(this.included),
       excluded: JSON.stringify(this.excluded),
       status: this.status,
-      featured: this.featured // Add featured to save
+      featured: this.featured
     };
 
     const sql = `
-      INSERT INTO tours (id, title, description, price, duration, location, max_participants, difficulty_level, image_url, images, itinerary, included, excluded, status, featured, created_at, updated_at)
+      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category, images, itinerary, included, excluded, status, featured, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     const params = [
-      tourData.id, tourData.title, tourData.description, tourData.price,
+      tourData.title, tourData.slug, tourData.description, tourData.price,
       tourData.duration, tourData.location, tourData.max_participants,
-      tourData.difficulty_level, tourData.image_url, tourData.images,
-      tourData.itinerary, tourData.included, tourData.excluded, tourData.status, tourData.featured
+      tourData.category, tourData.images,
+      tourData.itinerary, tourData.included, tourData.excluded,
+      tourData.status, tourData.featured
     ];
 
-    return await run(sql, params);
+    const result = await run(sql, params);
+    this.id = result.lastID;
+    return result;
   }
 
   // Update tour images using R2
@@ -98,39 +122,97 @@ class Tour {
 
   // Get all tours with pagination
   static async findAll(options = {}) {
-    const { limit = 20, offset = 0, status = 'active', location, difficulty_level } = options;
+    const { limit = 20, offset = 0, status = 'active', location, category, minPrice, maxPrice } = options;
 
-    let sql = 'SELECT * FROM tours WHERE status = ?';
+    let whereConditions = ['status = ?'];
     const params = [status];
 
     if (location) {
-      sql += ' AND location LIKE ?';
+      whereConditions.push('location LIKE ?');
       params.push(`%${location}%`);
     }
 
-    if (difficulty_level) {
-      sql += ' AND difficulty_level = ?';
-      params.push(difficulty_level);
+    if (category) {
+      whereConditions.push('category = ?');
+      params.push(category);
     }
 
-    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    if (minPrice) {
+      whereConditions.push('price >= ?');
+      params.push(minPrice);
+    }
 
-    const tours = await all(sql, params);
-    return tours.map(tour => new Tour(tour));
+    if (maxPrice) {
+      whereConditions.push('price <= ?');
+      params.push(maxPrice);
+    }
+
+    const whereClause = whereConditions.join(' AND ');
+
+    // Get total count for pagination
+    const countSql = `SELECT COUNT(*) as total FROM tours WHERE ${whereClause}`;
+    const countResult = await get(countSql, params);
+    const total = countResult.total;
+
+    // Get paginated results
+    const sql = `SELECT * FROM tours WHERE ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    const tours = await all(sql, [...params, limit, offset]);
+
+    return {
+      data: tours.map(tour => new Tour(tour)),
+      pagination: {
+        total,
+        currentPage: Math.floor(offset / limit) + 1,
+        totalPages: Math.ceil(total / limit),
+        hasNext: offset + limit < total,
+        hasPrev: offset > 0,
+        limit
+      }
+    };
   }
 
-  // Search tours
-  static async search(searchTerm) {
-    const sql = `
-      SELECT * FROM tours 
-      WHERE status = 'active' 
-      AND (title LIKE ? OR description LIKE ? OR location LIKE ?)
-      ORDER BY created_at DESC
-    `;
-    const searchPattern = `%${searchTerm}%`;
-    const tours = await all(sql, [searchPattern, searchPattern, searchPattern]);
-    return tours.map(tour => new Tour(tour));
+  // Search tours with pagination
+  static async search(searchTerm, options = {}) {
+    const { limit = 20, offset = 0, minPrice, maxPrice } = options;
+
+    let whereConditions = [
+      "status = 'active'",
+      "(title LIKE ? OR description LIKE ? OR location LIKE ?)"
+    ];
+    const params = [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`];
+
+    if (minPrice) {
+      whereConditions.push('price >= ?');
+      params.push(minPrice);
+    }
+
+    if (maxPrice) {
+      whereConditions.push('price <= ?');
+      params.push(maxPrice);
+    }
+
+    const whereClause = whereConditions.join(' AND ');
+
+    // Get total count for pagination
+    const countSql = `SELECT COUNT(*) as total FROM tours WHERE ${whereClause}`;
+    const countResult = await get(countSql, params);
+    const total = countResult.total;
+
+    // Get paginated results
+    const sql = `SELECT * FROM tours WHERE ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    const tours = await all(sql, [...params, limit, offset]);
+
+    return {
+      data: tours.map(tour => new Tour(tour)),
+      pagination: {
+        total,
+        currentPage: Math.floor(offset / limit) + 1,
+        totalPages: Math.ceil(total / limit),
+        hasNext: offset + limit < total,
+        hasPrev: offset > 0,
+        limit
+      }
+    };
   }
 
   // Update tour
@@ -180,14 +262,20 @@ class Tour {
     const totalTours = await get('SELECT COUNT(*) as count FROM tours WHERE status = ?', ['active']);
     const featuredTours = await get('SELECT COUNT(*) as count FROM tours WHERE status = ? AND featured = ?', ['active', true]);
     const toursByLocation = await all('SELECT location, COUNT(*) as count FROM tours WHERE status = ? GROUP BY location', ['active']);
-    const toursByDifficulty = await all('SELECT difficulty_level, COUNT(*) as count FROM tours WHERE status = ? GROUP BY difficulty_level', ['active']);
+    const toursByCategory = await all('SELECT category, COUNT(*) as count FROM tours WHERE status = ? GROUP BY category', ['active']);
 
     return {
       total: totalTours.count,
       featured: featuredTours.count,
       byLocation: toursByLocation,
-      byDifficulty: toursByDifficulty
+      byCategory: toursByCategory
     };
+  }
+
+  // Find tour by slug
+  static async findBySlug(slug) {
+    const tour = await get('SELECT * FROM tours WHERE slug = ?', [slug]);
+    return tour ? new Tour(tour) : null;
   }
 
   // Convert to JSON

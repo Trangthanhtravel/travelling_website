@@ -3,24 +3,44 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
 import toast from 'react-hot-toast';
 
+// Tour types (corrected to match backend)
 interface Tour {
-  id: string;
+  id: number;
+  title: string;
+  slug?: string;
+  description: string;
+  price: number;
+  duration: string;
+  location: string;
+  max_participants: number;
+  tour_type: string; // Fixed: use appropriate travel field
+  activity_level: string; // Fixed: use activity level instead of difficulty
+  category: string;
+  images: string[];
+  itinerary: any;
+  included: string[];
+  excluded: string[];
+  status: 'active' | 'inactive' | 'draft';
+  featured: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface TourFormData {
   title: string;
   description: string;
   price: number;
   duration: string;
   location: string;
   max_participants: number;
-  difficulty_level: string;
-  image_url?: string;
-  images: string[];
-  itinerary: any;
+  tour_type: string; // Fixed field name
+  activity_level: string; // Fixed field name
+  category: string;
   included: string[];
   excluded: string[];
-  status: 'active' | 'inactive';
-  featured: boolean; // Add featured field
-  created_at: string;
-  updated_at: string;
+  status: 'active' | 'inactive' | 'draft';
+  featured: boolean;
+  images?: FileList;
 }
 
 const TourManagement: React.FC = () => {
@@ -32,12 +52,12 @@ const TourManagement: React.FC = () => {
 
   const queryClient = useQueryClient();
 
-  // Get the correct API base URL for your setup
+  // Get the correct API base URL
   const getApiUrl = () => {
-    return process.env.REACT_APP_API_URL || 'https://your-backend-domain.vercel.app/api';
+    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   };
 
-  // Fetch tours with correct API URL
+  // Fetch tours - use public tours endpoint with admin auth
   const { data: toursData, isLoading } = useQuery({
     queryKey: ['admin-tours', searchTerm, filterStatus],
     queryFn: async () => {
@@ -45,9 +65,9 @@ const TourManagement: React.FC = () => {
       if (searchTerm) params.append('search', searchTerm);
       if (filterStatus !== 'all') params.append('status', filterStatus);
 
-      const response = await fetch(`${getApiUrl()}/admin/tours?${params}`, {
+      const response = await fetch(`${getApiUrl()}/tours?${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -56,20 +76,45 @@ const TourManagement: React.FC = () => {
     }
   });
 
-  // Create tour mutation
+  // Create tour mutation with proper FormData for image upload
   const createTourMutation = useMutation({
-    mutationFn: async (tourData: any) => {
-      const response = await fetch(`${getApiUrl()}/admin/tours`, {
+    mutationFn: async (tourData: TourFormData) => {
+      const formData = new FormData();
+
+      // Add all tour fields
+      formData.append('title', tourData.title);
+      formData.append('description', tourData.description);
+      formData.append('price', tourData.price.toString());
+      formData.append('duration', tourData.duration);
+      formData.append('location', tourData.location);
+      formData.append('max_participants', tourData.max_participants.toString());
+      formData.append('tour_type', tourData.tour_type); // Fixed field name
+      formData.append('activity_level', tourData.activity_level); // Fixed field name
+      formData.append('category', tourData.category);
+      formData.append('included', JSON.stringify(tourData.included));
+      formData.append('excluded', JSON.stringify(tourData.excluded));
+      formData.append('status', tourData.status);
+      formData.append('featured', tourData.featured.toString());
+
+      // Add images if provided
+      if (tourData.images && tourData.images.length > 0) {
+        Array.from(tourData.images).forEach((file) => {
+          formData.append('images', file);
+        });
+      }
+
+      const response = await fetch(`${getApiUrl()}/tours`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          // Don't set Content-Type for FormData, let browser set it
         },
-        body: JSON.stringify(tourData)
+        body: formData
       });
+
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Failed to create tour: ${error}`);
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create tour');
       }
       return response.json();
     },
@@ -83,18 +128,45 @@ const TourManagement: React.FC = () => {
     }
   });
 
-  // Update tour mutation
+  // Update tour mutation with proper FormData handling
   const updateTourMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const response = await fetch(`${getApiUrl()}/admin/tours/${id}`, {
+    mutationFn: async ({ id, data }: { id: number; data: TourFormData }) => {
+      const formData = new FormData();
+
+      // Add all tour fields
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('price', data.price.toString());
+      formData.append('duration', data.duration);
+      formData.append('location', data.location);
+      formData.append('max_participants', data.max_participants.toString());
+      formData.append('tour_type', data.tour_type); // Fixed field name
+      formData.append('activity_level', data.activity_level); // Fixed field name
+      formData.append('category', data.category);
+      formData.append('included', JSON.stringify(data.included));
+      formData.append('excluded', JSON.stringify(data.excluded));
+      formData.append('status', data.status);
+      formData.append('featured', data.featured.toString());
+
+      // Add new images if provided
+      if (data.images && data.images.length > 0) {
+        Array.from(data.images).forEach((file) => {
+          formData.append('images', file);
+        });
+      }
+
+      const response = await fetch(`${getApiUrl()}/tours/${id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         },
-        body: JSON.stringify(data)
+        body: formData
       });
-      if (!response.ok) throw new Error('Failed to update tour');
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update tour');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -103,29 +175,32 @@ const TourManagement: React.FC = () => {
       setIsEditModalOpen(false);
       setSelectedTour(null);
     },
-    onError: () => {
-      toast.error('Failed to update tour');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update tour');
     }
   });
 
-  // Delete tour mutation with correct API URL
+  // Delete tour mutation
   const deleteTourMutation = useMutation({
-    mutationFn: async (tourId: string) => {
-      const response = await fetch(`${getApiUrl()}/admin/tours/${tourId}`, {
+    mutationFn: async (tourId: number) => {
+      const response = await fetch(`${getApiUrl()}/tours/${tourId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
       });
-      if (!response.ok) throw new Error('Failed to delete tour');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete tour');
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-tours'] });
       toast.success('Tour deleted successfully');
     },
-    onError: () => {
-      toast.error('Failed to delete tour');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to delete tour');
     }
   });
 
@@ -248,7 +323,7 @@ const TourManagement: React.FC = () => {
                         <div className="h-12 w-12 flex-shrink-0">
                           <img
                             className="h-12 w-12 rounded-lg object-cover"
-                            src={tour.image_url || tour.images[0] || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}
+                            src={tour.images[0] || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}
                             alt={tour.title}
                           />
                         </div>
@@ -264,7 +339,7 @@ const TourManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 dark:text-white">{tour.location}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{tour.difficulty_level}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{tour.activity_level}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -371,19 +446,26 @@ const TourModal: React.FC<TourModalProps> = ({
     duration: initialData?.duration || '',
     location: initialData?.location || '',
     max_participants: initialData?.max_participants || 1,
-    difficulty_level: initialData?.difficulty_level || 'easy',
-    image_url: initialData?.image_url || '',
-    images: initialData?.images || [],
-    itinerary: initialData?.itinerary || {},
+    tour_type: initialData?.tour_type || '', // Fixed field name
+    activity_level: initialData?.activity_level || 'easy', // Fixed field name
+    category: initialData?.category || '',
     included: initialData?.included || [],
     excluded: initialData?.excluded || [],
     status: initialData?.status || 'active',
-    featured: initialData?.featured || false // Initialize featured field
+    featured: initialData?.featured || false, // Initialize featured field
+    images: undefined // Initialize images as undefined
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setFormData({ ...formData, images: files });
+    }
   };
 
   if (!isOpen) return null;
@@ -490,11 +572,24 @@ const TourModal: React.FC<TourModalProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Difficulty Level
+                  Tour Type
+                </label>
+                <input
+                  type="text"
+                  value={formData.tour_type}
+                  onChange={(e) => setFormData({ ...formData, tour_type: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Activity Level
                 </label>
                 <select
-                  value={formData.difficulty_level}
-                  onChange={(e) => setFormData({ ...formData, difficulty_level: e.target.value })}
+                  value={formData.activity_level}
+                  onChange={(e) => setFormData({ ...formData, activity_level: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
                 >
                   <option value="easy">Easy</option>
@@ -502,33 +597,65 @@ const TourModal: React.FC<TourModalProps> = ({
                   <option value="challenging">Challenging</option>
                 </select>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Status
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Image URL
+                Status
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' | 'draft' })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Category
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
+                required
+              >
+                <option value="">Select Category</option>
+                <option value="adventure">Adventure</option>
+                <option value="cultural">Cultural</option>
+                <option value="nature">Nature</option>
+                <option value="city">City</option>
+                <option value="beach">Beach</option>
+                <option value="luxury">Luxury</option>
+                <option value="family">Family</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Upload Images
               </label>
               <input
-                type="url"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                placeholder="https://example.com/image.jpg"
+                type="file"
+                onChange={handleFileChange}
+                multiple
+                accept="image/*"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-primary-50 file:text-primary-700"
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Select multiple images for your tour. Max 10 images, 5MB each.
+              </p>
+              {initialData?.images && initialData.images.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Current images: {initialData.images.length} uploaded
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Featured Tour Toggle */}

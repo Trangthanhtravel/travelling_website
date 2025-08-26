@@ -1,4 +1,5 @@
 const Tour = require('../models/Tour');
+const Category = require('../models/Category');
 const { r2Helpers } = require('../config/storage');
 const multer = require('multer');
 
@@ -45,10 +46,12 @@ const getTours = async (req, res) => {
       page = 1,
       limit = 12,
       location,
-      difficulty_level,
+      category, // Updated: only domestic, inbound, outbound
       minPrice,
       maxPrice,
-      search
+      search,
+      sortBy = 'created_at',
+      sortOrder = 'desc'
     } = req.query;
 
     const offset = (page - 1) * limit;
@@ -56,35 +59,22 @@ const getTours = async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       location,
-      difficulty_level
+      category, // Updated to use new category structure
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined
     };
 
-    let tours;
+    let result;
     if (search) {
-      tours = await Tour.search(search);
+      result = await Tour.search(search, options);
     } else {
-      tours = await Tour.findAll(options);
-    }
-
-    // Filter by price if specified
-    if (minPrice || maxPrice) {
-      tours = tours.filter(tour => {
-        const price = tour.price;
-        if (minPrice && price < minPrice) return false;
-        if (maxPrice && price > maxPrice) return false;
-        return true;
-      });
+      result = await Tour.findAll(options);
     }
 
     res.json({
       success: true,
-      data: tours.map(tour => tour.toJSON()),
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(tours.length / limit),
-        hasNext: page * limit < tours.length,
-        hasPrev: page > 1
-      }
+      data: result.data.map(tour => tour.toJSON()),
+      pagination: result.pagination
     });
   } catch (error) {
     console.error('Get tours error:', error);
@@ -120,12 +110,11 @@ const getTour = async (req, res) => {
   }
 };
 
-// Get tour by slug (using ID for now until slug is implemented)
+// Get tour by slug - now properly implemented
 const getTourBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    // Since we don't have slug column yet, treat the slug parameter as ID
-    const tour = await Tour.findById(slug);
+    const tour = await Tour.findBySlug(slug);
 
     if (!tour) {
       return res.status(404).json({
@@ -151,18 +140,37 @@ const getTourBySlug = async (req, res) => {
 const createTour = async (req, res) => {
   try {
     const tourData = req.body;
+
+    // Parse JSON fields from FormData
+    if (tourData.included && typeof tourData.included === 'string') {
+      tourData.included = JSON.parse(tourData.included);
+    }
+    if (tourData.excluded && typeof tourData.excluded === 'string') {
+      tourData.excluded = JSON.parse(tourData.excluded);
+    }
+
+    // Convert string values to appropriate types
+    tourData.price = parseFloat(tourData.price);
+    tourData.max_participants = parseInt(tourData.max_participants);
+    tourData.featured = tourData.featured === 'true';
+
     const tour = new Tour(tourData);
 
     // Handle image uploads if provided
     if (req.files && req.files.length > 0) {
-      const imageUrls = await tour.updateImages(req.r2, req.files);
-      tour.images = imageUrls;
-      if (imageUrls.length > 0) {
-        tour.image_url = imageUrls[0];
+      try {
+        const imageUrls = await tour.updateImages(req.r2, req.files);
+        tour.images = imageUrls;
+      } catch (imageError) {
+        console.error('Image upload error:', imageError);
+        return res.status(400).json({
+          success: false,
+          message: `Image upload failed: ${imageError.message}`
+        });
       }
     }
 
-    await tour.save(req.db);
+    await tour.save();
 
     res.status(201).json({
       success: true,
@@ -173,7 +181,7 @@ const createTour = async (req, res) => {
     console.error('Create tour error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error creating tour'
+      message: error.message || 'Error creating tour'
     });
   }
 };
@@ -181,7 +189,7 @@ const createTour = async (req, res) => {
 // Update tour (admin only)
 const updateTour = async (req, res) => {
   try {
-    const tour = await Tour.findById(req.db, req.params.id);
+    const tour = await Tour.findById(req.params.id);
 
     if (!tour) {
       return res.status(404).json({
@@ -192,27 +200,46 @@ const updateTour = async (req, res) => {
 
     const updateData = req.body;
 
+    // Parse JSON fields from FormData
+    if (updateData.included && typeof updateData.included === 'string') {
+      updateData.included = JSON.parse(updateData.included);
+    }
+    if (updateData.excluded && typeof updateData.excluded === 'string') {
+      updateData.excluded = JSON.parse(updateData.excluded);
+    }
+
+    // Convert string values to appropriate types
+    if (updateData.price) updateData.price = parseFloat(updateData.price);
+    if (updateData.max_participants) updateData.max_participants = parseInt(updateData.max_participants);
+    if (updateData.featured !== undefined) updateData.featured = updateData.featured === 'true';
+
     // Handle image uploads if provided
     if (req.files && req.files.length > 0) {
-      const oldImages = tour.images || [];
-      const imageUrls = await tour.updateImages(req.r2, req.files, oldImages);
-      updateData.images = imageUrls;
-      if (imageUrls.length > 0) {
-        updateData.image_url = imageUrls[0];
+      try {
+        const oldImages = tour.images || [];
+        const imageUrls = await tour.updateImages(req.r2, req.files, oldImages);
+        updateData.images = imageUrls;
+      } catch (imageError) {
+        console.error('Image upload error:', imageError);
+        return res.status(400).json({
+          success: false,
+          message: `Image upload failed: ${imageError.message}`
+        });
       }
     }
 
-    await tour.update(req.db, updateData);
+    await tour.update(updateData);
 
     res.json({
       success: true,
+      data: tour.toJSON(),
       message: 'Tour updated successfully'
     });
   } catch (error) {
     console.error('Update tour error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error updating tour'
+      message: error.message || 'Error updating tour'
     });
   }
 };
@@ -220,7 +247,7 @@ const updateTour = async (req, res) => {
 // Delete tour (admin only)
 const deleteTour = async (req, res) => {
   try {
-    const tour = await Tour.findById(req.db, req.params.id);
+    const tour = await Tour.findById(req.params.id);
 
     if (!tour) {
       return res.status(404).json({
@@ -229,7 +256,7 @@ const deleteTour = async (req, res) => {
       });
     }
 
-    await tour.delete(req.db, req.r2);
+    await tour.delete(req.r2);
 
     res.json({
       success: true,
@@ -239,7 +266,7 @@ const deleteTour = async (req, res) => {
     console.error('Delete tour error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error deleting tour'
+      message: error.message || 'Error deleting tour'
     });
   }
 };
