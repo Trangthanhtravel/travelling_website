@@ -2,9 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import SocialChatBox from './components/common/SocialChatBox';
 import Home from './pages/Home';
 import Tours from './pages/Tours';
 import TourDetail from './pages/TourDetail';
@@ -31,73 +32,83 @@ const queryClient = new QueryClient({
   },
 });
 
+const AppContent: React.FC = () => {
+  const { isDarkMode } = useTheme();
+
+  return (
+    <div className={`min-h-screen flex flex-col transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
+      <Header />
+      <main className={`flex-1 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/tours" element={<Tours />} />
+          <Route path="/tours/:slug" element={<TourDetail />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/services/:serviceId" element={<ServiceDetail />} />
+          <Route path="/blogs" element={<Blogs />} /> {/* Add blogs alias route */}
+          <Route path="/blog/:slug" element={<BlogDetail />} />
+          <Route path="/contact" element={<Contact />} /> {/* Add Contact route */}
+          <Route path="/login" element={<Login />} />
+
+          <Route path="/booking/:tourId" element={
+            <ProtectedRoute>
+              <Booking />
+            </ProtectedRoute>
+          } />
+          <Route path="/service-booking/:serviceId" element={
+            <ProtectedRoute>
+              <ServiceBooking />
+            </ProtectedRoute>
+          } />
+
+          {/* Admin Routes */}
+          <Route path="/admin/*" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/blogs" element={
+            <ProtectedRoute requiredRole="admin">
+              <BlogManagement />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/blogs/new" element={
+            <ProtectedRoute requiredRole="admin">
+              <BlogEditor />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/blogs/edit/:blogId" element={
+            <ProtectedRoute requiredRole="admin">
+              <BlogEditor />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </main>
+      <Footer />
+      <SocialChatBox /> {/* Add SocialChatBox component */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: isDarkMode ? '#122941' : '#FFFFFF',
+            color: isDarkMode ? '#FAFAFA' : '#000000',
+            border: `1px solid ${isDarkMode ? '#1a3650' : '#E6EFFF'}`,
+          },
+        }}
+      />
+    </div>
+  );
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
           <Router>
-            <div className="min-h-screen flex flex-col transition-colors duration-200">
-              <Header />
-              <main className="flex-1 bg-gray-50 dark:bg-dark-900">
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={<Home />} />
-                  <Route path="/tours" element={<Tours />} />
-                  <Route path="/tours/:slug" element={<TourDetail />} />
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/services/:serviceId" element={<ServiceDetail />} />
-                  <Route path="/blogs" element={<Blogs />} /> {/* Add blogs alias route */}
-                  <Route path="/blog/:slug" element={<BlogDetail />} />
-                  <Route path="/contact" element={<Contact />} /> {/* Add Contact route */}
-                  <Route path="/login" element={<Login />} />
-
-                  <Route path="/booking/:tourId" element={
-                    <ProtectedRoute>
-                      <Booking />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/service-booking/:serviceId" element={
-                    <ProtectedRoute>
-                      <ServiceBooking />
-                    </ProtectedRoute>
-                  } />
-
-                  {/* Admin Routes */}
-                  <Route path="/admin/*" element={
-                    <ProtectedRoute requiredRole="admin">
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/blogs" element={
-                    <ProtectedRoute requiredRole="admin">
-                      <BlogManagement />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/blogs/new" element={
-                    <ProtectedRoute requiredRole="admin">
-                      <BlogEditor />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/blogs/edit/:blogId" element={
-                    <ProtectedRoute requiredRole="admin">
-                      <BlogEditor />
-                    </ProtectedRoute>
-                  } />
-                </Routes>
-              </main>
-              <Footer />
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                }}
-              />
-            </div>
+            <AppContent />
           </Router>
         </AuthProvider>
       </ThemeProvider>

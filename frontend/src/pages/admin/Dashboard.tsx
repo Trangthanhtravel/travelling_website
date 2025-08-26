@@ -6,6 +6,9 @@ import BlogManagement from './BlogManagement';
 import ServiceManagement from './ServiceManagement';
 import BookingManagement from './BookingManagement';
 import CustomerManagement from './CustomerManagement';
+import HeroImageManagement from './HeroImageManagement';
+import AboutSectionManagement from './AboutSectionManagement';
+import SocialLinksManagement from './SocialLinksManagement';
 
 interface DashboardStats {
   totalBookings: number;
@@ -183,12 +186,15 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const tabs = [
-    { id: 'dashboard', name: 'Dashboard', icon: Icons.FiBarChart },
+    { id: 'dashboard', name: 'Dashboard', icon: Icons.FiHome },
     { id: 'tours', name: 'Tours', icon: Icons.FiMapPin },
-    { id: 'services', name: 'Services', icon: Icons.FiSettings },
+    { id: 'services', name: 'Services', icon: Icons.FiTruck },
     { id: 'bookings', name: 'Bookings', icon: Icons.FiCalendar },
     { id: 'customers', name: 'Customers', icon: Icons.FiUsers },
-    { id: 'content', name: 'Content', icon: Icons.FiEdit3 },
+    { id: 'content', name: 'Blogs', icon: Icons.FiFileText },
+    { id: 'hero-images', name: 'Hero Images', icon: Icons.FiImage },
+    { id: 'about-section', name: 'About Section', icon: Icons.FiInfo },
+    { id: 'social-links', name: 'Social Links', icon: Icons.FiMessageCircle },
   ];
 
   const renderContent = () => {
@@ -203,6 +209,12 @@ const AdminDashboard: React.FC = () => {
         return <CustomerManagement />;
       case 'content':
         return <BlogManagement />;
+      case 'hero-images':
+        return <HeroImageManagement />;
+      case 'about-section':
+        return <AboutSectionManagement />;
+      case 'social-links':
+        return <SocialLinksManagement />;
       case 'dashboard':
       default:
         return <DashboardOverview onQuickAction={setActiveTab} />;

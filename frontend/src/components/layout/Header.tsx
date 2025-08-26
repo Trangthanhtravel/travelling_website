@@ -36,21 +36,21 @@ const Header: React.FC = () => {
     ];
 
     const logoTextClasses = isScrolled
-        ? `transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'}`
-        : `transition-colors duration-300 ${isDarkMode ? 'text-white drop-shadow-lg' : 'text-gray-900 drop-shadow-lg'}`;
+        ? `transition-colors duration-300 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`
+        : `transition-colors duration-300 ${isDarkMode ? 'text-dark-text-secondary drop-shadow-lg' : 'text-light-text-primary drop-shadow-lg'}`;
 
     const navLinkClasses = isScrolled
-        ? `px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 ${isDarkMode ? 'text-dark-white-300 hover:text-primary-300' : 'text-gray-700 hover:text-primary-600'}`
-        : `px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 ${isDarkMode ? 'text-white hover:text-primary-200 drop-shadow-md' : 'text-gray-900 hover:text-primary-600 drop-shadow-md'}`;
+        ? `px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 ${isDarkMode ? 'text-dark-text-primary hover:text-accent-orange' : 'text-light-text-secondary hover:text-accent-orange'}`
+        : `px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 ${isDarkMode ? 'text-dark-text-secondary hover:text-accent-orange drop-shadow-md' : 'text-light-text-primary hover:text-accent-orange drop-shadow-md'}`;
 
     const buttonClasses = isScrolled
-        ? `p-2 rounded-lg transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-dark-750 text-dark-white-400 hover:bg-dark-700 border border-dark-white-800/20' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`
-        : `p-2 rounded-lg transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm border border-white/10' : 'bg-black/20 text-gray-900 hover:bg-black/30 backdrop-blur-sm'}`;
+        ? `p-2 rounded-lg transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700 border border-dark-700' : 'bg-light-200 text-light-text-secondary hover:bg-light-300'}`
+        : `p-2 rounded-lg transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-dark-text-secondary/20 text-dark-text-secondary hover:bg-dark-text-secondary/30 backdrop-blur-sm border border-dark-text-secondary/10' : 'bg-light-text-primary/20 text-light-text-primary hover:bg-light-text-primary/30 backdrop-blur-sm'}`;
 
     return (
         <header className={`fixed w-full z-50 transition-all duration-300 ${
             isScrolled 
-                ? `${isDarkMode ? 'bg-dark-875/95 backdrop-blur-md border-dark-white-800/20' : 'bg-white/95 backdrop-blur-md border-gray-200'} border-b shadow-lg`
+                ? `${isDarkMode ? 'bg-dark-900/95 backdrop-blur-md border-dark-800' : 'bg-light-50/95 backdrop-blur-md border-light-300'} border-b shadow-lg`
                 : 'bg-transparent'
         }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,10 +58,11 @@ const Header: React.FC = () => {
                     {/* Logo */}
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center space-x-2">
-                            <Icon icon={Icons.FiMapPin} className={`h-8 w-8 ${logoTextClasses}`} />
-                            <span className={`text-xl font-bold ${logoTextClasses}`}>
-                                TravelWorld
-                            </span>
+                            <img
+                                src="/company_logo.png"
+                                alt="Company Logo"
+                                className={`h-10 w-auto ${logoTextClasses}`}
+                            />
                         </Link>
                     </div>
 
@@ -99,13 +100,13 @@ const Header: React.FC = () => {
                             <div className="flex items-center space-x-3">
                                 <Link
                                     to="/admin/dashboard"
-                                    className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-accent-orange hover:text-accent-orange-hover' : 'text-accent-orange hover:text-accent-orange-hover'}`}
                                 >
                                     Admin Dashboard
                                 </Link>
                                 <button
                                     onClick={handleLogout}
-                                    className="text-sm font-medium text-gray-600 hover:text-gray-500"
+                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
                                 >
                                     Logout
                                 </button>
@@ -113,7 +114,7 @@ const Header: React.FC = () => {
                         ) : (
                             <Link
                                 to="/admin/login"
-                                className="text-sm font-medium text-gray-600 hover:text-gray-500"
+                                className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
                             >
                                 Admin
                             </Link>
@@ -138,13 +139,13 @@ const Header: React.FC = () => {
 
             {/* Mobile Navigation */}
             {isMenuOpen && (
-                <div className={`md:hidden ${isDarkMode ? 'bg-dark-900' : 'bg-white'} border-t ${isDarkMode ? 'border-dark-700' : 'border-gray-200'}`}>
+                <div className={`md:hidden ${isDarkMode ? 'bg-dark-900' : 'bg-light-50'} border-t ${isDarkMode ? 'border-dark-800' : 'border-light-300'}`}>
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
                                 to={item.href}
-                                className={`block px-3 py-2 text-base font-medium ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
+                                className={`block px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-secondary' : 'text-light-text-secondary hover:text-light-text-primary'}`}
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 {item.name}
@@ -152,12 +153,12 @@ const Header: React.FC = () => {
                         ))}
 
                         {/* Mobile Admin Section */}
-                        <div className="border-t pt-3 mt-3">
+                        <div className={`border-t pt-3 mt-3 ${isDarkMode ? 'border-dark-800' : 'border-light-300'}`}>
                             {state.isAuthenticated && state.admin ? (
                                 <>
                                     <Link
                                         to="/admin/dashboard"
-                                        className="block px-3 py-2 text-base font-medium text-blue-600"
+                                        className="block px-3 py-2 text-base font-medium text-accent-orange hover:text-accent-orange-hover transition-colors"
                                         onClick={() => setIsMenuOpen(false)}
                                     >
                                         Admin Dashboard
@@ -167,7 +168,7 @@ const Header: React.FC = () => {
                                             handleLogout();
                                             setIsMenuOpen(false);
                                         }}
-                                        className="block w-full text-left px-3 py-2 text-base font-medium text-gray-600"
+                                        className={`block w-full text-left px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
                                     >
                                         Logout
                                     </button>
@@ -175,7 +176,7 @@ const Header: React.FC = () => {
                             ) : (
                                 <Link
                                     to="/admin/login"
-                                    className="block px-3 py-2 text-base font-medium text-gray-600"
+                                    className={`block px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
                                     onClick={() => setIsMenuOpen(false)}
                                 >
                                     Admin Login
@@ -184,7 +185,7 @@ const Header: React.FC = () => {
 
                             <button
                                 onClick={toggleTheme}
-                                className="block w-full text-left px-3 py-2 text-base font-medium text-gray-600"
+                                className={`block w-full text-left px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
                             >
                                 {isDarkMode ? 'Light Mode' : 'Dark Mode'}
                             </button>
