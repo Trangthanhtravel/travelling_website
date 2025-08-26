@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { Icon, Icons } from '../components/common/Icons';
-import ServiceBookingModal from '../components/common/ServiceBookingModal';
 import AnimatedCounter from '../components/common/AnimatedCounter';
 import { getFeaturedTours } from '../data/mockTours';
 import { carRentals } from '../data/carRentals';
@@ -823,13 +822,6 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Booking Modal */}
-      <ServiceBookingModal
-        isOpen={bookingModal.isOpen}
-        onClose={closeBookingModal}
-        item={bookingModal.item}
-      />
     </div>
   );
 };
