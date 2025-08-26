@@ -73,29 +73,24 @@ export interface TourFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
-// Booking types (simplified)
+// Booking types (simplified - no payments, no reviews)
 export interface Booking {
   id: string;
-  tourId: string;
-  userId: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  totalAmount: number;
-  bookingDate: string;
-  travelDate: string;
-  participants: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Review types
-export interface Review {
-  id: string;
-  tourId: string;
-  userId: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  updatedAt: string;
+  type: 'tour' | 'service';
+  item_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  start_date: string;
+  total_travelers: number;
+  special_requests?: string;
+  total_amount: number;
+  currency: string;
+  status: 'pending' | 'confirmed' | 'contacted' | 'completed' | 'cancelled';
+  contacted_at?: string;
+  confirmed_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // Content types (for blogs, etc.)

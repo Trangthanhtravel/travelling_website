@@ -1,10 +1,8 @@
-const { v4: uuidv4 } = require('uuid');
 const { dbHelpers } = require('../config/database');
 
 class Booking {
   constructor(data) {
     this.id = data.id;
-    this.booking_number = data.booking_number || `BK${Date.now()}`;
     this.type = data.type; // 'tour' or 'service'
     this.item_id = data.item_id;
     
@@ -35,7 +33,6 @@ class Booking {
   // Save booking to database
   async save(db) {
     const bookingData = {
-      booking_number: this.booking_number,
       type: this.type,
       item_id: this.item_id,
       customer_name: this.customer_name,
@@ -63,12 +60,6 @@ class Booking {
   // Find booking by ID
   static async findById(db, id) {
     const bookings = await dbHelpers.query(db, 'SELECT * FROM bookings WHERE id = ?', [id]);
-    return bookings.length > 0 ? new Booking(bookings[0]) : null;
-  }
-
-  // Find booking by booking number
-  static async findByBookingNumber(db, bookingNumber) {
-    const bookings = await dbHelpers.query(db, 'SELECT * FROM bookings WHERE booking_number = ?', [bookingNumber]);
     return bookings.length > 0 ? new Booking(bookings[0]) : null;
   }
 
@@ -160,7 +151,6 @@ class Booking {
   toJSON() {
     return {
       id: this.id,
-      booking_number: this.booking_number,
       type: this.type,
       item_id: this.item_id,
       customer_name: this.customer_name,
