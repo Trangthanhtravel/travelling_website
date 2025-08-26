@@ -4,7 +4,6 @@
 -- Drop all existing tables
 DROP TABLE IF EXISTS booking_notes;
 DROP TABLE IF EXISTS bookings;
-DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS blogs;
 DROP TABLE IF EXISTS content;
 DROP TABLE IF EXISTS services;
@@ -22,8 +21,6 @@ DROP INDEX IF EXISTS idx_services_category;
 DROP INDEX IF EXISTS idx_services_status;
 DROP INDEX IF EXISTS idx_bookings_status;
 DROP INDEX IF EXISTS idx_bookings_customer_email;
-DROP INDEX IF EXISTS idx_bookings_booking_number;
-DROP INDEX IF EXISTS idx_reviews_status;
 DROP INDEX IF EXISTS idx_categories_type;
 
 -- Recreate all tables with new schema
@@ -44,143 +41,125 @@ CREATE TABLE categories (
 
 -- Users table (Admin only)
 CREATE TABLE users (
-                       id INTEGER PRIMARY KEY AUTOINCREMENT,
-                       name TEXT NOT NULL,
-                       email TEXT UNIQUE NOT NULL,
-                       password TEXT NOT NULL,
-                       phone TEXT,
-                       role TEXT DEFAULT 'admin' CHECK(role IN ('admin')),
-                       created_at TEXT NOT NULL,
-                       updated_at TEXT NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    phone TEXT,
+    role TEXT DEFAULT 'admin' CHECK(role IN ('admin')),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
 );
 
 -- Tours table
 CREATE TABLE tours (
-                       id INTEGER PRIMARY KEY AUTOINCREMENT,
-                       title TEXT NOT NULL,
-                       slug TEXT UNIQUE NOT NULL,
-                       description TEXT,
-                       price REAL NOT NULL,
-                       duration TEXT,
-                       max_participants INTEGER,
-                       included TEXT,
-                       excluded TEXT,
-                       itinerary TEXT,
-                       images TEXT,
-                       status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'draft')),
-                       featured BOOLEAN DEFAULT FALSE,
-                       category TEXT DEFAULT 'domestic' CHECK(category IN ('domestic', 'inbound', 'outbound')),
-                       location TEXT,
-                       created_at TEXT NOT NULL,
-                       updated_at TEXT NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    description TEXT,
+    price REAL NOT NULL,
+    duration TEXT,
+    max_participants INTEGER,
+    included TEXT,
+    excluded TEXT,
+    itinerary TEXT,
+    images TEXT,
+    status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'draft')),
+    featured BOOLEAN DEFAULT FALSE,
+    category TEXT DEFAULT 'domestic' CHECK(category IN ('domestic', 'inbound', 'outbound')),
+    location TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
 );
 
 -- Services table
 CREATE TABLE services (
-                          id INTEGER PRIMARY KEY AUTOINCREMENT,
-                          title TEXT NOT NULL,
-                          subtitle TEXT,
-                          description TEXT,
-                          price REAL NOT NULL,
-                          duration TEXT,
-                          images TEXT,
-                          included TEXT,
-                          excluded TEXT,
-                          category_id INTEGER,
-                          service_type TEXT NOT NULL CHECK(service_type IN ('tours', 'car-rental', 'other-services')),
-                          status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
-                          created_at TEXT NOT NULL,
-                          updated_at TEXT NOT NULL,
-                          FOREIGN KEY (category_id) REFERENCES categories(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    subtitle TEXT,
+    description TEXT,
+    price REAL NOT NULL,
+    duration TEXT,
+    images TEXT,
+    included TEXT,
+    excluded TEXT,
+    category_id INTEGER,
+    service_type TEXT NOT NULL CHECK(service_type IN ('tours', 'car-rental', 'other-services')),
+    status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
--- Direct Bookings table (no user account required)
+-- Simplified Bookings table (no payment info, no reviews)
 CREATE TABLE bookings (
-                          id INTEGER PRIMARY KEY AUTOINCREMENT,
-                          booking_number TEXT UNIQUE NOT NULL,
-                          type TEXT NOT NULL CHECK(type IN ('tour', 'service')),
-                          item_id INTEGER NOT NULL,
-                          customer_name TEXT NOT NULL,
-                          customer_email TEXT NOT NULL,
-                          customer_phone TEXT NOT NULL,
-                          start_date TEXT NOT NULL,
-                          total_travelers INTEGER NOT NULL,
-                          special_requests TEXT,
-                          total_amount REAL NOT NULL,
-                          currency TEXT DEFAULT 'USD',
-                          status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'confirmed', 'contacted', 'completed', 'cancelled')),
-                          contacted_at TEXT,
-                          confirmed_at TEXT,
-                          created_at TEXT NOT NULL,
-                          updated_at TEXT NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL CHECK(type IN ('tour', 'service')),
+    item_id INTEGER NOT NULL,
+    customer_name TEXT NOT NULL,
+    customer_email TEXT NOT NULL,
+    customer_phone TEXT NOT NULL,
+    start_date TEXT NOT NULL,
+    total_travelers INTEGER NOT NULL,
+    special_requests TEXT,
+    total_amount REAL NOT NULL,
+    currency TEXT DEFAULT 'USD',
+    status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'confirmed', 'contacted', 'completed', 'cancelled')),
+    contacted_at TEXT,
+    confirmed_at TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
 );
 
 -- Booking notes table (for admin use)
 CREATE TABLE booking_notes (
-                               id INTEGER PRIMARY KEY AUTOINCREMENT,
-                               booking_id INTEGER NOT NULL,
-                               content TEXT NOT NULL,
-                               created_by INTEGER NOT NULL,
-                               created_at TEXT NOT NULL,
-                               FOREIGN KEY (booking_id) REFERENCES bookings(id),
-                               FOREIGN KEY (created_by) REFERENCES users(id)
-);
-
--- Reviews table (now accepts reviews from non-registered customers)
-CREATE TABLE reviews (
-                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                         service_id INTEGER,
-                         tour_id INTEGER,
-                         customer_name TEXT NOT NULL,
-                         customer_email TEXT NOT NULL,
-                         rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
-                         title TEXT,
-                         comment TEXT,
-                         status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')),
-                         created_at TEXT NOT NULL,
-                         updated_at TEXT NOT NULL,
-                         FOREIGN KEY (service_id) REFERENCES services(id),
-                         FOREIGN KEY (tour_id) REFERENCES tours(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    booking_id INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    created_by INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
 -- Blogs table
 CREATE TABLE blogs (
-                       id INTEGER PRIMARY KEY AUTOINCREMENT,
-                       type TEXT DEFAULT 'blog',
-                       title TEXT NOT NULL,
-                       slug TEXT UNIQUE NOT NULL,
-                       content TEXT NOT NULL,
-                       excerpt TEXT,
-                       featured_image TEXT,
-                       gallery TEXT,
-                       author INTEGER NOT NULL,
-                       status TEXT DEFAULT 'draft' CHECK(status IN ('draft', 'published', 'archived')),
-                       featured BOOLEAN DEFAULT FALSE,
-                       categories TEXT,
-                       tags TEXT,
-                       language TEXT DEFAULT 'en',
-                       seo_meta_title TEXT,
-                       seo_meta_description TEXT,
-                       seo_keywords TEXT,
-                       views INTEGER DEFAULT 0,
-                       reading_time INTEGER,
-                       published_at TEXT,
-                       created_at TEXT NOT NULL,
-                       updated_at TEXT NOT NULL,
-                       FOREIGN KEY (author) REFERENCES users(id)
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT DEFAULT 'blog',
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    content TEXT NOT NULL,
+    excerpt TEXT,
+    featured_image TEXT,
+    gallery TEXT,
+    author INTEGER NOT NULL,
+    status TEXT DEFAULT 'draft' CHECK(status IN ('draft', 'published', 'archived')),
+    featured BOOLEAN DEFAULT FALSE,
+    categories TEXT,
+    tags TEXT,
+    language TEXT DEFAULT 'en',
+    seo_meta_title TEXT,
+    seo_meta_description TEXT,
+    seo_keywords TEXT,
+    views INTEGER DEFAULT 0,
+    reading_time INTEGER,
+    published_at TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (author) REFERENCES users(id)
 );
 
 -- Content management table
 CREATE TABLE content (
-                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                         key TEXT UNIQUE NOT NULL,
-                         title TEXT,
-                         content TEXT,
-                         type TEXT CHECK(type IN ('page', 'section', 'setting')),
-                         language TEXT DEFAULT 'en',
-                         status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
-                         created_at TEXT NOT NULL,
-                         updated_at TEXT NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT UNIQUE NOT NULL,
+    title TEXT,
+    content TEXT,
+    type TEXT CHECK(type IN ('page', 'section', 'setting')),
+    language TEXT DEFAULT 'en',
+    status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
 );
 
 -- Social Links table for contact chat box
@@ -200,13 +179,11 @@ CREATE TABLE social_links (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_tours_slug ON tours(slug);
 CREATE INDEX idx_tours_status ON tours(status);
-CREATE INDEX idx_tours_category ON tours(category_id);
-CREATE INDEX idx_services_category ON services(category_id);
+CREATE INDEX idx_tours_category ON tours(category);
+CREATE INDEX idx_services_category_id ON services(category_id);
 CREATE INDEX idx_services_status ON services(status);
 CREATE INDEX idx_bookings_status ON bookings(status);
 CREATE INDEX idx_bookings_customer_email ON bookings(customer_email);
-CREATE INDEX idx_bookings_booking_number ON bookings(booking_number);
-CREATE INDEX idx_reviews_status ON reviews(status);
 CREATE INDEX idx_categories_type ON categories(type);
 
 -- Insert a default admin user (change password before production!)
