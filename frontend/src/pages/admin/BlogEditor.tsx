@@ -1,508 +1,503 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import { Icon, Icons } from '../../components/common/Icons';
-import { Blog, BlogForm } from '../../types';
+import { useTheme } from '../../contexts/ThemeContext';
 import toast from 'react-hot-toast';
 
-// Validation schema
-const blogSchema = yup.object({
-  title: yup.string().required('Title is required').min(5, 'Title must be at least 5 characters'),
-  slug: yup.string().required('Slug is required').matches(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
-  excerpt: yup.string().required('Excerpt is required').min(20, 'Excerpt must be at least 20 characters'),
-  content: yup.string().required('Content is required').min(100, 'Content must be at least 100 characters'),
-  featuredImage: yup.string().optional().nullable(),
-  gallery: yup.array().of(yup.string().required()).default([]),
-  categories: yup.array().of(yup.string().required()).min(1, 'At least one category is required').default([]),
-  tags: yup.array().of(yup.string().required()).min(1, 'At least one tag is required').default([]),
-  status: yup.string().oneOf(['draft', 'published', 'archived'] as const).required(),
-  featured: yup.boolean().required(),
-  language: yup.string().oneOf(['en', 'vi'] as const).required(),
-  seoData: yup.object({
-    metaTitle: yup.string().optional().nullable(),
-    metaDescription: yup.string().optional().nullable(),
-    keywords: yup.array().of(yup.string().required()).default([]),
-  }).required(),
-});
-
-// Mock API functions
-const getBlogById = async (blogId: string): Promise<{ data: { blog: Blog } }> => {
-  // Mock data
-  const mockBlog: Blog = {
-    _id: blogId,
-    type: 'blog',
-    title: 'Hidden Gems of Northern Vietnam',
-    slug: 'hidden-gems-northern-vietnam',
-    content: '<h2>Discover the Untouched Beauty</h2><p>Northern Vietnam is a land of breathtaking landscapes...</p>',
-    excerpt: 'Explore remote villages, pristine lakes, and mountain passes that few tourists ever see.',
-    featuredImage: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b',
-    gallery: [],
-    author: '60f7b3b3b3b3b3b3b3b3b3b3',
-    authorProfile: { name: 'Sarah Johnson' },
-    status: 'published',
-    featured: true,
-    categories: ['Travel Tips', 'Vietnam'],
-    tags: ['northern vietnam', 'hidden gems', 'adventure'],
-    language: 'en',
-    seoData: {
-      metaTitle: 'Hidden Gems of Northern Vietnam',
-      metaDescription: 'Discover secret destinations in Northern Vietnam',
-      keywords: ['vietnam travel', 'hidden gems']
-    },
-    views: 1250,
-    readingTime: 8,
-    publishedAt: '2024-01-15T10:00:00Z',
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  };
-  return { data: { blog: mockBlog } };
-};
-
-const createBlog = async (blogData: BlogForm): Promise<{ data: { blog: Blog } }> => {
-  console.log('Creating blog:', blogData);
-  // Mock response
-  return { data: { blog: { _id: 'new-blog-id', ...blogData } as Blog } };
-};
-
-const updateBlog = async ({ blogId, blogData }: { blogId: string; blogData: BlogForm }): Promise<{ data: { blog: Blog } }> => {
-  console.log('Updating blog:', blogId, blogData);
-  // Mock response
-  return { data: { blog: { _id: blogId, ...blogData } as Blog } };
-};
+interface BlogFormData {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  featured_image: string;
+  status: 'draft' | 'published' | 'archived';
+  featured: boolean;
+  categories: string;
+  tags: string;
+  seo_meta_title: string;
+  seo_meta_description: string;
+  seo_keywords: string;
+}
 
 const BlogEditor: React.FC = () => {
-  const { blogId } = useParams<{ blogId?: string }>();
+  const { blogId } = useParams<{ blogId: string }>();
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   const queryClient = useQueryClient();
-  const isEditing = blogId && blogId !== 'new';
+  const isEditing = !!blogId && blogId !== 'new';
 
-  const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'settings'>('content');
-  const [previewMode, setPreviewMode] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [formData, setFormData] = useState<BlogFormData>({
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    featured_image: '',
+    status: 'draft',
+    featured: false,
+    categories: '',
+    tags: '',
+    seo_meta_title: '',
+    seo_meta_description: '',
+    seo_keywords: ''
+  });
 
+  // Fetch blog for editing
   const { data: blogData, isLoading } = useQuery({
     queryKey: ['blog', blogId],
-    queryFn: () => getBlogById(blogId!),
-    enabled: !!isEditing,
-  });
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-    reset
-  } = useForm<BlogForm>({
-    resolver: yupResolver(blogSchema) as any,
-    defaultValues: {
-      title: '',
-      slug: '',
-      content: '',
-      excerpt: '',
-      featuredImage: '',
-      gallery: [],
-      categories: [],
-      tags: [],
-      status: 'draft',
-      featured: false,
-      language: 'en',
-      seoData: {
-        metaTitle: '',
-        metaDescription: '',
-        keywords: [],
-      },
+    queryFn: async () => {
+      if (!isEditing) return null;
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/blogs/${blogId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch blog');
+      return response.json();
     },
+    enabled: isEditing
   });
 
-  const createMutation = useMutation({
-    mutationFn: createBlog,
+  // Populate form when editing
+  useEffect(() => {
+    if (blogData?.data?.blog) {
+      const blog = blogData.data.blog;
+      setFormData({
+        title: blog.title || '',
+        slug: blog.slug || '',
+        excerpt: blog.excerpt || '',
+        content: blog.content || '',
+        featured_image: blog.featured_image || '',
+        status: blog.status || 'draft',
+        featured: blog.featured || false,
+        categories: blog.categories || '',
+        tags: blog.tags || '',
+        seo_meta_title: blog.seo_meta_title || '',
+        seo_meta_description: blog.seo_meta_description || '',
+        seo_keywords: blog.seo_keywords || ''
+      });
+    }
+  }, [blogData]);
+
+  // Generate slug from title
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9 -]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  };
+
+  // Handle title change and auto-generate slug
+  const handleTitleChange = (title: string) => {
+    setFormData(prev => ({
+      ...prev,
+      title,
+      slug: !isEditing ? generateSlug(title) : prev.slug
+    }));
+  };
+
+  // Save blog mutation
+  const saveBlogMutation = useMutation({
+    mutationFn: async (data: BlogFormData) => {
+      const url = isEditing
+        ? `${process.env.REACT_APP_API_URL}/api/blogs/admin/${blogId}`
+        : `${process.env.REACT_APP_API_URL}/api/blogs/admin`;
+
+      const response = await fetch(url, {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: data.title,
+          slug: data.slug,
+          excerpt: data.excerpt,
+          content: data.content,
+          featuredImage: data.featured_image,
+          status: data.status,
+          featured: data.featured,
+          categories: data.categories ? data.categories.split(',').map(c => c.trim()) : [],
+          tags: data.tags ? data.tags.split(',').map(t => t.trim()) : [],
+          seoData: {
+            meta_title: data.seo_meta_title,
+            meta_description: data.seo_meta_description,
+            keywords: data.seo_keywords
+          }
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to save blog');
+      return response.json();
+    },
     onSuccess: () => {
-      toast.success('Blog created successfully!');
+      toast.success(isEditing ? 'Blog updated successfully' : 'Blog created successfully');
       queryClient.invalidateQueries({ queryKey: ['admin-blogs'] });
       navigate('/admin/blogs');
     },
-    onError: () => {
-      toast.error('Failed to create blog');
-    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to save blog');
+    }
   });
 
-  const updateMutation = useMutation({
-    mutationFn: updateBlog,
-    onSuccess: () => {
-      toast.success('Blog updated successfully!');
-      queryClient.invalidateQueries({ queryKey: ['admin-blogs'] });
-      queryClient.invalidateQueries({ queryKey: ['blog', blogId] });
-    },
-    onError: () => {
-      toast.error('Failed to update blog');
-    },
-  });
+  const handleInputChange = (field: keyof BlogFormData, value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-  // Auto-generate slug from title
-  const watchTitle = watch('title');
-  useEffect(() => {
-    if (watchTitle && !isEditing) {
-      const slug = watchTitle
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
-      setValue('slug', slug);
+  const handleSave = () => {
+    if (!formData.title || !formData.slug || !formData.content || !formData.excerpt) {
+      toast.error('Please fill in all required fields');
+      return;
     }
-  }, [watchTitle, setValue, isEditing]);
-
-  // Load blog data for editing
-  useEffect(() => {
-    if (blogData?.data.blog) {
-      const blog = blogData.data.blog;
-      reset({
-        title: blog.title,
-        slug: blog.slug,
-        content: blog.content,
-        excerpt: blog.excerpt || '',
-        featuredImage: blog.featuredImage || '',
-        gallery: blog.gallery || [],
-        categories: blog.categories,
-        tags: blog.tags,
-        status: blog.status,
-        featured: blog.featured,
-        language: blog.language,
-        seoData: blog.seoData,
-      });
-    }
-  }, [blogData, reset]);
-
-  const onSubmit = (data: BlogForm) => {
-    if (isEditing) {
-      updateMutation.mutate({ blogId: blogId!, blogData: data });
-    } else {
-      createMutation.mutate(data);
-    }
+    saveBlogMutation.mutate(formData);
   };
 
-  const handleSaveAsDraft = () => {
-    setValue('status', 'draft');
-    handleSubmit(onSubmit)();
-  };
-
-  const handlePublish = () => {
-    setValue('status', 'published');
-    handleSubmit(onSubmit)();
-  };
-
-  const availableCategories = ['Travel Tips', 'Vietnam', 'Japan', 'Budget Travel', 'Seasonal Travel', 'Adventure', 'Culture', 'Food & Drink'];
-  const watchCategories = watch('categories');
-  const watchTags = watch('tags');
-
-  const addCategory = (category: string) => {
-    if (!watchCategories.includes(category)) {
-      setValue('categories', [...watchCategories, category], { shouldDirty: true });
-    }
-  };
-
-  const removeCategory = (category: string) => {
-    setValue('categories', watchCategories.filter(c => c !== category), { shouldDirty: true });
-  };
-
-  const addTag = (tag: string) => {
-    if (tag.trim() && !watchTags.includes(tag.trim())) {
-      setValue('tags', [...watchTags, tag.trim()], { shouldDirty: true });
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    setValue('tags', watchTags.filter(t => t !== tag), { shouldDirty: true });
+  const handlePreview = () => {
+    setIsPreviewMode(!isPreviewMode);
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      <div className={`p-6 ${isDarkMode ? 'bg-dark-900 text-dark-text-primary' : 'bg-light-50 text-light-text-primary'}`}>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-orange"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-900">
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {isEditing ? 'Edit Blog Post' : 'Create New Blog Post'}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {isEditing ? 'Update your blog post content and settings' : 'Create a new blog post for your audience'}
-            </p>
-          </div>
-          <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-            <button
-              type="button"
-              onClick={() => setPreviewMode(!previewMode)}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors duration-200"
-            >
-              <Icon icon={previewMode ? Icons.FiEdit : Icons.FiEye} className="w-4 h-4 mr-2" />
-              {previewMode ? 'Edit' : 'Preview'}
-            </button>
-            <button
-              type="button"
-              onClick={handleSaveAsDraft}
-              disabled={createMutation.isPending || updateMutation.isPending}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors duration-200 disabled:opacity-50"
-            >
-              Save Draft
-            </button>
-            <button
-              type="button"
-              onClick={handlePublish}
-              disabled={createMutation.isPending || updateMutation.isPending}
-              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50"
-            >
-              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : 'Publish'}
-            </button>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900 text-dark-text-primary' : 'bg-light-50 text-light-text-primary'}`}>
+      {/* Header */}
+      <div className={`sticky top-0 z-10 border-b ${isDarkMode ? 'bg-dark-800 border-dark-700' : 'bg-white border-gray-200'} shadow-sm`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/admin/blogs')}
+                className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-dark-700' : 'hover:bg-gray-100'}`}
+              >
+                <Icon icon={Icons.FiArrowLeft} className="w-5 h-5" />
+              </button>
+              <h1 className="text-xl font-semibold">
+                {isEditing ? 'Edit Blog' : 'Create New Blog'}
+              </h1>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handlePreview}
+                className={`px-4 py-2 border rounded-lg transition-colors ${
+                  isPreviewMode
+                    ? 'bg-accent-orange text-white border-accent-orange'
+                    : isDarkMode
+                    ? 'border-dark-600 hover:bg-dark-700'
+                    : 'border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <Icon icon={Icons.FiEye} className="w-4 h-4 mr-2 inline" />
+                {isPreviewMode ? 'Edit' : 'Preview'}
+              </button>
+
+              <button
+                onClick={handleSave}
+                disabled={saveBlogMutation.isPending}
+                className="bg-accent-orange hover:bg-accent-orange-hover text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saveBlogMutation.isPending ? (
+                  <Icon icon={Icons.FiLoader} className="w-4 h-4 mr-2 inline animate-spin" />
+                ) : (
+                  <Icon icon={Icons.FiSave} className="w-4 h-4 mr-2 inline" />
+                )}
+                {isEditing ? 'Update' : 'Save'}
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-dark-800 rounded-lg shadow">
-              {/* Tabs */}
-              <div className="border-b border-gray-200 dark:border-dark-700">
-                <nav className="flex space-x-8 px-6">
-                  {[
-                    { id: 'content', label: 'Content', icon: Icons.FiEdit },
-                    { id: 'seo', label: 'SEO', icon: Icons.FiSearch },
-                    { id: 'settings', label: 'Settings', icon: Icons.FiSettings },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id as any)}
-                      className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                        activeTab === tab.id
-                          ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                      }`}
-                    >
-                      <Icon icon={tab.icon} className="w-4 h-4 mr-2" />
-                      {tab.label}
-                    </button>
-                  ))}
-                </nav>
-              </div>
-
-              <div className="p-6">
-                {/* Content Tab */}
-                {activeTab === 'content' && (
-                  <div className="space-y-6">
-                    {/* Title */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Title <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        {...register('title')}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                        placeholder="Enter your blog title..."
-                      />
-                      {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
-                    </div>
-
-                    {/* Slug */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        URL Slug <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        {...register('slug')}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                        placeholder="url-friendly-slug"
-                      />
-                      {errors.slug && <p className="mt-1 text-sm text-red-600">{errors.slug.message}</p>}
-                    </div>
-
-                    {/* Excerpt */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Excerpt <span className="text-red-500">*</span>
-                      </label>
-                      <textarea
-                        {...register('excerpt')}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                        placeholder="Brief description of your blog post..."
-                      />
-                      {errors.excerpt && <p className="mt-1 text-sm text-red-600">{errors.excerpt.message}</p>}
-                    </div>
-
-                    {/* Featured Image */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Featured Image URL
-                      </label>
-                      <input
-                        type="url"
-                        {...register('featuredImage')}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                        placeholder="https://example.com/image.jpg"
-                      />
-                    </div>
-
-                    {/* Content */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Content <span className="text-red-500">*</span>
-                      </label>
-                      <textarea
-                        {...register('content')}
-                        rows={20}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white font-mono text-sm"
-                        placeholder="Write your blog content in HTML format..."
-                      />
-                      {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content.message}</p>}
-                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        You can use HTML tags for formatting. In a production app, you'd integrate a rich text editor here.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* SEO Tab */}
-                {activeTab === 'seo' && (
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Meta Title
-                      </label>
-                      <input
-                        type="text"
-                        {...register('seoData.metaTitle')}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                        placeholder="SEO-optimized title..."
-                      />
-                      {errors.seoData?.metaTitle && <p className="mt-1 text-sm text-red-600">{errors.seoData.metaTitle.message}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Meta Description
-                      </label>
-                      <textarea
-                        {...register('seoData.metaDescription')}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                        placeholder="SEO meta description..."
-                      />
-                      {errors.seoData?.metaDescription && <p className="mt-1 text-sm text-red-600">{errors.seoData.metaDescription.message}</p>}
-                    </div>
-                  </div>
-                )}
-
-                {/* Settings Tab */}
-                {activeTab === 'settings' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        {...register('featured')}
-                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                      />
-                      <label className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Featured Post
-                      </label>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Language
-                      </label>
-                      <select
-                        {...register('language')}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                      >
-                        <option value="en">English</option>
-                        <option value="vi">Vietnamese</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Categories */}
-            <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Categories</h3>
-              <div className="space-y-2">
-                {availableCategories.map((category) => (
-                  <label key={category} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={watchCategories.includes(category)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          addCategory(category);
-                        } else {
-                          removeCategory(category);
-                        }
-                      }}
-                      className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{category}</span>
-                  </label>
-                ))}
-              </div>
-              {errors.categories && <p className="mt-2 text-sm text-red-600">{errors.categories.message}</p>}
-            </div>
-
-            {/* Tags */}
-            <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Tags</h3>
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="Add a tag..."
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addTag(e.currentTarget.value);
-                      e.currentTarget.value = '';
-                    }
-                  }}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {isPreviewMode ? (
+          /* Preview Mode */
+          <div className={`rounded-lg shadow-sm ${isDarkMode ? 'bg-dark-800' : 'bg-white'} p-8`}>
+            <article className="prose prose-lg max-w-none">
+              {formData.featured_image && (
+                <img
+                  src={formData.featured_image}
+                  alt={formData.title}
+                  className="w-full h-64 object-cover rounded-lg mb-6"
                 />
-                <div className="flex flex-wrap gap-2">
-                  {watchTags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 rounded-full text-sm"
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => removeTag(tag)}
-                        className="ml-1 text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200"
-                      >
-                        <Icon icon={Icons.FiX} className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
+              )}
+
+              <header className="mb-8">
+                <h1 className={`text-4xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>
+                  {formData.title || 'Blog Title'}
+                </h1>
+
+                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <span>Draft Preview</span>
+                  <span>•</span>
+                  <span>{new Date().toLocaleDateString()}</span>
+                  {formData.featured && (
+                    <>
+                      <span>•</span>
+                      <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Featured</span>
+                    </>
+                  )}
+                </div>
+
+                {formData.excerpt && (
+                  <p className={`text-xl mt-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
+                    {formData.excerpt}
+                  </p>
+                )}
+              </header>
+
+              <div
+                className={`prose max-w-none ${isDarkMode ? 'prose-invert' : ''}`}
+                dangerouslySetInnerHTML={{ __html: formData.content || '<p>Start writing your blog content...</p>' }}
+              />
+            </article>
+          </div>
+        ) : (
+          /* Edit Mode */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Basic Information */}
+              <div className={`rounded-lg shadow-sm ${isDarkMode ? 'bg-dark-800' : 'bg-white'} p-6`}>
+                <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Title *</label>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) => handleTitleChange(e.target.value)}
+                      placeholder="Enter blog title"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Slug *</label>
+                    <input
+                      type="text"
+                      value={formData.slug}
+                      onChange={(e) => handleInputChange('slug', e.target.value)}
+                      placeholder="blog-url-slug"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Excerpt *</label>
+                    <textarea
+                      value={formData.excerpt}
+                      onChange={(e) => handleInputChange('excerpt', e.target.value)}
+                      placeholder="Brief description of the blog post"
+                      rows={3}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Featured Image URL</label>
+                    <input
+                      type="url"
+                      value={formData.featured_image}
+                      onChange={(e) => handleInputChange('featured_image', e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    />
+                    {formData.featured_image && (
+                      <img
+                        src={formData.featured_image}
+                        alt="Preview"
+                        className="mt-2 w-full h-32 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-              {errors.tags && <p className="mt-2 text-sm text-red-600">{errors.tags.message}</p>}
+
+              {/* Content Editor */}
+              <div className={`rounded-lg shadow-sm ${isDarkMode ? 'bg-dark-800' : 'bg-white'} p-6`}>
+                <h2 className="text-lg font-semibold mb-4">Content *</h2>
+                <textarea
+                  value={formData.content}
+                  onChange={(e) => handleInputChange('content', e.target.value)}
+                  placeholder="Write your blog content here... (HTML supported)"
+                  rows={20}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange font-mono text-sm ${
+                    isDarkMode
+                      ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  You can use HTML tags for formatting. For example: &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt;, etc.
+                </p>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Publish Settings */}
+              <div className={`rounded-lg shadow-sm ${isDarkMode ? 'bg-dark-800' : 'bg-white'} p-6`}>
+                <h2 className="text-lg font-semibold mb-4">Publish Settings</h2>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Status</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => handleInputChange('status', e.target.value as BlogFormData['status'])}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="featured"
+                      checked={formData.featured}
+                      onChange={(e) => handleInputChange('featured', e.target.checked)}
+                      className="w-4 h-4 text-accent-orange border-gray-300 rounded focus:ring-accent-orange"
+                    />
+                    <label htmlFor="featured" className="ml-2 text-sm font-medium">
+                      Featured Blog
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Categories & Tags */}
+              <div className={`rounded-lg shadow-sm ${isDarkMode ? 'bg-dark-800' : 'bg-white'} p-6`}>
+                <h2 className="text-lg font-semibold mb-4">Categories & Tags</h2>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Categories</label>
+                    <input
+                      type="text"
+                      value={formData.categories}
+                      onChange={(e) => handleInputChange('categories', e.target.value)}
+                      placeholder="travel, adventure, culture (comma separated)"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Tags</label>
+                    <input
+                      type="text"
+                      value={formData.tags}
+                      onChange={(e) => handleInputChange('tags', e.target.value)}
+                      placeholder="vietnam, tour, guide (comma separated)"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SEO Settings */}
+              <div className={`rounded-lg shadow-sm ${isDarkMode ? 'bg-dark-800' : 'bg-white'} p-6`}>
+                <h2 className="text-lg font-semibold mb-4">SEO Settings</h2>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Meta Title</label>
+                    <input
+                      type="text"
+                      value={formData.seo_meta_title}
+                      onChange={(e) => handleInputChange('seo_meta_title', e.target.value)}
+                      placeholder="SEO title for search engines"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Meta Description</label>
+                    <textarea
+                      value={formData.seo_meta_description}
+                      onChange={(e) => handleInputChange('seo_meta_description', e.target.value)}
+                      placeholder="Description for search engines"
+                      rows={3}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Keywords</label>
+                    <input
+                      type="text"
+                      value={formData.seo_keywords}
+                      onChange={(e) => handleInputChange('seo_keywords', e.target.value)}
+                      placeholder="keyword1, keyword2, keyword3"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </form>
+        )}
+      </div>
     </div>
   );
 };

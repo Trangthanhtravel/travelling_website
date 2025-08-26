@@ -22,9 +22,9 @@ const getBlogs = async (req, res) => {
     } = req.query;
 
     let query = `
-      SELECT b.*, u.name as author_name, u.avatar as author_avatar, u.email as author_email
+      SELECT b.*, u.name as author_name, u.email as author_email
       FROM blogs b
-      LEFT JOIN users u ON b.author_id = u.id
+      LEFT JOIN users u ON b.author = u.id
     `;
 
     const conditions = [];
@@ -45,7 +45,7 @@ const getBlogs = async (req, res) => {
     }
 
     if (author) {
-      conditions.push('b.author_id = ?');
+      conditions.push('b.author = ?');
       params.push(author);
     }
 
@@ -86,31 +86,31 @@ const getBlogs = async (req, res) => {
 
     // Get total count for pagination
     let countQuery = `SELECT COUNT(*) as total FROM blogs b`;
-    if (conditions.length > 0) {
-      countQuery += ' WHERE ' + conditions.join(' AND ');
+    const countConditions = conditions.slice(0, -2); // Remove limit and offset conditions
+    if (countConditions.length > 0) {
+      countQuery += ' WHERE ' + countConditions.join(' AND ');
     }
 
-    const countResult = await db.prepare(countQuery).bind(...params.slice(0, -2)).first();
+    const countParams = params.slice(0, -2);
+    const countResult = await db.prepare(countQuery).bind(...countParams).first();
     const total = countResult?.total || 0;
 
     // Process results
     const blogs = result.results?.map(blog => ({
       ...blog,
-      categories: blog.categories ? JSON.parse(blog.categories) : [],
-      tags: blog.tags ? JSON.parse(blog.tags) : [],
+      categories: blog.categories ? (typeof blog.categories === 'string' ? blog.categories : JSON.stringify(blog.categories)) : '',
+      tags: blog.tags ? (typeof blog.tags === 'string' ? blog.tags : JSON.stringify(blog.tags)) : '',
       gallery: blog.gallery ? JSON.parse(blog.gallery) : [],
-      seo_data: blog.seo_data ? JSON.parse(blog.seo_data) : {},
       featured: Boolean(blog.featured),
       authorProfile: {
         name: blog.author_name,
-        avatar: blog.author_avatar,
         email: blog.author_email
       }
     })) || [];
 
     res.json({
       success: true,
-      data: blogs,
+      data: { blogs },
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / parseInt(limit)),
@@ -136,9 +136,9 @@ const getBlogBySlug = async (req, res) => {
     const { slug } = req.params;
 
     const query = `
-      SELECT b.*, u.name as author_name, u.avatar as author_avatar, u.email as author_email
+      SELECT b.*, u.name as author_name, u.email as author_email
       FROM blogs b
-      LEFT JOIN users u ON b.author_id = u.id
+      LEFT JOIN users u ON b.author = u.id
       WHERE b.slug = ? AND (b.status = 'published' OR ? = 'admin')
     `;
 
@@ -156,14 +156,12 @@ const getBlogBySlug = async (req, res) => {
 
     const blog = {
       ...result,
-      categories: result.categories ? JSON.parse(result.categories) : [],
-      tags: result.tags ? JSON.parse(result.tags) : [],
+      categories: result.categories ? (typeof result.categories === 'string' ? result.categories : JSON.stringify(result.categories)) : '',
+      tags: result.tags ? (typeof result.tags === 'string' ? result.tags : JSON.stringify(result.tags)) : '',
       gallery: result.gallery ? JSON.parse(result.gallery) : [],
-      seo_data: result.seo_data ? JSON.parse(result.seo_data) : {},
       featured: Boolean(result.featured),
       authorProfile: {
         name: result.author_name,
-        avatar: result.author_avatar,
         email: result.author_email
       }
     };
@@ -186,9 +184,9 @@ const getBlogById = async (req, res) => {
     const { id } = req.params;
 
     const query = `
-      SELECT b.*, u.name as author_name, u.avatar as author_avatar, u.email as author_email
+      SELECT b.*, u.name as author_name, u.email as author_email
       FROM blogs b
-      LEFT JOIN users u ON b.author_id = u.id
+      LEFT JOIN users u ON b.author = u.id
       WHERE b.id = ?
     `;
 
@@ -200,14 +198,12 @@ const getBlogById = async (req, res) => {
 
     const blog = {
       ...result,
-      categories: result.categories ? JSON.parse(result.categories) : [],
-      tags: result.tags ? JSON.parse(result.tags) : [],
+      categories: result.categories ? (typeof result.categories === 'string' ? result.categories : JSON.stringify(result.categories)) : '',
+      tags: result.tags ? (typeof result.tags === 'string' ? result.tags : JSON.stringify(result.tags)) : '',
       gallery: result.gallery ? JSON.parse(result.gallery) : [],
-      seo_data: result.seo_data ? JSON.parse(result.seo_data) : {},
       featured: Boolean(result.featured),
       authorProfile: {
         name: result.author_name,
-        avatar: result.author_avatar,
         email: result.author_email
       }
     };
