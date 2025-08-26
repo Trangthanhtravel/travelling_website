@@ -282,7 +282,7 @@ const createServiceBooking = async (req, res) => {
 
     const query = `
       INSERT INTO service_bookings (
-        id, booking_number, service_id, customer_id, booking_form, status
+        id, service_id, customer_id, booking_form, status
       ) VALUES (?, ?, ?, ?, ?, 'pending')
     `;
 
@@ -383,7 +383,7 @@ const getAllServiceBookings = async (req, res) => {
     }
 
     // Add sorting
-    const validSortColumns = ['created_at', 'updated_at', 'booking_number'];
+    const validSortColumns = ['created_at', 'updated_at'];
     const validSortOrders = ['asc', 'desc'];
 
     if (validSortColumns.includes(sortBy) && validSortOrders.includes(sortOrder)) {

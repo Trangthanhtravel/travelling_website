@@ -19,7 +19,6 @@ DROP INDEX IF EXISTS idx_services_category;
 DROP INDEX IF EXISTS idx_services_status;
 DROP INDEX IF EXISTS idx_bookings_status;
 DROP INDEX IF EXISTS idx_bookings_customer_email;
-DROP INDEX IF EXISTS idx_bookings_booking_number;
 DROP INDEX IF EXISTS idx_reviews_status;
 
 -- Recreate all tables with new schema
@@ -78,7 +77,6 @@ CREATE TABLE services (
 -- Direct Bookings table (no user account required)
 CREATE TABLE bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    booking_number TEXT UNIQUE NOT NULL,
     type TEXT NOT NULL CHECK(type IN ('tour', 'service')),
     item_id INTEGER NOT NULL,
     customer_name TEXT NOT NULL,
@@ -172,7 +170,6 @@ CREATE INDEX idx_services_category ON services(category);
 CREATE INDEX idx_services_status ON services(status);
 CREATE INDEX idx_bookings_status ON bookings(status);
 CREATE INDEX idx_bookings_customer_email ON bookings(customer_email);
-CREATE INDEX idx_bookings_booking_number ON bookings(booking_number);
 CREATE INDEX idx_reviews_status ON reviews(status);
 
 -- Insert a default admin user (change password before production!)

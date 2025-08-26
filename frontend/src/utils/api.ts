@@ -8,7 +8,8 @@ import {
   getBookingById, 
   MockBooking 
 } from '../data/mockBookings';
-import { Tour, Service, TourFilters, ApiResponse, PaginationResponse } from '../types';
+import {Tour, Service, TourFilters, ApiResponse, PaginationResponse, User} from '../types';
+import axios, {AxiosResponse} from "axios";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -217,47 +218,25 @@ export const contactApi = {
   }
 };
 
-// Admin API (for admin panel)
-export const adminApi = {
-  // Dashboard stats
-  async getDashboardStats(): Promise<ApiResponse<{
-    totalTours: number;
-    totalServices: number;
-    totalBookings: number;
-    pendingBookings: number;
-    totalRevenue: number;
-    recentBookings: MockBooking[];
-  }>> {
-    await simulateDelay();
-    
-    const totalRevenue = mockBookings
-      .filter(b => b.status === 'confirmed' || b.status === 'completed')
-      .reduce((sum, booking) => sum + booking.total_amount, 0);
-    
-    const recentBookings = mockBookings
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 5);
-    
-    return {
-      success: true,
-      data: {
-        totalTours: mockTours.length,
-        totalServices: mockServices.length,
-        totalBookings: mockBookings.length,
-        pendingBookings: mockBookings.filter(b => b.status === 'pending').length,
-        totalRevenue,
-        recentBookings
-      }
-    };
-  }
+// Create admin axios instance
+const adminAPI = axios.create({
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+export const adminAPI_functions = {
+    getDashboardStats: (): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.get('/admin/stats'),
+
+    getProfile: (): Promise<AxiosResponse<ApiResponse<User>>> =>
+        adminAPI.get('/admin/profile'),
+
 };
 
-// Export default API object
-export default {
-  tours: toursApi,
-  services: servicesApi,
-  blogs: blogsApi,
-  bookings: bookingsApi,
-  contact: contactApi,
-  admin: adminApi
+// Auth API (Admin only)
+export const authAPI = {
+    adminLogin: (email: string, password: string): Promise<AxiosResponse<ApiResponse<{ user: User; token: string }>>> =>
+        adminAPI.post('/auth/admin/login', { email, password }),
 };
