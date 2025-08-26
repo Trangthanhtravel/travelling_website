@@ -299,6 +299,9 @@ export const mockTours: Tour[] = [
     pricing: { basePrice: 1299 }
   }
 ];
+export const getFeaturedTours = () => {
+    return mockTours.filter(tour => tour.featured && tour.status === 'active');
+};
 
 // Export individual tours for easy access
 export const featuredTours = mockTours.filter(tour => tour.featured);

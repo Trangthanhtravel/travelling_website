@@ -9,97 +9,76 @@ const getBlogs = async (filters: BlogFilters = {}): Promise<{ data: Blog[]; pagi
   // Mock data - replace with actual API call
   const mockBlogs: Blog[] = [
     {
-      _id: '1',
+      id: 1,
       type: 'blog',
       title: 'Hidden Gems of Northern Vietnam',
       slug: 'hidden-gems-northern-vietnam',
       content: `<p>Discover the breathtaking landscapes and rich culture of Northern Vietnam beyond the typical tourist trails...</p>`,
       excerpt: 'Explore remote villages, pristine lakes, and mountain passes that few tourists ever see in this comprehensive guide.',
-      featuredImage: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      featured_image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
       gallery: [],
-      author: '60f7b3b3b3b3b3b3b3b3b3b3',
-      authorProfile: {
-        name: 'Sarah Johnson',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b547?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
-        bio: 'Travel writer and photographer with 10+ years exploring Southeast Asia'
-      },
+      author: 1,
       status: 'published',
       featured: true,
       categories: ['Travel Tips', 'Vietnam'],
       tags: ['northern vietnam', 'hidden gems', 'adventure', 'culture'],
       language: 'en',
-      seoData: {
-        metaTitle: 'Hidden Gems of Northern Vietnam - Off the Beaten Path',
-        metaDescription: 'Discover secret destinations in Northern Vietnam',
-        keywords: ['vietnam travel', 'hidden gems', 'northern vietnam', 'adventure travel']
-      },
+        seo_meta_title: 'Hidden Gems of Northern Vietnam - Off the Beaten Path',
+    seo_meta_description: 'Discover secret destinations in Northern Vietnam',
+    seo_keywords: ['vietnam travel', 'hidden gems', 'northern vietnam', 'adventure travel'],
       views: 1250,
-      readingTime: 8,
-      publishedAt: '2024-01-15T10:00:00Z',
-      createdAt: '2024-01-15T10:00:00Z',
-      updatedAt: '2024-01-15T10:00:00Z'
+      reading_time: 8,
+      published_at: '2024-01-15T10:00:00Z',
+      created_at: '2024-01-15T10:00:00Z',
+      updated_at: '2024-01-15T10:00:00Z'
     },
     {
-      _id: '2',
+      id: 2,
       type: 'blog',
       title: 'Ultimate Guide to Japanese Cherry Blossom Season',
       slug: 'japanese-cherry-blossom-guide',
       content: `<p>Experience the magic of sakura season with our comprehensive guide...</p>`,
       excerpt: 'Everything you need to know about when, where, and how to experience Japan\'s famous cherry blossom season.',
-      featuredImage: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      featured_image: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
       gallery: [],
-      author: '60f7b3b3b3b3b3b3b3b3b3b4',
-      authorProfile: {
-        name: 'Hiroshi Tanaka',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
-        bio: 'Local Japan expert and cultural guide'
-      },
+      author: 2,
       status: 'published',
       featured: false,
       categories: ['Japan', 'Seasonal Travel'],
       tags: ['japan', 'cherry blossom', 'sakura', 'spring travel'],
       language: 'en',
-      seoData: {
-        metaTitle: 'Japanese Cherry Blossom Season Guide - Best Times & Places',
-        metaDescription: 'Complete guide to experiencing Japan\'s cherry blossom season',
-        keywords: ['japan travel', 'cherry blossom', 'sakura', 'spring japan']
-      },
+        seo_meta_title: 'Japanese Cherry Blossom Season Guide - Best Times & Places',
+        seo_meta_description: 'Complete guide to experiencing Japan\'s cherry blossom season',
+        seo_keywords: ['japan travel', 'cherry blossom', 'sakura', 'spring japan'],
       views: 890,
-      readingTime: 12,
-      publishedAt: '2024-02-01T09:30:00Z',
-      createdAt: '2024-02-01T09:30:00Z',
-      updatedAt: '2024-02-01T09:30:00Z'
+      reading_time: 12,
+      published_at: '2024-02-01T09:30:00Z',
+      created_at: '2024-02-01T09:30:00Z',
+      updated_at: '2024-02-01T09:30:00Z'
     },
     {
-      _id: '3',
+      id: 3,
       type: 'blog',
       title: 'Budget Travel Tips for Southeast Asia',
       slug: 'budget-travel-southeast-asia',
       content: `<p>Make your money go further with these proven budget travel strategies...</p>`,
       excerpt: 'Discover how to travel through Southeast Asia on a shoestring budget without sacrificing experiences.',
-      featuredImage: 'https://images.unsplash.com/photo-1528127269322-539801943592?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+      featured_image: 'https://images.unsplash.com/photo-1528127269322-539801943592?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
       gallery: [],
-      author: '60f7b3b3b3b3b3b3b3b3b3b3',
-      authorProfile: {
-        name: 'Sarah Johnson',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b547?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80',
-        bio: 'Travel writer and photographer with 10+ years exploring Southeast Asia'
-      },
+        author: 3,
       status: 'published',
       featured: true,
       categories: ['Travel Tips', 'Budget Travel'],
       tags: ['budget travel', 'southeast asia', 'backpacking', 'money saving'],
       language: 'en',
-      seoData: {
-        metaTitle: 'Budget Travel Tips for Southeast Asia - Save Money While Exploring',
-        metaDescription: 'Expert tips for budget travel in Southeast Asia',
-        keywords: ['budget travel', 'southeast asia', 'backpacking', 'cheap travel']
-      },
+        seo_meta_title: 'Budget Travel Tips for Southeast Asia - Save Money While Exploring',
+        seo_meta_description: 'Expert tips for budget travel in Southeast Asia',
+        seo_keywords: ['budget travel', 'southeast asia', 'backpacking', 'cheap travel'],
       views: 2100,
-      readingTime: 10,
-      publishedAt: '2024-01-10T14:20:00Z',
-      createdAt: '2024-01-10T14:20:00Z',
-      updatedAt: '2024-01-10T14:20:00Z'
+      reading_time: 10,
+      published_at: '2024-01-10T14:20:00Z',
+      created_at: '2024-01-10T14:20:00Z',
+      updated_at: '2024-01-10T14:20:00Z'
     }
   ];
 
@@ -254,13 +233,13 @@ const Blogs: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {featuredBlogs.map((blog) => (
                   <Link
-                    key={blog._id}
+                    key={blog.id}
                     to={`/blogs/${blog.slug}`}
                     className="group bg-white dark:bg-dark-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300"
                   >
                     <div className="relative h-64 overflow-hidden">
                       <img
-                        src={blog.featuredImage}
+                        src={blog.featured_image}
                         alt={blog.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
@@ -270,20 +249,13 @@ const Blogs: React.FC = () => {
                         </span>
                       </div>
                       <div className="absolute bottom-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
-                        {blog.readingTime} min read
+                        {blog.reading_time} min read
                       </div>
                     </div>
                     <div className="p-6">
                       <div className="flex items-center mb-3">
-                        <img
-                          src={blog.authorProfile?.avatar}
-                          alt={blog.authorProfile?.name}
-                          className="w-8 h-8 rounded-full mr-3"
-                        />
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">{blog.authorProfile?.name}</span>
-                          <span className="mx-2">•</span>
-                          <span>{formatDate(blog.publishedAt!)}</span>
+                          <span>{formatDate(blog.published_at!)}</span>
                         </div>
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
@@ -324,31 +296,24 @@ const Blogs: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {regularBlogs.map((blog) => (
                   <Link
-                    key={blog._id}
+                    key={blog.id}
                     to={`/blogs/${blog.slug}`}
                     className="group bg-white dark:bg-dark-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300"
                   >
                     <div className="relative h-48 overflow-hidden">
                       <img
-                        src={blog.featuredImage}
+                        src={blog.featured_image}
                         alt={blog.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                       <div className="absolute bottom-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
-                        {blog.readingTime} min read
+                        {blog.reading_time} min read
                       </div>
                     </div>
                     <div className="p-6">
                       <div className="flex items-center mb-3">
-                        <img
-                          src={blog.authorProfile?.avatar}
-                          alt={blog.authorProfile?.name}
-                          className="w-6 h-6 rounded-full mr-2"
-                        />
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">{blog.authorProfile?.name}</span>
-                          <span className="mx-2">•</span>
-                          <span>{formatDate(blog.publishedAt!)}</span>
+                          <span>{formatDate(blog.published_at!)}</span>
                         </div>
                       </div>
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">

@@ -93,6 +93,32 @@ export interface Booking {
   updated_at: string;
 }
 
+export interface BookingForm {
+    tourId: string;
+    startDate: string;
+    numberOfTravelers: {
+        adults: number;
+        children: number;
+        infants: number;
+    };
+    travelers: Traveler[];
+    specialRequests?: string;
+    emergencyContact?: {
+        name: string;
+        phone: string;
+        relationship: string;
+    };
+}
+
+export interface Traveler {
+    name: string;
+    age?: number;
+    type: 'adult' | 'child' | 'infant';
+    passportNumber?: string;
+    nationality?: string;
+    dietaryRequirements?: string;
+}
+
 // Content types (for blogs, etc.)
 export interface Content {
   id: string;
@@ -159,4 +185,43 @@ export interface ServiceApiResponse {
     service: Service;
   };
   message?: string;
+}
+
+// Blog-specific types extending Content
+export interface Blog {
+    id: number;
+    type: string;
+    title: string;
+    slug: string;
+    content: string;
+    excerpt: string;
+    featured_image: string;
+    gallery: string[];
+    author: number;
+    authorName?: string;
+    status: 'draft' | 'published' | 'archived';
+    featured: boolean;
+    categories: string[];
+    tags: string[];
+    language: string;
+    seo_meta_title: string;
+    seo_meta_description: string;
+    seo_keywords: string[];
+    views: number;
+    reading_time: number;
+    published_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface BlogFilters {
+    category?: string;
+    tag?: string;
+    status?: 'draft' | 'published' | 'archived';
+    author?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sortBy?: 'createdAt' | 'publishedAt' | 'views' | 'title';
+    sortOrder?: 'asc' | 'desc';
 }
