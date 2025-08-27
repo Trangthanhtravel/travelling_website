@@ -109,7 +109,9 @@ const SocialChatBox: React.FC = () => {
         <div className="fixed bottom-6 right-6 z-40">
             {/* Social Links */}
             <div className={`mb-4 space-y-3 transition-all duration-300 ${
-                isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                isOpen 
+                    ? 'opacity-100 translate-y-0 pointer-events-auto' 
+                    : 'opacity-0 translate-y-4 pointer-events-none invisible'
             }`}>
                 {socialLinks.map((link) => (
                     <div

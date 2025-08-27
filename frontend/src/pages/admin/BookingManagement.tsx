@@ -388,16 +388,87 @@ const BookingManagement: React.FC = () => {
                 {/* Booking Form Details */}
                 <div className="mt-6">
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Booking Details</h4>
-                  <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg">
-                    <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                      {JSON.stringify(selectedBooking, null, 2)}
-                    </pre>
+                  <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg overflow-x-auto">
+                    <table className="min-w-full">
+                      <tbody className="divide-y divide-gray-200 dark:divide-dark-600">
+                        <tr>
+                          <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Booking ID</td>
+                          <td className="py-2 text-sm text-gray-900 dark:text-white">{selectedBooking.id}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Type</td>
+                          <td className="py-2 text-sm text-gray-900 dark:text-white">{selectedBooking.type}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Item ID</td>
+                          <td className="py-2 text-sm text-gray-900 dark:text-white">{selectedBooking.item_id}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Start Date</td>
+                          <td className="py-2 text-sm text-gray-900 dark:text-white">
+                            {selectedBooking.start_date ? new Date(selectedBooking.start_date).toLocaleDateString() : 'Not specified'}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Total Travelers</td>
+                          <td className="py-2 text-sm text-gray-900 dark:text-white">{selectedBooking.total_travelers}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Total Amount</td>
+                          <td className="py-2 text-sm text-gray-900 dark:text-white">
+                            ${selectedBooking.total_amount} {selectedBooking.currency}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Status</td>
+                          <td className="py-2 text-sm">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedBooking.status)}`}>
+                              {selectedBooking.status}
+                            </span>
+                          </td>
+                        </tr>
+                        {selectedBooking.special_requests && (
+                          <tr>
+                            <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Special Requests</td>
+                            <td className="py-2 text-sm text-gray-900 dark:text-white">{selectedBooking.special_requests}</td>
+                          </tr>
+                        )}
+                        {selectedBooking.contacted_at && (
+                          <tr>
+                            <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Contacted At</td>
+                            <td className="py-2 text-sm text-gray-900 dark:text-white">
+                              {new Date(selectedBooking.contacted_at).toLocaleString()}
+                            </td>
+                          </tr>
+                        )}
+                        {selectedBooking.confirmed_at && (
+                          <tr>
+                            <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Confirmed At</td>
+                            <td className="py-2 text-sm text-gray-900 dark:text-white">
+                              {new Date(selectedBooking.confirmed_at).toLocaleString()}
+                            </td>
+                          </tr>
+                        )}
+                        <tr>
+                          <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Created At</td>
+                          <td className="py-2 text-sm text-gray-900 dark:text-white">
+                            {new Date(selectedBooking.created_at).toLocaleString()}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 pr-4 text-sm font-medium text-gray-500 dark:text-gray-400">Updated At</td>
+                          <td className="py-2 text-sm text-gray-900 dark:text-white">
+                            {new Date(selectedBooking.updated_at).toLocaleString()}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
                 {/* Notes Section */}
                 <div className="mt-6">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notes</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Admin Notes</h4>
 
                   {/* Add Note Form */}
                   <form onSubmit={handleAddNote} className="mb-4">
@@ -418,6 +489,11 @@ const BookingManagement: React.FC = () => {
                       </button>
                     </div>
                   </form>
+
+                  {/* Notes List */}
+                  <div className="space-y-3 max-h-32 overflow-y-auto">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">No notes available for this booking</p>
+                  </div>
                 </div>
               </div>
             </div>

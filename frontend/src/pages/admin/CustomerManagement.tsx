@@ -390,28 +390,67 @@ const CustomerManagement: React.FC = () => {
                 {/* Booking History */}
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Booking History</h4>
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {selectedCustomer.bookings.map((booking) => (
-                      <div key={booking.id} className="border dark:border-dark-600 rounded-lg p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{booking.type}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {new Date(booking.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              booking.status === 'completed' ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300' :
-                              booking.status === 'confirmed' ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300' :
-                              'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300'
-                            }`}>
-                              {booking.status}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="bg-gray-50 dark:bg-dark-700 rounded-lg overflow-hidden">
+                    <div className="max-h-64 overflow-y-auto">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-600">
+                        <thead className="bg-gray-100 dark:bg-dark-600 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Booking ID
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Type
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Amount
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-gray-50 dark:bg-dark-700 divide-y divide-gray-200 dark:divide-dark-600">
+                          {selectedCustomer.bookings.length === 0 ? (
+                            <tr>
+                              <td colSpan={5} className="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                No bookings found for this customer
+                              </td>
+                            </tr>
+                          ) : (
+                            selectedCustomer.bookings.map((booking) => (
+                              <tr key={booking.id} className="hover:bg-gray-100 dark:hover:bg-dark-600">
+                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                  #{booking.id}
+                                </td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                  {booking.type === 'tour' ? 'Tour' : 'Service'}
+                                </td>
+                                <td className="px-4 py-3 whitespace-nowrap">
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    booking.status === 'completed' ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300' :
+                                    booking.status === 'confirmed' ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300' :
+                                    booking.status === 'contacted' ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300' :
+                                    booking.status === 'pending' ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300' :
+                                    'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300'
+                                  }`}>
+                                    {booking.status}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                  ${booking.total_amount.toLocaleString()}
+                                </td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                  {new Date(booking.created_at).toLocaleDateString()}
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
