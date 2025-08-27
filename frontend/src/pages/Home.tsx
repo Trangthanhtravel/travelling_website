@@ -211,11 +211,11 @@ const Home: React.FC = () => {
 
   const featuredBlogs = featuredBlogsData?.data || [];
 
-  // Fetch featured tours from real API
+  // Fetch featured tours from real API using the dedicated featured endpoint
   const { data: featuredToursData, isLoading: toursLoading } = useQuery({
     queryKey: ['featured-tours'],
     queryFn: async () => {
-      const response = await toursAPI.getTours({ featured: 'true', limit: 3, status: 'active' });
+      const response = await toursAPI.getFeaturedTours();
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
