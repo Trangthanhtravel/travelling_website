@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { getDB } = require('./config/database');
+const db = require('./config/database');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -60,7 +60,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Database middleware - attach database connection to request
 app.use((req, res, next) => {
   try {
-    req.db = getDB();
+    req.db = db;
     next();
   } catch (error) {
     console.error('Database connection error:', error);
