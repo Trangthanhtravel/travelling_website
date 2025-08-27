@@ -22,11 +22,11 @@ const Home: React.FC = () => {
   const [heroLoading, setHeroLoading] = useState(true);
   const [aboutContent, setAboutContent] = useState({
     backgroundImage: '',
-    quote: '',
+    quote: 'For over 15 years, Trang Thanh Travel has been a trusted companion, helping customers have smooth and memorable trips. From organizing tours, events, to renting private cars, making visas, or booking airline tickets, cruises, trains, hotels, we can take care of everything so that you have the most perfect experience.',
     tagline: '',
     title: '',
     description: '',
-    youtubeId: '',
+    youtubeId: 'https://www.youtube.com/embed/8VJpaYXrPPQ?autoplay=0&mute=0&controls=1&loop=0&origin=https%3A%2F%2Fmaxineho3110.wixsite.com&playsinline=1&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Fmaxineho3110.wixsite.com%2Ftrang-thanh-travel-2&aoriginsup=1&vf=6',
   });
   const [statisticsContent, setStatisticsContent] = useState({
     happyCustomers: 500,
@@ -117,7 +117,7 @@ const Home: React.FC = () => {
     {
       id: 2,
       image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
-      title: 'Travel with TrangThanh',
+      title: 'Travel with Trang Thanh',
       subtitle: 'Professional travel services and unforgettable experiences',
       description: '',
     },
@@ -338,19 +338,11 @@ const Home: React.FC = () => {
         className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-white'}`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className={`text-4xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-              Our Journey in Numbers
-            </h2>
-            <p className={`text-xl max-w-2xl mx-auto ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-              Years of excellence creating unforgettable travel experiences
-            </p>
-          </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Happy Customers */}
             <div className="text-center group">
-              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'bg-dark-800 hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} shadow-lg hover:shadow-xl`}>
+              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} hover:shadow-xl`}>
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon icon={Icons.FiUsers} className="w-8 h-8 text-white" />
                 </div>
@@ -370,7 +362,7 @@ const Home: React.FC = () => {
 
             {/* Number of Trips */}
             <div className="text-center group">
-              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'bg-dark-800 hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} shadow-lg hover:shadow-xl`}>
+              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} hover:shadow-xl`}>
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon icon={Icons.FiMapPin} className="w-8 h-8 text-white" />
                 </div>
@@ -390,7 +382,7 @@ const Home: React.FC = () => {
 
             {/* Years of Experience */}
             <div className="text-center group">
-              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'bg-dark-800 hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} shadow-lg hover:shadow-xl`}>
+              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? ' hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} hover:shadow-xl`}>
                 <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon icon={Icons.FiCalendar} className="w-8 h-8 text-white" />
                 </div>
@@ -410,7 +402,7 @@ const Home: React.FC = () => {
 
             {/* Google Review */}
             <div className="text-center group">
-              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'bg-dark-800 hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} shadow-lg hover:shadow-xl`}>
+              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} hover:shadow-xl`}>
                 <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon icon={Icons.FiStar} className="w-8 h-8 text-white" />
                 </div>
@@ -590,22 +582,22 @@ const Home: React.FC = () => {
                       )}
                     </div>
                     <div className="p-6">
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-500 mb-2">
                         <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1" />
                         <span>{tour.location}</span>
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
                         {tour.title}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+                      <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
                         {tour.description}
                       </p>
                       <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
                           <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
                           <span>{tour.duration}</span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
                           <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
                           <span>Max {tour.max_participants}</span>
                         </div>
@@ -700,7 +692,7 @@ const Home: React.FC = () => {
       <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-50'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-light-text-primary">
+            <h2 className="text-4xl font-bold mb-4 text-light-text-primary dark:text-white">
               Featured Blogs
             </h2>
             <p className="text-xl text-light-text-muted max-w-2xl mx-auto">

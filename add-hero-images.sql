@@ -7,7 +7,7 @@ INSERT INTO content (key, title, content, type, status, created_at, updated_at) 
 -- Add hero titles and descriptions
 INSERT INTO content (key, title, content, type, status, created_at, updated_at) VALUES
 ('hero_title_1', 'Hero Title 1', 'Discover Amazing Vietnam', 'setting', 'active', datetime('now'), datetime('now')),
-('hero_title_2', 'Hero Title 2', 'Travel with TrangThanh', 'setting', 'active', datetime('now'), datetime('now')),
+('hero_title_2', 'Hero Title 2', 'Travel with Trang Thanh', 'setting', 'active', datetime('now'), datetime('now')),
 ('hero_title_3', 'Hero Title 3', 'Cultural Immersion', 'setting', 'active', datetime('now'), datetime('now')),
 ('hero_subtitle_1', 'Hero Subtitle 1', 'Experience the beauty and culture of Southeast Asia', 'setting', 'active', datetime('now'), datetime('now')),
 ('hero_subtitle_2', 'Hero Subtitle 2', 'Professional travel services and unforgettable experiences', 'setting', 'active', datetime('now'), datetime('now')),
