@@ -1,4 +1,4 @@
-const { query, get, all, run } = require('../config/database');
+const { db } = require('../config/database');
 const { r2Helpers } = require('../config/storage');
 
 class Tour {
@@ -66,7 +66,7 @@ class Tour {
 
     const sql = `
       INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category, images, itinerary, included, excluded, status, featured, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     const params = [
@@ -77,8 +77,8 @@ class Tour {
       tourData.status, tourData.featured
     ];
 
-    const result = await run(sql, params);
-    this.id = result.lastID;
+    const result = await db.prepare(sql).bind(...params).run();
+    this.id = result.last_row_id;
     return result;
   }
 
@@ -116,7 +116,7 @@ class Tour {
 
   // Find tour by ID
   static async findById(id) {
-    const tour = await get('SELECT * FROM tours WHERE id = ?', [id]);
+    const tour = await db.prepare('SELECT * FROM tours WHERE id = ?').bind(id).first();
     return tour ? new Tour(tour) : null;
   }
 
@@ -151,12 +151,13 @@ class Tour {
 
     // Get total count for pagination
     const countSql = `SELECT COUNT(*) as total FROM tours WHERE ${whereClause}`;
-    const countResult = await get(countSql, params);
-    const total = countResult.total;
+    const countResult = await db.prepare(countSql).bind(...params).first();
+    const total = countResult?.total || 0;
 
     // Get paginated results
     const sql = `SELECT * FROM tours WHERE ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
-    const tours = await all(sql, [...params, limit, offset]);
+    const result = await db.prepare(sql).bind(...params, limit, offset).all();
+    const tours = result.results || [];
 
     return {
       data: tours.map(tour => new Tour(tour)),
@@ -195,12 +196,13 @@ class Tour {
 
     // Get total count for pagination
     const countSql = `SELECT COUNT(*) as total FROM tours WHERE ${whereClause}`;
-    const countResult = await get(countSql, params);
-    const total = countResult.total;
+    const countResult = await db.prepare(countSql).bind(...params).first();
+    const total = countResult?.total || 0;
 
     // Get paginated results
     const sql = `SELECT * FROM tours WHERE ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
-    const tours = await all(sql, [...params, limit, offset]);
+    const result = await db.prepare(sql).bind(...params, limit, offset).all();
+    const tours = result.results || [];
 
     return {
       data: tours.map(tour => new Tour(tour)),
@@ -216,7 +218,7 @@ class Tour {
   }
 
   // Update tour
-  async update(db, updateData) {
+  async update(updateData) {
     // Handle JSON fields
     if (updateData.images) {
       updateData.images = JSON.stringify(updateData.images);
@@ -235,11 +237,11 @@ class Tour {
     const values = Object.values(updateData);
     const sql = `UPDATE tours SET ${fields}, updated_at = datetime('now') WHERE id = ?`;
 
-    return await run(sql, [...values, this.id]);
+    return await db.prepare(sql).bind(...values, this.id).run();
   }
 
   // Delete tour
-  async delete(db, r2Bucket) {
+  async delete(r2Bucket) {
     // Delete images from R2 storage
     if (this.images && this.images.length > 0) {
       for (const imageUrl of this.images) {
@@ -247,7 +249,7 @@ class Tour {
       }
     }
 
-    return await run('DELETE FROM tours WHERE id = ?', [this.id]);
+    return await db.prepare('DELETE FROM tours WHERE id = ?').bind(this.id).run();
   }
 
   // Get featured tours for homepage
@@ -261,23 +263,23 @@ class Tour {
   }
 
   // Get tour stats
-  static async getStats(db) {
-    const totalTours = await get('SELECT COUNT(*) as count FROM tours WHERE status = ?', ['active']);
-    const featuredTours = await get('SELECT COUNT(*) as count FROM tours WHERE status = ? AND featured = ?', ['active', true]);
-    const toursByLocation = await all('SELECT location, COUNT(*) as count FROM tours WHERE status = ? GROUP BY location', ['active']);
-    const toursByCategory = await all('SELECT category, COUNT(*) as count FROM tours WHERE status = ? GROUP BY category', ['active']);
+  static async getStats() {
+    const totalTours = await db.prepare('SELECT COUNT(*) as count FROM tours WHERE status = ?').bind('active').first();
+    const featuredTours = await db.prepare('SELECT COUNT(*) as count FROM tours WHERE status = ? AND featured = ?').bind('active', 1).first();
+    const toursByLocationResult = await db.prepare('SELECT location, COUNT(*) as count FROM tours WHERE status = ? GROUP BY location').bind('active').all();
+    const toursByCategoryResult = await db.prepare('SELECT category, COUNT(*) as count FROM tours WHERE status = ? GROUP BY category').bind('active').all();
 
     return {
-      total: totalTours.count,
-      featured: featuredTours.count,
-      byLocation: toursByLocation,
-      byCategory: toursByCategory
+      total: totalTours?.count || 0,
+      featured: featuredTours?.count || 0,
+      byLocation: toursByLocationResult.results || [],
+      byCategory: toursByCategoryResult.results || []
     };
   }
 
   // Find tour by slug
   static async findBySlug(slug) {
-    const tour = await get('SELECT * FROM tours WHERE slug = ?', [slug]);
+    const tour = await db.prepare('SELECT * FROM tours WHERE slug = ?').bind(slug).first();
     return tour ? new Tour(tour) : null;
   }
 
