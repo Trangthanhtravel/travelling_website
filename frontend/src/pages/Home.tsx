@@ -588,54 +588,49 @@ const Home: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredTours?.slice(0, 3).map((tour) => (
                 <div key={tour.id} className="bg-white dark:bg-dark-850 rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 border dark:border-dark-600">
-                  <Link to={`/tour/${tour.id}`} className="block">
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={tour.image_url || tour.images?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
-                        alt={tour.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                      <div className="absolute top-4 right-4 bg-white dark:bg-dark-800 rounded-full px-3 py-1 text-sm font-medium text-primary-600 dark:text-primary-400">
-                        ${tour.price}
-                      </div>
-                      {tour.featured && (
-                        <div className="absolute top-4 left-4 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
-                          Featured
-                        </div>
-                      )}
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={tour.image_url || tour.images?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
+                      alt={tour.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute top-4 right-4 bg-white dark:bg-dark-800 rounded-full px-3 py-1 text-sm font-medium text-primary-600 dark:text-primary-400">
+                      ${tour.price}
                     </div>
-                    <div className="p-6">
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-500 mb-2">
-                        <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1" />
-                        <span>{tour.location}</span>
+                    {tour.featured && (
+                      <div className="absolute top-4 left-4 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
+                        Featured
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
-                        {tour.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
-                        {tour.description}
-                      </p>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
-                          <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
-                          <span>{tour.duration}</span>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
-                          <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
-                          <span>Max {tour.max_participants}</span>
-                        </div>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1" />
+                      <span>{tour.location}</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+                      {tour.title}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                      {tour.description}
+                    </p>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
+                        <span>{tour.duration}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
+                        <span>Max {tour.max_participants}</span>
                       </div>
                     </div>
-                  </Link>
-                  <div className="px-6 pb-6">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                      }}
-                      className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
+                    <Link
+                      to={`/tours/${tour.slug || tour.id}`}
+                      className="inline-flex items-center justify-center w-full bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
                     >
-                      Book Now
-                    </button>
+                      View Details
+                      <Icon icon={Icons.FiArrowRight} className="w-4 h-4 ml-2" />
+                    </Link>
                   </div>
                 </div>
               ))}
