@@ -21,12 +21,12 @@ const Home: React.FC = () => {
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [heroLoading, setHeroLoading] = useState(true);
   const [aboutContent, setAboutContent] = useState({
-    backgroundImage: '',
+    backgroundImage: 'https://static.wixstatic.com/media/8fa70e_ca95c635557f41c7b98ac645bb27d085~mv2.jpg/v1/fill/w_675,h_312,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/This%20was%20indeed%20one-of-a-kind%20experience.jpg',
     quote: 'For over 15 years, Trang Thanh Travel has been a trusted companion, helping customers have smooth and memorable trips. From organizing tours, events, to renting private cars, making visas, or booking airline tickets, cruises, trains, hotels, we can take care of everything so that you have the most perfect experience.',
     tagline: '',
     title: '',
     description: '',
-    youtubeId: 'https://www.youtube.com/embed/8VJpaYXrPPQ?autoplay=0&mute=0&controls=1&loop=0&origin=https%3A%2F%2Fmaxineho3110.wixsite.com&playsinline=1&enablejsapi=1&widgetid=1&forigin=https%3A%2F%2Fmaxineho3110.wixsite.com%2Ftrang-thanh-travel-2&aoriginsup=1&vf=6',
+    youtubeId: '8VJpaYXrPPQ',
   });
   const [statisticsContent, setStatisticsContent] = useState({
     happyCustomers: 500,

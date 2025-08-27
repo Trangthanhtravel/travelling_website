@@ -45,16 +45,6 @@ const AdminLogin: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="max-w-md w-full space-y-8">
-        {/* Theme Toggle Button */}
-        <div className="flex justify-end">
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg bg-white dark:bg-dark-850 border border-gray-300 dark:border-dark-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors duration-200"
-            aria-label="Toggle theme"
-          >
-            <Icon icon={isDarkMode ? Icons.FiSun : Icons.FiMoon} className="w-5 h-5" />
-          </button>
-        </div>
 
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
@@ -65,7 +55,7 @@ const AdminLogin: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-white dark:bg-dark-850 p-8 rounded-lg shadow-lg border dark:border-dark-700">
+        <div className="dark:bg-dark-850 p-8 rounded-lg shadow-lg border dark:border-dark-700">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-4">
               <div>
