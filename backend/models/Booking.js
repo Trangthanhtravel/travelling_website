@@ -1,4 +1,4 @@
-const { dbHelpers } = require('../config/database');
+const { getDB } = require('../config/database');
 
 class Booking {
   constructor(data) {
@@ -31,26 +31,23 @@ class Booking {
   }
 
   // Save booking to database
-  async save(db) {
-    const bookingData = {
-      type: this.type,
-      item_id: this.item_id,
-      customer_name: this.customer_name,
-      customer_email: this.customer_email,
-      customer_phone: this.customer_phone,
-      start_date: this.start_date,
-      total_travelers: this.total_travelers,
-      special_requests: this.special_requests,
-      total_amount: this.total_amount,
-      currency: this.currency,
-      status: this.status,
-      contacted_at: this.contacted_at,
-      confirmed_at: this.confirmed_at,
-      created_at: this.created_at,
-      updated_at: this.updated_at
-    };
+  async save() {
+    const db = getDB();
+    const sql = `
+      INSERT INTO bookings (
+        type, item_id, customer_name, customer_email, customer_phone,
+        start_date, total_travelers, special_requests, total_amount, currency,
+        status, contacted_at, confirmed_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
-    const result = await dbHelpers.insert(db, 'bookings', bookingData);
+    const params = [
+      this.type, this.item_id, this.customer_name, this.customer_email, this.customer_phone,
+      this.start_date, this.total_travelers, this.special_requests, this.total_amount, this.currency,
+      this.status, this.contacted_at, this.confirmed_at, this.created_at, this.updated_at
+    ];
+
+    const result = await db.prepare(sql).bind(...params).run();
     if (result && result.meta && result.meta.last_row_id) {
       this.id = result.meta.last_row_id;
     }
@@ -58,24 +55,25 @@ class Booking {
   }
 
   // Find booking by ID
-  static async findById(db, id) {
-    const bookings = await dbHelpers.query(db, 'SELECT * FROM bookings WHERE id = ?', [id]);
-    return bookings.length > 0 ? new Booking(bookings[0]) : null;
+  static async findById(id) {
+    const db = getDB();
+    const booking = await db.prepare('SELECT * FROM bookings WHERE id = ?').bind(id).first();
+    return booking ? new Booking(booking) : null;
   }
 
   // Find bookings by customer email
-  static async findByCustomerEmail(db, email) {
-    const bookings = await dbHelpers.query(
-      db,
-      'SELECT * FROM bookings WHERE customer_email = ? ORDER BY created_at DESC',
-      [email]
-    );
-    return bookings.map(booking => new Booking(booking));
+  static async findByCustomerEmail(email) {
+    const db = getDB();
+    const result = await db.prepare(
+      'SELECT * FROM bookings WHERE customer_email = ? ORDER BY created_at DESC'
+    ).bind(email).all();
+    return result.results.map(booking => new Booking(booking));
   }
 
-  // Get all bookings with pagination (admin only)
-  static async findAll(db, options = {}) {
+  // Get all bookings with filters
+  static async findAll(options = {}) {
     const { limit = 50, offset = 0, status, type } = options;
+    const db = getDB();
 
     let sql = 'SELECT * FROM bookings';
     const params = [];
@@ -98,12 +96,13 @@ class Booking {
     sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
 
-    const bookings = await dbHelpers.query(db, sql, params);
-    return bookings.map(booking => new Booking(booking));
+    const result = await db.prepare(sql).bind(...params).all();
+    return result.results.map(booking => new Booking(booking));
   }
 
   // Update booking status
-  async updateStatus(db, status) {
+  async updateStatus(status) {
+    const db = getDB();
     const updateData = {
       status,
       updated_at: new Date().toISOString()
@@ -117,33 +116,55 @@ class Booking {
 
     this.status = status;
     this.updated_at = updateData.updated_at;
+    if (updateData.contacted_at) this.contacted_at = updateData.contacted_at;
+    if (updateData.confirmed_at) this.confirmed_at = updateData.confirmed_at;
 
-    return await dbHelpers.update(db, 'bookings', updateData, 'id = ?', [this.id]);
+    const sql = `UPDATE bookings SET status = ?, updated_at = ?${
+      updateData.contacted_at ? ', contacted_at = ?' : ''
+    }${
+      updateData.confirmed_at ? ', confirmed_at = ?' : ''
+    } WHERE id = ?`;
+
+    const params = [status, updateData.updated_at];
+    if (updateData.contacted_at) params.push(updateData.contacted_at);
+    if (updateData.confirmed_at) params.push(updateData.confirmed_at);
+    params.push(this.id);
+
+    return await db.prepare(sql).bind(...params).run();
   }
 
   // Update booking
-  async update(db, updateData) {
+  async update(updateData) {
+    const db = getDB();
     updateData.updated_at = new Date().toISOString();
-    return await dbHelpers.update(db, 'bookings', updateData, 'id = ?', [this.id]);
+
+    const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(updateData);
+    const sql = `UPDATE bookings SET ${fields} WHERE id = ?`;
+
+    return await db.prepare(sql).bind(...values, this.id).run();
   }
 
   // Delete booking
-  async delete(db) {
-    return await dbHelpers.delete(db, 'bookings', 'id = ?', [this.id]);
+  async delete() {
+    const db = getDB();
+    return await db.prepare('DELETE FROM bookings WHERE id = ?').bind(this.id).run();
   }
 
   // Get booking statistics (admin only)
-  static async getStats(db) {
-    const totalBookings = await dbHelpers.query(db, 'SELECT COUNT(*) as count FROM bookings');
-    const bookingsByStatus = await dbHelpers.query(db, 'SELECT status, COUNT(*) as count FROM bookings GROUP BY status');
-    const bookingsByType = await dbHelpers.query(db, 'SELECT type, COUNT(*) as count FROM bookings GROUP BY type');
-    const totalRevenue = await dbHelpers.query(db, 'SELECT SUM(total_amount) as total FROM bookings WHERE status IN (?, ?)', ['confirmed', 'completed']);
+  static async getStats() {
+    const db = getDB();
+
+    const totalResult = await db.prepare('SELECT COUNT(*) as count FROM bookings').first();
+    const statusResult = await db.prepare('SELECT status, COUNT(*) as count FROM bookings GROUP BY status').all();
+    const typeResult = await db.prepare('SELECT type, COUNT(*) as count FROM bookings GROUP BY type').all();
+    const revenueResult = await db.prepare('SELECT SUM(total_amount) as total FROM bookings WHERE status IN (?, ?)').bind('confirmed', 'completed').first();
 
     return {
-      total: totalBookings[0]?.count || 0,
-      byStatus: bookingsByStatus,
-      byType: bookingsByType,
-      totalRevenue: totalRevenue[0]?.total || 0
+      total: totalResult?.count || 0,
+      byStatus: statusResult.results || [],
+      byType: typeResult.results || [],
+      totalRevenue: revenueResult?.total || 0
     };
   }
 
