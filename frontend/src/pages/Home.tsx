@@ -604,22 +604,22 @@ const Home: React.FC = () => {
                     )}
                   </div>
                   <div className="p-6">
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-500 mb-2">
                       <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1" />
                       <span>{tour.location}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
                       {tour.title}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                    <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
                       {tour.description}
                     </p>
                     <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
                         <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
                         <span>{tour.duration}</span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
                         <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
                         <span>Max {tour.max_participants}</span>
                       </div>
