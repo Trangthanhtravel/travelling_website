@@ -109,7 +109,7 @@ const ServiceDetail: React.FC = () => {
             <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
               <div className={`flex items-center text-sm mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 <Icon icon={getCategoryIcon(service.category)} className="w-4 h-4 mr-1" />
-                <span className="capitalize">{service.category.replace('-', ' ')}</span>
+                <span className="capitalize">{service.category ? service.category.replace('-', ' ') : 'General Service'}</span>
               </div>
               <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {service.title}
@@ -129,7 +129,10 @@ const ServiceDetail: React.FC = () => {
                 )}
                 <div className="flex items-center">
                   <Icon icon={Icons.FiTag} className="w-4 h-4 mr-1" />
-                  <span className="capitalize">{service.service_type?.replace('-', ' ') || service.category.replace('-', ' ')}</span>
+                  <span className="capitalize">
+                    {service.service_type ? service.service_type.replace('-', ' ') :
+                     service.category ? service.category.replace('-', ' ') : 'General Service'}
+                  </span>
                 </div>
               </div>
             </div>
