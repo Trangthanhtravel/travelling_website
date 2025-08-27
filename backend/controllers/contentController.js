@@ -15,7 +15,8 @@ const getAllContent = async (req, res) => {
 
     query += ' ORDER BY created_at DESC';
 
-    const content = await db.prepare(query).all(...params);
+    const result = await db.prepare(query).bind(...params).all();
+    const content = result.results || [];
 
     res.json({
       success: true,
@@ -35,11 +36,11 @@ const getContentByKey = async (req, res) => {
   try {
     const { key } = req.params;
 
-    const content = await db.prepare(
+    const result = await db.prepare(
       'SELECT * FROM content WHERE key = ? AND status = ?'
-    ).get(key, 'active');
+    ).bind(key, 'active').first();
 
-    if (!content) {
+    if (!result) {
       return res.status(404).json({
         success: false,
         message: 'Content not found'
@@ -48,7 +49,7 @@ const getContentByKey = async (req, res) => {
 
     res.json({
       success: true,
-      data: content
+      data: result
     });
   } catch (error) {
     console.error('Get content by key error:', error);
@@ -74,7 +75,7 @@ const createContent = async (req, res) => {
     // Check if key already exists
     const existing = await db.prepare(
       'SELECT id FROM content WHERE key = ?'
-    ).get(key);
+    ).bind(key).first();
 
     if (existing) {
       return res.status(400).json({
@@ -88,12 +89,12 @@ const createContent = async (req, res) => {
     const result = await db.prepare(`
       INSERT INTO content (key, title, content, type, status, created_at, updated_at)
       VALUES (?, ?, ?, ?, 'active', ?, ?)
-    `).run(key, title, content, type, now, now);
+    `).bind(key, title, content, type, now, now).run();
 
     res.status(201).json({
       success: true,
       message: 'Content created successfully',
-      data: { id: result.lastInsertRowid }
+      data: { id: result.last_row_id }
     });
   } catch (error) {
     console.error('Create content error:', error);
@@ -112,7 +113,7 @@ const updateContent = async (req, res) => {
 
     const existing = await db.prepare(
       'SELECT * FROM content WHERE id = ?'
-    ).get(id);
+    ).bind(id).first();
 
     if (!existing) {
       return res.status(404).json({
@@ -127,14 +128,14 @@ const updateContent = async (req, res) => {
       UPDATE content 
       SET title = ?, content = ?, type = ?, status = ?, updated_at = ?
       WHERE id = ?
-    `).run(
+    `).bind(
       title || existing.title,
       content || existing.content,
       type || existing.type,
       status || existing.status,
       now,
       id
-    );
+    ).run();
 
     res.json({
       success: true,
@@ -156,7 +157,7 @@ const deleteContent = async (req, res) => {
 
     const existing = await db.prepare(
       'SELECT * FROM content WHERE id = ?'
-    ).get(id);
+    ).bind(id).first();
 
     if (!existing) {
       return res.status(404).json({
@@ -165,7 +166,7 @@ const deleteContent = async (req, res) => {
       });
     }
 
-    await db.prepare('DELETE FROM content WHERE id = ?').run(id);
+    await db.prepare('DELETE FROM content WHERE id = ?').bind(id).run();
 
     res.json({
       success: true,
@@ -183,11 +184,13 @@ const deleteContent = async (req, res) => {
 // Get hero images specifically
 const getHeroImages = async (req, res) => {
   try {
-    const heroImages = await db.prepare(`
+    const result = await db.prepare(`
       SELECT * FROM content 
       WHERE key LIKE 'hero_image_%' AND status = 'active'
       ORDER BY key
-    `).all();
+    `).bind().all();
+
+    const heroImages = result.results || [];
 
     res.json({
       success: true,

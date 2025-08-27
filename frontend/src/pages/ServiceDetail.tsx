@@ -56,8 +56,9 @@ const ServiceDetail: React.FC = () => {
     );
   }
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
+  const getCategoryIcon = (category: string | any) => {
+    const categoryStr = typeof category === 'string' ? category : category?.slug || category?.name || 'default';
+    switch (categoryStr) {
       case 'tours': return Icons.FiMapPin;
       case 'car-rental': return Icons.FiTruck;
       case 'hotel-booking': return Icons.FiHome;
@@ -66,6 +67,12 @@ const ServiceDetail: React.FC = () => {
       case 'visa-service': return Icons.FiFileText;
       default: return Icons.FiSettings;
     }
+  };
+
+  const getCategoryName = (category: string | any) => {
+    if (!category) return 'General Service';
+    if (typeof category === 'string') return category.replace('-', ' ');
+    return category.name || category.slug?.replace('-', ' ') || 'General Service';
   };
 
   return (
@@ -109,7 +116,7 @@ const ServiceDetail: React.FC = () => {
             <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
               <div className={`flex items-center text-sm mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 <Icon icon={getCategoryIcon(service.category)} className="w-4 h-4 mr-1" />
-                <span className="capitalize">{service.category ? service.category.replace('-', ' ') : 'General Service'}</span>
+                <span className="capitalize">{getCategoryName(service.category)}</span>
               </div>
               <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {service.title}
@@ -130,8 +137,9 @@ const ServiceDetail: React.FC = () => {
                 <div className="flex items-center">
                   <Icon icon={Icons.FiTag} className="w-4 h-4 mr-1" />
                   <span className="capitalize">
-                    {service.service_type ? service.service_type.replace('-', ' ') :
-                     service.category ? service.category.replace('-', ' ') : 'General Service'}
+                    {service.service_type ?
+                      (typeof service.service_type === 'string' ? service.service_type.replace('-', ' ') :  'General Service') :
+                      getCategoryName(service.category)}
                   </span>
                 </div>
               </div>
@@ -225,7 +233,7 @@ const ServiceDetail: React.FC = () => {
                   )}
                   <div className="flex items-center justify-between text-sm">
                     <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Category:</span>
-                    <span className={`font-medium capitalize ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{service.category.replace('-', ' ')}</span>
+                    <span className={`font-medium capitalize ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{getCategoryName(service.category)}</span>
                   </div>
                 </div>
 
