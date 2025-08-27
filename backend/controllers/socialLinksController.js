@@ -2,11 +2,13 @@ class SocialLinksController {
     // Get all social links (public endpoint)
     static async getAllSocialLinks(req, res) {
         try {
-            const socialLinks = await req.db.prepare(`
+            const result = await req.db.prepare(`
                 SELECT * FROM social_links 
                 WHERE is_active = 1 
                 ORDER BY sort_order ASC, platform ASC
-            `).all();
+            `).bind().all();
+
+            const socialLinks = result.results || [];
 
             res.json({
                 success: true,
@@ -24,10 +26,12 @@ class SocialLinksController {
     // Get all social links for admin (including inactive)
     static async getAdminSocialLinks(req, res) {
         try {
-            const socialLinks = await req.db.prepare(`
+            const result = await req.db.prepare(`
                 SELECT * FROM social_links 
                 ORDER BY sort_order ASC, platform ASC
-            `).all();
+            `).bind().all();
+
+            const socialLinks = result.results || [];
 
             res.json({
                 success: true,
@@ -57,7 +61,7 @@ class SocialLinksController {
             const result = await req.db.prepare(`
                 INSERT INTO social_links (platform, url, display_text, icon, is_active, sort_order)
                 VALUES (?, ?, ?, ?, ?, ?)
-            `).run(platform, url, display_text || null, icon || null, is_active || 1, sort_order || 0);
+            `).bind(platform, url, display_text || null, icon || null, is_active || 1, sort_order || 0).run();
 
             res.status(201).json({
                 success: true,
@@ -90,7 +94,7 @@ class SocialLinksController {
                 UPDATE social_links 
                 SET platform = ?, url = ?, display_text = ?, icon = ?, is_active = ?, sort_order = ?
                 WHERE id = ?
-            `).run(platform, url, display_text || null, icon || null, is_active || 1, sort_order || 0, id);
+            `).bind(platform, url, display_text || null, icon || null, is_active || 1, sort_order || 0, id).run();
 
             if (result.meta.changes === 0) {
                 return res.status(404).json({
@@ -119,7 +123,7 @@ class SocialLinksController {
 
             const result = await req.db.prepare(`
                 DELETE FROM social_links WHERE id = ?
-            `).run(id);
+            `).bind(id).run();
 
             if (result.meta.changes === 0) {
                 return res.status(404).json({
