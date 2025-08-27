@@ -36,7 +36,7 @@ const HeroImageManagement: React.FC = () => {
 
   const fetchHeroImages = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/content`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/content`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -147,7 +147,7 @@ const HeroImageManagement: React.FC = () => {
   };
 
   const updateContent = async (id: number, content: string) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/content/${id}`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/content/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ const HeroImageManagement: React.FC = () => {
   };
 
   const createContent = async (key: string, title: string, content: string) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/content`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/content`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -177,7 +177,7 @@ const HeroImageManagement: React.FC = () => {
   };
 
   const deleteContent = async (id: number) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/content/${id}`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/content/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`

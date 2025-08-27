@@ -21,17 +21,22 @@ const getFeaturedBlogs = async (req, res) => {
 
     const result = await db.prepare(query).bind(parseInt(limit)).all();
 
+    console.log('Featured blogs query result:', result); // Debug log
+
     const blogs = result.results?.map(blog => ({
       ...blog,
       categories: blog.categories ? (typeof blog.categories === 'string' ? blog.categories : JSON.stringify(blog.categories)) : '',
       tags: blog.tags ? (typeof blog.tags === 'string' ? blog.tags : JSON.stringify(blog.tags)) : '',
       gallery: blog.gallery ? JSON.parse(blog.gallery) : [],
       featured: Boolean(blog.featured),
+      image_url: blog.featured_image, // Add this for frontend compatibility
       authorProfile: {
         name: blog.author_name,
         email: blog.author_email
       }
     })) || [];
+
+    console.log('Processed featured blogs:', blogs); // Debug log
 
     res.json({
       success: true,

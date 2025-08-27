@@ -48,7 +48,7 @@ const BlogEditor: React.FC = () => {
     queryKey: ['blog', blogId],
     queryFn: async () => {
       if (!isEditing) return null;
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/blogs/${blogId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/blogs/${blogId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         }
@@ -103,8 +103,8 @@ const BlogEditor: React.FC = () => {
   const saveBlogMutation = useMutation({
     mutationFn: async (data: BlogFormData) => {
       const url = isEditing
-        ? `${process.env.REACT_APP_API_URL}/api/blogs/admin/${blogId}`
-        : `${process.env.REACT_APP_API_URL}/api/blogs/admin`;
+        ? `${process.env.REACT_APP_API_URL}/blogs/admin/${blogId}`
+        : `${process.env.REACT_APP_API_URL}/blogs/admin`;
 
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',

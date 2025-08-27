@@ -42,7 +42,7 @@ const AboutSectionManagement: React.FC = () => {
 
   const fetchAboutContent = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/content?type=setting`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/content?type=setting`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -92,7 +92,7 @@ const AboutSectionManagement: React.FC = () => {
 
       for (const item of contentItems) {
         // First try to get existing content
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/content/${item.key}`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/content/${item.key}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -101,7 +101,7 @@ const AboutSectionManagement: React.FC = () => {
         if (response.ok) {
           // Update existing content
           const existingData = await response.json();
-          await fetch(`${process.env.REACT_APP_API_URL}/api/content/${existingData.data.id}`, {
+          await fetch(`${process.env.REACT_APP_API_URL}/content/${existingData.data.id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ const AboutSectionManagement: React.FC = () => {
           });
         } else {
           // Create new content
-          await fetch(`${process.env.REACT_APP_API_URL}/api/content`, {
+          await fetch(`${process.env.REACT_APP_API_URL}/content`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

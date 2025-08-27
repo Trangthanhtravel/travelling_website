@@ -24,7 +24,7 @@ const SocialChatBox: React.FC = () => {
 
     const fetchSocialLinks = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/social-links/public`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/social-links/public`);
             const data = await response.json();
 
             if (data.success) {

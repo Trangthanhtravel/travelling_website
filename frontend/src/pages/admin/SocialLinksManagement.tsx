@@ -37,7 +37,7 @@ const SocialLinksManagement: React.FC = () => {
     const fetchSocialLinks = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/social-links`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/social-links`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -63,8 +63,8 @@ const SocialLinksManagement: React.FC = () => {
         try {
             const token = localStorage.getItem('token');
             const url = editingLink
-                ? `${process.env.REACT_APP_API_URL}/api/social-links/${editingLink.id}`
-                : `${process.env.REACT_APP_API_URL}/api/social-links`;
+                ? `${process.env.REACT_APP_API_URL}/social-links/${editingLink.id}`
+                : `${process.env.REACT_APP_API_URL}/social-links`;
 
             const method = editingLink ? 'PUT' : 'POST';
 
@@ -99,7 +99,7 @@ const SocialLinksManagement: React.FC = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/social-links/${id}`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/social-links/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

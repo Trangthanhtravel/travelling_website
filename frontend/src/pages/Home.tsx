@@ -56,7 +56,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchHeroImages = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/content/hero-images`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/content/hero-images`);
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data.length > 0) {
@@ -156,7 +156,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchAboutContent = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/content?type=setting`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/content?type=setting`);
         if (response.ok) {
           const data = await response.json();
           const aboutData = data.data || [];
@@ -202,7 +202,7 @@ const Home: React.FC = () => {
   const { data: featuredBlogsData, isLoading: blogsLoading } = useQuery({
     queryKey: ['featured-blogs'],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/blogs/featured?limit=3`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/blogs/featured?limit=3`);
       if (!response.ok) throw new Error('Failed to fetch featured blogs');
       return response.json();
     },

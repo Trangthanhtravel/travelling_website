@@ -40,7 +40,7 @@ const BlogManagement: React.FC = () => {
       if (filterStatus !== 'all') params.append('status', filterStatus);
       if (filterFeatured !== 'all') params.append('featured', filterFeatured === 'featured' ? 'true' : 'false');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/blogs?${params}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/blogs?${params}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
@@ -54,7 +54,7 @@ const BlogManagement: React.FC = () => {
   // Delete blog mutation
   const deleteBlogMutation = useMutation({
     mutationFn: async (blogId: number) => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/blogs/${blogId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/blogs/${blogId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -75,7 +75,7 @@ const BlogManagement: React.FC = () => {
   // Toggle featured status mutation
   const toggleFeaturedMutation = useMutation({
     mutationFn: async ({ blogId, featured }: { blogId: number; featured: boolean }) => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/blogs/${blogId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/blogs/${blogId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
