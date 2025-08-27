@@ -124,24 +124,55 @@ export const bookingsAPI = {
         adminAPI.put(`/bookings/${id}/status`, { status }),
 };
 
+// Blog API (replacing content API with proper blog endpoints)
+export const blogAPI = {
+    getBlogs: (filters: any = {}): Promise<AxiosResponse<any>> => {
+        const params = new URLSearchParams();
+        Object.keys(filters).forEach(key => {
+            if (filters[key] !== undefined && filters[key] !== null) {
+                params.append(key, filters[key].toString());
+            }
+        });
+        return api.get(`/blogs?${params.toString()}`);
+    },
 
-// Content API (Public)
-export const contentAPI = {
-    getBlogs: (): Promise<AxiosResponse<ApiResponse<Content[]>>> =>
-        api.get('/content/blogs'),
-
-    getBlogBySlug: (slug: string): Promise<AxiosResponse<ApiResponse<Content>>> =>
-        api.get(`/content/blogs/${slug}`),
+    getBlogBySlug: (slug: string): Promise<AxiosResponse<any>> =>
+        api.get(`/blogs/slug/${slug}`),
 
     // Admin only
-    createBlog: (blogData: any): Promise<AxiosResponse<ApiResponse<Content>>> =>
-        adminAPI.post('/content/blogs', blogData),
+    getBlogById: (id: string): Promise<AxiosResponse<any>> =>
+        adminAPI.get(`/blogs/admin/${id}`),
 
-    updateBlog: (id: string, blogData: any): Promise<AxiosResponse<ApiResponse<Content>>> =>
-        adminAPI.put(`/content/blogs/${id}`, blogData),
+    createBlog: (blogData: any): Promise<AxiosResponse<any>> =>
+        adminAPI.post('/blogs/admin', blogData),
 
-    deleteBlog: (id: string): Promise<AxiosResponse<ApiResponse<void>>> =>
-        adminAPI.delete(`/content/blogs/${id}`),
+    updateBlog: (id: string, blogData: any): Promise<AxiosResponse<any>> =>
+        adminAPI.put(`/blogs/admin/${id}`, blogData),
+
+    deleteBlog: (id: string): Promise<AxiosResponse<any>> =>
+        adminAPI.delete(`/blogs/admin/${id}`),
+
+    updateBlogStatus: (id: string, status: string): Promise<AxiosResponse<any>> =>
+        adminAPI.patch(`/blogs/admin/${id}/status`, { status }),
+};
+
+// Content API (Public) - keeping for backward compatibility but updating to use blog API
+export const contentAPI = {
+    getBlogs: (): Promise<AxiosResponse<any>> =>
+        blogAPI.getBlogs(),
+
+    getBlogBySlug: (slug: string): Promise<AxiosResponse<any>> =>
+        blogAPI.getBlogBySlug(slug),
+
+    // Admin only
+    createBlog: (blogData: any): Promise<AxiosResponse<any>> =>
+        blogAPI.createBlog(blogData),
+
+    updateBlog: (id: string, blogData: any): Promise<AxiosResponse<any>> =>
+        blogAPI.updateBlog(id, blogData),
+
+    deleteBlog: (id: string): Promise<AxiosResponse<any>> =>
+        blogAPI.deleteBlog(id),
 };
 
 // Admin API

@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { Icon, Icons } from '../components/common/Icons';
 import AnimatedCounter from '../components/common/AnimatedCounter';
-import { getFeaturedTours } from '../data/mockTours';
-import { carRentals } from '../data/carRentals';
 import { useQuery } from '@tanstack/react-query';
+import { toursAPI, servicesAPI } from '../utils/api';
 
 interface HeroSlide {
   id: number;
@@ -52,9 +51,6 @@ const Home: React.FC = () => {
     }
   };
 
-  // Use mock data for featured tours
-  const featuredTours = getFeaturedTours();
-  const toursLoading = false;
 
   // Fetch hero images from backend
   useEffect(() => {
@@ -214,6 +210,33 @@ const Home: React.FC = () => {
   });
 
   const featuredBlogs = featuredBlogsData?.data?.blogs || [];
+
+  // Fetch featured tours from real API
+  const { data: featuredToursData, isLoading: toursLoading } = useQuery({
+    queryKey: ['featured-tours'],
+    queryFn: async () => {
+      const response = await toursAPI.getTours({ featured: true, limit: 3, status: 'active' });
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const featuredTours = featuredToursData?.data || [];
+
+  // Fetch car rental services from real API
+  const { data: carRentalsData, isLoading: carRentalsLoading } = useQuery({
+    queryKey: ['car-rentals'],
+    queryFn: async () => {
+      const response = await servicesAPI.getServices();
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Filter car rental services from all services
+  const carRentals = (carRentalsData?.data || []).filter((service: any) =>
+    service.service_type === 'car-rental'
+  ).slice(0, 6); // Limit to 6 car rentals for homepage
 
   return (
     <div className={`transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
@@ -642,48 +665,56 @@ const Home: React.FC = () => {
           </div>
 
           <div className="relative">
-            <div className="overflow-x-auto scrollbar-hide" ref={carRentalsRef}>
+            {carRentalsLoading ? (
               <div className="flex space-x-6 pb-4">
-                {carRentals.map((car, index) => (
-                  <div key={index} className="flex-none w-80 bg-white dark:bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-300">
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={car.image}
-                        alt={car.name}
-                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                      />
-                      <div className="absolute top-4 right-4 bg-white dark:bg-gray-100 text-gray-900 dark:text-gray-900 px-3 py-1 rounded-full text-sm font-medium border border-gray-200 dark:border-gray-300">
-                        ${car.price}
-                        {car.priceUnit}
-                      </div>
-                    </div>
+                {[...Array(4)].map((_, index) => (
+                  <div key={index} className="flex-none w-80 bg-white rounded-xl shadow-lg animate-pulse">
+                    <div className="h-48 bg-gray-300 rounded-t-xl"></div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">{car.name}</h3>
-                      <p className="text-gray-600 dark:text-gray-600 text-sm mb-4">{car.description}</p>
-                      <button
-                        className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
-                      >
-                        Book Now
-                      </button>
+                      <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                      <div className="h-6 bg-gray-300 rounded mb-4"></div>
+                      <div className="h-4 bg-gray-300 rounded"></div>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Scroll buttons */}
-            <button
-              onClick={() => scrollLeft(carRentalsRef)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-100 shadow-lg rounded-full p-3 hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors duration-200 border border-gray-200 dark:border-gray-300"
-            >
-              <Icon icon={Icons.FiChevronLeft} className="w-6 h-6 text-gray-600 dark:text-gray-700" />
-            </button>
-            <button
-              onClick={() => scrollRight(carRentalsRef)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-100 shadow-lg rounded-full p-3 hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors duration-200 border border-gray-200 dark:border-gray-300"
-            >
-              <Icon icon={Icons.FiChevronRight} className="w-6 h-6 text-gray-600 dark:text-gray-700" />
-            </button>
+            ) : (
+              <div className="overflow-x-auto scrollbar-hide" ref={carRentalsRef}>
+                <div className="flex space-x-6 pb-4">
+                  {carRentals.length > 0 ? carRentals.map((car, index) => (
+                    <div key={car.id || index} className="flex-none w-80 bg-white dark:bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-300">
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={car.images ? (typeof car.images === 'string' ? JSON.parse(car.images)[0] : car.images[0]) : 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
+                          alt={car.title}
+                          className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                          }}
+                        />
+                        <div className="absolute top-4 right-4 bg-white dark:bg-gray-100 text-gray-900 dark:text-gray-900 px-3 py-1 rounded-full text-sm font-medium border border-gray-200 dark:border-gray-300">
+                          ${car.price}/{car.duration || 'day'}
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">{car.title}</h3>
+                        <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">{car.subtitle || car.description}</p>
+                        <Link
+                          to={`/service/${car.id}`}
+                          className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200 block text-center"
+                        >
+                          Book Now
+                        </Link>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="flex-none w-80 bg-white rounded-xl shadow-lg p-6 text-center">
+                      <p className="text-gray-500">No car rentals available at the moment.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

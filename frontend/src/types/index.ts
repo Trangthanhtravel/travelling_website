@@ -61,6 +61,8 @@ export interface PaginationResponse<T> {
 
 // Tour filters for API requests
 export interface TourFilters {
+    status?: 'active' | 'inactive' | 'draft';
+    featured?: boolean;
   page?: number;
   limit?: number;
   search?: string;
@@ -178,42 +180,6 @@ export interface ServiceBookingForm {
   requestDetails?: string;
 }
 
-// Update API Response types to match backend structure
-export interface ServiceApiResponse {
-  success: boolean;
-  data: {
-    service: Service;
-  };
-  message?: string;
-}
-
-// Blog-specific types extending Content
-export interface Blog {
-    id: number;
-    type: string;
-    title: string;
-    slug: string;
-    content: string;
-    excerpt: string;
-    featured_image: string;
-    gallery: string[];
-    author: number;
-    authorName?: string;
-    status: 'draft' | 'published' | 'archived';
-    featured: boolean;
-    categories: string[];
-    tags: string[];
-    language: string;
-    seo_meta_title: string;
-    seo_meta_description: string;
-    seo_keywords: string[];
-    views: number;
-    reading_time: number;
-    published_at: string;
-    created_at: string;
-    updated_at: string;
-}
-
 export interface BlogFilters {
     category?: string;
     tag?: string;
@@ -222,6 +188,6 @@ export interface BlogFilters {
     search?: string;
     page?: number;
     limit?: number;
-    sortBy?: 'createdAt' | 'publishedAt' | 'views' | 'title';
+    sortBy?: 'created_at' | 'published_at' | 'views' | 'title';
     sortOrder?: 'asc' | 'desc';
 }

@@ -2,31 +2,21 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../components/common/Icons';
-import { mockBlogs, Blog } from '../data/mockBlogs';
-
-// Mock API function (replace with actual API call)
-const getBlogBySlug = async (slug: string): Promise<{ data: { blog: Blog } }> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  const blog = mockBlogs.find(blog => blog.slug === slug);
-  if (!blog) {
-    throw new Error('Blog not found');
-  }
-  
-  return { data: { blog } };
-};
+import { blogAPI } from '../utils/api';
 
 const BlogDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
 
-  const { data: blogData, isLoading, error } = useQuery({
+  const { data: blogResponse, isLoading, error } = useQuery({
     queryKey: ['blog', slug],
-    queryFn: () => getBlogBySlug(slug!),
+    queryFn: async () => {
+      const response = await blogAPI.getBlogBySlug(slug!);
+      return response.data;
+    },
     enabled: !!slug,
   });
 
-  const blog = blogData?.data.blog;
+  const blog = blogResponse?.data?.blog;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -53,14 +43,40 @@ const BlogDetail: React.FC = () => {
     );
   }
 
-  if (error || !blog) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Article Not Found</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-8">The article you're looking for doesn't exist or has been removed.</p>
-          <Link to="/blogs" className="btn-primary">
-            Back to Blog
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Blog Not Found</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Sorry, we couldn't find the blog you're looking for.
+          </p>
+          <Link
+            to="/blogs"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Icon icon={Icons.FiArrowLeft} className="h-4 w-4" />
+            Back to Blogs
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!blog) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Blog Not Found</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            The blog you're looking for doesn't exist or has been removed.
+          </p>
+          <Link
+            to="/blogs"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Icon icon={Icons.FiArrowLeft} className="h-4 w-4" />
+            Back to Blogs
           </Link>
         </div>
       </div>
@@ -70,123 +86,128 @@ const BlogDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-900">
       {/* Breadcrumb */}
-      <nav className="bg-white dark:bg-dark-850 border-b dark:border-dark-700 pt-20 md:pt-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center space-x-2 text-sm">
-            <Link to="/" className="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+      <div className="bg-white dark:bg-dark-800 border-b border-gray-200 dark:border-dark-700">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <nav className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <Link to="/" className="hover:text-blue-600 dark:hover:text-blue-400">
               Home
             </Link>
-            <Icon icon={Icons.FiChevronRight} className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-            <Link to="/blogs" className="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
-              Blog
+            <Icon icon={Icons.FiChevronRight} className="h-4 w-4" />
+            <Link to="/blogs" className="hover:text-blue-600 dark:hover:text-blue-400">
+              Blogs
             </Link>
-            <Icon icon={Icons.FiChevronRight} className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-            <span className="text-gray-900 dark:text-white font-medium truncate">
-              {blog.title}
-            </span>
-          </div>
+            <Icon icon={Icons.FiChevronRight} className="h-4 w-4" />
+            <span className="text-gray-900 dark:text-white">{blog.title}</span>
+          </nav>
         </div>
-      </nav>
+      </div>
 
-      {/* Article Content */}
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <article className="max-w-4xl mx-auto px-4 py-8">
+        {/* Header */}
         <header className="mb-8">
-          <div className="flex flex-wrap gap-2 mb-4">
-            {blog.categories.map((category) => (
-              <span
-                key={category}
-                className="bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 px-3 py-1 rounded-full text-sm font-medium"
-              >
-                {category}
-              </span>
-            ))}
-          </div>
+          {/* Categories */}
+          {blog.categories && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {(typeof blog.categories === 'string' ? blog.categories.split(',') : blog.categories)
+                .map((category: string, index: number) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium rounded-full"
+                  >
+                    {category.trim()}
+                  </span>
+                ))}
+            </div>
+          )}
 
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             {blog.title}
           </h1>
 
-          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-8">
-            <div className="flex items-center space-x-4">
-              <span>By {blog.authorName}</span>
-              <span>•</span>
-              <span>{formatDate(blog.published_at)}</span>
-              <span>•</span>
-              <span>{blog.reading_time} min read</span>
-              <span>•</span>
-              <span>{blog.views.toLocaleString()} views</span>
+          {/* Meta Information */}
+          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400 mb-6">
+            {blog.authorProfile && (
+              <div className="flex items-center gap-2">
+                <Icon icon={Icons.FiUser} className="h-4 w-4" />
+                <span>{blog.authorProfile.name}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <Icon icon={Icons.FiCalendar} className="h-4 w-4" />
+              <time dateTime={blog.published_at || blog.created_at}>
+                {formatDate(blog.published_at || blog.created_at)}
+              </time>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Icon icon={Icons.FiClock} className="h-4 w-4" />
+              <span>{blog.reading_time || 5} min read</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Icon icon={Icons.FiEye} className="h-4 w-4" />
+              <span>{blog.views || 0} views</span>
             </div>
           </div>
 
+          {/* Featured Image */}
           {blog.featured_image && (
-            <div className="mb-8">
+            <div className="mb-8 rounded-lg overflow-hidden">
               <img
                 src={blog.featured_image}
                 alt={blog.title}
-                className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+                className="w-full h-64 md:h-96 object-cover"
               />
             </div>
           )}
         </header>
 
-        {/* Article Content */}
-        <div className="prose prose-lg dark:prose-invert max-w-none mb-12">
+        {/* Content */}
+        <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
           <div dangerouslySetInnerHTML={{ __html: blog.content }} />
         </div>
 
         {/* Tags */}
-        {blog.tags.length > 0 && (
-          <div className="border-t dark:border-dark-700 pt-8 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tags</h3>
+        {blog.tags && (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Tags</h3>
             <div className="flex flex-wrap gap-2">
-              {blog.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-dark-600 cursor-pointer"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Gallery */}
-        {blog.gallery.length > 0 && (
-          <div className="border-t dark:border-dark-700 pt-8 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Gallery</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {blog.gallery.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Gallery ${index + 1}`}
-                  className="w-full h-48 object-cover rounded-lg shadow-md"
-                />
-              ))}
+              {(typeof blog.tags === 'string' ? blog.tags.split(',') : blog.tags)
+                .map((tag: string, index: number) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-gray-200 dark:bg-dark-700 text-gray-700 dark:text-gray-300 text-sm rounded-full"
+                  >
+                    #{tag.trim()}
+                  </span>
+                ))}
             </div>
           </div>
         )}
 
         {/* Navigation */}
-        <div className="border-t dark:border-dark-700 pt-8">
-          <div className="flex justify-between items-center">
-            <Link
-              to="/blogs"
-              className="flex items-center space-x-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+        <div className="flex justify-between items-center pt-8 border-t border-gray-200 dark:border-dark-700">
+          <Link
+            to="/blogs"
+            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+          >
+            <Icon icon={Icons.FiArrowLeft} className="h-4 w-4" />
+            Back to Blogs
+          </Link>
+
+          <div className="flex gap-4">
+            <button
+              onClick={() => navigator.share && navigator.share({
+                title: blog.title,
+                text: blog.excerpt,
+                url: window.location.href
+              })}
+              className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             >
-              <Icon icon={Icons.FiArrowLeft} className="w-4 h-4" />
-              <span>Back to Blog</span>
-            </Link>
-            
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Share this article:</span>
-              <div className="flex space-x-2">
-                <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
-                  <Icon icon={Icons.FiShare2} className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+              <Icon icon={Icons.FiShare} className="h-4 w-4" />
+              Share
+            </button>
           </div>
         </div>
       </article>
