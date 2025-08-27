@@ -94,5 +94,6 @@ const adminAuth = async (req, res, next) => {
 module.exports = {
   adminAuth,
   requireAuth,
-  requireRole
+  requireRole,
+  verifyToken: requireAuth // Add verifyToken as an alias for requireAuth
 };
