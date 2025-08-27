@@ -140,11 +140,6 @@ const getDB = () => {
   throw new Error('Database configuration missing. Please set CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, and CLOUDFLARE_DATABASE_ID environment variables.');
 };
 
-// Create and export the database instance
-const db = getDB();
-
-module.exports = db;
-
 // Helper functions
 const generateId = () => {
   return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -155,6 +150,21 @@ const generateBookingNumber = () => {
   const timestamp = Date.now().toString().slice(-6);
   const random = Math.random().toString(36).substr(2, 4).toUpperCase();
   return `${prefix}${timestamp}${random}`;
+};
+
+// Create and export the database instance
+const db = getDB();
+
+// Export both the database instance and helper functions
+module.exports = {
+  // Default export (database instance)
+  default: db,
+  // Named exports for backward compatibility
+  getDB: () => db,
+  generateId,
+  generateBookingNumber,
+  // Direct database access
+  db
 };
 
 // Enhanced query wrapper with proper error handling

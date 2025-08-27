@@ -24,7 +24,7 @@ const upload = multer({
 // Get all services with filtering
 const getServices = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
@@ -152,7 +152,7 @@ const getServices = async (req, res) => {
 // Get single service by ID
 const getServiceById = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
@@ -201,7 +201,7 @@ const getServiceById = async (req, res) => {
 // Create service booking
 const createServiceBooking = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
@@ -308,7 +308,7 @@ const createServiceBooking = async (req, res) => {
 // Get user's service bookings
 const getUserServiceBookings = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
@@ -344,7 +344,7 @@ const getUserServiceBookings = async (req, res) => {
 // Admin: Get all service bookings
 const getAllServiceBookings = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
@@ -413,7 +413,7 @@ const getAllServiceBookings = async (req, res) => {
 // Admin: Update service booking status
 const updateServiceBookingStatus = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
@@ -468,7 +468,7 @@ const updateServiceBookingStatus = async (req, res) => {
 // Admin: Create new service
 const createService = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
@@ -539,7 +539,7 @@ const createService = async (req, res) => {
 // Admin: Update existing service
 const updateService = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
@@ -622,7 +622,7 @@ const updateService = async (req, res) => {
 // Admin: Delete service
 const deleteService = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
@@ -657,7 +657,7 @@ const deleteService = async (req, res) => {
 // Admin: Update service status
 const updateServiceStatus = async (req, res) => {
   try {
-    const db = getDB(req);
+    const db = getDB();
     if (!db) {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
