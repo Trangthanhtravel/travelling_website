@@ -8,12 +8,12 @@ const { r2Helpers } = require('../config/storage');
 const getDashboardStats = async (req, res) => {
   try {
     // Get statistics from all models
-    const bookingStats = await Booking.getStats(req.db);
-    const tourStats = await Tour.getStats(req.db);
+    const bookingStats = await Booking.getStats();
+    const tourStats = await Tour.getStats();
     const userCount = await User.findAll(req.db, 100, 0); // Get user count
 
     // Recent bookings with more details
-    const recentBookings = await Booking.findAll(req.db, { limit: 10 });
+    const recentBookings = await Booking.findAll({ limit: 10 });
 
     const stats = {
       totalBookings: bookingStats.total,

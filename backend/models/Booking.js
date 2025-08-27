@@ -155,9 +155,9 @@ class Booking {
   static async getStats() {
     const db = getDB();
 
-    const totalResult = await db.prepare('SELECT COUNT(*) as count FROM bookings').first();
-    const statusResult = await db.prepare('SELECT status, COUNT(*) as count FROM bookings GROUP BY status').all();
-    const typeResult = await db.prepare('SELECT type, COUNT(*) as count FROM bookings GROUP BY type').all();
+    const totalResult = await db.prepare('SELECT COUNT(*) as count FROM bookings').bind().first();
+    const statusResult = await db.prepare('SELECT status, COUNT(*) as count FROM bookings GROUP BY status').bind().all();
+    const typeResult = await db.prepare('SELECT type, COUNT(*) as count FROM bookings GROUP BY type').bind().all();
     const revenueResult = await db.prepare('SELECT SUM(total_amount) as total FROM bookings WHERE status IN (?, ?)').bind('confirmed', 'completed').first();
 
     return {

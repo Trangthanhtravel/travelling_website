@@ -1,4 +1,4 @@
-const { db } = require('../config/database');
+const { getDB } = require('../config/database');
 const { r2Helpers } = require('../config/storage');
 
 class Tour {
@@ -116,6 +116,7 @@ class Tour {
 
   // Find tour by ID
   static async findById(id) {
+    const db = getDB();
     const tour = await db.prepare('SELECT * FROM tours WHERE id = ?').bind(id).first();
     return tour ? new Tour(tour) : null;
   }
@@ -123,6 +124,7 @@ class Tour {
   // Get all tours with pagination
   static async findAll(options = {}) {
     const { limit = 20, offset = 0, status = 'active', location, category, minPrice, maxPrice } = options;
+    const db = getDB();
 
     let whereConditions = ['status = ?'];
     const params = [status];
@@ -175,6 +177,7 @@ class Tour {
   // Search tours with pagination
   static async search(searchTerm, options = {}) {
     const { limit = 20, offset = 0, minPrice, maxPrice } = options;
+    const db = getDB();
 
     let whereConditions = [
       "status = 'active'",
@@ -219,6 +222,7 @@ class Tour {
 
   // Update tour
   async update(updateData) {
+    const db = getDB();
     // Handle JSON fields
     if (updateData.images) {
       updateData.images = JSON.stringify(updateData.images);
@@ -242,6 +246,7 @@ class Tour {
 
   // Delete tour
   async delete(r2Bucket) {
+    const db = getDB();
     // Delete images from R2 storage
     if (this.images && this.images.length > 0) {
       for (const imageUrl of this.images) {
@@ -264,6 +269,7 @@ class Tour {
 
   // Get tour stats
   static async getStats() {
+    const db = getDB(); // Get the database connection
     const totalTours = await db.prepare('SELECT COUNT(*) as count FROM tours WHERE status = ?').bind('active').first();
     const featuredTours = await db.prepare('SELECT COUNT(*) as count FROM tours WHERE status = ? AND featured = ?').bind('active', 1).first();
     const toursByLocationResult = await db.prepare('SELECT location, COUNT(*) as count FROM tours WHERE status = ? GROUP BY location').bind('active').all();
@@ -279,6 +285,7 @@ class Tour {
 
   // Find tour by slug
   static async findBySlug(slug) {
+    const db = getDB();
     const tour = await db.prepare('SELECT * FROM tours WHERE slug = ?').bind(slug).first();
     return tour ? new Tour(tour) : null;
   }
