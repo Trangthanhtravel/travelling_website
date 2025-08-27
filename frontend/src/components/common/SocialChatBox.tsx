@@ -108,39 +108,37 @@ const SocialChatBox: React.FC = () => {
     return (
         <div className="fixed bottom-6 right-6 z-40">
             {/* Social Links */}
-            <div className={`mb-4 space-y-3 transition-all duration-300 ${
-                isOpen 
-                    ? 'opacity-100 translate-y-0 pointer-events-auto' 
-                    : 'opacity-0 translate-y-4 pointer-events-none invisible'
-            }`}>
-                {socialLinks.map((link) => (
-                    <div
-                        key={link.id}
-                        className="flex items-center justify-end"
-                    >
-                        {/* Tooltip */}
-                        <div className={`mr-3 px-3 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-200 ${
-                            isDarkMode 
-                                ? 'bg-dark-800 text-dark-text-primary border border-dark-700' 
-                                : 'bg-white text-gray-800 border border-gray-200'
-                        }`}>
-                            {link.display_text || link.platform.charAt(0).toUpperCase() + link.platform.slice(1)}
-                        </div>
-
-                        {/* Social Icon Button */}
-                        <button
-                            onClick={() => handleSocialClick(link)}
-                            className={`w-12 h-12 rounded-full ${getPlatformColor(link.platform)} text-white shadow-lg transition-all duration-200 hover:scale-110 flex items-center justify-center`}
-                            aria-label={`Contact via ${link.platform}`}
+            {isOpen && (
+                <div className="mb-4 space-y-3 transition-all duration-300 opacity-100 translate-y-0">
+                    {socialLinks.map((link) => (
+                        <div
+                            key={link.id}
+                            className="flex items-center justify-end"
                         >
-                            <Icon
-                                icon={getPlatformIcon(link.platform)}
-                                className="w-5 h-5"
-                            />
-                        </button>
-                    </div>
-                ))}
-            </div>
+                            {/* Tooltip */}
+                            <div className={`mr-3 px-3 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-200 ${
+                                isDarkMode 
+                                    ? 'bg-dark-800 text-dark-text-primary border border-dark-700' 
+                                    : 'bg-white text-gray-800 border border-gray-200'
+                            }`}>
+                                {link.display_text || link.platform.charAt(0).toUpperCase() + link.platform.slice(1)}
+                            </div>
+
+                            {/* Social Icon Button */}
+                            <button
+                                onClick={() => handleSocialClick(link)}
+                                className={`w-12 h-12 rounded-full ${getPlatformColor(link.platform)} text-white shadow-lg transition-all duration-200 hover:scale-110 flex items-center justify-center`}
+                                aria-label={`Contact via ${link.platform}`}
+                            >
+                                <Icon
+                                    icon={getPlatformIcon(link.platform)}
+                                    className="w-5 h-5"
+                                />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Main Chat Button */}
             <button
