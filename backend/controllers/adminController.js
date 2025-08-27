@@ -1,7 +1,6 @@
 const Booking = require('../models/Booking');
 const Tour = require('../models/Tour');
 const User = require('../models/User');
-const Review = require('../models/Review');
 const Content = require('../models/Content');
 const { r2Helpers } = require('../config/storage');
 
