@@ -51,16 +51,9 @@ const AppContent: React.FC = () => {
           <Route path="/contact" element={<Contact />} /> {/* Add Contact route */}
           <Route path="/login" element={<Login />} />
 
-          <Route path="/booking/:tourId" element={
-            <ProtectedRoute>
-              <Booking />
-            </ProtectedRoute>
-          } />
-          <Route path="/service-booking/:serviceId" element={
-            <ProtectedRoute>
-              <ServiceBooking />
-            </ProtectedRoute>
-          } />
+          {/* Customer Booking Routes - No authentication required */}
+          <Route path="/booking/:tourId" element={<Booking />} />
+          <Route path="/service-booking/:serviceId" element={<ServiceBooking />} />
 
           {/* Admin Routes */}
           <Route path="/admin/*" element={
