@@ -4,29 +4,22 @@ import { Icon, Icons } from '../../components/common/Icons';
 import toast from 'react-hot-toast';
 
 interface Booking {
-  _id: string;
-  bookingNumber: string;
-  customer: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-  service: {
-    name: string;
-    category: string;
-  };
-  bookingForm: any;
+  id: string;
+  type: 'tour' | 'service';
+  item_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  start_date: string;
+  total_travelers: number;
+  special_requests?: string;
+  total_amount: number;
+  currency: string;
   status: 'pending' | 'confirmed' | 'contacted' | 'completed' | 'cancelled';
-  totalAmount: number;
-  contactedAt?: string;
-  confirmedAt?: string;
-  notes: Array<{
-    message: string;
-    createdAt: string;
-    createdBy: string;
-  }>;
-  createdAt: string;
-  updatedAt: string;
+  contacted_at?: string;
+  confirmed_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const BookingManagement: React.FC = () => {
@@ -117,7 +110,7 @@ const BookingManagement: React.FC = () => {
   const handleAddNote = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBooking || !noteText.trim()) return;
-    addNoteMutation.mutate({ bookingId: selectedBooking._id, message: noteText.trim() });
+    addNoteMutation.mutate({ bookingId: selectedBooking.id, message: noteText.trim() });
   };
 
   const getStatusColor = (status: string) => {
@@ -258,15 +251,15 @@ const BookingManagement: React.FC = () => {
               </thead>
               <tbody className="bg-white dark:bg-dark-800 divide-y divide-gray-200 dark:divide-dark-600">
                 {bookings.map((booking) => (
-                  <tr key={booking._id} className="hover:bg-gray-50 dark:hover:bg-dark-700">
+                  <tr key={booking.id} className="hover:bg-gray-50 dark:hover:bg-dark-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          #{booking.bookingNumber}
+                          #{booking.id}
                         </div>
-                        {booking.notes.length > 0 && (
+                        {booking.special_requests && (
                           <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {booking.notes.length} note{booking.notes.length !== 1 ? 's' : ''}
+                            {booking.special_requests}
                           </div>
                         )}
                       </div>
@@ -274,33 +267,33 @@ const BookingManagement: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {booking.customer.name}
+                          {booking.customer_name}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {booking.customer.email}
+                          {booking.customer_email}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {booking.customer.phone}
+                          {booking.customer_phone}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {booking.service.name}
+                          {booking.type === 'tour' ? 'Tour' : 'Service'}
                         </div>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">
-                          {booking.service.category}
+                          {booking.item_id}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      ${booking.totalAmount || 0}
+                      ${booking.total_amount || 0} {booking.currency}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
                         value={booking.status}
-                        onChange={(e) => handleStatusUpdate(booking._id, e.target.value)}
+                        onChange={(e) => handleStatusUpdate(booking.id, e.target.value)}
                         className={`text-xs font-medium px-2.5 py-0.5 rounded-full border-0 focus:ring-2 focus:ring-primary-500 ${getStatusColor(booking.status)}`}
                       >
                         <option value="pending">Pending</option>
@@ -311,7 +304,7 @@ const BookingManagement: React.FC = () => {
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(booking.createdAt).toLocaleDateString()}
+                      {new Date(booking.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
@@ -341,7 +334,7 @@ const BookingManagement: React.FC = () => {
             <div className="inline-block w-full max-w-4xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-dark-850 shadow-xl rounded-2xl">
               <div className="flex items-center justify-between p-6 border-b dark:border-dark-700">
                 <h3 className="text-xl font-medium text-gray-900 dark:text-white">
-                  Booking Details - #{selectedBooking.bookingNumber}
+                  Booking Details - #{selectedBooking.id}
                 </h3>
                 <button
                   onClick={() => setSelectedBooking(null)}
@@ -359,15 +352,15 @@ const BookingManagement: React.FC = () => {
                     <div className="space-y-3">
                       <div>
                         <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</label>
-                        <p className="text-gray-900 dark:text-white">{selectedBooking.customer.name}</p>
+                        <p className="text-gray-900 dark:text-white">{selectedBooking.customer_name}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
-                        <p className="text-gray-900 dark:text-white">{selectedBooking.customer.email}</p>
+                        <p className="text-gray-900 dark:text-white">{selectedBooking.customer_email}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone</label>
-                        <p className="text-gray-900 dark:text-white">{selectedBooking.customer.phone}</p>
+                        <p className="text-gray-900 dark:text-white">{selectedBooking.customer_phone}</p>
                       </div>
                     </div>
                   </div>
@@ -378,15 +371,15 @@ const BookingManagement: React.FC = () => {
                     <div className="space-y-3">
                       <div>
                         <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Service</label>
-                        <p className="text-gray-900 dark:text-white">{selectedBooking.service.name}</p>
+                        <p className="text-gray-900 dark:text-white">{selectedBooking.type === 'tour' ? 'Tour' : 'Service'}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Category</label>
-                        <p className="text-gray-900 dark:text-white">{selectedBooking.service.category}</p>
+                        <p className="text-gray-900 dark:text-white">{selectedBooking.item_id}</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Amount</label>
-                        <p className="text-gray-900 dark:text-white">${selectedBooking.totalAmount || 0}</p>
+                        <p className="text-gray-900 dark:text-white">${selectedBooking.total_amount || 0} {selectedBooking.currency}</p>
                       </div>
                     </div>
                   </div>
@@ -397,7 +390,7 @@ const BookingManagement: React.FC = () => {
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Booking Details</h4>
                   <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg">
                     <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                      {JSON.stringify(selectedBooking.bookingForm, null, 2)}
+                      {JSON.stringify(selectedBooking, null, 2)}
                     </pre>
                   </div>
                 </div>
@@ -425,22 +418,6 @@ const BookingManagement: React.FC = () => {
                       </button>
                     </div>
                   </form>
-
-                  {/* Notes List */}
-                  <div className="space-y-3 max-h-32 overflow-y-auto">
-                    {selectedBooking.notes.length === 0 ? (
-                      <p className="text-gray-500 dark:text-gray-400 text-sm">No notes yet</p>
-                    ) : (
-                      selectedBooking.notes.map((note, index) => (
-                        <div key={index} className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg">
-                          <p className="text-sm text-gray-900 dark:text-white">{note.message}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            {new Date(note.createdAt).toLocaleString()} by {note.createdBy}
-                          </p>
-                        </div>
-                      ))
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
