@@ -186,15 +186,15 @@ const getHeroImages = async (req, res) => {
   try {
     const result = await db.prepare(`
       SELECT * FROM content 
-      WHERE key LIKE 'hero_image_%' AND status = 'active'
+      WHERE (key LIKE 'hero_image_%' OR key LIKE 'hero_title_%' OR key LIKE 'hero_subtitle_%') AND status = 'active'
       ORDER BY key
     `).bind().all();
 
-    const heroImages = result.results || [];
+    const heroContent = result.results || [];
 
     res.json({
       success: true,
-      data: heroImages
+      data: heroContent
     });
   } catch (error) {
     console.error('Get hero images error:', error);
