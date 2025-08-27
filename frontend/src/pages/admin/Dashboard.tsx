@@ -32,7 +32,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onQuickAction }) 
     queryFn: async () => {
       const response = await fetch(`${getApiUrl()}/admin/dashboard`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         }
       });

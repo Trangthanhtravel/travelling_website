@@ -50,16 +50,15 @@ const BookingManagement: React.FC = () => {
       if (filterStatus !== 'all') params.append('status', filterStatus);
       if (filterService !== 'all') params.append('serviceType', filterService);
 
-      const response = await fetch(`${getApiUrl()}/admin/bookings?${params}`, {
+      const response = await fetch(`${getApiUrl()}/bookings?${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         }
       });
       if (!response.ok) throw new Error('Failed to fetch bookings');
       return response.json();
     },
-    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Update booking status
