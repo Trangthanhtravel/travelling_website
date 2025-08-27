@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { query, get, all, run } = require('../config/database');
+const { getDB } = require('../config/database');
 
 class User {
   constructor(data) {
@@ -28,6 +28,7 @@ class User {
   // Save admin user to database
   async save() {
     await this.hashPassword();
+    const db = getDB();
     const sql = `
       INSERT INTO users (name, email, password, phone, role, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -38,7 +39,7 @@ class User {
       this.phone, this.role, this.created_at, this.updated_at
     ];
 
-    const result = await run(sql, params);
+    const result = await db.prepare(sql).bind(...params).run();
     this.id = result.meta.last_row_id; // Set the auto-generated ID
     return result;
   }
@@ -47,7 +48,10 @@ class User {
   static async findByEmail(email) {
     try {
       console.log('🔍 Database query - Finding user by email:', email.toLowerCase());
-      const user = await get('SELECT * FROM users WHERE email = ? AND role = ?', [email.toLowerCase(), 'admin']);
+      const db = getDB();
+      const user = await db.prepare('SELECT * FROM users WHERE email = ? AND role = ?')
+        .bind(email.toLowerCase(), 'admin')
+        .first();
       console.log('🔍 Database result:', {
         found: !!user,
         userEmail: user?.email,
@@ -65,16 +69,20 @@ class User {
 
   // Find user by ID (admin only)
   static async findById(id) {
-    const user = await get('SELECT * FROM users WHERE id = ? AND role = ?', [id, 'admin']);
+    const db = getDB();
+    const user = await db.prepare('SELECT * FROM users WHERE id = ? AND role = ?')
+      .bind(id, 'admin')
+      .first();
     return user ? new User(user) : null;
   }
 
   // Get all admin users
   static async findAll(options = {}) {
     const { limit = 50, offset = 0 } = options;
+    const db = getDB();
     const sql = 'SELECT * FROM users WHERE role = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    const users = await all(sql, ['admin', limit, offset]);
-    return users.map(user => new User(user));
+    const result = await db.prepare(sql).bind('admin', limit, offset).all();
+    return result.results.map(user => new User(user));
   }
 
   // Update admin user
@@ -88,12 +96,14 @@ class User {
     const values = Object.values(updateData);
     const sql = `UPDATE users SET ${fields} WHERE id = ?`;
 
-    return await run(sql, [...values, this.id]);
+    const db = getDB();
+    return await db.prepare(sql).bind(...values, this.id).run();
   }
 
   // Delete admin user
   async delete() {
-    return await run('DELETE FROM users WHERE id = ?', [this.id]);
+    const db = getDB();
+    return await db.prepare('DELETE FROM users WHERE id = ?').bind(this.id).run();
   }
 
   // Convert to JSON (without password)
