@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import { Icon, Icons } from '../../components/common/Icons';
 import toast from 'react-hot-toast';
 
@@ -21,7 +20,6 @@ interface LoginFormData {
 const AdminLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { adminLogin, state } = useAuth();
-  const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const {

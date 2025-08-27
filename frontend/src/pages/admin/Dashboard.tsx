@@ -46,7 +46,6 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onQuickAction }) 
     totalBookings: 0,
     totalTours: 0,
     totalUsers: 0,
-    totalRevenue: 0,
     recentBookings: []
   };
 
@@ -62,20 +61,6 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onQuickAction }) 
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Bookings</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {isLoading ? '...' : stats.totalBookings}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-dark-800 rounded-lg shadow-lg p-6 border dark:border-dark-700">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-              <Icon icon={Icons.FiDollarSign} className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Revenue</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {isLoading ? '...' : `$${stats.totalRevenue?.toLocaleString() || 0}`}
               </p>
             </div>
           </div>
