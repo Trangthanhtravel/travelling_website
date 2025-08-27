@@ -5,6 +5,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 
 // Public routes
 router.get('/', blogController.getBlogs);
+router.get('/featured', blogController.getFeaturedBlogs);
 router.get('/slug/:slug', blogController.getBlogBySlug);
 
 // Admin routes

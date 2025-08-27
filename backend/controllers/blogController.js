@@ -1,5 +1,48 @@
 const { getDB, generateId } = require('../config/database');
 
+// Get featured blogs for homepage
+const getFeaturedBlogs = async (req, res) => {
+  try {
+    const db = getDB(req);
+    if (!db) {
+      return res.status(500).json({ success: false, message: 'Database not available' });
+    }
+
+    const { limit = 3 } = req.query;
+
+    const query = `
+      SELECT b.*, u.name as author_name, u.email as author_email
+      FROM blogs b
+      LEFT JOIN users u ON b.author = u.id
+      WHERE b.status = 'published' AND b.featured = 1
+      ORDER BY b.created_at DESC
+      LIMIT ?
+    `;
+
+    const result = await db.prepare(query).bind(parseInt(limit)).all();
+
+    const blogs = result.results?.map(blog => ({
+      ...blog,
+      categories: blog.categories ? (typeof blog.categories === 'string' ? blog.categories : JSON.stringify(blog.categories)) : '',
+      tags: blog.tags ? (typeof blog.tags === 'string' ? blog.tags : JSON.stringify(blog.tags)) : '',
+      gallery: blog.gallery ? JSON.parse(blog.gallery) : [],
+      featured: Boolean(blog.featured),
+      authorProfile: {
+        name: blog.author_name,
+        email: blog.author_email
+      }
+    })) || [];
+
+    res.json({
+      success: true,
+      data: blogs
+    });
+  } catch (error) {
+    console.error('Error fetching featured blogs:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
 // Get all blogs with filtering and pagination
 const getBlogs = async (req, res) => {
   try {
@@ -456,6 +499,7 @@ const updateBlogStatus = async (req, res) => {
 };
 
 module.exports = {
+  getFeaturedBlogs,
   getBlogs,
   getBlogBySlug,
   getBlogById,

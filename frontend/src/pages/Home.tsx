@@ -202,7 +202,7 @@ const Home: React.FC = () => {
   const { data: featuredBlogsData, isLoading: blogsLoading } = useQuery({
     queryKey: ['featured-blogs'],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/blogs?featured=true&limit=3&status=published`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/blogs/featured?limit=3`);
       if (!response.ok) throw new Error('Failed to fetch featured blogs');
       return response.json();
     },

@@ -251,10 +251,13 @@ class Tour {
   }
 
   // Get featured tours for homepage
-  static async getFeatured(limit = 6) {
+  static async getFeatured(db, limit = 6) {
+    if (!db) {
+      throw new Error('Database connection required');
+    }
     const sql = 'SELECT * FROM tours WHERE status = ? AND featured = ? ORDER BY created_at DESC LIMIT ?';
-    const tours = await all(sql, ['active', true, limit]);
-    return tours.map(tour => new Tour(tour));
+    const result = await db.prepare(sql).bind('active', 1, limit).all();
+    return result.results?.map(tour => new Tour(tour)) || [];
   }
 
   // Get tour stats

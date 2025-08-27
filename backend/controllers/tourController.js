@@ -24,7 +24,16 @@ const upload = multer({
 const getFeaturedTours = async (req, res) => {
   try {
     const { limit = 6 } = req.query;
-    const featuredTours = await Tour.getFeatured(parseInt(limit));
+    const db = req.db || req.cloudflare?.env?.DB;
+
+    if (!db) {
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection not available'
+      });
+    }
+
+    const featuredTours = await Tour.getFeatured(db, parseInt(limit));
 
     res.json({
       success: true,
