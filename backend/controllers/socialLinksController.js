@@ -1,10 +1,8 @@
-const db = require('../config/database');
-
 class SocialLinksController {
     // Get all social links (public endpoint)
     static async getAllSocialLinks(req, res) {
         try {
-            const socialLinks = await db.prepare(`
+            const socialLinks = await req.db.prepare(`
                 SELECT * FROM social_links 
                 WHERE is_active = 1 
                 ORDER BY sort_order ASC, platform ASC
@@ -26,7 +24,7 @@ class SocialLinksController {
     // Get all social links for admin (including inactive)
     static async getAdminSocialLinks(req, res) {
         try {
-            const socialLinks = await db.prepare(`
+            const socialLinks = await req.db.prepare(`
                 SELECT * FROM social_links 
                 ORDER BY sort_order ASC, platform ASC
             `).all();
@@ -56,19 +54,15 @@ class SocialLinksController {
                 });
             }
 
-            const result = await db.prepare(`
-                INSERT INTO social_links (platform, url, display_text, icon, is_active, sort_order, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-            `).run(platform, url, display_text, icon, is_active ?? true, sort_order ?? 0);
-
-            const socialLink = await db.prepare(`
-                SELECT * FROM social_links WHERE id = ?
-            `).get(result.lastInsertRowid);
+            const result = await req.db.prepare(`
+                INSERT INTO social_links (platform, url, display_text, icon, is_active, sort_order)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `).run(platform, url, display_text || null, icon || null, is_active || 1, sort_order || 0);
 
             res.status(201).json({
                 success: true,
                 message: 'Social link created successfully',
-                data: socialLink
+                data: { id: result.meta.last_row_id }
             });
         } catch (error) {
             console.error('Error creating social link:', error);
@@ -92,17 +86,13 @@ class SocialLinksController {
                 });
             }
 
-            await db.prepare(`
+            const result = await req.db.prepare(`
                 UPDATE social_links 
-                SET platform = ?, url = ?, display_text = ?, icon = ?, is_active = ?, sort_order = ?, updated_at = datetime('now')
+                SET platform = ?, url = ?, display_text = ?, icon = ?, is_active = ?, sort_order = ?
                 WHERE id = ?
-            `).run(platform, url, display_text, icon, is_active, sort_order, id);
+            `).run(platform, url, display_text || null, icon || null, is_active || 1, sort_order || 0, id);
 
-            const socialLink = await db.prepare(`
-                SELECT * FROM social_links WHERE id = ?
-            `).get(id);
-
-            if (!socialLink) {
+            if (result.meta.changes === 0) {
                 return res.status(404).json({
                     success: false,
                     message: 'Social link not found'
@@ -111,8 +101,7 @@ class SocialLinksController {
 
             res.json({
                 success: true,
-                message: 'Social link updated successfully',
-                data: socialLink
+                message: 'Social link updated successfully'
             });
         } catch (error) {
             console.error('Error updating social link:', error);
@@ -128,11 +117,11 @@ class SocialLinksController {
         try {
             const { id } = req.params;
 
-            const result = await db.prepare(`
+            const result = await req.db.prepare(`
                 DELETE FROM social_links WHERE id = ?
             `).run(id);
 
-            if (result.changes === 0) {
+            if (result.meta.changes === 0) {
                 return res.status(404).json({
                     success: false,
                     message: 'Social link not found'
