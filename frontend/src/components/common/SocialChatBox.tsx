@@ -127,7 +127,8 @@ const SocialChatBox: React.FC = () => {
                             {/* Social Icon Button */}
                             <button
                                 onClick={() => handleSocialClick(link)}
-                                className={`w-12 h-12 rounded-full ${getPlatformColor(link.platform)} text-white shadow-lg transition-all duration-200 hover:scale-110 flex items-center justify-center`}
+                                className={`w-12 h-12 rounded-full ${getPlatformColor(link.platform)} text-white shadow-lg transition-all duration-200 hover:scale-110 flex items-center justify-center border-0`}
+                                style={{ borderRadius: '50%' }}
                                 aria-label={`Contact via ${link.platform}`}
                             >
                                 <Icon
