@@ -50,8 +50,8 @@ const getServices = async (req, res) => {
     const conditions = [];
     const params = [];
 
-    // Only show active services for non-admin users
-    if (req.user?.role !== 'admin') {
+    // For public access, always filter to active services unless user is admin
+    if (!req.user || req.user.role !== 'admin') {
       conditions.push('s.status = ?');
       params.push('active');
     } else if (status) {
