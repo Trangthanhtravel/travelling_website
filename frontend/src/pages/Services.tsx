@@ -226,7 +226,15 @@ const Services: React.FC = () => {
                 <div className="p-6 flex-1 flex flex-col">
                   <div className={`flex items-center text-sm mb-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
                     <Icon icon={Icons.FiTag} className="w-4 h-4 mr-1" />
-                    <span className="capitalize">{service.category.replace('-', ' ')}</span>
+                    <span className="capitalize">
+                      {service.category ?
+                        (typeof service.category === 'string' ?
+                          service.category.replace('-', ' ') :
+                          service.category.name || service.category.slug || 'Uncategorized'
+                        ) :
+                        'Uncategorized'
+                      }
+                    </span>
                   </div>
                   <h3 className={`font-bold mb-2 group-hover:text-accent-orange transition-colors duration-200 ${
                     viewMode === 'grid' ? 'text-xl' : 'text-lg'

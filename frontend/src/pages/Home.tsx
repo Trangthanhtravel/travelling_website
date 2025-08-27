@@ -202,20 +202,20 @@ const Home: React.FC = () => {
   const { data: featuredBlogsData, isLoading: blogsLoading } = useQuery({
     queryKey: ['featured-blogs'],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/blogs?featured=true&limit=3&status=published`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/blogs?featured=true&limit=3&status=published`);
       if (!response.ok) throw new Error('Failed to fetch featured blogs');
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const featuredBlogs = featuredBlogsData?.data?.blogs || [];
+  const featuredBlogs = featuredBlogsData?.data || [];
 
   // Fetch featured tours from real API
   const { data: featuredToursData, isLoading: toursLoading } = useQuery({
     queryKey: ['featured-tours'],
     queryFn: async () => {
-      const response = await toursAPI.getTours({ featured: true, limit: 3, status: 'active' });
+      const response = await toursAPI.getTours({ featured: 'true', limit: 3, status: 'active' });
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -710,6 +710,20 @@ const Home: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Scroll buttons for car rentals */}
+            <button
+              onClick={() => scrollLeft(carRentalsRef)}
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-100 shadow-lg rounded-full p-3 hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors duration-200 z-10 border border-gray-200 dark:border-gray-300"
+            >
+              <Icon icon={Icons.FiChevronLeft} className="w-6 h-6 text-gray-600 dark:text-gray-700" />
+            </button>
+            <button
+              onClick={() => scrollRight(carRentalsRef)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-100 shadow-lg rounded-full p-3 hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors duration-200 z-10 border border-gray-200 dark:border-gray-300"
+            >
+              <Icon icon={Icons.FiChevronRight} className="w-6 h-6 text-gray-600 dark:text-gray-700" />
+            </button>
           </div>
         </div>
       </section>

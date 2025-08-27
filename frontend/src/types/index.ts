@@ -62,7 +62,7 @@ export interface PaginationResponse<T> {
 // Tour filters for API requests
 export interface TourFilters {
     status?: 'active' | 'inactive' | 'draft';
-    featured?: boolean;
+    featured?: string;
   page?: number;
   limit?: number;
   search?: string;
