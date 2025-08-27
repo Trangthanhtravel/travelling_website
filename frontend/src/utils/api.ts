@@ -3,7 +3,6 @@ import {
     User,
     Tour,
     Booking,
-    Content,
     TourFilters,
     ApiResponse,
     PaginationResponse, Service
