@@ -345,7 +345,6 @@ const Home: React.FC = () => {
                   className="w-full h-full"
                   src={`https://www.youtube.com/embed/${aboutContent.youtubeId}?controls=1&modestbranding=1&rel=0`}
                   title="About Our Travel Company"
-                  frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 ></iframe>
@@ -695,10 +694,10 @@ const Home: React.FC = () => {
                         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">{car.title}</h3>
                         <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">{car.subtitle || car.description}</p>
                         <Link
-                          to={`/service/${car.id}`}
+                          to={`/service/${car.slug || car.id}`}
                           className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200 block text-center"
                         >
-                          Book Now
+                          View Details
                         </Link>
                       </div>
                     </div>
@@ -757,7 +756,7 @@ const Home: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredBlogs.map((blog) => (
                 <div key={blog.id} className="bg-white dark:bg-dark-850 rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 border dark:border-dark-600">
-                  <Link to={`/blog/${blog.id}`} className="block">
+                  <Link to={`/blog/${blog.slug}`} className="block">
                     <div className="relative h-48 overflow-hidden">
                       <img
                         src={blog.image_url || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
