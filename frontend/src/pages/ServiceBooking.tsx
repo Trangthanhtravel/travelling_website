@@ -58,7 +58,7 @@ const ServiceBooking: React.FC = () => {
   const { isDarkMode } = useTheme();
 
   // Fetch service data
-  const { data: serviceData, isLoading, error } = useQuery({
+  const { data: serviceData, isLoading } = useQuery({
     queryKey: ['service', slug],
     queryFn: () => servicesAPI.getServiceBySlug(slug!),
     enabled: !!slug,
