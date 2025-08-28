@@ -398,20 +398,14 @@ const getAllServiceBookings = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
 
-    const {
-      status,
-      serviceType,
-      page = 1,
-      limit = 20,
-      sortBy = 'created_at',
-      sortOrder = 'desc'
-    } = req.query;
+    const { status, page = 1, limit = 10 } = req.query;
 
     let query = `
-      SELECT sb.*, s.title as service_title, s.service_type, u.name as customer_name, u.email as customer_email
+      SELECT sb.*, s.title as service_title, s.subtitle as service_subtitle, s.images as service_images,
+             u.name as customer_name, u.email as customer_email
       FROM service_bookings sb
       JOIN services s ON sb.service_id = s.id
-      JOIN users u ON sb.customer_id = u.id
+      LEFT JOIN users u ON sb.customer_id = u.id
     `;
 
     const conditions = [];
@@ -422,22 +416,11 @@ const getAllServiceBookings = async (req, res) => {
       params.push(status);
     }
 
-    if (serviceType) {
-      conditions.push('s.service_type = ?');
-      params.push(serviceType);
-    }
-
     if (conditions.length > 0) {
       query += ' WHERE ' + conditions.join(' AND ');
     }
 
-    // Add sorting
-    const validSortColumns = ['created_at', 'updated_at'];
-    const validSortOrders = ['asc', 'desc'];
-
-    if (validSortColumns.includes(sortBy) && validSortOrders.includes(sortOrder)) {
-      query += ` ORDER BY sb.${sortBy} ${sortOrder.toUpperCase()}`;
-    }
+    query += ' ORDER BY sb.created_at DESC';
 
     // Add pagination
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -449,7 +432,16 @@ const getAllServiceBookings = async (req, res) => {
     const bookings = result.results?.map(booking => ({
       ...booking,
       booking_form: booking.booking_form ? JSON.parse(booking.booking_form) : {},
-      notes: booking.notes ? JSON.parse(booking.notes) : []
+      notes: booking.notes ? JSON.parse(booking.notes) : [],
+      service: {
+        title: booking.service_title,
+        subtitle: booking.service_subtitle,
+        images: booking.service_images ? JSON.parse(booking.service_images) : []
+      },
+      customer: {
+        name: booking.customer_name,
+        email: booking.customer_email
+      }
     })) || [];
 
     res.json({ success: true, data: bookings });
@@ -459,62 +451,7 @@ const getAllServiceBookings = async (req, res) => {
   }
 };
 
-// Admin: Update service booking status
-const updateServiceBookingStatus = async (req, res) => {
-  try {
-    const db = getDB();
-    if (!db) {
-      return res.status(500).json({ success: false, message: 'Database not available' });
-    }
-
-    const { id } = req.params;
-    const { status, note } = req.body;
-
-    if (!['pending', 'contacted', 'confirmed', 'completed', 'cancelled'].includes(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid status' });
-    }
-
-    // Check if booking exists
-    const booking = await db.prepare('SELECT * FROM service_bookings WHERE id = ?').bind(id).first();
-    if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found' });
-    }
-
-    // Update status and timestamps
-    let updateFields = ['status = ?', 'updated_at = CURRENT_TIMESTAMP'];
-    let params = [status];
-
-    if (status === 'contacted') {
-      updateFields.push('contacted_at = CURRENT_TIMESTAMP');
-    } else if (status === 'confirmed') {
-      updateFields.push('confirmed_at = CURRENT_TIMESTAMP');
-    }
-
-    // Add note if provided
-    if (note) {
-      const existingNotes = booking.notes ? JSON.parse(booking.notes) : [];
-      const newNote = {
-        content: note,
-        author: req.user.name,
-        createdAt: new Date().toISOString()
-      };
-      updateFields.push('notes = ?');
-      params.push(JSON.stringify([...existingNotes, newNote]));
-    }
-
-    const query = `UPDATE service_bookings SET ${updateFields.join(', ')} WHERE id = ?`;
-    params.push(id);
-
-    await db.prepare(query).bind(...params).run();
-
-    res.json({ success: true, message: 'Booking status updated successfully' });
-  } catch (error) {
-    console.error('Error updating service booking status:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-};
-
-// Admin: Create new service
+// Admin: Create service
 const createService = async (req, res) => {
   try {
     const db = getDB();
@@ -522,70 +459,84 @@ const createService = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
 
-    const serviceData = req.body;
-    
-    // Parse JSON fields from FormData if they're strings
-    if (serviceData.included && typeof serviceData.included === 'string') {
-      serviceData.included = JSON.parse(serviceData.included);
-    }
-    if (serviceData.excluded && typeof serviceData.excluded === 'string') {
-      serviceData.excluded = JSON.parse(serviceData.excluded);
-    }
-    if (serviceData.features && typeof serviceData.features === 'string') {
-      serviceData.features = JSON.parse(serviceData.features);
+    const {
+      title,
+      subtitle,
+      description,
+      price,
+      duration,
+      included,
+      excluded,
+      category_id,
+      service_type,
+      status = 'active'
+    } = req.body;
+
+    // Validate required fields
+    if (!title || !description || !price || !service_type) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: title, description, price, service_type'
+      });
     }
 
-    // Create new service instance
-    const service = new Service({
-      title: serviceData.name,
-      subtitle: serviceData.subtitle || '',
-      description: serviceData.description,
-      price: parseFloat(serviceData.price),
-      duration: serviceData.duration,
-      category: serviceData.category,
-      service_type: serviceData.category, // Map category to service_type
-      included: serviceData.features || [],
-      excluded: serviceData.excluded || [],
-      status: serviceData.status || 'active',
-      featured: serviceData.featured || false
-    });
+    // Generate slug from title
+    const slug = title.toLowerCase()
+      .replace(/[^a-z0-9 -]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim('-');
 
-    // Handle image uploads if files are provided
+    // Handle image uploads if any
+    let imageUrls = [];
     if (req.files && req.files.length > 0) {
       try {
-        const uploadedImages = await service.updateImages(
-          process.env.R2_BUCKET_NAME,
-          req.files,
-          []
+        const uploadPromises = req.files.map(file =>
+          r2Helpers.uploadFile(file.buffer, `services/${slug}/${file.originalname}`, file.mimetype)
         );
-        console.log(`Uploaded ${uploadedImages.length} images for service`);
-      } catch (imageError) {
-        console.error('Image upload error:', imageError);
-        return res.status(400).json({
-          success: false,
-          message: 'Error uploading images: ' + imageError.message
-        });
+        imageUrls = await Promise.all(uploadPromises);
+      } catch (uploadError) {
+        console.error('Error uploading images:', uploadError);
+        return res.status(500).json({ success: false, message: 'Error uploading images' });
       }
     }
 
-    // Save service to database
-    const result = await service.save(db);
-    
+    const serviceId = generateId();
+    const query = `
+      INSERT INTO services (
+        id, title, slug, subtitle, description, price, duration, images,
+        included, excluded, category_id, service_type, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+    `;
+
+    await db.prepare(query).bind(
+      serviceId,
+      title,
+      slug,
+      subtitle || null,
+      description,
+      parseFloat(price),
+      duration || null,
+      JSON.stringify(imageUrls),
+      JSON.stringify(included || []),
+      JSON.stringify(excluded || []),
+      category_id || null,
+      service_type,
+      status
+    ).run();
+
     res.status(201).json({
       success: true,
       message: 'Service created successfully',
-      data: service.toJSON ? service.toJSON() : service
+      data: { id: serviceId, slug }
     });
   } catch (error) {
-    console.error('Create service error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error creating service: ' + error.message
-    });
+    console.error('Error creating service:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// Admin: Update existing service
+// Admin: Update service
 const updateService = async (req, res) => {
   try {
     const db = getDB();
@@ -594,77 +545,91 @@ const updateService = async (req, res) => {
     }
 
     const { id } = req.params;
-    const updateData = req.body;
+    const {
+      title,
+      subtitle,
+      description,
+      price,
+      duration,
+      included,
+      excluded,
+      category_id,
+      service_type,
+      status
+    } = req.body;
 
     // Check if service exists
-    const existingService = await Service.findById(db, id);
+    const existingService = await db.prepare('SELECT * FROM services WHERE id = ?').bind(id).first();
     if (!existingService) {
-      return res.status(404).json({
-        success: false,
-        message: 'Service not found'
-      });
+      return res.status(404).json({ success: false, message: 'Service not found' });
     }
 
-    // Parse JSON fields if they're strings
-    if (updateData.included && typeof updateData.included === 'string') {
-      updateData.included = JSON.parse(updateData.included);
-    }
-    if (updateData.excluded && typeof updateData.excluded === 'string') {
-      updateData.excluded = JSON.parse(updateData.excluded);
-    }
-    if (updateData.features && typeof updateData.features === 'string') {
-      updateData.features = JSON.parse(updateData.features);
+    // Generate new slug if title changed
+    let slug = existingService.slug;
+    if (title && title !== existingService.title) {
+      slug = title.toLowerCase()
+        .replace(/[^a-z0-9 -]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim('-');
     }
 
-    // Prepare update data
-    const serviceUpdateData = {
-      title: updateData.name || existingService.title,
-      subtitle: updateData.subtitle || existingService.subtitle,
-      description: updateData.description || existingService.description,
-      price: updateData.price ? parseFloat(updateData.price) : existingService.price,
-      duration: updateData.duration || existingService.duration,
-      category: updateData.category || existingService.category,
-      service_type: updateData.category || existingService.service_type,
-      included: updateData.features || existingService.included,
-      excluded: updateData.excluded || existingService.excluded,
-      status: updateData.status || existingService.status,
-      featured: updateData.featured !== undefined ? updateData.featured : existingService.featured,
-      updated_at: new Date().toISOString()
-    };
-
-    // Handle image uploads if new files are provided
+    // Handle image uploads if any
+    let imageUrls = existingService.images ? JSON.parse(existingService.images) : [];
     if (req.files && req.files.length > 0) {
       try {
-        const uploadedImages = await existingService.updateImages(
-          process.env.R2_BUCKET_NAME,
-          req.files,
-          existingService.images || []
+        const uploadPromises = req.files.map(file =>
+          r2Helpers.uploadFile(file.buffer, `services/${slug}/${file.originalname}`, file.mimetype)
         );
-        serviceUpdateData.images = JSON.stringify(uploadedImages);
-        console.log(`Updated ${uploadedImages.length} images for service`);
-      } catch (imageError) {
-        console.error('Image update error:', imageError);
-        return res.status(400).json({
-          success: false,
-          message: 'Error updating images: ' + imageError.message
-        });
+        const newImageUrls = await Promise.all(uploadPromises);
+        imageUrls = [...imageUrls, ...newImageUrls];
+      } catch (uploadError) {
+        console.error('Error uploading images:', uploadError);
+        return res.status(500).json({ success: false, message: 'Error uploading images' });
       }
     }
 
-    // Update service in database
-    await existingService.update(db, serviceUpdateData);
+    const query = `
+      UPDATE services SET
+        title = COALESCE(?, title),
+        slug = ?,
+        subtitle = ?,
+        description = COALESCE(?, description),
+        price = COALESCE(?, price),
+        duration = ?,
+        images = ?,
+        included = ?,
+        excluded = ?,
+        category_id = ?,
+        service_type = COALESCE(?, service_type),
+        status = COALESCE(?, status),
+        updated_at = datetime('now')
+      WHERE id = ?
+    `;
+
+    await db.prepare(query).bind(
+      title,
+      slug,
+      subtitle,
+      description,
+      price ? parseFloat(price) : null,
+      duration,
+      JSON.stringify(imageUrls),
+      JSON.stringify(included || []),
+      JSON.stringify(excluded || []),
+      category_id,
+      service_type,
+      status,
+      id
+    ).run();
 
     res.json({
       success: true,
-      message: 'Service updated successfully',
-      data: { ...existingService, ...serviceUpdateData }
+      message: 'Service updated successfully'
     });
   } catch (error) {
-    console.error('Update service error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error updating service: ' + error.message
-    });
+    console.error('Error updating service:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
@@ -679,27 +644,21 @@ const deleteService = async (req, res) => {
     const { id } = req.params;
 
     // Check if service exists
-    const service = await Service.findById(db, id);
-    if (!service) {
-      return res.status(404).json({
-        success: false,
-        message: 'Service not found'
-      });
+    const existingService = await db.prepare('SELECT * FROM services WHERE id = ?').bind(id).first();
+    if (!existingService) {
+      return res.status(404).json({ success: false, message: 'Service not found' });
     }
 
-    // Delete service (this will also handle image cleanup)
-    await service.delete(db, process.env.R2_BUCKET_NAME);
+    // Delete the service
+    await db.prepare('DELETE FROM services WHERE id = ?').bind(id).run();
 
     res.json({
       success: true,
       message: 'Service deleted successfully'
     });
   } catch (error) {
-    console.error('Delete service error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error deleting service: ' + error.message
-    });
+    console.error('Error deleting service:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
@@ -714,52 +673,80 @@ const updateServiceStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!['active', 'inactive'].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status. Must be "active" or "inactive"'
-      });
+    // Validate status
+    const validStatuses = ['active', 'inactive'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status' });
     }
 
     // Check if service exists
-    const service = await Service.findById(db, id);
-    if (!service) {
-      return res.status(404).json({
-        success: false,
-        message: 'Service not found'
-      });
+    const existingService = await db.prepare('SELECT * FROM services WHERE id = ?').bind(id).first();
+    if (!existingService) {
+      return res.status(404).json({ success: false, message: 'Service not found' });
     }
 
     // Update status
-    await service.update(db, { 
-      status, 
-      updated_at: new Date().toISOString() 
-    });
+    await db.prepare('UPDATE services SET status = ?, updated_at = datetime("now") WHERE id = ?')
+      .bind(status, id).run();
 
     res.json({
       success: true,
       message: 'Service status updated successfully'
     });
   } catch (error) {
-    console.error('Update service status error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error updating service status: ' + error.message
+    console.error('Error updating service status:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// Admin: Update service booking status
+const updateServiceBookingStatus = async (req, res) => {
+  try {
+    const db = getDB();
+    if (!db) {
+      return res.status(500).json({ success: false, message: 'Database not available' });
+    }
+
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status' });
+    }
+
+    // Check if booking exists
+    const existingBooking = await db.prepare('SELECT * FROM service_bookings WHERE id = ?').bind(id).first();
+    if (!existingBooking) {
+      return res.status(404).json({ success: false, message: 'Service booking not found' });
+    }
+
+    // Update status
+    await db.prepare('UPDATE service_bookings SET status = ?, updated_at = datetime("now") WHERE id = ?')
+      .bind(status, id).run();
+
+    res.json({
+      success: true,
+      message: 'Service booking status updated successfully'
     });
+  } catch (error) {
+    console.error('Error updating service booking status:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
 module.exports = {
+  upload,
   getServices,
+  getServiceById,
   getServiceBySlug,
   createServiceBooking,
   getUserServiceBookings,
   getAllServiceBookings,
-  updateServiceBookingStatus,
-  // Admin functions
   createService,
   updateService,
   deleteService,
   updateServiceStatus,
-  upload // Export the multer upload middleware
+  updateServiceBookingStatus
 };
