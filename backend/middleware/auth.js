@@ -79,12 +79,10 @@ const adminAuth = async (req, res, next) => {
 
     // Add user info to request object
     req.user = decoded;
-    req.userId = decoded.userId;
-
     next();
   } catch (error) {
     console.error('Admin auth middleware error:', error);
-    return res.status(401).json({
+    res.status(401).json({
       success: false,
       message: 'Token is not valid'
     });
@@ -92,8 +90,7 @@ const adminAuth = async (req, res, next) => {
 };
 
 module.exports = {
-  adminAuth,
   requireAuth,
   requireRole,
-  verifyToken: requireAuth // Add verifyToken as an alias for requireAuth
+  adminAuth
 };

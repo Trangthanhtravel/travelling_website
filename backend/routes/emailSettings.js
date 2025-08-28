@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const emailSettingsController = require('../controllers/emailSettingsController');
-const auth = require('../middleware/auth');
+const { adminAuth } = require('../middleware/auth');
 
 // All routes require admin authentication
-router.use(auth);
+router.use(adminAuth);
 
 // Get email settings
 router.get('/', emailSettingsController.getEmailSettings);
