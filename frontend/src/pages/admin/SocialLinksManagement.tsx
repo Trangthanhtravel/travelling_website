@@ -36,18 +36,31 @@ const SocialLinksManagement: React.FC = () => {
 
     const fetchSocialLinks = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/social-links`, {
+            const token = localStorage.getItem('adminToken');
+
+            // Check if token exists and is valid
+            if (!token || token === 'null' || token === 'undefined') {
+                toast.error('Please log in to access social links');
+                return;
+            }
+
+            const response = await fetch('/api/social-links', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            const data = await response.json();
 
-            if (data.success) {
+            if (response.ok) {
+                const data = await response.json();
                 setSocialLinks(data.data);
             } else {
-                toast.error('Failed to fetch social links');
+                const errorData = await response.json();
+                if (response.status === 401) {
+                    toast.error('Authentication failed. Please log in again.');
+                    localStorage.removeItem('adminToken');
+                } else {
+                    toast.error(errorData.message || 'Failed to fetch social links');
+                }
             }
         } catch (error) {
             console.error('Error fetching social links:', error);
@@ -61,10 +74,16 @@ const SocialLinksManagement: React.FC = () => {
         e.preventDefault();
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('adminToken');
+
+            if (!token || token === 'null' || token === 'undefined') {
+                toast.error('Please log in to save social link');
+                return;
+            }
+
             const url = editingLink
-                ? `${process.env.REACT_APP_API_URL}/social-links/${editingLink.id}`
-                : `${process.env.REACT_APP_API_URL}/social-links`;
+                ? `/api/social-links/${editingLink.id}`
+                : '/api/social-links';
 
             const method = editingLink ? 'PUT' : 'POST';
 
@@ -77,14 +96,19 @@ const SocialLinksManagement: React.FC = () => {
                 body: JSON.stringify(formData)
             });
 
-            const data = await response.json();
-
-            if (data.success) {
+            if (response.ok) {
+                const data = await response.json();
                 toast.success(editingLink ? 'Social link updated successfully' : 'Social link created successfully');
                 fetchSocialLinks();
                 closeModal();
             } else {
-                toast.error(data.message || 'Failed to save social link');
+                const data = await response.json();
+                if (response.status === 401) {
+                    toast.error('Authentication failed. Please log in again.');
+                    localStorage.removeItem('adminToken');
+                } else {
+                    toast.error(data.message || 'Failed to save social link');
+                }
             }
         } catch (error) {
             console.error('Error saving social link:', error);
@@ -98,21 +122,32 @@ const SocialLinksManagement: React.FC = () => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/social-links/${id}`, {
+            const token = localStorage.getItem('adminToken');
+
+            if (!token || token === 'null' || token === 'undefined') {
+                toast.error('Please log in to delete social link');
+                return;
+            }
+
+            const response = await fetch(`/api/social-links/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
 
-            const data = await response.json();
-
-            if (data.success) {
+            if (response.ok) {
+                const data = await response.json();
                 toast.success('Social link deleted successfully');
                 fetchSocialLinks();
             } else {
-                toast.error(data.message || 'Failed to delete social link');
+                const data = await response.json();
+                if (response.status === 401) {
+                    toast.error('Authentication failed. Please log in again.');
+                    localStorage.removeItem('adminToken');
+                } else {
+                    toast.error(data.message || 'Failed to delete social link');
+                }
             }
         } catch (error) {
             console.error('Error deleting social link:', error);

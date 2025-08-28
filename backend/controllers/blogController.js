@@ -132,13 +132,13 @@ const getBlogs = async (req, res) => {
 
     const result = await db.prepare(query).bind(...params).all();
 
-    // Get total count for pagination
+    // Get total count for pagination - fix parameter binding issue
     let countQuery = `SELECT COUNT(*) as total FROM blogs b`;
-    const countConditions = conditions.slice(0, -2); // Remove limit and offset conditions
-    if (countConditions.length > 0) {
-      countQuery += ' WHERE ' + countConditions.join(' AND ');
+    if (conditions.length > 0) {
+      countQuery += ' WHERE ' + conditions.join(' AND ');
     }
 
+    // Create count params by excluding limit and offset (last 2 params)
     const countParams = params.slice(0, -2);
     const countResult = await db.prepare(countQuery).bind(...countParams).first();
     const total = countResult?.total || 0;
