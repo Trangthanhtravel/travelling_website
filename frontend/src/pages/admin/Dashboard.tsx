@@ -9,6 +9,7 @@ import CustomerManagement from './CustomerManagement';
 import HeroImageManagement from './HeroImageManagement';
 import AboutSectionManagement from './AboutSectionManagement';
 import SocialLinksManagement from './SocialLinksManagement';
+import EmailSettingsManagement from './EmailSettingsManagement';
 
 interface DashboardStats {
   totalBookings: number;
@@ -180,6 +181,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'hero-images', name: 'Hero Images', icon: Icons.FiImage },
     { id: 'about-section', name: 'About Section', icon: Icons.FiInfo },
     { id: 'social-links', name: 'Social Links', icon: Icons.FiMessageCircle },
+    { id: 'email-settings', name: 'Email Settings', icon: Icons.FiMail },
   ];
 
   const renderContent = () => {
@@ -200,6 +202,8 @@ const AdminDashboard: React.FC = () => {
         return <AboutSectionManagement />;
       case 'social-links':
         return <SocialLinksManagement />;
+      case 'email-settings':
+        return <EmailSettingsManagement />;
       case 'dashboard':
       default:
         return <DashboardOverview onQuickAction={setActiveTab} />;
