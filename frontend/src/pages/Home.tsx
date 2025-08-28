@@ -694,7 +694,7 @@ const Home: React.FC = () => {
                         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">{car.title}</h3>
                         <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">{car.subtitle || car.description}</p>
                         <Link
-                          to={`/service/${car.slug || car.id}`}
+                          to={`/services/${car.slug || car.id}`}
                           className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200 block text-center"
                         >
                           View Details
