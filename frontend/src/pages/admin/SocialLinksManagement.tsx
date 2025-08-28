@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Icon, Icons } from '../../components/common/Icons';
 import toast from 'react-hot-toast';
+import { socialLinksAPI } from '../../utils/api';
 
 interface SocialLink {
     id: number;
@@ -30,41 +31,26 @@ const SocialLinksManagement: React.FC = () => {
         sort_order: 0
     });
 
+    const [saving, setSaving] = useState(false);
+
     useEffect(() => {
         fetchSocialLinks();
     }, []);
 
     const fetchSocialLinks = async () => {
         try {
-            const token = localStorage.getItem('adminToken');
-
-            // Check if token exists and is valid
-            if (!token || token === 'null' || token === 'undefined') {
-                toast.error('Please log in to access social links');
-                return;
-            }
-
-            const response = await fetch('/api/social-links', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setSocialLinks(data.data);
-            } else {
-                const errorData = await response.json();
-                if (response.status === 401) {
-                    toast.error('Authentication failed. Please log in again.');
-                    localStorage.removeItem('adminToken');
-                } else {
-                    toast.error(errorData.message || 'Failed to fetch social links');
-                }
-            }
-        } catch (error) {
+            setIsLoading(true);
+            const response = await socialLinksAPI.getAllSocialLinks();
+            setSocialLinks(response.data.data);
+        } catch (error: any) {
             console.error('Error fetching social links:', error);
-            toast.error('Failed to fetch social links');
+            if (error.response?.status === 401) {
+                toast.error('Authentication failed. Please log in again.');
+                localStorage.removeItem('adminToken');
+                // Redirect will be handled by the API interceptor
+            } else {
+                toast.error(error.response?.data?.message || 'Failed to fetch social links');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -72,47 +58,29 @@ const SocialLinksManagement: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSaving(true);
 
         try {
-            const token = localStorage.getItem('adminToken');
-
-            if (!token || token === 'null' || token === 'undefined') {
-                toast.error('Please log in to save social link');
-                return;
-            }
-
-            const url = editingLink
-                ? `/api/social-links/${editingLink.id}`
-                : '/api/social-links';
-
-            const method = editingLink ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                toast.success(editingLink ? 'Social link updated successfully' : 'Social link created successfully');
-                fetchSocialLinks();
-                closeModal();
+            if (editingLink) {
+                await socialLinksAPI.updateSocialLink(editingLink.id.toString(), formData);
+                toast.success('Social link updated successfully');
             } else {
-                const data = await response.json();
-                if (response.status === 401) {
-                    toast.error('Authentication failed. Please log in again.');
-                    localStorage.removeItem('adminToken');
-                } else {
-                    toast.error(data.message || 'Failed to save social link');
-                }
+                await socialLinksAPI.createSocialLink(formData);
+                toast.success('Social link created successfully');
             }
-        } catch (error) {
+
+            await fetchSocialLinks();
+            resetForm();
+            setIsModalOpen(false);
+        } catch (error: any) {
             console.error('Error saving social link:', error);
-            toast.error('Failed to save social link');
+            if (error.response?.status === 401) {
+                toast.error('Authentication failed. Please log in again.');
+            } else {
+                toast.error(error.response?.data?.message || 'Failed to save social link');
+            }
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -122,36 +90,16 @@ const SocialLinksManagement: React.FC = () => {
         }
 
         try {
-            const token = localStorage.getItem('adminToken');
-
-            if (!token || token === 'null' || token === 'undefined') {
-                toast.error('Please log in to delete social link');
-                return;
-            }
-
-            const response = await fetch(`/api/social-links/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                toast.success('Social link deleted successfully');
-                fetchSocialLinks();
-            } else {
-                const data = await response.json();
-                if (response.status === 401) {
-                    toast.error('Authentication failed. Please log in again.');
-                    localStorage.removeItem('adminToken');
-                } else {
-                    toast.error(data.message || 'Failed to delete social link');
-                }
-            }
-        } catch (error) {
+            await socialLinksAPI.deleteSocialLink(id.toString());
+            toast.success('Social link deleted successfully');
+            await fetchSocialLinks();
+        } catch (error: any) {
             console.error('Error deleting social link:', error);
-            toast.error('Failed to delete social link');
+            if (error.response?.status === 401) {
+                toast.error('Authentication failed. Please log in again.');
+            } else {
+                toast.error(error.response?.data?.message || 'Failed to delete social link');
+            }
         }
     };
 
@@ -178,9 +126,7 @@ const SocialLinksManagement: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-        setEditingLink(null);
+    const resetForm = () => {
         setFormData({
             platform: 'facebook',
             url: '',
@@ -188,6 +134,12 @@ const SocialLinksManagement: React.FC = () => {
             is_active: true,
             sort_order: 0
         });
+        setEditingLink(null);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        resetForm();
     };
 
     const getPlatformIcon = (platform: string) => {
@@ -407,9 +359,10 @@ const SocialLinksManagement: React.FC = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="bg-accent-orange hover:bg-accent-orange-hover text-white px-4 py-2 rounded-lg transition-colors"
+                                    disabled={saving}
+                                    className="bg-accent-orange hover:bg-accent-orange-hover text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
                                 >
-                                    {editingLink ? 'Update' : 'Create'}
+                                    {saving ? 'Saving...' : (editingLink ? 'Update' : 'Create')}
                                 </button>
                             </div>
                         </form>

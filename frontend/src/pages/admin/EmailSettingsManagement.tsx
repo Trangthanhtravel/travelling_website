@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { emailSettingsAPI } from '../../utils/api';
 
 interface EmailSettings {
   company_email: string;
@@ -33,37 +34,18 @@ const EmailSettingsManagement: React.FC = () => {
 
   const fetchEmailSettings = async () => {
     try {
-      const token = localStorage.getItem('adminToken');
-
-      // Check if token exists and is valid
-      if (!token || token === 'null' || token === 'undefined') {
-        toast.error('Please log in to access email settings');
-        // Redirect to login or handle authentication
-        return;
-      }
-
-      const response = await fetch('/api/email-settings', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSettings(data.data);
-      } else {
-        const errorData = await response.json();
-        if (response.status === 401) {
-          toast.error('Authentication failed. Please log in again.');
-          localStorage.removeItem('adminToken');
-          // Redirect to login page
-        } else {
-          toast.error(errorData.message || 'Failed to fetch email settings');
-        }
-      }
-    } catch (error) {
+      setLoading(true);
+      const response = await emailSettingsAPI.getEmailSettings();
+      setSettings(response.data.data);
+    } catch (error: any) {
       console.error('Error fetching email settings:', error);
-      toast.error('Error fetching email settings');
+      if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please log in again.');
+        localStorage.removeItem('adminToken');
+        // Redirect will be handled by the API interceptor
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to fetch email settings');
+      }
     } finally {
       setLoading(false);
     }
@@ -79,36 +61,15 @@ const EmailSettingsManagement: React.FC = () => {
   const handleSaveSettings = async () => {
     setSaving(true);
     try {
-      const token = localStorage.getItem('adminToken');
-
-      if (!token || token === 'null' || token === 'undefined') {
-        toast.error('Please log in to save settings');
-        return;
-      }
-
-      const response = await fetch('/api/email-settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ settings })
-      });
-
-      if (response.ok) {
-        toast.success('Email settings updated successfully');
+      await emailSettingsAPI.updateEmailSettings(settings);
+      toast.success('Email settings saved successfully');
+    } catch (error: any) {
+      console.error('Error saving email settings:', error);
+      if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please log in again.');
       } else {
-        const data = await response.json();
-        if (response.status === 401) {
-          toast.error('Authentication failed. Please log in again.');
-          localStorage.removeItem('adminToken');
-        } else {
-          toast.error(data.message || 'Failed to update settings');
-        }
+        toast.error(error.response?.data?.message || 'Failed to save email settings');
       }
-    } catch (error) {
-      console.error('Error updating settings:', error);
-      toast.error('Error updating settings');
     } finally {
       setSaving(false);
     }
@@ -122,37 +83,15 @@ const EmailSettingsManagement: React.FC = () => {
 
     setTesting(true);
     try {
-      const token = localStorage.getItem('adminToken');
-
-      if (!token || token === 'null' || token === 'undefined') {
-        toast.error('Please log in to test email');
-        return;
-      }
-
-      const response = await fetch('/api/email-settings/test', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ testEmail })
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        toast.success(data.message);
-        setTestEmail('');
+      await emailSettingsAPI.testEmailConfiguration({ testEmail });
+      toast.success('Test email sent successfully');
+    } catch (error: any) {
+      console.error('Error testing email:', error);
+      if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please log in again.');
       } else {
-        if (response.status === 401) {
-          toast.error('Authentication failed. Please log in again.');
-          localStorage.removeItem('adminToken');
-        } else {
-          toast.error(data.message || 'Failed to send test email');
-        }
+        toast.error(error.response?.data?.message || 'Failed to send test email');
       }
-    } catch (error) {
-      console.error('Error sending test email:', error);
-      toast.error('Error sending test email');
     } finally {
       setTesting(false);
     }

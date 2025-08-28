@@ -177,13 +177,39 @@ export const contentAPI = {
         blogAPI.deleteBlog(id),
 };
 
-// Admin API
-export const adminAPI_functions = {
-    getDashboardStats: (): Promise<AxiosResponse<ApiResponse<any>>> =>
-        adminAPI.get('/admin/stats'),
+// Social Links API
+export const socialLinksAPI = {
+    // Public
+    getPublicSocialLinks: (): Promise<AxiosResponse<ApiResponse<any[]>>> =>
+        api.get('/social-links/public'),
 
-    getProfile: (): Promise<AxiosResponse<ApiResponse<User>>> =>
-        adminAPI.get('/admin/profile'),
+    // Admin only
+    getAllSocialLinks: (): Promise<AxiosResponse<ApiResponse<any[]>>> =>
+        adminAPI.get('/social-links'),
+
+    createSocialLink: (linkData: any): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.post('/social-links', linkData),
+
+    updateSocialLink: (id: string, linkData: any): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.put(`/social-links/${id}`, linkData),
+
+    deleteSocialLink: (id: string): Promise<AxiosResponse<ApiResponse<void>>> =>
+        adminAPI.delete(`/social-links/${id}`),
+};
+
+// Email Settings API
+export const emailSettingsAPI = {
+    getEmailSettings: (): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.get('/email-settings'),
+
+    updateEmailSettings: (settings: any): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.put('/email-settings', settings),
+
+    testEmailConfiguration: (testData: any): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.post('/email-settings/test', testData),
+
+    getEmailStats: (): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.get('/email-settings/stats'),
 };
 
 export default api;
