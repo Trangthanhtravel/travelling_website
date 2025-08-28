@@ -212,4 +212,14 @@ export const emailSettingsAPI = {
         adminAPI.get('/email-settings/stats'),
 };
 
+// Admin API
+export const adminAPI_functions = {
+    getDashboardStats: (): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.get('/admin/stats'),
+
+        getProfile: (): Promise<AxiosResponse<ApiResponse<User>>> =>
+            adminAPI.get('/admin/profile'),
+    };
+
+
 export default api;
