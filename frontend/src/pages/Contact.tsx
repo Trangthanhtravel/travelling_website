@@ -50,7 +50,7 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen py-16 transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
+    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
       {/* Hero Section */}
       <div className="bg-accent-orange text-white py-16 mb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
