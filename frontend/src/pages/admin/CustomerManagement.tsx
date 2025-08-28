@@ -156,37 +156,9 @@ const CustomerManagement: React.FC = () => {
               <Icon icon={Icons.FiUserPlus} className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">New Customers</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Customers</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {customers.filter(c => c.totalBookings === 1).length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-dark-800 rounded-lg shadow-lg p-6 border dark:border-dark-700">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-              <Icon icon={Icons.FiRepeat} className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Repeat Customers</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {customers.filter(c => c.totalBookings >= 2).length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-dark-800 rounded-lg shadow-lg p-6 border dark:border-dark-700">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-              <Icon icon={Icons.FiStar} className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">VIP Customers</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {customers.filter(c => c.totalBookings >= 5).length}
               </p>
             </div>
           </div>
