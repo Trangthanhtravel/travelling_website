@@ -92,7 +92,7 @@ class SocialLinksController {
 
             const result = await req.db.prepare(`
                 UPDATE social_links 
-                SET platform = ?, url = ?, display_text = ?, icon = ?, is_active = ?, sort_order = ?
+                SET platform = ?, url = ?, display_text = ?, icon = ?, is_active = ?, sort_order = ?, updated_at = datetime('now')
                 WHERE id = ?
             `).bind(platform, url, display_text || null, icon || null, is_active || 1, sort_order || 0, id).run();
 
