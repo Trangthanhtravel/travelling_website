@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../components/common/Icons';
 import { useTheme } from '../contexts/ThemeContext';
 
 const Services: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,6 +79,19 @@ const Services: React.FC = () => {
 
   const pagination = servicesData?.pagination;
   const services = servicesData?.data || [];
+
+  // Handle URL parameters for filtering
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    const searchParam = searchParams.get('search');
+
+    if (categoryParam) {
+      setActiveCategory(categoryParam);
+    }
+    if (searchParam) {
+      setSearchTerm(searchParam);
+    }
+  }, [searchParams]);
 
   if (error) {
     return (

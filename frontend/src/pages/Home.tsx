@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { Icon, Icons } from '../components/common/Icons';
 import AnimatedCounter from '../components/common/AnimatedCounter';
@@ -37,6 +37,7 @@ const Home: React.FC = () => {
   const statisticsRef = useRef<HTMLDivElement>(null);
   const carRentalsRef = useRef<HTMLDivElement>(null);
   const coreServicesRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // Scroll functions
   const scrollLeft = (ref: React.RefObject<HTMLDivElement>) => {
@@ -237,6 +238,41 @@ const Home: React.FC = () => {
   const carRentals = (carRentalsData?.data || []).filter((service: any) =>
     service.service_type === 'car-rental'
   ).slice(0, 6); // Limit to 6 car rentals for homepage
+
+  // Function to handle service navigation with category filter
+  const handleServiceNavigation = (serviceTitle: string) => {
+    let categorySlug = '';
+
+    // Map service titles to category slugs that match your backend categories
+    switch (serviceTitle.toLowerCase()) {
+      case 'domestic tours':
+        categorySlug = 'domestic-tours';
+        break;
+      case 'outbound tours':
+        categorySlug = 'outbound-tours';
+        break;
+      case 'car rental':
+        categorySlug = 'car-rental';
+        break;
+      case 'hotel booking':
+        categorySlug = 'hotel-booking';
+        break;
+      case 'train booking':
+        categorySlug = 'train-booking';
+        break;
+      case 'cruise/ship':
+        categorySlug = 'cruise';
+        break;
+      case 'visa service':
+        categorySlug = 'visa-service';
+        break;
+      default:
+        categorySlug = 'all';
+    }
+
+    // Navigate to services page with category filter
+    navigate(`/services?category=${categorySlug}`);
+  };
 
   return (
     <div className={`transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
@@ -534,7 +570,10 @@ const Home: React.FC = () => {
                       <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
                         {service.description}
                       </p>
-                      <button className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200">
+                      <button
+                        onClick={() => handleServiceNavigation(service.title)}
+                        className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
+                      >
                         Learn More
                       </button>
                     </div>
