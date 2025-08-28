@@ -18,14 +18,14 @@ interface DirectBookingForm extends Omit<BookingForm, 'tourId' | 'travelers'> {
 }
 
 const DirectBooking: React.FC = () => {
-  const { tourId } = useParams<{ tourId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [pricing, setPricing] = useState<any>(null);
 
   const { data: response, isLoading: tourLoading } = useQuery({
-    queryKey: ['tour-booking', tourId],
-    queryFn: () => toursAPI.getTourBySlug(tourId!),
-    enabled: !!tourId,
+    queryKey: ['tour-booking', slug],
+    queryFn: () => toursAPI.getTourBySlug(slug!),
+    enabled: !!slug,
   });
 
   // Extract the actual tour data from the API response with proper type checking
@@ -102,7 +102,7 @@ const DirectBooking: React.FC = () => {
 
     const bookingData = {
       type: 'tour' as const,
-      itemId: String(tourData?._id || tourData?.id || tourId),
+      itemId: slug!, // Use slug instead of trying to get ID from tour data
       customerInfo: data.customerInfo,
       bookingDetails: {
         startDate: data.startDate,

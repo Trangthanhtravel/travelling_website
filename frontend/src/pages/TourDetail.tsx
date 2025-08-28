@@ -277,7 +277,7 @@ const TourDetail: React.FC = () => {
                 </div>
 
                 <Link
-                  to={`/booking/${tour?._id || tour?.id || slug}`}
+                  to={`/booking/${slug}`}
                   className="w-full btn-primary mb-4 flex items-center justify-center"
                 >
                   <Icon icon={Icons.FiCalendar} className="w-4 h-4 mr-2" />

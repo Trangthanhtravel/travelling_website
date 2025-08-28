@@ -199,10 +199,23 @@ class Service {
       return {
         total: totalServices[0]?.count || 0,
         featured: featuredServices[0]?.count || 0,
-        byCategory: servicesByCategory || []
+        byCategory: servicesByCategory
       };
     } catch (error) {
       console.error('Error getting service stats:', error);
+      throw error;
+    }
+  }
+
+  // Find service by slug
+  static async findBySlug(db, slug) {
+    try {
+      const result = await dbHelpers.query(db, 'SELECT * FROM services WHERE slug = ? AND status = ?', [slug, 'active']);
+      if (result.length === 0) return null;
+
+      return new Service(result[0]);
+    } catch (error) {
+      console.error('Error finding service by slug:', error);
       throw error;
     }
   }

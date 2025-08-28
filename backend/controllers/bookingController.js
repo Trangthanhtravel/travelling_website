@@ -112,9 +112,9 @@ const createDirectBooking = async (req, res) => {
     // Get tour or service details
     let tourOrService;
     if (type === 'tour') {
-      tourOrService = await Tour.findById(req.db, itemId);
+      tourOrService = await Tour.findBySlug(req.db, itemId);
     } else if (type === 'service') {
-      tourOrService = await Service.findById(req.db, itemId);
+      tourOrService = await Service.findBySlug(req.db, itemId);
     }
 
     if (!tourOrService) {

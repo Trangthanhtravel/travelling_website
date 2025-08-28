@@ -54,7 +54,7 @@ const AppContent: React.FC = () => {
           <Route path="/login" element={<Login />} />
 
           {/* Customer Booking Routes - No authentication required */}
-          <Route path="/booking/:tourId" element={<Booking />} />
+          <Route path="/booking/:slug" element={<Booking />} />
           <Route path="/service-booking/:slug" element={<ServiceBooking />} />
 
           {/* Admin Routes */}
