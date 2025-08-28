@@ -6,6 +6,7 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import SocialChatBox from './components/common/SocialChatBox';
+import ScrollToTop from './components/common/ScrollToTop';
 import Home from './pages/Home';
 import Tours from './pages/Tours';
 import TourDetail from './pages/TourDetail';
@@ -37,6 +38,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
+      <ScrollToTop />
       <Header />
       <main className={`flex-1 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
         <Routes>
@@ -45,7 +47,7 @@ const AppContent: React.FC = () => {
           <Route path="/tours" element={<Tours />} />
           <Route path="/tours/:slug" element={<TourDetail />} />
           <Route path="/services" element={<Services />} />
-          <Route path="/services/:serviceId" element={<ServiceDetail />} />
+          <Route path="/services/:slug" element={<ServiceDetail />} />
           <Route path="/blogs" element={<Blogs />} /> {/* Add blogs alias route */}
           <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="/contact" element={<Contact />} /> {/* Add Contact route */}
@@ -53,7 +55,7 @@ const AppContent: React.FC = () => {
 
           {/* Customer Booking Routes - No authentication required */}
           <Route path="/booking/:tourId" element={<Booking />} />
-          <Route path="/service-booking/:serviceId" element={<ServiceBooking />} />
+          <Route path="/service-booking/:slug" element={<ServiceBooking />} />
 
           {/* Admin Routes */}
           <Route path="/admin/*" element={
