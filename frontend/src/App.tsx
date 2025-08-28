@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
@@ -33,6 +33,14 @@ const queryClient = new QueryClient({
   },
 });
 
+// Route-based layout wrapper component
+const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
+  return <div className={isHomePage ? '' : 'pt-16'}>{children}</div>;
+};
+
 const AppContent: React.FC = () => {
   const { isDarkMode } = useTheme();
 
@@ -41,44 +49,46 @@ const AppContent: React.FC = () => {
       <ScrollToTop />
       <Header />
       <main className={`flex-1 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/tours" element={<Tours />} />
-          <Route path="/tours/:slug" element={<TourDetail />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/services/:slug" element={<ServiceDetail />} />
-          <Route path="/blogs" element={<Blogs />} /> {/* Add blogs alias route */}
-          <Route path="/blog/:slug" element={<BlogDetail />} />
-          <Route path="/contact" element={<Contact />} /> {/* Add Contact route */}
-          <Route path="/login" element={<Login />} />
+        <RouteWrapper>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/tours" element={<Tours />} />
+            <Route path="/tours/:slug" element={<TourDetail />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/services/:slug" element={<ServiceDetail />} />
+            <Route path="/blogs" element={<Blogs />} />
+            <Route path="/blog/:slug" element={<BlogDetail />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
 
-          {/* Customer Booking Routes - No authentication required */}
-          <Route path="/booking/:slug" element={<Booking />} />
-          <Route path="/service-booking/:slug" element={<ServiceBooking />} />
+            {/* Customer Booking Routes - No authentication required */}
+            <Route path="/booking/:slug" element={<Booking />} />
+            <Route path="/service-booking/:slug" element={<ServiceBooking />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/*" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/blogs" element={
-            <ProtectedRoute requiredRole="admin">
-              <BlogManagement />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/blogs/new" element={
-            <ProtectedRoute requiredRole="admin">
-              <BlogEditor />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/blogs/edit/:blogId" element={
-            <ProtectedRoute requiredRole="admin">
-              <BlogEditor />
-            </ProtectedRoute>
-          } />
-        </Routes>
+            {/* Admin Routes */}
+            <Route path="/admin/*" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/blogs" element={
+              <ProtectedRoute requiredRole="admin">
+                <BlogManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/blogs/new" element={
+              <ProtectedRoute requiredRole="admin">
+                <BlogEditor />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/blogs/edit/:blogId" element={
+              <ProtectedRoute requiredRole="admin">
+                <BlogEditor />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </RouteWrapper>
       </main>
       <Footer />
       <SocialChatBox /> {/* Add SocialChatBox component */}
