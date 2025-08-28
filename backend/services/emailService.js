@@ -28,9 +28,26 @@ class EmailService {
       const result = await db.prepare(query).all();
 
       const settings = {};
-      result.forEach(row => {
-        settings[row.setting_key] = row.setting_value;
-      });
+
+      // D1 returns results in a 'results' array
+      if (result.results && result.results.length > 0) {
+        result.results.forEach(row => {
+          settings[row.setting_key] = row.setting_value;
+        });
+      }
+
+      // If no settings found in database, return defaults
+      if (Object.keys(settings).length === 0) {
+        return {
+          company_email: process.env.COMPANY_EMAIL || 'info@travelcompany.com',
+          company_name: process.env.COMPANY_NAME || 'Travel Company',
+          email_from_name: 'Travel Company Team',
+          booking_notification_enabled: 'true',
+          customer_confirmation_enabled: 'true',
+          admin_notification_subject: 'New Booking Received - {booking_number}',
+          customer_confirmation_subject: 'Booking Confirmation - {booking_number}'
+        };
+      }
 
       return settings;
     } catch (error) {
