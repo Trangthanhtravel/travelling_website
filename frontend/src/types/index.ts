@@ -139,6 +139,7 @@ export interface Content {
 export interface Service {
   id: string;
   title: string;
+    slug: string;
   subtitle?: string;
   description: string;
   price: number;

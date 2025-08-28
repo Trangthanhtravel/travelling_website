@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Icon, Icons } from '../components/common/Icons';
-import { servicesAPI } from '../utils/api';
+import { servicesAPI, bookingsAPI } from '../utils/api';
 import { useTheme } from '../contexts/ThemeContext';
 import { ServiceBookingForm } from '../types';
 import toast from 'react-hot-toast';
@@ -53,17 +53,18 @@ const otherServiceSchema = yup.object({
 });
 
 const ServiceBooking: React.FC = () => {
-  const { serviceId } = useParams<{ serviceId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
 
-  const { data: serviceData, isLoading: serviceLoading } = useQuery({
-    queryKey: ['service-booking', serviceId],
-    queryFn: () => servicesAPI.getServiceById(serviceId!),
-    enabled: !!serviceId,
+  // Fetch service data
+  const { data: serviceData, isLoading, error } = useQuery({
+    queryKey: ['service', slug],
+    queryFn: () => servicesAPI.getServiceBySlug(slug!),
+    enabled: !!slug,
   });
 
-  const service = serviceData?.data.data; // Fixed: added .service
+  const service = serviceData?.data.data;
 
   // Determine which schema to use based on service category
   const getSchema = () => {
@@ -83,7 +84,7 @@ const ServiceBooking: React.FC = () => {
   } = useForm<ServiceBookingForm>({
     resolver: yupResolver(getSchema()) as any,
     defaultValues: {
-      serviceId: serviceId || '',
+      serviceId: slug || '',
       serviceType: service?.category || 'tours',
       passengers: { adults: 1, children: 0 },
       returnTrip: false,
@@ -94,40 +95,39 @@ const ServiceBooking: React.FC = () => {
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData: ServiceBookingForm) => {
-      // Transform data to match backend expectations
-      const transformedData = {
-        serviceId: bookingData.serviceId,
-        serviceType: bookingData.serviceType,
-        name: bookingData.name,
-        email: bookingData.email,
-        gender: bookingData.gender,
-        dateOfBirth: bookingData.dateOfBirth,
-        phone: bookingData.phone,
-        address: bookingData.address,
-        passengers: bookingData.passengers.adults + bookingData.passengers.children,
-        departureDate: bookingData.departureDate,
-        from: bookingData.from,
-        to: bookingData.to,
-        returnTrip: bookingData.returnTrip,
-        returnDate: bookingData.returnDate,
-        tripDetails: bookingData.tripDetails,
-        requestDetails: bookingData.requestDetails,
+      // Transform data to match the database schema and backend API
+      const totalTravelers = bookingData.passengers.adults + bookingData.passengers.children;
+
+      // Build special requests from various fields
+      const specialRequestsParts = [];
+      if (bookingData.requestDetails) specialRequestsParts.push(`Service Requirements: ${bookingData.requestDetails}`);
+      if (bookingData.tripDetails) specialRequestsParts.push(`Trip Details: ${bookingData.tripDetails}`);
+      if (bookingData.from && bookingData.to) specialRequestsParts.push(`Route: ${bookingData.from} to ${bookingData.to}`);
+      if (bookingData.returnTrip && bookingData.returnDate) specialRequestsParts.push(`Return Trip: ${bookingData.returnDate}`);
+      if (bookingData.gender) specialRequestsParts.push(`Gender: ${bookingData.gender}`);
+      if (bookingData.dateOfBirth) specialRequestsParts.push(`Date of Birth: ${bookingData.dateOfBirth}`);
+      if (bookingData.address) specialRequestsParts.push(`Address: ${bookingData.address}`);
+
+      const bookingPayload = {
+        type: 'service' as const,
+        itemId: slug!,
+        customerInfo: {
+          name: bookingData.name,
+          email: bookingData.email,
+          phone: bookingData.phone,
+        },
+        bookingDetails: {
+          startDate: bookingData.departureDate || new Date().toISOString().split('T')[0],
+          totalTravelers,
+          specialRequests: specialRequestsParts.join('; '),
+        },
+        pricing: {
+          totalAmount: service?.price || 0,
+          currency: 'USD',
+        },
       };
 
-      // Call the service booking API (this should be added to servicesAPI)
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/services/bookings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(transformedData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create booking');
-      }
-
-      return response.json();
+      return await bookingsAPI.createDirectBooking(bookingPayload);
     },
     onSuccess: (data) => {
       toast.success('Booking request submitted successfully! Our team will contact you shortly.');
@@ -142,7 +142,7 @@ const ServiceBooking: React.FC = () => {
     createBookingMutation.mutate(data);
   };
 
-  if (serviceLoading || !service) {
+  if (isLoading || !service) {
     return (
       <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'} flex items-center justify-center`}>
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
@@ -180,7 +180,7 @@ const ServiceBooking: React.FC = () => {
     <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'} py-8`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <Link to={`/services/${serviceId}`} className={`flex items-center text-sm ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
+          <Link to={`/services/${slug}`} className={`flex items-center text-sm ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
             <Icon icon={Icons.FiArrowLeft} className="w-4 h-4 mr-1" />
             Back to Service Details
           </Link>

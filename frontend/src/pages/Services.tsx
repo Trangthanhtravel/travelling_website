@@ -254,7 +254,7 @@ const Services: React.FC = () => {
 
                   {/* View Details Button */}
                   <Link
-                    to={`/services/${service.id}`}
+                    to={`/services/${service.slug}`}
                     className="w-full bg-accent-orange hover:bg-accent-orange-hover text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center"
                   >
                     View Details

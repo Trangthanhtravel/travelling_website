@@ -76,6 +76,7 @@ CREATE TABLE tours (
 CREATE TABLE services (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
     subtitle TEXT,
     description TEXT,
     price REAL NOT NULL,

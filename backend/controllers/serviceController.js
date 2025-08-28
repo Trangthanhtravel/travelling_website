@@ -151,23 +151,72 @@ const getServices = async (req, res) => {
 
 // Get single service by ID
 const getServiceById = async (req, res) => {
-  try {
-    const db = getDB();
-    if (!db) {
-      return res.status(500).json({ success: false, message: 'Database not available' });
-    }
+    try {
+        const db = getDB();
+        if (!db) {
+            return res.status(500).json({ success: false, message: 'Database not available' });
+        }
 
-    const { id } = req.params;
+        const { id } = req.params;
 
-    // Updated query to include category information
-    const query = `
+        // Updated query to include category information
+        const query = `
       SELECT s.*, c.name as category_name, c.slug as category_slug, c.icon as category_icon, c.color as category_color
       FROM services s
       LEFT JOIN categories c ON s.category_id = c.id
       WHERE s.id = ? AND (s.status = "active" OR ? = "admin")
     `;
 
-    const result = await db.prepare(query).bind(id, req.user?.role || '').first();
+        const result = await db.prepare(query).bind(id, req.user?.role || '').first();
+
+        if (!result) {
+            return res.status(404).json({ success: false, message: 'Service not found' });
+        }
+
+        const service = {
+            ...result,
+            images: result.images ? JSON.parse(result.images) : [],
+            videos: result.videos ? JSON.parse(result.videos) : [],
+            included: result.included ? JSON.parse(result.included) : [],
+            excluded: result.excluded ? JSON.parse(result.excluded) : [],
+            itinerary: result.itinerary ? JSON.parse(result.itinerary) : [],
+            location: result.location ? JSON.parse(result.location) : null,
+            featured: Boolean(result.featured),
+            category: result.category_id ? {
+                id: result.category_id,
+                name: result.category_name,
+                slug: result.category_slug,
+                icon: result.category_icon,
+                color: result.category_color
+            } : null
+        };
+
+        res.json({ success: true, data: service });
+    } catch (error) {
+        console.error('Error fetching service:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+// Get single service by slug
+const getServiceBySlug = async (req, res) => {
+  try {
+    const db = getDB();
+    if (!db) {
+      return res.status(500).json({ success: false, message: 'Database not available' });
+    }
+
+    const { slug } = req.params;
+
+    // Updated query to include category information and search by slug
+    const query = `
+      SELECT s.*, c.name as category_name, c.slug as category_slug, c.icon as category_icon, c.color as category_color
+      FROM services s
+      LEFT JOIN categories c ON s.category_id = c.id
+      WHERE s.slug = ? AND (s.status = "active" OR ? = "admin")
+    `;
+
+    const result = await db.prepare(query).bind(slug, req.user?.role || '').first();
 
     if (!result) {
       return res.status(404).json({ success: false, message: 'Service not found' });
@@ -702,7 +751,7 @@ const updateServiceStatus = async (req, res) => {
 
 module.exports = {
   getServices,
-  getServiceById,
+  getServiceBySlug,
   createServiceBooking,
   getUserServiceBookings,
   getAllServiceBookings,

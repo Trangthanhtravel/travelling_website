@@ -90,6 +90,9 @@ export const servicesAPI = {
 
     getServiceById: (id: string): Promise<AxiosResponse<ApiResponse<Service>>> =>
         api.get(`/services/${id}`),
+
+    getServiceBySlug: (slug: string): Promise<AxiosResponse<ApiResponse<Service>>> =>
+        api.get(`/services/${slug}`),
 };
 
 // Bookings API

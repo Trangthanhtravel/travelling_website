@@ -6,6 +6,7 @@ const { requireAuth, adminAuth } = require('../middleware/auth');
 // Public routes
 router.get('/', serviceController.getServices);
 router.get('/:id', serviceController.getServiceById);
+router.get('/:slug', serviceController.getServiceBySlug);
 
 // Protected routes for customers
 router.post('/bookings', requireAuth, serviceController.createServiceBooking);

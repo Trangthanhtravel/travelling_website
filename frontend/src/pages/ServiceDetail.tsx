@@ -6,17 +6,17 @@ import { servicesAPI } from '../utils/api';
 import { useTheme } from '../contexts/ThemeContext';
 
 const ServiceDetail: React.FC = () => {
-  const { serviceId } = useParams<{ serviceId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const { isDarkMode } = useTheme();
   const [selectedImage, setSelectedImage] = useState(0);
 
   const { data: serviceData, isLoading, error } = useQuery({
-    queryKey: ['service', serviceId],
-    queryFn: () => servicesAPI.getServiceById(serviceId!),
-    enabled: !!serviceId,
+    queryKey: ['service', slug],
+    queryFn: () => servicesAPI.getServiceBySlug(slug!),
+    enabled: !!slug,
   });
 
-  const service = serviceData?.data?.data; // Fixed: added .service
+  const service = serviceData?.data?.data;
 
   if (isLoading) {
     return (
@@ -238,7 +238,7 @@ const ServiceDetail: React.FC = () => {
                 </div>
 
                 <Link
-                  to={`/service-booking/${service.id}`}
+                  to={`/service-booking/${service.slug}`}
                   className="w-full btn-primary mb-4 flex items-center justify-center"
                 >
                   <Icon icon={Icons.FiCalendar} className="w-4 h-4 mr-2" />
