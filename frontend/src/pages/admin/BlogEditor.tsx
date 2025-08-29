@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {  useMutation } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import toast from 'react-hot-toast';
@@ -20,12 +19,33 @@ interface BlogFormData {
   seo_keywords: string;
 }
 
-const BlogEditor: React.FC = () => {
-  const { blogId } = useParams<{ blogId: string }>();
-  const navigate = useNavigate();
+interface Blog {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  featured_image?: string;
+  author: number;
+  author_name: string;
+  status: 'draft' | 'published' | 'archived';
+  featured: boolean;
+  categories?: string;
+  tags?: string;
+  views: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface BlogEditorProps {
+  blog: Blog | null;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSuccess }) => {
   const { isDarkMode } = useTheme();
-  const queryClient = useQueryClient();
-  const isEditing = !!blogId && blogId !== 'new';
+  const isEditing = !!blog;
 
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [formData, setFormData] = useState<BlogFormData>({
@@ -43,26 +63,9 @@ const BlogEditor: React.FC = () => {
     seo_keywords: ''
   });
 
-  // Fetch blog for editing
-  const { data: blogData, isLoading } = useQuery({
-    queryKey: ['blog', blogId],
-    queryFn: async () => {
-      if (!isEditing) return null;
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/blogs/${blogId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch blog');
-      return response.json();
-    },
-    enabled: isEditing
-  });
-
   // Populate form when editing
   useEffect(() => {
-    if (blogData?.data?.blog) {
-      const blog = blogData.data.blog;
+    if (blog) {
       setFormData({
         title: blog.title || '',
         slug: blog.slug || '',
@@ -73,12 +76,12 @@ const BlogEditor: React.FC = () => {
         featured: blog.featured || false,
         categories: blog.categories || '',
         tags: blog.tags || '',
-        seo_meta_title: blog.seo_meta_title || '',
-        seo_meta_description: blog.seo_meta_description || '',
-        seo_keywords: blog.seo_keywords || ''
+        seo_meta_title: blog.title || '',
+        seo_meta_description: blog.excerpt || '',
+        seo_keywords: blog.tags || ''
       });
     }
-  }, [blogData]);
+  }, [blog]);
 
   // Generate slug from title
   const generateSlug = (title: string) => {
@@ -103,7 +106,7 @@ const BlogEditor: React.FC = () => {
   const saveBlogMutation = useMutation({
     mutationFn: async (data: BlogFormData) => {
       const url = isEditing
-        ? `${process.env.REACT_APP_API_URL}/blogs/admin/${blogId}`
+        ? `${process.env.REACT_APP_API_URL}/blogs/admin/${blog?.id}`
         : `${process.env.REACT_APP_API_URL}/blogs/admin`;
 
       const response = await fetch(url, {
@@ -135,8 +138,7 @@ const BlogEditor: React.FC = () => {
     },
     onSuccess: () => {
       toast.success(isEditing ? 'Blog updated successfully' : 'Blog created successfully');
-      queryClient.invalidateQueries({ queryKey: ['admin-blogs'] });
-      navigate('/admin/blogs');
+      onSuccess();
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to save blog');
@@ -162,16 +164,6 @@ const BlogEditor: React.FC = () => {
     setIsPreviewMode(!isPreviewMode);
   };
 
-  if (isLoading) {
-    return (
-      <div className={`p-6 ${isDarkMode ? 'bg-dark-900 text-dark-text-primary' : 'bg-light-50 text-light-text-primary'}`}>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-orange"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900 text-dark-text-primary' : 'bg-light-50 text-light-text-primary'}`}>
       {/* Header */}
@@ -180,7 +172,7 @@ const BlogEditor: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => navigate('/admin/blogs')}
+                onClick={onClose}
                 className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-dark-700' : 'hover:bg-gray-100'}`}
               >
                 <Icon icon={Icons.FiArrowLeft} className="w-5 h-5" />
@@ -503,4 +495,3 @@ const BlogEditor: React.FC = () => {
 };
 
 export default BlogEditor;
-

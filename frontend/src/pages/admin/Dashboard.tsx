@@ -224,21 +224,23 @@ const AdminDashboard: React.FC = () => {
 
         <div className="mb-8">
           <div className="border-b border-gray-200 dark:border-dark-600">
-            <nav className="flex space-x-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                    activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-500'
-                  }`}
-                >
-                  <Icon icon={tab.icon} className="w-5 h-5 mr-2" />
-                  {tab.name}
-                </button>
-              ))}
+            <nav className="flex overflow-x-auto scrollbar-hide">
+              <div className="flex space-x-8 min-w-max px-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-500'
+                    }`}
+                  >
+                    <Icon icon={tab.icon} className="w-5 h-5 mr-2" />
+                    {tab.name}
+                  </button>
+                ))}
+              </div>
             </nav>
           </div>
         </div>

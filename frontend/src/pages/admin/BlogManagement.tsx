@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import { Icon, Icons } from '../../components/common/Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import toast from 'react-hot-toast';
+import BlogEditor from './BlogEditor';
 
 interface Blog {
   id: number;
@@ -27,8 +27,9 @@ const BlogManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
   const [filterFeatured, setFilterFeatured] = useState<'all' | 'featured' | 'normal'>('all');
+  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const { isDarkMode } = useTheme();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   // Fetch blogs
@@ -105,8 +106,25 @@ const BlogManagement: React.FC = () => {
     toggleFeaturedMutation.mutate({ blogId, featured: !currentFeatured });
   };
 
-  const handleEdit = (blogId: number) => {
-    navigate(`/admin/blogs/edit/${blogId}`);
+  const handleEdit = (blog: Blog) => {
+    setEditingBlog(blog);
+    setIsEditorOpen(true);
+  };
+
+  const handleCreateNew = () => {
+    setEditingBlog(null);
+    setIsEditorOpen(true);
+  };
+
+  const handleCloseEditor = () => {
+    setIsEditorOpen(false);
+    setEditingBlog(null);
+  };
+
+  const handleEditorSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-blogs'] });
+    handleCloseEditor();
+    toast.success(editingBlog ? 'Blog updated successfully' : 'Blog created successfully');
   };
 
   const handlePreview = (slug: string) => {
@@ -125,6 +143,17 @@ const BlogManagement: React.FC = () => {
     );
   }
 
+  // If editor is open, show the blog editor instead of the blog list
+  if (isEditorOpen) {
+    return (
+      <BlogEditor
+        blog={editingBlog}
+        onClose={handleCloseEditor}
+        onSuccess={handleEditorSuccess}
+      />
+    );
+  }
+
   return (
     <div className={`p-6 ${isDarkMode ? 'bg-dark-900 text-dark-text-primary' : 'bg-light-50 text-light-text-primary'}`}>
       {/* Header */}
@@ -136,7 +165,7 @@ const BlogManagement: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/admin/blogs/new')}
+          onClick={handleCreateNew}
           className="bg-accent-orange hover:bg-accent-orange-hover text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
         >
           <Icon icon={Icons.FiPlus} className="w-4 h-4" />
@@ -276,7 +305,7 @@ const BlogManagement: React.FC = () => {
                       <Icon icon={Icons.FiEye} className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleEdit(blog.id)}
+                      onClick={() => handleEdit(blog)}
                       className="text-accent-orange hover:text-accent-orange-hover"
                       title="Edit"
                     >
