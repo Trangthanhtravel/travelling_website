@@ -84,7 +84,10 @@ const BlogManagement: React.FC = () => {
         },
         body: JSON.stringify({ featured })
       });
-      if (!response.ok) throw new Error('Failed to update blog');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update blog');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -92,6 +95,7 @@ const BlogManagement: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-blogs'] });
     },
     onError: (error: Error) => {
+      console.error('Featured toggle error:', error);
       toast.error(error.message || 'Failed to update blog');
     }
   });

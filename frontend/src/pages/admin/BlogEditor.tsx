@@ -3,6 +3,9 @@ import {  useMutation } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import toast from 'react-hot-toast';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 interface BlogFormData {
   title: string;
@@ -218,7 +221,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSuccess }) => 
         {isPreviewMode ? (
           /* Preview Mode */
           <div className={`rounded-lg shadow-sm ${isDarkMode ? 'bg-dark-800' : 'bg-white'} p-8`}>
-            <article className="prose prose-lg max-w-none">
+            <article className="prose prose-lg max-w-none dark:prose-invert">
               {formData.featured_image && (
                 <img
                   src={formData.featured_image}
@@ -251,10 +254,51 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSuccess }) => 
                 )}
               </header>
 
-              <div
-                className={`prose max-w-none ${isDarkMode ? 'prose-invert' : ''}`}
-                dangerouslySetInnerHTML={{ __html: formData.content || '<p>Start writing your blog content...</p>' }}
-              />
+              <div className={`prose prose-lg max-w-none ${isDarkMode ? 'prose-invert' : ''}`}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    h1: ({ children }) => (
+                      <h1 className={`text-3xl font-bold mt-8 mb-4 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>{children}</h1>
+                    ),
+                    h2: ({ children }) => (
+                      <h2 className={`text-2xl font-bold mt-6 mb-3 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>{children}</h2>
+                    ),
+                    h3: ({ children }) => (
+                      <h3 className={`text-xl font-bold mt-4 mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>{children}</h3>
+                    ),
+                    p: ({ children }) => (
+                      <p className={`leading-relaxed mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-700'}`}>{children}</p>
+                    ),
+                    a: ({ href, children }) => (
+                      <a href={href} className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
+                        {children}
+                      </a>
+                    ),
+                    img: ({ src, alt }) => (
+                      <img src={src} alt={alt} className="w-full rounded-lg shadow-lg my-6" />
+                    ),
+                    blockquote: ({ children }) => (
+                      <blockquote className={`border-l-4 border-blue-500 pl-4 italic my-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
+                        {children}
+                      </blockquote>
+                    ),
+                    code: ({ children }) => (
+                      <code className={`px-1 py-0.5 rounded text-sm font-mono ${isDarkMode ? 'bg-dark-700' : 'bg-gray-100'}`}>
+                        {children}
+                      </code>
+                    ),
+                    pre: ({ children }) => (
+                      <pre className={`p-4 rounded-lg overflow-x-auto my-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-100'}`}>
+                        {children}
+                      </pre>
+                    ),
+                  }}
+                >
+                  {formData.content || 'Start writing your blog content...'}
+                </ReactMarkdown>
+              </div>
             </article>
           </div>
         ) : (
@@ -495,3 +539,4 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSuccess }) => 
 };
 
 export default BlogEditor;
+

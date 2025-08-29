@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
 import TourManagement from './TourManagement';
@@ -171,6 +171,9 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onQuickAction }) 
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
     { id: 'dashboard', name: 'Dashboard', icon: Icons.FiHome },
@@ -185,6 +188,45 @@ const AdminDashboard: React.FC = () => {
     { id: 'social-links', name: 'Social Links', icon: Icons.FiMessageCircle },
     { id: 'email-settings', name: 'Email Settings', icon: Icons.FiMail },
   ];
+
+  // Check scroll buttons state
+  const checkScrollButtons = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      setCanScrollLeft(container.scrollLeft > 0);
+      setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth);
+    }
+  };
+
+  // Scroll left
+  const scrollLeft = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  // Scroll right
+  const scrollRight = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+  };
+
+  // Check scroll state on mount and when tabs change
+  useEffect(() => {
+    checkScrollButtons();
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScrollButtons);
+      window.addEventListener('resize', checkScrollButtons);
+      return () => {
+        container.removeEventListener('scroll', checkScrollButtons);
+        window.removeEventListener('resize', checkScrollButtons);
+      };
+    }
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -224,24 +266,51 @@ const AdminDashboard: React.FC = () => {
 
         <div className="mb-8">
           <div className="border-b border-gray-200 dark:border-dark-600">
-            <nav className="flex overflow-x-auto scrollbar-hide">
-              <div className="flex space-x-8 min-w-max px-2">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-500'
-                    }`}
-                  >
-                    <Icon icon={tab.icon} className="w-5 h-5 mr-2" />
-                    {tab.name}
-                  </button>
-                ))}
-              </div>
-            </nav>
+            <div className="relative">
+              {/* Left scroll button */}
+              {canScrollLeft && (
+                <button
+                  onClick={scrollLeft}
+                  className="absolute left-0 top-0 bottom-0 z-10 bg-gradient-to-r from-gray-50 to-transparent dark:from-dark-900 dark:to-transparent w-12 flex items-center justify-start pl-2 hover:from-gray-100 dark:hover:from-dark-800"
+                >
+                  <Icon icon={Icons.FiChevronLeft} className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                </button>
+              )}
+
+              {/* Right scroll button */}
+              {canScrollRight && (
+                <button
+                  onClick={scrollRight}
+                  className="absolute right-0 top-0 bottom-0 z-10 bg-gradient-to-l from-gray-50 to-transparent dark:from-dark-900 dark:to-transparent w-12 flex items-center justify-end pr-2 hover:from-gray-100 dark:hover:from-dark-800"
+                >
+                  <Icon icon={Icons.FiChevronRight} className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                </button>
+              )}
+
+              {/* Tab navigation */}
+              <nav
+                ref={scrollContainerRef}
+                className="flex overflow-x-auto scrollbar-hide"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                <div className="flex space-x-8 min-w-max px-12">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
+                        activeTab === tab.id
+                          ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-500'
+                      }`}
+                    >
+                      <Icon icon={tab.icon} className="w-5 h-5 mr-2" />
+                      {tab.name}
+                    </button>
+                  ))}
+                </div>
+              </nav>
+            </div>
           </div>
         </div>
 

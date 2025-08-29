@@ -1,6 +1,9 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import { Icon, Icons } from '../components/common/Icons';
 import { blogAPI } from '../utils/api';
 
@@ -102,113 +105,122 @@ const BlogDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* Blog Content */}
       <article className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <header className="mb-8">
-          {/* Categories */}
-          {blog.categories && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {(typeof blog.categories === 'string' ? blog.categories.split(',') : blog.categories)
-                .map((category: string, index: number) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium rounded-full"
-                  >
-                    {category.trim()}
-                  </span>
-                ))}
-            </div>
-          )}
-
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             {blog.title}
           </h1>
 
-          {/* Meta Information */}
-          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400 mb-6">
-            {blog.authorProfile && (
-              <div className="flex items-center gap-2">
-                <Icon icon={Icons.FiUser} className="h-4 w-4" />
-                <span>{blog.authorProfile.name}</span>
-              </div>
+          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
+            <span>By {blog.author_name || 'Admin'}</span>
+            <span>•</span>
+            <time>{formatDate(blog.created_at)}</time>
+            <span>•</span>
+            <span>{blog.views || 0} views</span>
+            {blog.featured && (
+              <>
+                <span>•</span>
+                <span className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400 px-2 py-1 rounded text-xs font-medium">
+                  Featured
+                </span>
+              </>
             )}
-
-            <div className="flex items-center gap-2">
-              <Icon icon={Icons.FiCalendar} className="h-4 w-4" />
-              <time dateTime={blog.published_at || blog.created_at}>
-                {formatDate(blog.published_at || blog.created_at)}
-              </time>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Icon icon={Icons.FiClock} className="h-4 w-4" />
-              <span>{blog.reading_time || 5} min read</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Icon icon={Icons.FiEye} className="h-4 w-4" />
-              <span>{blog.views || 0} views</span>
-            </div>
           </div>
 
-          {/* Featured Image */}
-          {blog.featured_image && (
-            <div className="mb-8 rounded-lg overflow-hidden">
-              <img
-                src={blog.featured_image}
-                alt={blog.title}
-                className="w-full h-64 md:h-96 object-cover"
-              />
-            </div>
+          {blog.excerpt && (
+            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+              {blog.excerpt}
+            </p>
           )}
         </header>
 
-        {/* Content */}
-        <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
-          <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+        {/* Featured Image */}
+        {blog.featured_image && (
+          <div className="mb-8">
+            <img
+              src={blog.featured_image}
+              alt={blog.title}
+              className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+            />
+          </div>
+        )}
+
+        {/* Blog Content with Markdown Support */}
+        <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-strong:text-gray-900 dark:prose-strong:text-white">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+            components={{
+              // Custom components for better styling
+              h1: ({ children }) => (
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-4">{children}</h1>
+              ),
+              h2: ({ children }) => (
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-3">{children}</h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-4 mb-2">{children}</h3>
+              ),
+              p: ({ children }) => (
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{children}</p>
+              ),
+              a: ({ href, children }) => (
+                <a href={href} className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
+                  {children}
+                </a>
+              ),
+              img: ({ src, alt }) => (
+                <img src={src} alt={alt} className="w-full rounded-lg shadow-lg my-6" />
+              ),
+              blockquote: ({ children }) => (
+                <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 dark:text-gray-400 my-4">
+                  {children}
+                </blockquote>
+              ),
+              code: ({ children }) => (
+                <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm font-mono">
+                  {children}
+                </code>
+              ),
+              pre: ({ children }) => (
+                <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto my-4">
+                  {children}
+                </pre>
+              ),
+            }}
+          >
+            {blog.content || 'No content available.'}
+          </ReactMarkdown>
         </div>
 
         {/* Tags */}
         {blog.tags && (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Tags</h3>
+          <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Tags:</h3>
             <div className="flex flex-wrap gap-2">
-              {(typeof blog.tags === 'string' ? blog.tags.split(',') : blog.tags)
-                .map((tag: string, index: number) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-gray-200 dark:bg-dark-700 text-gray-700 dark:text-gray-300 text-sm rounded-full"
-                  >
-                    #{tag.trim()}
-                  </span>
-                ))}
+              {blog.tags.split(',').map((tag: string, index: number) => (
+                <span
+                  key={index}
+                  className="inline-block bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 px-3 py-1 rounded-full text-sm"
+                >
+                  {tag.trim()}
+                </span>
+              ))}
             </div>
           </div>
         )}
 
         {/* Navigation */}
-        <div className="flex justify-between items-center pt-8 border-t border-gray-200 dark:border-dark-700">
+        <div className="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
           <Link
             to="/blogs"
-            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
           >
             <Icon icon={Icons.FiArrowLeft} className="h-4 w-4" />
-            Back to Blogs
+            Back to all blogs
           </Link>
-
-          <div className="flex gap-4">
-            <button
-              onClick={() => navigator.share && navigator.share({
-                title: blog.title,
-                text: blog.excerpt,
-                url: window.location.href
-              })}
-              className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-            >
-              <Icon icon={Icons.FiShare} className="h-4 w-4" />
-              Share
-            </button>
-          </div>
         </div>
       </article>
     </div>
