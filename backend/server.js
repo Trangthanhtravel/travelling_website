@@ -72,6 +72,64 @@ app.use((req, res, next) => {
   }
 });
 
+// R2 Storage middleware - initialize R2 bucket for file uploads
+app.use((req, res, next) => {
+  try {
+    // Initialize R2 bucket if environment variables are available
+    if (process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
+      const { S3Client } = require('@aws-sdk/client-s3');
+
+      const r2Client = new S3Client({
+        region: 'auto',
+        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+        },
+      });
+
+      // Create a bucket helper object that mimics the expected interface
+      req.r2 = {
+        put: async (key, data, options = {}) => {
+          const { PutObjectCommand } = require('@aws-sdk/client-s3');
+          const command = new PutObjectCommand({
+            Bucket: process.env.R2_BUCKET_NAME,
+            Key: key,
+            Body: data,
+            ContentType: options.httpMetadata?.contentType,
+            CacheControl: options.httpMetadata?.cacheControl,
+          });
+          return await r2Client.send(command);
+        },
+        delete: async (key) => {
+          const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
+          const command = new DeleteObjectCommand({
+            Bucket: process.env.R2_BUCKET_NAME,
+            Key: key,
+          });
+          return await r2Client.send(command);
+        },
+        head: async (key) => {
+          const { HeadObjectCommand } = require('@aws-sdk/client-s3');
+          const command = new HeadObjectCommand({
+            Bucket: process.env.R2_BUCKET_NAME,
+            Key: key,
+          });
+          return await r2Client.send(command);
+        }
+      };
+    } else {
+      console.warn('R2 environment variables not configured. File uploads will not work.');
+      req.r2 = null;
+    }
+    next();
+  } catch (error) {
+    console.error('R2 initialization error:', error);
+    req.r2 = null;
+    next();
+  }
+});
+
 // Health check route
 app.get('/health', (req, res) => {
   res.json({

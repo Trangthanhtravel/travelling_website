@@ -14,8 +14,7 @@ interface Tour {
   duration: string;
   location: string;
   max_participants: number;
-  tour_type: string; // Fixed: use appropriate travel field
-  activity_level: string; // Fixed: use activity level instead of difficulty
+  activity_level: string;
   category: string;
   images: string[];
   itinerary: any;
@@ -34,14 +33,20 @@ interface TourFormData {
   duration: string;
   location: string;
   max_participants: number;
-  tour_type: string; // Fixed field name
-  activity_level: string; // Fixed field name
+  activity_level: string;
   category: string;
   included: string[];
   excluded: string[];
   status: 'active' | 'inactive' | 'draft';
   featured: boolean;
   images?: FileList;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  type: string;
 }
 
 const TourManagement: React.FC = () => {
@@ -79,6 +84,21 @@ const TourManagement: React.FC = () => {
     }
   });
 
+  // Fetch categories for tours
+  const { data: categoriesData } = useQuery({
+    queryKey: ['tour-categories'],
+    queryFn: async () => {
+      const response = await fetch(`${getApiUrl()}/categories?type=tour`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      return response.json();
+    }
+  });
+
   // Create tour mutation with proper FormData for image upload
   const createTourMutation = useMutation({
     mutationFn: async (tourData: TourFormData) => {
@@ -91,8 +111,7 @@ const TourManagement: React.FC = () => {
       formData.append('duration', tourData.duration);
       formData.append('location', tourData.location);
       formData.append('max_participants', tourData.max_participants.toString());
-      formData.append('tour_type', tourData.tour_type); // Fixed field name
-      formData.append('activity_level', tourData.activity_level); // Fixed field name
+      formData.append('activity_level', tourData.activity_level);
       formData.append('category', tourData.category);
       formData.append('included', JSON.stringify(tourData.included));
       formData.append('excluded', JSON.stringify(tourData.excluded));
@@ -143,8 +162,7 @@ const TourManagement: React.FC = () => {
       formData.append('duration', data.duration);
       formData.append('location', data.location);
       formData.append('max_participants', data.max_participants.toString());
-      formData.append('tour_type', data.tour_type); // Fixed field name
-      formData.append('activity_level', data.activity_level); // Fixed field name
+      formData.append('activity_level', data.activity_level);
       formData.append('category', data.category);
       formData.append('included', JSON.stringify(data.included));
       formData.append('excluded', JSON.stringify(data.excluded));
@@ -414,6 +432,7 @@ const TourManagement: React.FC = () => {
           onSubmit={(data) => createTourMutation.mutate(data)}
           isLoading={createTourMutation.isPending}
           title="Create New Tour"
+          categories={categoriesData?.data || []}
         />
       )}
 
@@ -429,6 +448,7 @@ const TourManagement: React.FC = () => {
           isLoading={updateTourMutation.isPending}
           title="Edit Tour"
           initialData={selectedTour}
+          categories={categoriesData?.data || []}
         />
       )}
 
@@ -463,6 +483,7 @@ interface TourModalProps {
   isLoading: boolean;
   title: string;
   initialData?: Tour;
+  categories: Category[];
 }
 
 const TourModal: React.FC<TourModalProps> = ({
@@ -471,7 +492,8 @@ const TourModal: React.FC<TourModalProps> = ({
   onSubmit,
   isLoading,
   title,
-  initialData
+  initialData,
+  categories
 }) => {
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -480,7 +502,6 @@ const TourModal: React.FC<TourModalProps> = ({
     duration: initialData?.duration || '',
     location: initialData?.location || '',
     max_participants: initialData?.max_participants || 1,
-    tour_type: initialData?.tour_type || '', // Fixed field name
     activity_level: initialData?.activity_level || 'easy', // Fixed field name
     category: initialData?.category || '',
     included: initialData?.included || [],
@@ -606,19 +627,6 @@ const TourModal: React.FC<TourModalProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Tour Type
-                </label>
-                <input
-                  type="text"
-                  value={formData.tour_type}
-                  onChange={(e) => setFormData({ ...formData, tour_type: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Activity Level
                 </label>
                 <select
@@ -659,13 +667,11 @@ const TourModal: React.FC<TourModalProps> = ({
                 required
               >
                 <option value="">Select Category</option>
-                <option value="adventure">Adventure</option>
-                <option value="cultural">Cultural</option>
-                <option value="nature">Nature</option>
-                <option value="city">City</option>
-                <option value="beach">Beach</option>
-                <option value="luxury">Luxury</option>
-                <option value="family">Family</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.slug}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
             </div>
 

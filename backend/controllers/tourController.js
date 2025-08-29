@@ -352,6 +352,15 @@ const updateTourGallery = async (req, res) => {
       });
     }
 
+    // Check if R2 is properly configured
+    if (!req.r2) {
+      console.error('R2 bucket not configured. Check environment variables.');
+      return res.status(500).json({
+        success: false,
+        message: 'Image upload service not configured. Please contact administrator.'
+      });
+    }
+
     // Handle gallery uploads (max 10 photos)
     if (req.files && req.files.length > 0) {
       if (req.files.length > 10) {
