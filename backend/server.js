@@ -78,6 +78,23 @@ app.use((req, res, next) => {
     // Initialize R2 bucket if environment variables are available
     if (process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY) {
       const { S3Client } = require('@aws-sdk/client-s3');
+      const https = require('https');
+
+      // Temporarily disable strict SSL checking for development if needed
+      if (process.env.NODE_ENV !== 'production') {
+        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+      }
+
+      // Create a custom HTTPS agent that works with Cloudflare R2
+      const httpsAgent = new https.Agent({
+        keepAlive: true,
+        maxSockets: 50,
+        rejectUnauthorized: process.env.NODE_ENV === 'production',
+        // Use TLS 1.2 which is more compatible with Cloudflare
+        secureProtocol: 'TLSv1_2_method',
+        servername: `${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        timeout: 30000
+      });
 
       const r2Client = new S3Client({
         region: 'auto',
@@ -86,40 +103,74 @@ app.use((req, res, next) => {
           accessKeyId: process.env.R2_ACCESS_KEY_ID,
           secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
         },
+        // Use path-style addressing for R2 compatibility
+        forcePathStyle: true,
+        // Add the custom HTTPS agent
+        requestHandler: {
+          httpsAgent: httpsAgent,
+          requestTimeout: 60000,
+          connectionTimeout: 30000
+        }
       });
 
-      // Create a bucket helper object that mimics the expected interface
+      // Create a bucket helper object with error handling
       req.r2 = {
         put: async (key, data, options = {}) => {
-          const { PutObjectCommand } = require('@aws-sdk/client-s3');
-          const command = new PutObjectCommand({
-            Bucket: process.env.R2_BUCKET_NAME,
-            Key: key,
-            Body: data,
-            ContentType: options.httpMetadata?.contentType,
-            CacheControl: options.httpMetadata?.cacheControl,
-          });
-          return await r2Client.send(command);
+          try {
+            const { PutObjectCommand } = require('@aws-sdk/client-s3');
+            const command = new PutObjectCommand({
+              Bucket: process.env.R2_BUCKET_NAME,
+              Key: key,
+              Body: data,
+              ContentType: options.httpMetadata?.contentType || 'application/octet-stream',
+              CacheControl: options.httpMetadata?.cacheControl || 'public, max-age=31536000',
+            });
+
+            console.log(`Attempting to upload ${key} to R2...`);
+            const result = await r2Client.send(command);
+            console.log(`Successfully uploaded ${key} to R2`);
+            return result;
+          } catch (error) {
+            console.error(`R2 upload error for ${key}:`, error);
+            throw new Error(`Failed to upload ${key}: ${error.message}`);
+          }
         },
         delete: async (key) => {
-          const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
-          const command = new DeleteObjectCommand({
-            Bucket: process.env.R2_BUCKET_NAME,
-            Key: key,
-          });
-          return await r2Client.send(command);
+          try {
+            const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
+            const command = new DeleteObjectCommand({
+              Bucket: process.env.R2_BUCKET_NAME,
+              Key: key,
+            });
+
+            const result = await r2Client.send(command);
+            console.log(`Successfully deleted ${key} from R2`);
+            return result;
+          } catch (error) {
+            console.error(`R2 delete error for ${key}:`, error);
+            return null;
+          }
         },
         head: async (key) => {
-          const { HeadObjectCommand } = require('@aws-sdk/client-s3');
-          const command = new HeadObjectCommand({
-            Bucket: process.env.R2_BUCKET_NAME,
-            Key: key,
-          });
-          return await r2Client.send(command);
+          try {
+            const { HeadObjectCommand } = require('@aws-sdk/client-s3');
+            const command = new HeadObjectCommand({
+              Bucket: process.env.R2_BUCKET_NAME,
+              Key: key,
+            });
+
+            const result = await r2Client.send(command);
+            return result;
+          } catch (error) {
+            console.error(`R2 head error for ${key}:`, error);
+            return null;
+          }
         }
       };
+
+      console.log('R2 client initialized successfully');
     } else {
-      console.warn('R2 environment variables not configured. File uploads will not work.');
+      console.warn('R2 environment variables not configured. Required: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME');
       req.r2 = null;
     }
     next();
