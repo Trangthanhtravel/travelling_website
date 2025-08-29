@@ -70,7 +70,7 @@ const PhotoGallery: React.FC<PhotoGalleryProps> = ({
       <div className="relative w-full h-full flex items-center justify-center p-4">
         <img
           src={images[activeIndex]}
-          alt={`Gallery photo ${activeIndex + 1}`}
+          alt={`Gallery ${activeIndex + 1}`}
           className="max-w-full max-h-full object-contain"
         />
 

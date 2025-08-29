@@ -214,7 +214,7 @@ const TourDetail: React.FC = () => {
                     >
                       <img
                         src={photo}
-                        alt={`Gallery photo ${index + 1}`}
+                        alt={`Gallery ${index + 1}`}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
