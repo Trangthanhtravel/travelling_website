@@ -3,7 +3,7 @@ const { r2Helpers } = require('../config/storage');
 
 class Tour {
   constructor(data) {
-    this.id = data.id; // Remove UUID generation for DB compatibility
+    this.id = data.id;
     this.title = data.title;
     this.slug = data.slug;
     this.description = data.description;
@@ -11,7 +11,7 @@ class Tour {
     this.duration = data.duration;
     this.location = data.location;
     this.max_participants = data.max_participants;
-    this.category = data.category || 'domestic'; // Updated: only domestic, inbound, outbound
+    this.category_slug = data.category_slug || data.category; // Support both new and old field names
     this.images = data.images ? (typeof data.images === 'string' ? JSON.parse(data.images) : data.images) : [];
     this.itinerary = data.itinerary ? (typeof data.itinerary === 'string' ? JSON.parse(data.itinerary) : data.itinerary) : {};
     this.included = data.included ? (typeof data.included === 'string' ? JSON.parse(data.included) : data.included) : [];
@@ -34,18 +34,22 @@ class Tour {
     }
   }
 
-  // Validate category
-  validateCategory() {
-    const validCategories = ['domestic', 'inbound', 'outbound'];
-    if (!validCategories.includes(this.category)) {
-      throw new Error(`Invalid category. Must be one of: ${validCategories.join(', ')}`);
+  // Validate category against database categories
+  async validateCategory(db) {
+    if (!this.category_slug) return;
+
+    const category = await db.prepare('SELECT id FROM categories WHERE slug = ? AND type = ? AND status = ?')
+      .bind(this.category_slug, 'tour', 'active').first();
+
+    if (!category) {
+      throw new Error(`Invalid category slug: ${this.category_slug}. Category must exist in database with type 'tour' and status 'active'.`);
     }
   }
 
   // Save tour to database
   async save(db) {
-    this.generateSlug(); // Generate slug before saving
-    this.validateCategory(); // Validate category before saving
+    this.generateSlug();
+    await this.validateCategory(db);
 
     const tourData = {
       title: this.title,
@@ -55,7 +59,7 @@ class Tour {
       duration: this.duration,
       location: this.location,
       max_participants: this.max_participants,
-      category: this.category, // Updated field name
+      category_slug: this.category_slug,
       images: JSON.stringify(this.images),
       itinerary: JSON.stringify(this.itinerary),
       included: JSON.stringify(this.included),
@@ -65,20 +69,20 @@ class Tour {
     };
 
     const sql = `
-      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category, images, itinerary, included, excluded, status, featured, created_at, updated_at)
+      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, images, itinerary, included, excluded, status, featured, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     const params = [
       tourData.title, tourData.slug, tourData.description, tourData.price,
       tourData.duration, tourData.location, tourData.max_participants,
-      tourData.category, tourData.images,
+      tourData.category_slug, tourData.images,
       tourData.itinerary, tourData.included, tourData.excluded,
       tourData.status, tourData.featured
     ];
 
     const result = await db.prepare(sql).bind(...params).run();
-    this.id = result.last_row_id;
+    this.id = result.meta.last_row_id;
     return result;
   }
 
@@ -115,16 +119,14 @@ class Tour {
   }
 
   // Find tour by ID
-  static async findById(id) {
-    const db = getDB();
+  static async findById(db, id) {
     const tour = await db.prepare('SELECT * FROM tours WHERE id = ?').bind(id).first();
     return tour ? new Tour(tour) : null;
   }
 
   // Get all tours with pagination
-  static async findAll(options = {}) {
-    const { limit = 20, offset = 0, status = 'active', location, category, minPrice, maxPrice } = options;
-    const db = getDB();
+  static async findAll(db, options = {}) {
+    const { limit = 20, offset = 0, status = 'active', location, category, minPrice, maxPrice, sortBy = 'created_at', sortOrder = 'desc' } = options;
 
     let whereConditions = ['status = ?'];
     const params = [status];
@@ -135,7 +137,7 @@ class Tour {
     }
 
     if (category) {
-      whereConditions.push('category = ?');
+      whereConditions.push('category_slug = ?');
       params.push(category);
     }
 
@@ -150,6 +152,7 @@ class Tour {
     }
 
     const whereClause = whereConditions.join(' AND ');
+    const orderClause = `ORDER BY ${sortBy} ${sortOrder.toUpperCase()}`;
 
     // Get total count for pagination
     const countSql = `SELECT COUNT(*) as total FROM tours WHERE ${whereClause}`;
@@ -157,7 +160,7 @@ class Tour {
     const total = countResult?.total || 0;
 
     // Get paginated results
-    const sql = `SELECT * FROM tours WHERE ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    const sql = `SELECT * FROM tours WHERE ${whereClause} ${orderClause} LIMIT ? OFFSET ?`;
     const result = await db.prepare(sql).bind(...params, limit, offset).all();
     const tours = result.results || [];
 
@@ -175,9 +178,8 @@ class Tour {
   }
 
   // Search tours with pagination
-  static async search(searchTerm, options = {}) {
-    const { limit = 20, offset = 0, minPrice, maxPrice } = options;
-    const db = getDB();
+  static async search(db, searchTerm, options = {}) {
+    const { limit = 20, offset = 0, minPrice, maxPrice, sortBy = 'created_at', sortOrder = 'desc' } = options;
 
     let whereConditions = [
       "status = 'active'",
@@ -196,6 +198,7 @@ class Tour {
     }
 
     const whereClause = whereConditions.join(' AND ');
+    const orderClause = `ORDER BY ${sortBy} ${sortOrder.toUpperCase()}`;
 
     // Get total count for pagination
     const countSql = `SELECT COUNT(*) as total FROM tours WHERE ${whereClause}`;
@@ -203,7 +206,7 @@ class Tour {
     const total = countResult?.total || 0;
 
     // Get paginated results
-    const sql = `SELECT * FROM tours WHERE ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    const sql = `SELECT * FROM tours WHERE ${whereClause} ${orderClause} LIMIT ? OFFSET ?`;
     const result = await db.prepare(sql).bind(...params, limit, offset).all();
     const tours = result.results || [];
 
@@ -284,8 +287,7 @@ class Tour {
   }
 
   // Find tour by slug
-  static async findBySlug(slug) {
-    const db = getDB();
+  static async findBySlug(db, slug) {
     const tour = await db.prepare('SELECT * FROM tours WHERE slug = ?').bind(slug).first();
     return tour ? new Tour(tour) : null;
   }

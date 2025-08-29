@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { toursAPI } from '../utils/api';
 import { Tour, TourFilters } from '../types';
@@ -8,6 +8,7 @@ import { Icon, Icons } from '../components/common/Icons';
 
 const Tours: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<TourFilters>({
     page: 1,
     limit: 12,
@@ -17,17 +18,36 @@ const Tours: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
 
-  const { data: toursData, isLoading, error } = useQuery({
-    queryKey: ['tours', filters],
-    queryFn: () => toursAPI.getTours(filters),
+  // Load initial filters from URL params
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    if (categoryFromUrl && categoryFromUrl !== 'all') {
+      setFilters(prev => ({ ...prev, category: categoryFromUrl }));
+    }
+  }, [searchParams]);
+
+  // Fetch tour categories from database
+  const { data: categoriesData } = useQuery({
+    queryKey: ['tour-categories'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories?type=tour&status=active`);
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      return response.json();
+    },
   });
 
   const categories = [
     { value: '', label: 'All Categories' },
-    { value: 'domestic', label: 'Domestic Tours' },
-    { value: 'inbound', label: 'Inbound Tours' },
-    { value: 'outbound', label: 'Outbound Tours' },
+    ...(categoriesData?.data || []).map((cat: any) => ({
+      value: cat.slug,
+      label: cat.name
+    }))
   ];
+
+  const { data: toursData, isLoading, error } = useQuery({
+    queryKey: ['tours', filters],
+    queryFn: () => toursAPI.getTours(filters),
+  });
 
   const sortOptions = [
     { value: 'created_at-desc', label: 'Newest First' },

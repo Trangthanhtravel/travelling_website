@@ -55,7 +55,7 @@ const getTours = async (req, res) => {
       page = 1,
       limit = 12,
       location,
-      category, // Updated: only domestic, inbound, outbound
+      category, // Now uses dynamic category slugs from database
       minPrice,
       maxPrice,
       search,
@@ -68,9 +68,11 @@ const getTours = async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       location,
-      category, // Updated to use new category structure
+      category, // Uses category_slug for filtering
       minPrice: minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      sortBy,
+      sortOrder
     };
 
     let result;

@@ -1,15 +1,17 @@
 const Category = require('../models/Category');
 
-// Get all categories
+// Get all categories with filtering
 const getCategories = async (req, res) => {
   try {
-    const { type, status, sortBy, sortOrder } = req.query;
+    const { type, status, featured, sortBy, sortOrder, search } = req.query;
 
     const categories = await Category.findAll({
       type,
       status,
+      featured,
       sortBy,
-      sortOrder
+      sortOrder,
+      search
     });
 
     res.json({
@@ -45,7 +47,7 @@ const getCategoryById = async (req, res) => {
 // Create new category (Admin only)
 const createCategory = async (req, res) => {
   try {
-    const { name, slug, description, type, icon, color, sort_order } = req.body;
+    const { name, slug, description, type, icon, color, status, featured, sort_order } = req.body;
 
     // Validate required fields
     if (!name || !slug || !type) {
@@ -79,6 +81,8 @@ const createCategory = async (req, res) => {
       type,
       icon,
       color,
+      status: status || 'active',
+      featured: featured || false,
       sort_order: sort_order || 0
     });
 
@@ -97,7 +101,7 @@ const createCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, slug, description, type, icon, color, status, sort_order } = req.body;
+    const { name, slug, description, type, icon, color, status, featured, sort_order } = req.body;
 
     const category = await Category.findById(id);
     if (!category) {
@@ -139,6 +143,7 @@ const updateCategory = async (req, res) => {
       icon,
       color,
       status,
+      featured,
       sort_order
     });
 
@@ -153,14 +158,79 @@ const updateCategory = async (req, res) => {
   }
 };
 
-// Delete category (Admin only)
-const deleteCategory = async (req, res) => {
+// Check if category can be deleted
+const checkCategoryUsage = async (req, res) => {
   try {
     const { id } = req.params;
+    const db = require('../config/database');
 
     const category = await Category.findById(id);
     if (!category) {
       return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+
+    // Check if category is used in tours or services
+    const tourCount = await db.prepare(`
+      SELECT COUNT(*) as count FROM tours 
+      WHERE category = ? AND status != 'deleted'
+    `).get(category.slug);
+
+    const serviceCount = await db.prepare(`
+      SELECT COUNT(*) as count FROM services 
+      WHERE category_id = ? AND status != 'deleted'
+    `).get(id);
+
+    const usage = {
+      canDelete: tourCount.count === 0 && serviceCount.count === 0,
+      toursUsing: tourCount.count,
+      servicesUsing: serviceCount.count,
+      totalUsage: tourCount.count + serviceCount.count
+    };
+
+    res.json({
+      success: true,
+      data: usage
+    });
+  } catch (error) {
+    console.error('Error checking category usage:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// Delete category (Admin only) with proper warnings
+const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { force } = req.body; // Allow force deletion
+    const db = require('../config/database');
+
+    const category = await Category.findById(id);
+    if (!category) {
+      return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+
+    // Check usage unless force delete
+    if (!force) {
+      const tourCount = await db.prepare(`
+        SELECT COUNT(*) as count FROM tours 
+        WHERE category = ? AND status != 'deleted'
+      `).get(category.slug);
+
+      const serviceCount = await db.prepare(`
+        SELECT COUNT(*) as count FROM services 
+        WHERE category_id = ? AND status != 'deleted'
+      `).get(id);
+
+      if (tourCount.count > 0 || serviceCount.count > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot delete category. It is currently being used by ${tourCount.count} tour(s) and ${serviceCount.count} service(s). Please remove or reassign these items first, or use force delete.`,
+          usage: {
+            tours: tourCount.count,
+            services: serviceCount.count
+          }
+        });
+      }
     }
 
     await category.delete();
@@ -171,9 +241,6 @@ const deleteCategory = async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting category:', error);
-    if (error.message.includes('being used')) {
-      return res.status(400).json({ success: false, message: error.message });
-    }
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
@@ -215,5 +282,6 @@ module.exports = {
   createCategory,
   updateCategory,
   deleteCategory,
-  reorderCategories
+  reorderCategories,
+  checkCategoryUsage
 };

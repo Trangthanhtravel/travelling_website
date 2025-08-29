@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { auth, adminAuth } = require('../middleware/auth');
+const {  adminAuth } = require('../middleware/auth');
 const {
   getCategories,
   getCategoryById,
   createCategory,
   updateCategory,
   deleteCategory,
-  reorderCategories
+  reorderCategories,
+  checkCategoryUsage
 } = require('../controllers/categoryController');
 
 // Public routes
@@ -17,6 +18,7 @@ router.get('/:id', getCategoryById);
 // Admin routes
 router.post('/', adminAuth, createCategory);
 router.put('/:id', adminAuth, updateCategory);
+router.get('/:id/usage', adminAuth, checkCategoryUsage);
 router.delete('/:id', adminAuth, deleteCategory);
 router.post('/reorder', adminAuth, reorderCategories);
 

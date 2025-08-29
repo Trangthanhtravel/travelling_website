@@ -6,6 +6,7 @@ import BlogManagement from './BlogManagement';
 import ServiceManagement from './ServiceManagement';
 import BookingManagement from './BookingManagement';
 import CustomerManagement from './CustomerManagement';
+import CategoryManagement from './CategoryManagement';
 import HeroImageManagement from './HeroImageManagement';
 import AboutSectionManagement from './AboutSectionManagement';
 import SocialLinksManagement from './SocialLinksManagement';
@@ -175,6 +176,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'dashboard', name: 'Dashboard', icon: Icons.FiHome },
     { id: 'tours', name: 'Tours', icon: Icons.FiMapPin },
     { id: 'services', name: 'Services', icon: Icons.FiTruck },
+    { id: 'categories', name: 'Categories', icon: Icons.FiGrid },
     { id: 'bookings', name: 'Bookings', icon: Icons.FiCalendar },
     { id: 'customers', name: 'Customers', icon: Icons.FiUsers },
     { id: 'content', name: 'Blogs', icon: Icons.FiFileText },
@@ -190,6 +192,8 @@ const AdminDashboard: React.FC = () => {
         return <TourManagement />;
       case 'services':
         return <ServiceManagement />;
+      case 'categories':
+        return <CategoryManagement />;
       case 'bookings':
         return <BookingManagement />;
       case 'customers':

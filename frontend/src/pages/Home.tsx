@@ -224,6 +224,19 @@ const Home: React.FC = () => {
 
   const featuredTours = featuredToursData?.data || [];
 
+  // Fetch featured categories from database
+  const { data: featuredCategoriesData, isLoading: categoriesLoading } = useQuery({
+    queryKey: ['featured-categories'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories?featured=1&status=active`);
+      if (!response.ok) throw new Error('Failed to fetch featured categories');
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const featuredCategories = featuredCategoriesData?.data || [];
+
   // Fetch car rental services from real API
   const { data: carRentalsData, isLoading: carRentalsLoading } = useQuery({
     queryKey: ['car-rentals'],
@@ -502,85 +515,110 @@ const Home: React.FC = () => {
 
           {/* Scrollable Services List */}
           <div className="relative">
-            <div className="overflow-x-auto scrollbar-hide" ref={coreServicesRef}>
+            {categoriesLoading ? (
               <div className="flex space-x-6 pb-4">
-                {[
-                  {
-                    title: 'Domestic Tours',
-                    icon: Icons.FiMapPin,
-                    description: 'Explore the beauty of your homeland with our curated domestic tour packages',
-                    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-                  },
-                  {
-                    title: 'Outbound Tours',
-                    icon: Icons.FiGlobe,
-                    description: 'Discover international destinations with our expertly planned outbound tours',
-                    image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-                  },
-                  {
-                    title: 'Car Rental',
-                    icon: Icons.FiTruck,
-                    description: 'Premium fleet of vehicles for comfortable and convenient travel',
-                    image: 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-                  },
-                  {
-                    title: 'Hotel Booking',
-                    icon: Icons.FiHome,
-                    description: 'Luxury accommodations and budget-friendly stays worldwide',
-                    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-                  },
-                  {
-                    title: 'Train Booking',
-                    icon: Icons.FiNavigation,
-                    description: 'Comfortable train travel with convenient booking and seating options',
-                    image: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-                  },
-                  {
-                    title: 'Cruise/Ship',
-                    icon: Icons.FiAnchor,
-                    description: 'Luxury cruise experiences with world-class amenities and destinations',
-                    image: 'https://images.unsplash.com/photo-1561292793-c0dd892e295d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-                  },
-                  {
-                    title: 'Visa Service',
-                    icon: Icons.FiFileText,
-                    description: 'Hassle-free visa processing and documentation assistance',
-                    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-                  },
-                ].map((service, index) => (
-                  <div
-                    key={index}
-                    className="flex-none w-80 bg-white dark:bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-300 group hover:shadow-2xl transition-all duration-300"
-                  >
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={service.image}
-                        alt={service.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                      <div className="absolute top-4 left-4 bg-primary-600 text-white p-2 rounded-lg">
-                        <Icon icon={service.icon} className="w-6 h-6" />
-                      </div>
-                    </div>
+                {[...Array(4)].map((_, index) => (
+                  <div key={index} className="flex-none w-80 bg-white rounded-xl shadow-lg animate-pulse">
+                    <div className="h-48 bg-gray-300 rounded-t-xl"></div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">
-                        {service.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
-                        {service.description}
-                      </p>
-                      <button
-                        onClick={() => handleServiceNavigation(service.title)}
-                        className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
-                      >
-                        Learn More
-                      </button>
+                      <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                      <div className="h-6 bg-gray-300 rounded mb-4"></div>
+                      <div className="h-4 bg-gray-300 rounded"></div>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            ) : (
+              <div className="overflow-x-auto scrollbar-hide" ref={coreServicesRef}>
+                <div className="flex space-x-6 pb-4">
+                  {featuredCategories.length > 0 ? featuredCategories.map((category, index) => {
+                    // Map category icons to actual icons
+                    const getIconByName = (iconName: string) => {
+                      const iconMap: { [key: string]: any } = {
+                        'map-pin': Icons.FiMapPin,
+                        'globe': Icons.FiGlobe,
+                        'plane': Icons.FiNavigation,
+                        'car': Icons.FiTruck,
+                        'file-text': Icons.FiFileText,
+                        'truck': Icons.FiTruck,
+                        'home': Icons.FiHome,
+                        'anchor': Icons.FiAnchor,
+                        'navigation': Icons.FiNavigation,
+                      };
+                      return iconMap[iconName] || Icons.FiMapPin;
+                    };
+
+                    // Generate appropriate image based on category type
+                    const getImageByCategory = (categoryName: string) => {
+                      const imageMap: { [key: string]: string } = {
+                        'domestic tours': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                        'inbound tours': 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                        'outbound tours': 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                        'car rental': 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                        'visa services': 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                        'transportation': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                        'hotel booking': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                      };
+                      return imageMap[categoryName.toLowerCase()] || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                    };
+
+                    return (
+                      <div
+                        key={category.id || index}
+                        className="flex-none w-80 bg-white dark:bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-300 group hover:shadow-2xl transition-all duration-300"
+                      >
+                        <div className="relative h-48 overflow-hidden">
+                          <img
+                            src={getImageByCategory(category.name)}
+                            alt={category.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                          <div
+                            className="absolute top-4 left-4 text-white p-2 rounded-lg"
+                            style={{ backgroundColor: category.color || '#3B82F6' }}
+                          >
+                            <Icon icon={getIconByName(category.icon)} className="w-6 h-6" />
+                          </div>
+                        </div>
+                        <div className="p-6">
+                          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">
+                            {category.name}
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
+                            {category.description}
+                          </p>
+                          <button
+                            onClick={() => {
+                              // Navigate to tours or services page based on category type
+                              if (category.type === 'tour') {
+                                navigate(`/tours?category=${category.slug}`);
+                              } else if (category.type === 'service') {
+                                navigate(`/services?category=${category.slug}`);
+                              } else if (category.type === 'both') {
+                                // For categories that apply to both, redirect to services by default
+                                // You could also show a modal to let users choose
+                                navigate(`/services?category=${category.slug}`);
+                              } else {
+                                // Fallback to services page
+                                navigate(`/services?category=${category.slug}`);
+                              }
+                            }}
+                            className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
+                          >
+                            Learn More
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }) : (
+                    <div className="flex-none w-80 bg-white rounded-xl shadow-lg p-6 text-center">
+                      <p className="text-gray-500">No featured services available at the moment.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Scroll buttons */}
             <button

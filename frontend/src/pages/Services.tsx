@@ -17,13 +17,21 @@ const Services: React.FC = () => {
     sortOrder: 'desc' as 'asc' | 'desc'
   });
 
+  // Load initial category from URL params
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    if (categoryFromUrl && categoryFromUrl !== 'all') {
+      setActiveCategory(categoryFromUrl);
+    }
+  }, [searchParams]);
+
   const getApiUrl = () => {
     return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   };
 
-  // Fetch categories from API
+  // Fetch service categories from database
   const { data: categoriesData } = useQuery({
-    queryKey: ['categories', 'service'],
+    queryKey: ['service-categories'],
     queryFn: async () => {
       const response = await fetch(`${getApiUrl()}/categories?type=service&status=active`);
       if (!response.ok) throw new Error('Failed to fetch categories');
@@ -31,12 +39,23 @@ const Services: React.FC = () => {
     },
   });
 
+  const categories = [
+    { id: 'all', name: 'All Services', slug: 'all' },
+    ...(categoriesData?.data || [])
+  ];
+
   // Fetch services from API with pagination
   const { data: servicesData, isLoading, error } = useQuery({
     queryKey: ['services', { category: activeCategory, search: searchTerm, ...filters }],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (activeCategory !== 'all') params.append('category', activeCategory);
+      if (activeCategory !== 'all') {
+        // Find category ID by slug
+        const category = categoriesData?.data?.find((cat: any) => cat.slug === activeCategory);
+        if (category) {
+          params.append('category_id', category.id.toString());
+        }
+      }
       if (searchTerm) params.append('search', searchTerm);
       params.append('status', 'active');
       params.append('page', filters.page.toString());
@@ -48,19 +67,8 @@ const Services: React.FC = () => {
       if (!response.ok) throw new Error('Failed to fetch services');
       return response.json();
     },
+    enabled: !!categoriesData, // Only run when categories are loaded
   });
-
-  // Build categories list with dynamic data from API
-  const categories = [
-    { id: 'all', name: 'All Services', icon: Icons.FiGrid, slug: 'all' },
-    ...(categoriesData?.data?.map((cat: any) => ({
-      id: cat.slug,
-      name: cat.name,
-      icon: Icons[cat.icon as keyof typeof Icons] || Icons.FiTag,
-      slug: cat.slug,
-      color: cat.color
-    })) || [])
-  ];
 
   const handlePageChange = (page: number) => {
     setFilters(prev => ({ ...prev, page }));
@@ -79,19 +87,6 @@ const Services: React.FC = () => {
 
   const pagination = servicesData?.pagination;
   const services = servicesData?.data || [];
-
-  // Handle URL parameters for filtering
-  useEffect(() => {
-    const categoryParam = searchParams.get('category');
-    const searchParam = searchParams.get('search');
-
-    if (categoryParam) {
-      setActiveCategory(categoryParam);
-    }
-    if (searchParam) {
-      setSearchTerm(searchParam);
-    }
-  }, [searchParams]);
 
   if (error) {
     return (
