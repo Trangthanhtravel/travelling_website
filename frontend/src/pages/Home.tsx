@@ -252,40 +252,6 @@ const Home: React.FC = () => {
     service.service_type === 'car-rental'
   ).slice(0, 6); // Limit to 6 car rentals for homepage
 
-  // Function to handle service navigation with category filter
-  const handleServiceNavigation = (serviceTitle: string) => {
-    let categorySlug = '';
-
-    // Map service titles to category slugs that match your backend categories
-    switch (serviceTitle.toLowerCase()) {
-      case 'domestic tours':
-        categorySlug = 'domestic-tours';
-        break;
-      case 'outbound tours':
-        categorySlug = 'outbound-tours';
-        break;
-      case 'car rental':
-        categorySlug = 'car-rental';
-        break;
-      case 'hotel booking':
-        categorySlug = 'hotel-booking';
-        break;
-      case 'train booking':
-        categorySlug = 'train-booking';
-        break;
-      case 'cruise/ship':
-        categorySlug = 'cruise';
-        break;
-      case 'visa service':
-        categorySlug = 'visa-service';
-        break;
-      default:
-        categorySlug = 'all';
-    }
-
-    // Navigate to services page with category filter
-    navigate(`/services?category=${categorySlug}`);
-  };
 
   return (
     <div className={`transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
