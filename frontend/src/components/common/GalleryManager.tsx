@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Icon, Icons } from '../common/Icons';
+import { Icon, Icons } from './Icons';
 import toast from 'react-hot-toast';
 
 interface GalleryManagerProps {
@@ -16,14 +16,10 @@ interface GalleryManagerProps {
 }
 
 const GalleryManager: React.FC<GalleryManagerProps> = ({
-  isOpen,
   onClose,
-  tour,
-  onUpdateSuccess,
-  onDeleteSuccess
+  tour
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const queryClient = useQueryClient();
 
   // API functions
@@ -159,7 +155,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
                   <div key={index} className="relative group">
                     <img
                       src={photo}
-                      alt={`Gallery photo ${index + 1}`}
+                      alt={`Gallery ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg"
                     />
                     <button
