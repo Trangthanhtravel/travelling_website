@@ -1,6 +1,7 @@
 const Tour = require('../models/Tour');
 const Category = require('../models/Category');
 const { r2Helpers } = require('../config/storage');
+const { getDB } = require('../config/database');
 const multer = require('multer');
 
 // Configure multer for memory storage (files will be uploaded to R2)
@@ -24,14 +25,7 @@ const upload = multer({
 const getFeaturedTours = async (req, res) => {
   try {
     const { limit = 6 } = req.query;
-    const db = req.db || req.cloudflare?.env?.DB;
-
-    if (!db) {
-      return res.status(500).json({
-        success: false,
-        message: 'Database connection not available'
-      });
-    }
+    const db = getDB();
 
     const featuredTours = await Tour.getFeatured(db, parseInt(limit));
 
@@ -51,6 +45,8 @@ const getFeaturedTours = async (req, res) => {
 // Get all tours with filtering and pagination
 const getTours = async (req, res) => {
   try {
+    const db = getDB();
+
     const {
       page = 1,
       limit = 12,
@@ -77,9 +73,9 @@ const getTours = async (req, res) => {
 
     let result;
     if (search) {
-      result = await Tour.search(search, options);
+      result = await Tour.search(db, search, options);
     } else {
-      result = await Tour.findAll(options);
+      result = await Tour.findAll(db, options);
     }
 
     res.json({
@@ -99,7 +95,8 @@ const getTours = async (req, res) => {
 // Get single tour by ID
 const getTour = async (req, res) => {
   try {
-    const tour = await Tour.findById(req.params.id);
+    const db = getDB();
+    const tour = await Tour.findById(db, req.params.id);
 
     if (!tour) {
       return res.status(404).json({
@@ -124,8 +121,9 @@ const getTour = async (req, res) => {
 // Get tour by slug - now properly implemented
 const getTourBySlug = async (req, res) => {
   try {
+    const db = getDB();
     const { slug } = req.params;
-    const tour = await Tour.findBySlug(slug);
+    const tour = await Tour.findBySlug(db, slug);
 
     if (!tour) {
       return res.status(404).json({
@@ -150,6 +148,7 @@ const getTourBySlug = async (req, res) => {
 // Create new tour (admin only)
 const createTour = async (req, res) => {
   try {
+    const db = getDB();
     const tourData = req.body;
 
     // Parse JSON fields from FormData
@@ -181,7 +180,7 @@ const createTour = async (req, res) => {
       }
     }
 
-    await tour.save();
+    await tour.save(db);
 
     res.status(201).json({
       success: true,
@@ -200,7 +199,8 @@ const createTour = async (req, res) => {
 // Update tour (admin only)
 const updateTour = async (req, res) => {
   try {
-    const tour = await Tour.findById(req.params.id);
+    const db = getDB();
+    const tour = await Tour.findById(db, req.params.id);
 
     if (!tour) {
       return res.status(404).json({
@@ -239,7 +239,7 @@ const updateTour = async (req, res) => {
       }
     }
 
-    await tour.update(updateData);
+    await tour.update(db, updateData);
 
     res.json({
       success: true,
@@ -258,7 +258,8 @@ const updateTour = async (req, res) => {
 // Delete tour (admin only)
 const deleteTour = async (req, res) => {
   try {
-    const tour = await Tour.findById(req.params.id);
+    const db = getDB();
+    const tour = await Tour.findById(db, req.params.id);
 
     if (!tour) {
       return res.status(404).json({
@@ -267,7 +268,7 @@ const deleteTour = async (req, res) => {
       });
     }
 
-    await tour.delete(req.r2);
+    await tour.delete(db, req.r2);
 
     res.json({
       success: true,
@@ -285,10 +286,11 @@ const deleteTour = async (req, res) => {
 // Check tour availability
 const checkAvailability = async (req, res) => {
   try {
+    const db = getDB();
     const { tourId } = req.params;
     const { date, participants } = req.query;
 
-    const tour = await Tour.findById(req.db, tourId);
+    const tour = await Tour.findById(db, tourId);
     if (!tour) {
       return res.status(404).json({
         success: false,
@@ -321,7 +323,8 @@ const checkAvailability = async (req, res) => {
 // Get tour statistics (admin only)
 const getTourStats = async (req, res) => {
   try {
-    const stats = await Tour.getStats(req.db);
+    const db = getDB();
+    const stats = await Tour.getStats(db);
 
     res.json({
       success: true,
