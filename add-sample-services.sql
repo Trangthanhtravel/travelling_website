@@ -1,4 +1,7 @@
 -- Sample services data including car rentals, visa services, and other travel services
+-- Clear existing services first
+DELETE FROM services;
+
 INSERT INTO services (
     title,
     slug,
@@ -15,7 +18,7 @@ INSERT INTO services (
     created_at,
     updated_at
 ) VALUES
--- CAR RENTAL SERVICES
+-- CAR RENTAL SERVICES (category_id = 4 for Car Rental)
 (
     'Toyota Vios - Economy Car Rental',
     'toyota-vios-economy-car-rental',
@@ -26,7 +29,7 @@ INSERT INTO services (
     '["https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
     '["Comprehensive insurance", "GPS navigation system", "24/7 roadside assistance", "Unlimited mileage within city limits", "Air conditioning", "Basic maintenance"]',
     '["Fuel costs", "Highway tolls", "Parking fees", "Additional driver fees", "Cross-border travel", "Damage excess"]',
-    2,
+    4,
     'car-rental',
     'active',
     datetime('now', '-20 days'),
@@ -42,7 +45,7 @@ INSERT INTO services (
     '["https://images.unsplash.com/photo-1581540222194-0def2dda95b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
     '["Full insurance coverage", "GPS and entertainment system", "24/7 support", "Child safety seats available", "All-weather tires", "Emergency kit"]',
     '["Fuel costs", "Toll fees", "Parking charges", "Additional driver fees", "International driving permit", "Cleaning fees if required"]',
-    2,
+    4,
     'car-rental',
     'active',
     datetime('now', '-18 days'),
@@ -58,7 +61,7 @@ INSERT INTO services (
     '["https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
     '["Professional driver", "Air conditioning", "Sound system", "Comfortable seating", "Luggage compartment", "Insurance coverage"]',
     '["Fuel costs", "Driver accommodation for multi-day trips", "Overtime charges", "Toll fees", "Parking fees", "Additional cleaning"]',
-    2,
+    4,
     'car-rental',
     'active',
     datetime('now', '-15 days'),
@@ -74,14 +77,14 @@ INSERT INTO services (
     '["https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
     '["Quality helmet", "Basic tools", "Lock and chain", "Insurance coverage", "24/7 emergency contact", "Route recommendations"]',
     '["Fuel costs", "Fines and violations", "Damage repairs", "Personal accident insurance", "International driving license", "Protective gear"]',
-    2,
+    4,
     'car-rental',
     'active',
     datetime('now', '-12 days'),
     datetime('now', '-12 days')
 ),
 
--- VISA SERVICES
+-- VISA SERVICES (category_id = 5 for Visa Services)
 (
     'Japan Tourist Visa Processing',
     'japan-tourist-visa-processing',
@@ -92,7 +95,7 @@ INSERT INTO services (
     '["https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
     '["Document review and preparation", "Visa application form completion", "Embassy appointment booking", "Application submission", "Status tracking", "Visa collection"]',
     '["Embassy fees", "Document translation if required", "Express processing fees", "Travel to embassy", "Additional documentation", "Visa rejection fees"]',
-    6,
+    5,
     'other-services',
     'active',
     datetime('now', '-25 days'),
@@ -108,46 +111,14 @@ INSERT INTO services (
     '["https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
     '["Document verification", "Application form completion", "Embassy submission", "Status updates", "Visa collection service", "Consultation"]',
     '["Embassy visa fees", "Express processing charges", "Document courier fees", "Translation services", "Multiple entry fees", "Travel insurance"]',
-    6,
+    5,
     'other-services',
     'active',
     datetime('now', '-22 days'),
     datetime('now', '-22 days')
 ),
-(
-    'Schengen Visa Assistance',
-    'schengen-visa-assistance',
-    'Europe travel visa processing',
-    'Comprehensive Schengen visa processing for European travel. Covers all 26 Schengen countries with expert guidance throughout the process.',
-    200.00,
-    '10-15 business days',
-    '["https://images.unsplash.com/photo-1467269204594-9661b134dd2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
-    '["Complete document checklist", "Application form assistance", "Embassy appointment booking", "Interview preparation", "Document submission", "Visa tracking"]',
-    '["Embassy visa fees", "Travel insurance", "Document translation", "Courier services", "Express appointment fees", "Additional documentation"]',
-    6,
-    'other-services',
-    'active',
-    datetime('now', '-20 days'),
-    datetime('now', '-20 days')
-),
-(
-    'USA Tourist Visa Support',
-    'usa-tourist-visa-support',
-    'US B1/B2 visa application assistance',
-    'Professional support for US tourist visa applications including DS-160 completion, interview preparation, and document guidance.',
-    300.00,
-    '2-4 weeks',
-    '["https://images.unsplash.com/photo-1485738422979-f5c462d49f74?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
-    '["DS-160 form completion", "Interview appointment booking", "Document preparation", "Interview coaching", "Application review", "Post-interview support"]',
-    '["US Embassy fees", "SEVIS fee if applicable", "Document courier", "Translation services", "Additional appointments", "Travel to embassy"]',
-    6,
-    'other-services',
-    'active',
-    datetime('now', '-18 days'),
-    datetime('now', '-18 days')
-),
 
--- OTHER SERVICES
+-- TRANSPORTATION SERVICES (category_id = 6 for Transportation)
 (
     'Airport Transfer Service',
     'airport-transfer-service',
@@ -158,28 +129,14 @@ INSERT INTO services (
     '["https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
     '["Professional driver", "Meet & greet service", "Flight monitoring", "Air-conditioned vehicle", "Luggage assistance", "Child seats available"]',
     '["Highway tolls", "Parking fees", "Waiting time over 30 minutes", "Additional stops", "Large luggage surcharge", "Late night surcharge"]',
-    1,
+    6,
     'other-services',
     'active',
     datetime('now', '-16 days'),
     datetime('now', '-16 days')
 ),
-(
-    'Travel Insurance Package',
-    'travel-insurance-package',
-    'Comprehensive travel protection',
-    'Complete travel insurance coverage including medical emergencies, trip cancellation, baggage protection, and 24/7 assistance worldwide.',
-    45.00,
-    'Per trip (up to 30 days)',
-    '["https://images.unsplash.com/photo-1559526324-593bc054d377?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
-    '["Medical emergency coverage up to $100,000", "Trip cancellation protection", "Baggage loss/delay coverage", "24/7 emergency assistance", "COVID-19 coverage", "Adventure sports coverage"]',
-    '["Pre-existing medical conditions", "High-risk activities", "Mental health treatment", "Pregnancy-related claims", "War and terrorism", "Alcohol or drug-related incidents"]',
-    1,
-    'other-services',
-    'active',
-    datetime('now', '-14 days'),
-    datetime('now', '-14 days')
-),
+
+-- HOTEL BOOKING SERVICES (category_id = 7 for Hotel Booking)
 (
     'Hotel Booking Service',
     'hotel-booking-service',
@@ -190,41 +147,9 @@ INSERT INTO services (
     '["https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
     '["Best rate guarantee", "Room upgrade requests", "Special occasion arrangements", "24/7 booking support", "Cancellation assistance", "Local recommendations"]',
     '["Hotel room charges", "Resort fees", "Tourism taxes", "Cancellation fees", "No-show charges", "Extra services at hotel"]',
-    3,
+    7,
     'other-services',
     'active',
     datetime('now', '-12 days'),
     datetime('now', '-12 days')
-),
-(
-    'Private Tour Guide Service',
-    'private-tour-guide-service',
-    'Personalized local expertise',
-    'Professional local tour guides for customized sightseeing experiences. Fluent in multiple languages with deep local knowledge.',
-    80.00,
-    'Per day (8 hours)',
-    '["https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
-    '["Professional licensed guide", "Customized itinerary", "Local recommendations", "Transportation coordination", "Photography assistance", "Cultural insights"]',
-    '["Transportation costs", "Entrance fees", "Meals", "Gratuities", "Overtime charges", "Special equipment"]',
-    1,
-    'tours',
-    'active',
-    datetime('now', '-10 days'),
-    datetime('now', '-10 days')
-),
-(
-    'Document Translation Service',
-    'document-translation-service',
-    'Certified travel document translation',
-    'Professional translation service for passports, visas, certificates, and other travel documents. Certified translations accepted by embassies.',
-    30.00,
-    '2-3 business days',
-    '["https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"]',
-    '["Certified translation", "Official stamp and signature", "Multiple language options", "Embassy acceptance guarantee", "Digital and hard copies", "Quality assurance"]',
-    '["Notarization fees", "Courier delivery", "Express processing", "Apostille services", "Multiple copies", "Complex document surcharge"]',
-    6,
-    'other-services',
-    'active',
-    datetime('now', '-8 days'),
-    datetime('now', '-8 days')
 );

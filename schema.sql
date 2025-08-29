@@ -34,6 +34,7 @@ CREATE TABLE categories (
     icon TEXT,
     color TEXT,
     status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive')),
+    featured BOOLEAN DEFAULT FALSE,
     sort_order INTEGER DEFAULT 0,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
@@ -66,10 +67,11 @@ CREATE TABLE tours (
     images TEXT,
     status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'draft')),
     featured BOOLEAN DEFAULT FALSE,
-    category TEXT DEFAULT 'domestic' CHECK(category IN ('domestic', 'inbound', 'outbound')),
+    category_slug TEXT,
     location TEXT,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (category_slug) REFERENCES categories(slug)
 );
 
 -- Services table
@@ -180,7 +182,7 @@ CREATE TABLE social_links (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_tours_slug ON tours(slug);
 CREATE INDEX idx_tours_status ON tours(status);
-CREATE INDEX idx_tours_category ON tours(category);
+CREATE INDEX idx_tours_category_slug ON tours(category_slug);
 CREATE INDEX idx_services_category_id ON services(category_id);
 CREATE INDEX idx_services_status ON services(status);
 CREATE INDEX idx_bookings_status ON bookings(status);
