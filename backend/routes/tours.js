@@ -9,6 +9,8 @@ const {
   updateTour,
   deleteTour,
   checkAvailability,
+  updateTourGallery,
+  deleteGalleryPhoto,
   upload
 } = require('../controllers/tourController');
 
@@ -46,5 +48,15 @@ router.put('/:id', adminAuth, upload.array('images', 10), updateTour);
 // @desc    Delete tour
 // @access  Private (Admin only)
 router.delete('/:id', adminAuth, deleteTour);
+
+// @route   PUT /api/tours/:id/gallery
+// @desc    Update tour gallery
+// @access  Private (Admin only)
+router.put('/:id/gallery', adminAuth, upload.array('images', 10), updateTourGallery);
+
+// @route   DELETE /api/tours/:id/gallery
+// @desc    Delete tour gallery photo
+// @access  Private (Admin only)
+router.delete('/:id/gallery', adminAuth, deleteGalleryPhoto);
 
 module.exports = router;

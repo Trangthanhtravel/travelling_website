@@ -339,6 +339,105 @@ const getTourStats = async (req, res) => {
   }
 };
 
+// Update tour gallery (admin only)
+const updateTourGallery = async (req, res) => {
+  try {
+    const db = getDB();
+    const tour = await Tour.findById(db, req.params.id);
+
+    if (!tour) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tour not found'
+      });
+    }
+
+    // Handle gallery uploads (max 10 photos)
+    if (req.files && req.files.length > 0) {
+      if (req.files.length > 10) {
+        return res.status(400).json({
+          success: false,
+          message: 'Maximum 10 gallery photos allowed'
+        });
+      }
+
+      try {
+        const oldGallery = tour.gallery || [];
+        const galleryUrls = await tour.updateGallery(req.r2, req.files, oldGallery);
+
+        // Update database
+        await db.prepare('UPDATE tours SET gallery = ?, updated_at = datetime("now") WHERE id = ?')
+          .bind(JSON.stringify(galleryUrls), tour.id).run();
+
+        tour.gallery = galleryUrls;
+
+        res.json({
+          success: true,
+          data: tour.toJSON(),
+          message: 'Tour gallery updated successfully'
+        });
+      } catch (imageError) {
+        console.error('Gallery upload error:', imageError);
+        return res.status(400).json({
+          success: false,
+          message: `Gallery upload failed: ${imageError.message}`
+        });
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'No gallery photos provided'
+      });
+    }
+  } catch (error) {
+    console.error('Update tour gallery error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating tour gallery'
+    });
+  }
+};
+
+// Delete specific gallery photo (admin only)
+const deleteGalleryPhoto = async (req, res) => {
+  try {
+    const db = getDB();
+    const { id, photoUrl } = req.params;
+
+    const tour = await Tour.findById(db, id);
+    if (!tour) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tour not found'
+      });
+    }
+
+    // Decode the photo URL parameter
+    const decodedPhotoUrl = decodeURIComponent(photoUrl);
+
+    if (!tour.gallery || !tour.gallery.includes(decodedPhotoUrl)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Gallery photo not found'
+      });
+    }
+
+    const updatedGallery = await tour.deleteGalleryPhoto(req.r2, decodedPhotoUrl);
+
+    res.json({
+      success: true,
+      data: { gallery: updatedGallery },
+      message: 'Gallery photo deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete gallery photo error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error deleting gallery photo'
+    });
+  }
+};
+
 module.exports = {
   getTours,
   getFeaturedTours,
@@ -349,5 +448,7 @@ module.exports = {
   deleteTour,
   getTourStats,
   checkAvailability,
+  updateTourGallery,
+  deleteGalleryPhoto,
   upload
 };

@@ -3,10 +3,13 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { toursAPI } from '../utils/api';
 import { Icon, Icons } from '../components/common/Icons';
+import PhotoGallery from '../components/common/PhotoGallery';
 
 const TourDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryStartIndex, setGalleryStartIndex] = useState(0);
 
   const { data: response, isLoading, error } = useQuery({
     queryKey: ['tour', slug],
@@ -191,6 +194,53 @@ const TourDetail: React.FC = () => {
               </div>
             )}
 
+            {/* Photo Gallery Section */}
+            {tour?.gallery && tour.gallery.length > 0 && (
+              <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900">Photo Gallery</h2>
+                  <span className="text-sm text-gray-500">{tour.gallery.length} photos</span>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {tour.gallery.slice(0, 8).map((photo, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setGalleryStartIndex(index);
+                        setIsGalleryOpen(true);
+                      }}
+                      className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer"
+                    >
+                      <img
+                        src={photo}
+                        alt={`Gallery photo ${index + 1}`}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                        <Icon icon={Icons.FiMaximize2} className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </button>
+                  ))}
+
+                  {tour.gallery.length > 8 && (
+                    <button
+                      onClick={() => {
+                        setGalleryStartIndex(8);
+                        setIsGalleryOpen(true);
+                      }}
+                      className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                    >
+                      <div className="text-center">
+                        <Icon icon={Icons.FiCamera} className="w-8 h-8 mb-2 mx-auto" />
+                        <span className="text-sm font-medium">+{tour.gallery.length - 8} more</span>
+                      </div>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Inclusions & Exclusions */}
             <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">What's Included</h2>
@@ -299,6 +349,16 @@ const TourDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Photo Gallery Modal */}
+      {isGalleryOpen && tour?.gallery && (
+        <PhotoGallery
+          images={tour.gallery}
+          currentIndex={galleryStartIndex}
+          isOpen={isGalleryOpen}
+          onClose={() => setIsGalleryOpen(false)}
+        />
+      )}
     </div>
   );
 };

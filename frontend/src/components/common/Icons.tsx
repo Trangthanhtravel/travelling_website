@@ -118,6 +118,7 @@ import {
     FiRepeat,
     FiTag,
     FiShare,
+    FiMaximize2,
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 
@@ -255,6 +256,7 @@ export const Icons = {
     FiRepeat,
     FiTag,
     FiShare,
+    FiMaximize2,
 };
 
 export default Icons;

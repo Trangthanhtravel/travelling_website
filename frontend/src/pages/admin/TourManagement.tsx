@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
+import GalleryManager from '../../components/common/GalleryManager';
 import toast from 'react-hot-toast';
 
 // Tour types (corrected to match backend)
@@ -49,6 +50,8 @@ const TourManagement: React.FC = () => {
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [galleryTour, setGalleryTour] = useState<Tour | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -213,6 +216,11 @@ const TourManagement: React.FC = () => {
   const handleEditTour = (tour: Tour) => {
     setSelectedTour(tour);
     setIsEditModalOpen(true);
+  };
+
+  const handleOpenGallery = (tour: Tour) => {
+    setGalleryTour(tour);
+    setIsGalleryModalOpen(true);
   };
 
   const tours = toursData?.data || [];
@@ -382,6 +390,12 @@ const TourManagement: React.FC = () => {
                         >
                           <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
                         </button>
+                        <button
+                          onClick={() => handleOpenGallery(tour)}
+                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          <Icon icon={Icons.FiImage} className="w-4 h-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -415,6 +429,26 @@ const TourManagement: React.FC = () => {
           isLoading={updateTourMutation.isPending}
           title="Edit Tour"
           initialData={selectedTour}
+        />
+      )}
+
+      {/* Gallery Manager Modal */}
+      {isGalleryModalOpen && galleryTour && (
+        <GalleryManager
+          isOpen={isGalleryModalOpen}
+          onClose={() => {
+            setIsGalleryModalOpen(false);
+            setGalleryTour(null);
+          }}
+          tour={galleryTour}
+          onUpdateSuccess={(updatedTour) => {
+            queryClient.setQueryData(['admin-tours', selectedTour?.id], updatedTour);
+            toast.success('Gallery updated successfully');
+          }}
+          onDeleteSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['admin-tours'] });
+            toast.success('Tour deleted successfully');
+          }}
         />
       )}
     </div>

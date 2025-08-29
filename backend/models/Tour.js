@@ -13,6 +13,7 @@ class Tour {
     this.max_participants = data.max_participants;
     this.category_slug = data.category_slug || data.category; // Support both new and old field names
     this.images = data.images ? (typeof data.images === 'string' ? JSON.parse(data.images) : data.images) : [];
+    this.gallery = data.gallery ? (typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery) : [];
     this.itinerary = data.itinerary ? (typeof data.itinerary === 'string' ? JSON.parse(data.itinerary) : data.itinerary) : {};
     this.included = data.included ? (typeof data.included === 'string' ? JSON.parse(data.included) : data.included) : [];
     this.excluded = data.excluded ? (typeof data.excluded === 'string' ? JSON.parse(data.excluded) : data.excluded) : [];
@@ -61,6 +62,7 @@ class Tour {
       max_participants: this.max_participants,
       category_slug: this.category_slug,
       images: JSON.stringify(this.images),
+      gallery: JSON.stringify(this.gallery),
       itinerary: JSON.stringify(this.itinerary),
       included: JSON.stringify(this.included),
       excluded: JSON.stringify(this.excluded),
@@ -69,14 +71,14 @@ class Tour {
     };
 
     const sql = `
-      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, images, itinerary, included, excluded, status, featured, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, images, gallery, itinerary, included, excluded, status, featured, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     const params = [
       tourData.title, tourData.slug, tourData.description, tourData.price,
       tourData.duration, tourData.location, tourData.max_participants,
-      tourData.category_slug, tourData.images,
+      tourData.category_slug, tourData.images, tourData.gallery,
       tourData.itinerary, tourData.included, tourData.excluded,
       tourData.status, tourData.featured
     ];
@@ -114,6 +116,56 @@ class Tour {
       return uploadedImageUrls;
     } catch (error) {
       console.error('Error updating tour images:', error);
+      throw error;
+    }
+  }
+
+  // Update tour gallery using R2 (up to 10 photos)
+  async updateGallery(r2Bucket, newGalleryFiles, oldGallery = []) {
+    try {
+      // Delete old gallery images from R2 if they exist
+      if (oldGallery.length > 0) {
+        for (const imageUrl of oldGallery) {
+          await r2Helpers.deleteImage(r2Bucket, imageUrl);
+        }
+      }
+
+      // Upload new gallery images to R2 (max 10)
+      const uploadedGalleryUrls = [];
+      if (newGalleryFiles && newGalleryFiles.length > 0) {
+        const filesToUpload = newGalleryFiles.slice(0, 10); // Limit to 10 photos
+        for (const file of filesToUpload) {
+          r2Helpers.validateImage(file);
+          const imageUrl = await r2Helpers.uploadImage(r2Bucket, file, 'tours/gallery');
+          uploadedGalleryUrls.push(imageUrl);
+        }
+      }
+
+      this.gallery = uploadedGalleryUrls;
+      return uploadedGalleryUrls;
+    } catch (error) {
+      console.error('Error updating tour gallery:', error);
+      throw error;
+    }
+  }
+
+  // Delete specific gallery photo
+  async deleteGalleryPhoto(r2Bucket, photoUrl) {
+    try {
+      // Remove from R2 storage
+      await r2Helpers.deleteImage(r2Bucket, photoUrl);
+
+      // Remove from gallery array
+      this.gallery = this.gallery.filter(url => url !== photoUrl);
+
+      // Update database
+      const db = getDB();
+      await db.prepare('UPDATE tours SET gallery = ?, updated_at = datetime("now") WHERE id = ?')
+        .bind(JSON.stringify(this.gallery), this.id).run();
+
+      return this.gallery;
+    } catch (error) {
+      console.error('Error deleting gallery photo:', error);
       throw error;
     }
   }
@@ -297,6 +349,7 @@ class Tour {
     return {
       ...this,
       images: typeof this.images === 'string' ? JSON.parse(this.images) : this.images,
+      gallery: typeof this.gallery === 'string' ? JSON.parse(this.gallery) : this.gallery,
       itinerary: typeof this.itinerary === 'string' ? JSON.parse(this.itinerary) : this.itinerary,
       included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
       excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded
