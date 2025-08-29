@@ -20,7 +20,6 @@ import Contact from './pages/Contact'; // Add Contact import
 import Login from './pages/auth/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import BlogManagement from './pages/admin/BlogManagement';
-import BlogEditor from './pages/admin/BlogEditor';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
@@ -75,16 +74,6 @@ const AppContent: React.FC = () => {
             <Route path="/admin/blogs" element={
               <ProtectedRoute requiredRole="admin">
                 <BlogManagement />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/blogs/new" element={
-              <ProtectedRoute requiredRole="admin">
-                <BlogEditor />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/blogs/edit/:blogId" element={
-              <ProtectedRoute requiredRole="admin">
-                <BlogEditor />
               </ProtectedRoute>
             } />
           </Routes>
