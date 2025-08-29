@@ -29,6 +29,24 @@ const Services: React.FC = () => {
     return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   };
 
+  // Icon mapping for categories
+  const getIconFromString = (iconName: string) => {
+    const iconMap: { [key: string]: any } = {
+      'car': Icons.FiTruck,
+      'file-text': Icons.FiFileText,
+      'truck': Icons.FiTruck,
+      'home': Icons.FiHome,
+      'globe': Icons.FiGlobe,
+      'plane': Icons.FiSend,
+      'map-pin': Icons.FiMapPin,
+      'package': Icons.FiPackage,
+      'users': Icons.FiUsers,
+      'calendar': Icons.FiCalendar,
+      'default': Icons.FiPackage
+    };
+    return iconMap[iconName] || iconMap['default'];
+  };
+
   // Fetch service categories from database
   const { data: categoriesData } = useQuery({
     queryKey: ['service-categories'],
@@ -40,8 +58,11 @@ const Services: React.FC = () => {
   });
 
   const categories = [
-    { id: 'all', name: 'All Services', slug: 'all' },
-    ...(categoriesData?.data || [])
+    { id: 'all', name: 'All Services', slug: 'all', icon: Icons.FiGrid },
+    ...(categoriesData?.data?.map((cat: any) => ({
+      ...cat,
+      icon: getIconFromString(cat.icon)
+    })) || [])
   ];
 
   // Fetch services from API with pagination
@@ -50,11 +71,8 @@ const Services: React.FC = () => {
     queryFn: async () => {
       const params = new URLSearchParams();
       if (activeCategory !== 'all') {
-        // Find category ID by slug
-        const category = categoriesData?.data?.find((cat: any) => cat.slug === activeCategory);
-        if (category) {
-          params.append('category_id', category.id.toString());
-        }
+        // Use category slug for filtering instead of category_id
+        params.append('category', activeCategory);
       }
       if (searchTerm) params.append('search', searchTerm);
       params.append('status', 'active');
@@ -173,9 +191,9 @@ const Services: React.FC = () => {
           {categories.map((category) => (
             <button
               key={category.id}
-              onClick={() => setActiveCategory(category.id)}
+              onClick={() => setActiveCategory(category.slug || category.id)}
               className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                activeCategory === category.id
+                activeCategory === (category.slug || category.id)
                   ? 'bg-accent-orange text-white'
                   : isDarkMode
                   ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700 border border-dark-700'
