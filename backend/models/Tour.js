@@ -11,7 +11,6 @@ class Tour {
     this.duration = data.duration;
     this.location = data.location;
     this.max_participants = data.max_participants;
-    this.activity_level = data.activity_level || 'easy'; // Add activity_level field
     this.category_slug = data.category_slug || data.category; // Support both new and old field names
     this.images = data.images ? (typeof data.images === 'string' ? JSON.parse(data.images) : data.images) : [];
     this.gallery = data.gallery ? (typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery) : [];
@@ -61,7 +60,6 @@ class Tour {
       duration: this.duration,
       location: this.location,
       max_participants: this.max_participants,
-      activity_level: this.activity_level, // Add activity_level field
       category_slug: this.category_slug,
       images: JSON.stringify(this.images),
       gallery: JSON.stringify(this.gallery),
@@ -73,14 +71,14 @@ class Tour {
     };
 
     const sql = `
-      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, activity_level, category_slug, images, gallery, itinerary, included, excluded, status, featured, created_at, updated_at)
+      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, images, gallery, itinerary, included, excluded, status, featured, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     const params = [
       tourData.title, tourData.slug, tourData.description, tourData.price,
       tourData.duration, tourData.location, tourData.max_participants,
-      tourData.activity_level, tourData.category_slug, tourData.images, tourData.gallery,
+      tourData.category_slug, tourData.images, tourData.gallery,
       tourData.itinerary, tourData.included, tourData.excluded,
       tourData.status, tourData.featured
     ];

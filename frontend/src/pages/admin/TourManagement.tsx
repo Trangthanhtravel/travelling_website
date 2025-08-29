@@ -14,7 +14,6 @@ interface Tour {
   duration: string;
   location: string;
   max_participants: number;
-  activity_level: string;
   category: string;
   images: string[];
   itinerary: any;
@@ -33,7 +32,6 @@ interface TourFormData {
   duration: string;
   location: string;
   max_participants: number;
-  activity_level: string;
   category: string;
   included: string[];
   excluded: string[];
@@ -111,7 +109,6 @@ const TourManagement: React.FC = () => {
       formData.append('duration', tourData.duration);
       formData.append('location', tourData.location);
       formData.append('max_participants', tourData.max_participants.toString());
-      formData.append('activity_level', tourData.activity_level);
       formData.append('category', tourData.category);
       formData.append('included', JSON.stringify(tourData.included));
       formData.append('excluded', JSON.stringify(tourData.excluded));
@@ -162,7 +159,6 @@ const TourManagement: React.FC = () => {
       formData.append('duration', data.duration);
       formData.append('location', data.location);
       formData.append('max_participants', data.max_participants.toString());
-      formData.append('activity_level', data.activity_level);
       formData.append('category', data.category);
       formData.append('included', JSON.stringify(data.included));
       formData.append('excluded', JSON.stringify(data.excluded));
@@ -365,7 +361,6 @@ const TourManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 dark:text-white">{tour.location}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{tour.activity_level}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -502,7 +497,6 @@ const TourModal: React.FC<TourModalProps> = ({
     duration: initialData?.duration || '',
     location: initialData?.location || '',
     max_participants: initialData?.max_participants || 1,
-    activity_level: initialData?.activity_level || 'easy', // Fixed field name
     category: initialData?.category || '',
     included: initialData?.included || [],
     excluded: initialData?.excluded || [],
@@ -625,20 +619,6 @@ const TourModal: React.FC<TourModalProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Activity Level
-                </label>
-                <select
-                  value={formData.activity_level}
-                  onChange={(e) => setFormData({ ...formData, activity_level: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                >
-                  <option value="easy">Easy</option>
-                  <option value="moderate">Moderate</option>
-                  <option value="challenging">Challenging</option>
-                </select>
-              </div>
             </div>
 
             <div>
