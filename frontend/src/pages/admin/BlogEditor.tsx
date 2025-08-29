@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {  useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import toast from 'react-hot-toast';
+import RichTextEditor from '../../components/common/RichTextEditor';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import toast from 'react-hot-toast';
 
 interface BlogFormData {
   title: string;
@@ -386,16 +387,11 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSuccess }) => 
               {/* Content Editor */}
               <div className={`rounded-lg shadow-sm ${isDarkMode ? 'bg-dark-800' : 'bg-white'} p-6`}>
                 <h2 className="text-lg font-semibold mb-4">Content *</h2>
-                <textarea
+                <RichTextEditor
                   value={formData.content}
-                  onChange={(e) => handleInputChange('content', e.target.value)}
+                  onChange={(value) => handleInputChange('content', value)}
                   placeholder="Write your blog content here... (HTML supported)"
-                  rows={20}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-orange font-mono text-sm ${
-                    isDarkMode
-                      ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                  isDarkMode={isDarkMode}
                 />
                 <p className="text-xs text-gray-500 mt-2">
                   You can use HTML tags for formatting. For example: &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt;, etc.

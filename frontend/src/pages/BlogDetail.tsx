@@ -148,14 +148,14 @@ const BlogDetail: React.FC = () => {
         )}
 
         {/* Blog Content with Markdown Support */}
-        <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-strong:text-gray-900 dark:prose-strong:text-white">
+        <div className="prose prose-lg max-w-none dark:prose-invert">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw]}
             components={{
               // Custom components for better styling
               h1: ({ children }) => (
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-4">{children}</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-4 first:mt-0">{children}</h1>
               ),
               h2: ({ children }) => (
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-3">{children}</h2>
@@ -163,31 +163,111 @@ const BlogDetail: React.FC = () => {
               h3: ({ children }) => (
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-4 mb-2">{children}</h3>
               ),
+              h4: ({ children }) => (
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white mt-3 mb-2">{children}</h4>
+              ),
+              h5: ({ children }) => (
+                <h5 className="text-base font-bold text-gray-900 dark:text-white mt-2 mb-1">{children}</h5>
+              ),
+              h6: ({ children }) => (
+                <h6 className="text-sm font-bold text-gray-900 dark:text-white mt-2 mb-1">{children}</h6>
+              ),
               p: ({ children }) => (
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{children}</p>
               ),
               a: ({ href, children }) => (
-                <a href={href} className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
+                <a
+                  href={href}
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline decoration-2 underline-offset-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {children}
                 </a>
               ),
               img: ({ src, alt }) => (
-                <img src={src} alt={alt} className="w-full rounded-lg shadow-lg my-6" />
+                <img
+                  src={src}
+                  alt={alt}
+                  className="w-full rounded-lg shadow-lg my-6 max-w-full h-auto"
+                  loading="lazy"
+                />
               ),
               blockquote: ({ children }) => (
-                <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 dark:text-gray-400 my-4">
+                <blockquote className="border-l-4 border-blue-500 pl-6 py-2 italic text-gray-700 dark:text-gray-400 my-6 bg-gray-50 dark:bg-gray-800/50 rounded-r-lg">
                   {children}
                 </blockquote>
               ),
-              code: ({ children }) => (
-                <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm font-mono">
-                  {children}
-                </code>
-              ),
+              code: ({ children, className }) => {
+                const isInline = !className;
+                if (isInline) {
+                  return (
+                    <code className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-sm font-mono">
+                      {children}
+                    </code>
+                  );
+                }
+                return <code className={className}>{children}</code>;
+              },
               pre: ({ children }) => (
-                <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto my-4">
+                <pre className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 p-4 rounded-lg overflow-x-auto my-6 border border-gray-200 dark:border-gray-700">
                   {children}
                 </pre>
+              ),
+              ul: ({ children }) => (
+                <ul className="list-disc list-inside mb-4 text-gray-700 dark:text-gray-300 space-y-2">
+                  {children}
+                </ul>
+              ),
+              ol: ({ children }) => (
+                <ol className="list-decimal list-inside mb-4 text-gray-700 dark:text-gray-300 space-y-2">
+                  {children}
+                </ol>
+              ),
+              li: ({ children }) => (
+                <li className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {children}
+                </li>
+              ),
+              table: ({ children }) => (
+                <div className="overflow-x-auto my-6">
+                  <table className="min-w-full border border-gray-200 dark:border-gray-700 rounded-lg">
+                    {children}
+                  </table>
+                </div>
+              ),
+              thead: ({ children }) => (
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                  {children}
+                </thead>
+              ),
+              tbody: ({ children }) => (
+                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                  {children}
+                </tbody>
+              ),
+              th: ({ children }) => (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {children}
+                </th>
+              ),
+              td: ({ children }) => (
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                  {children}
+                </td>
+              ),
+              hr: () => (
+                <hr className="my-8 border-gray-200 dark:border-gray-700" />
+              ),
+              strong: ({ children }) => (
+                <strong className="font-bold text-gray-900 dark:text-white">
+                  {children}
+                </strong>
+              ),
+              em: ({ children }) => (
+                <em className="italic text-gray-700 dark:text-gray-300">
+                  {children}
+                </em>
               ),
             }}
           >
