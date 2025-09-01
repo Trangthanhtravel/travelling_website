@@ -50,13 +50,13 @@ router.put('/:id', adminAuth, upload.array('images', 10), updateTour);
 router.delete('/:id', adminAuth, deleteTour);
 
 // @route   PUT /api/tours/:id/gallery
-// @desc    Update tour gallery
+// @desc    Update tour gallery photos
 // @access  Private (Admin only)
-router.put('/:id/gallery', adminAuth, upload.array('images', 10), updateTourGallery);
+router.put('/:id/gallery', adminAuth, upload.array('gallery', 10), updateTourGallery);
 
-// @route   DELETE /api/tours/:id/gallery
-// @desc    Delete tour gallery photo
+// @route   DELETE /api/tours/:id/gallery/:photoUrl
+// @desc    Delete specific gallery photo
 // @access  Private (Admin only)
-router.delete('/:id/gallery', adminAuth, deleteGalleryPhoto);
+router.delete('/:id/gallery/:photoUrl', adminAuth, deleteGalleryPhoto);
 
 module.exports = router;

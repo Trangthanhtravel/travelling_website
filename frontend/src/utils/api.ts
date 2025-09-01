@@ -79,6 +79,19 @@ export const toursAPI = {
     updateTour: (id: string, tourData: Partial<Tour>): Promise<AxiosResponse<ApiResponse<Tour>>> =>
         adminAPI.put(`/tours/${id}`, tourData),
 
+    updateTourWithImages: (id: string, tourData: FormData): Promise<AxiosResponse<ApiResponse<Tour>>> =>
+        adminAPI.put(`/tours/${id}`, tourData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }),
+
+    updateTourGallery: (id: string, galleryData: FormData): Promise<AxiosResponse<ApiResponse<Tour>>> =>
+        adminAPI.put(`/tours/${id}/gallery`, galleryData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }),
+
+    deleteGalleryPhoto: (id: string, photoUrl: string): Promise<AxiosResponse<ApiResponse<void>>> =>
+        adminAPI.delete(`/tours/${id}/gallery/${encodeURIComponent(photoUrl)}`),
+
     deleteTour: (id: string): Promise<AxiosResponse<ApiResponse<void>>> =>
         adminAPI.delete(`/tours/${id}`),
 };

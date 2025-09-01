@@ -276,11 +276,13 @@ class Tour {
   }
 
   // Update tour
-  async update(updateData) {
-    const db = getDB();
+  async update(db, updateData) {
     // Handle JSON fields
     if (updateData.images) {
       updateData.images = JSON.stringify(updateData.images);
+    }
+    if (updateData.gallery) {
+      updateData.gallery = JSON.stringify(updateData.gallery);
     }
     if (updateData.itinerary) {
       updateData.itinerary = JSON.stringify(updateData.itinerary);
@@ -296,7 +298,12 @@ class Tour {
     const values = Object.values(updateData);
     const sql = `UPDATE tours SET ${fields}, updated_at = datetime('now') WHERE id = ?`;
 
-    return await db.prepare(sql).bind(...values, this.id).run();
+    const result = await db.prepare(sql).bind(...values, this.id).run();
+
+    // Update the instance with new data
+    Object.assign(this, updateData);
+
+    return result;
   }
 
   // Delete tour

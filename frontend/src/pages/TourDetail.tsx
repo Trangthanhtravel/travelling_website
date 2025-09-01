@@ -63,7 +63,7 @@ const TourDetail: React.FC = () => {
       {/* Hero Image Gallery */}
       <div className="relative h-96 md:h-[500px] overflow-hidden">
         <img
-          src={tour?.images?.[selectedImage]?.url || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80`}
+          src={tour?.images?.[selectedImage] || tour?.images?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80`}
           alt={tour?.title || 'Tour'}
           className="w-full h-full object-cover"
         />
@@ -99,7 +99,7 @@ const TourDetail: React.FC = () => {
             <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
               <div className="flex items-center text-sm text-gray-500 mb-2">
                 <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1" />
-                {tour?.destination || tour?.location?.city || 'Location TBD'}
+                {tour?.location || 'Location TBD'}
               </div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 {tour?.title || 'Tour Title'}
@@ -108,11 +108,11 @@ const TourDetail: React.FC = () => {
               <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
                 <div className="flex items-center">
                   <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
-                  {tour?.duration?.days ? `${tour.duration.days} Days / ${tour.duration.nights} Nights` : 'Duration TBD'}
+                  {tour?.duration || 'Duration TBD'}
                 </div>
                 <div className="flex items-center">
                   <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
-                  Max {tour?.maxGroupSize || 'TBD'} People
+                  Max {tour?.max_participants || 'TBD'} People
                 </div>
                 <div className="flex items-center">
                   <Icon icon={Icons.FiStar} className="w-4 h-4 text-yellow-400 mr-1" />
@@ -313,12 +313,12 @@ const TourDetail: React.FC = () => {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Duration:</span>
                     <span className="font-medium">
-                      {tour?.duration?.days ? `${tour.duration.days}D/${tour.duration.nights}N` : 'TBD'}
+                      {tour?.duration || 'TBD'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Group Size:</span>
-                    <span className="font-medium">Max {tour?.maxGroupSize || 'TBD'}</span>
+                    <span className="font-medium">Max {tour?.max_participants || 'TBD'}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Minimum Age:</span>
