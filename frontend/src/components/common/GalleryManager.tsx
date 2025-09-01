@@ -76,11 +76,20 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   // Mutations
   const uploadMutation = useMutation({
     mutationFn: updateGallery,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success('Gallery updated successfully!');
+      // Invalidate multiple query keys to ensure all related data is refreshed
       queryClient.invalidateQueries({ queryKey: ['admin-tours'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-tour', tour.id] });
+      queryClient.invalidateQueries({ queryKey: ['tour', tour.slug] });
       setSelectedFiles(null);
-      onClose();
+
+      // Update the tour data immediately to reflect changes
+      if (data?.data) {
+        // Pass the updated tour data to parent component
+        const updatedTour = { ...tour, gallery: data.data.gallery };
+        onUpdateSuccess?.(updatedTour);
+      }
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to update gallery');
@@ -89,9 +98,18 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
 
   const deleteMutation = useMutation({
     mutationFn: deleteGalleryPhoto,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success('Photo deleted successfully!');
+      // Invalidate multiple query keys to ensure all related data is refreshed
       queryClient.invalidateQueries({ queryKey: ['admin-tours'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-tour', tour.id] });
+      queryClient.invalidateQueries({ queryKey: ['tour', tour.slug] });
+
+      // Update the tour data immediately to reflect changes
+      if (data?.data?.gallery !== undefined) {
+        const updatedTour = { ...tour, gallery: data.data.gallery };
+        onUpdateSuccess?.(updatedTour);
+      }
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to delete photo');

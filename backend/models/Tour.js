@@ -124,26 +124,28 @@ class Tour {
   // Update tour gallery using R2 (up to 10 photos)
   async updateGallery(r2Bucket, newGalleryFiles, oldGallery = []) {
     try {
-      // Delete old gallery images from R2 if they exist
-      if (oldGallery.length > 0) {
-        for (const imageUrl of oldGallery) {
-          await r2Helpers.deleteImage(r2Bucket, imageUrl);
-        }
-      }
+      // Start with existing gallery photos
+      let currentGallery = [...(this.gallery || [])];
 
-      // Upload new gallery images to R2 (max 10)
+      // Upload new gallery images to R2
       const uploadedGalleryUrls = [];
       if (newGalleryFiles && newGalleryFiles.length > 0) {
-        const filesToUpload = newGalleryFiles.slice(0, 10); // Limit to 10 photos
-        for (const file of filesToUpload) {
+        // Check total limit
+        if (currentGallery.length + newGalleryFiles.length > 10) {
+          throw new Error(`Total gallery photos cannot exceed 10. Current: ${currentGallery.length}, Adding: ${newGalleryFiles.length}`);
+        }
+
+        for (const file of newGalleryFiles) {
           r2Helpers.validateImage(file);
           const imageUrl = await r2Helpers.uploadImage(r2Bucket, file, 'tours/gallery');
           uploadedGalleryUrls.push(imageUrl);
         }
       }
 
-      this.gallery = uploadedGalleryUrls;
-      return uploadedGalleryUrls;
+      // Combine existing and new photos
+      const updatedGallery = [...currentGallery, ...uploadedGalleryUrls];
+      this.gallery = updatedGallery;
+      return updatedGallery;
     } catch (error) {
       console.error('Error updating tour gallery:', error);
       throw error;
@@ -153,6 +155,11 @@ class Tour {
   // Delete specific gallery photo
   async deleteGalleryPhoto(r2Bucket, photoUrl) {
     try {
+      // Check if photo exists in gallery
+      if (!this.gallery || !this.gallery.includes(photoUrl)) {
+        throw new Error('Photo not found in gallery');
+      }
+
       // Remove from R2 storage
       await r2Helpers.deleteImage(r2Bucket, photoUrl);
 
