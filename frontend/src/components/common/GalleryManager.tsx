@@ -9,6 +9,7 @@ interface GalleryManagerProps {
   tour: {
     id: number;
     title: string;
+    slug?: string;
     gallery?: string[];
   };
   onUpdateSuccess: (updatedTour: any) => void;
@@ -17,7 +18,9 @@ interface GalleryManagerProps {
 
 const GalleryManager: React.FC<GalleryManagerProps> = ({
   onClose,
-  tour
+  tour,
+  onUpdateSuccess,
+  onDeleteSuccess
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const queryClient = useQueryClient();
