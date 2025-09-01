@@ -21,6 +21,24 @@ const upload = multer({
   }
 });
 
+// Create a separate multer instance for gallery uploads
+const galleryUpload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept only image files and check field name
+    if (file.mimetype.startsWith('image/') && file.fieldname === 'gallery') {
+      cb(null, true);
+    } else if (!file.mimetype.startsWith('image/')) {
+      cb(new Error('Only image files are allowed'), false);
+    } else {
+      cb(new Error('Invalid field name'), false);
+    }
+  }
+});
+
 // Get featured tours for homepage
 const getFeaturedTours = async (req, res) => {
   try {
@@ -459,5 +477,6 @@ module.exports = {
   checkAvailability,
   updateTourGallery,
   deleteGalleryPhoto,
-  upload
+  upload,
+  galleryUpload
 };

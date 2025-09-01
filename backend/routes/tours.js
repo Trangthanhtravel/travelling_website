@@ -11,7 +11,8 @@ const {
   checkAvailability,
   updateTourGallery,
   deleteGalleryPhoto,
-  upload
+  upload,
+  galleryUpload
 } = require('../controllers/tourController');
 
 // @route   GET /api/tours
@@ -52,7 +53,7 @@ router.delete('/:id', adminAuth, deleteTour);
 // @route   PUT /api/tours/:id/gallery
 // @desc    Update tour gallery photos
 // @access  Private (Admin only)
-router.put('/:id/gallery', adminAuth, upload.array('gallery', 10), updateTourGallery);
+router.put('/:id/gallery', adminAuth, galleryUpload.array('gallery', 10), updateTourGallery);
 
 // @route   DELETE /api/tours/:id/gallery/:photoUrl
 // @desc    Delete specific gallery photo

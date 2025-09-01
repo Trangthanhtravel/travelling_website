@@ -277,31 +277,47 @@ class Tour {
 
   // Update tour
   async update(db, updateData) {
-    // Handle JSON fields
-    if (updateData.images) {
-      updateData.images = JSON.stringify(updateData.images);
-    }
-    if (updateData.gallery) {
-      updateData.gallery = JSON.stringify(updateData.gallery);
-    }
-    if (updateData.itinerary) {
-      updateData.itinerary = JSON.stringify(updateData.itinerary);
-    }
-    if (updateData.included) {
-      updateData.included = JSON.stringify(updateData.included);
-    }
-    if (updateData.excluded) {
-      updateData.excluded = JSON.stringify(updateData.excluded);
+    // Create a copy to avoid modifying the original data
+    const processedData = { ...updateData };
+
+    // Handle boolean fields properly
+    if (processedData.featured !== undefined) {
+      processedData.featured = processedData.featured === true || processedData.featured === 'true' || processedData.featured === 1;
     }
 
-    const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-    const values = Object.values(updateData);
+    // Handle JSON fields
+    if (processedData.images && typeof processedData.images !== 'string') {
+      processedData.images = JSON.stringify(processedData.images);
+    }
+    if (processedData.gallery && typeof processedData.gallery !== 'string') {
+      processedData.gallery = JSON.stringify(processedData.gallery);
+    }
+    if (processedData.itinerary && typeof processedData.itinerary !== 'string') {
+      processedData.itinerary = JSON.stringify(processedData.itinerary);
+    }
+    if (processedData.included && typeof processedData.included !== 'string') {
+      processedData.included = JSON.stringify(processedData.included);
+    }
+    if (processedData.excluded && typeof processedData.excluded !== 'string') {
+      processedData.excluded = JSON.stringify(processedData.excluded);
+    }
+
+    const fields = Object.keys(processedData).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(processedData);
     const sql = `UPDATE tours SET ${fields}, updated_at = datetime('now') WHERE id = ?`;
 
     const result = await db.prepare(sql).bind(...values, this.id).run();
 
-    // Update the instance with new data
+    // Update the instance with new data (use original updateData to preserve types)
     Object.assign(this, updateData);
+
+    // Parse JSON fields back to objects for the instance
+    if (this.images && typeof this.images === 'string') {
+      this.images = JSON.parse(this.images);
+    }
+    if (this.gallery && typeof this.gallery === 'string') {
+      this.gallery = JSON.parse(this.gallery);
+    }
 
     return result;
   }

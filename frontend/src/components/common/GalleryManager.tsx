@@ -46,7 +46,8 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   };
 
   const deleteGalleryPhoto = async (photoUrl: string) => {
-    const encodedUrl = encodeURIComponent(photoUrl);
+    // Double encode the URL to handle special characters properly
+    const encodedUrl = encodeURIComponent(encodeURIComponent(photoUrl));
     const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/tours/${tour.id}/gallery/${encodedUrl}`, {
       method: 'DELETE',
       headers: {
