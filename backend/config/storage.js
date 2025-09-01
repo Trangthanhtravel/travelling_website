@@ -33,7 +33,7 @@ const r2Helpers = {
         // Use custom domain if configured
         publicUrl = `https://${cleanPublicDomain}/${fileName}`;
       } else if (cleanBucketName && cleanAccountId) {
-        // Use default R2 public URL format
+        // Use default R2 public URL format (safer for now)
         publicUrl = `https://${cleanBucketName}.${cleanAccountId}.r2.cloudflarestorage.com/${fileName}`;
       } else {
         console.error('R2 configuration incomplete. Available vars:', {
