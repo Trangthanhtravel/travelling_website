@@ -101,6 +101,7 @@ import {
     FiFacebook,
     FiInstagram,
     FiTwitter,
+    FiYoutube,
 
   // Loading & Status
   FiLoader,
@@ -238,6 +239,7 @@ export const Icons = {
     FiFacebook,
     FiInstagram,
     FiTwitter,
+    FiYoutube,
 
   // Loading & Status
   FiLoader,

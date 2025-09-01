@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from '../contexts/TranslationContext';
 import { Icon, Icons } from '../components/common/Icons';
 import AnimatedCounter from '../components/common/AnimatedCounter';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ interface HeroSlide {
 
 const Home: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [heroLoading, setHeroLoading] = useState(true);
@@ -262,7 +264,7 @@ const Home: React.FC = () => {
       <section className="relative h-screen overflow-hidden">
         {heroLoading ? (
           <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-            <div className="text-gray-500 text-lg">Loading...</div>
+            <div className="text-gray-500 text-lg">{t('Loading...')}</div>
           </div>
         ) : (
           <div className="absolute inset-0">
@@ -294,7 +296,7 @@ const Home: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
             <div className="animate-fade-in">
               <h1 className="text-5xl md:text-7xl font-bold font-serif mb-6 drop-shadow-lg">
-                {heroSlides[currentSlide]?.title || 'Welcome'}
+                {heroSlides[currentSlide]?.title || t('Welcome to')}
               </h1>
               <p className="text-xl md:text-2xl mb-4 text-light-300 drop-shadow-md">
                 {heroSlides[currentSlide]?.subtitle || ''}
@@ -302,6 +304,20 @@ const Home: React.FC = () => {
               <p className="text-lg mb-8 max-w-2xl mx-auto text-light-200 drop-shadow-md">
                 {heroSlides[currentSlide]?.description || ''}
               </p>
+              <div className="space-x-4">
+                <Link
+                  to="/tours"
+                  className="inline-block bg-accent-orange hover:bg-accent-orange-hover text-white font-semibold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105"
+                >
+                  {t('Explore the world with our expert guides')}
+                </Link>
+                <Link
+                  to="/contact"
+                  className="inline-block border-2 border-white text-white hover:bg-white hover:text-accent-orange font-semibold py-4 px-8 rounded-lg transition-all duration-300"
+                >
+                  {t('Contact')}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -395,7 +411,7 @@ const Home: React.FC = () => {
                   />
                 </div>
                 <p className={`text-lg font-medium ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  Happy Customers
+                  {t('Happy Customers')}
                 </p>
               </div>
             </div>
@@ -415,7 +431,7 @@ const Home: React.FC = () => {
                   />
                 </div>
                 <p className={`text-lg font-medium ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  Successful Trips
+                  {t('Successful Trips')}
                 </p>
               </div>
             </div>
@@ -435,7 +451,7 @@ const Home: React.FC = () => {
                   />
                 </div>
                 <p className={`text-lg font-medium ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  Years Experience
+                  {t('Years of Experience')}
                 </p>
               </div>
             </div>
@@ -455,7 +471,7 @@ const Home: React.FC = () => {
                   />
                 </div>
                 <p className={`text-lg font-medium ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  Google Rating
+                  {t('Google Review')}
                 </p>
                 <div className="flex justify-center mt-2">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -476,9 +492,9 @@ const Home: React.FC = () => {
       <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-light-50' : 'bg-light-200'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-light-text-primary mb-4">Our Core Services</h2>
+            <h2 className="text-4xl font-bold text-light-text-primary mb-4">{t('Our Services')}</h2>
             <p className="text-xl text-light-text-muted max-w-2xl mx-auto">
-              Comprehensive travel solutions to make your journey seamless and memorable
+              Giải pháp du lịch toàn diện để làm cho hành trình của bạn trở nên liền mạch và đáng nhớ
             </p>
           </div>
 
@@ -575,7 +591,7 @@ const Home: React.FC = () => {
                             }}
                             className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
                           >
-                            Learn More
+                            {t('Learn More')}
                           </button>
                         </div>
                       </div>
@@ -610,9 +626,9 @@ const Home: React.FC = () => {
       <section className="py-20 bg-white dark:bg-dark-800 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Featured Tours</h2>
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{t('Featured Tours')}</h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Discover our handpicked collection of extraordinary tours and experiences
+              Khám phá bộ sưu tập tour và trải nghiệm đặc biệt được chúng tôi tuyển chọn
             </p>
           </div>
 
@@ -676,7 +692,7 @@ const Home: React.FC = () => {
                           to={`/tours/${tour.slug || tour.id}`}
                           className="inline-flex items-center justify-center w-full bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
                         >
-                          View Details
+                          {t('View Details')}
                           <Icon icon={Icons.FiArrowRight} className="w-4 h-4 ml-2" />
                         </Link>
                       </div>
@@ -706,15 +722,15 @@ const Home: React.FC = () => {
           ) : (
             <div className="text-center py-12">
               <Icon icon={Icons.FiCalendar} className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No Featured Tours Available</h3>
+              <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">{t('No Featured Tours Available')}</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
-                We're working on adding some amazing featured tours for you.
+                {t("We're working on adding some amazing featured tours for you.")}
               </p>
               <Link
                 to="/tours"
                 className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
               >
-                Browse All Tours
+                {t('Browse All Tours')}
                 <Icon icon={Icons.FiArrowRight} className="w-4 h-4 ml-2" />
               </Link>
             </div>
@@ -725,20 +741,20 @@ const Home: React.FC = () => {
               to="/tours"
               className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200"
             >
-              View All Tours
+              {t('View More')}
               <Icon icon={Icons.FiArrowRight} className="w-5 h-5 ml-2" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Car Rentals Section - Make this WHITE in dark mode too */}
+      {/* Car Rentals Section */}
       <section className="py-20 bg-gray-50 dark:bg-white transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-900 mb-4">Car Rentals</h2>
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-900 mb-4">{t('Car Rental')}</h2>
             <p className="text-xl text-gray-600 dark:text-gray-600 max-w-2xl mx-auto">
-              Choose from our premium fleet
+              Chọn từ đội xe cao cấp của chúng tôi
             </p>
           </div>
 
@@ -781,7 +797,7 @@ const Home: React.FC = () => {
                           to={`/services/${car.slug || car.id}`}
                           className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200 block text-center"
                         >
-                          View Details
+                          {t('View Details')}
                         </Link>
                       </div>
                     </div>
@@ -816,10 +832,10 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-light-text-primary dark:text-white">
-              Featured Blogs
+              {t('Latest News')}
             </h2>
             <p className="text-xl text-light-text-muted max-w-2xl mx-auto">
-              Insights and stories from our travel experts
+              Thông tin chi tiết và câu chuyện từ các chuyên gia du lịch của chúng tôi
             </p>
           </div>
 
@@ -871,7 +887,7 @@ const Home: React.FC = () => {
               to="/blogs"
               className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200"
             >
-              View All Blogs
+              {t('View More')}
               <Icon icon={Icons.FiArrowRight} className="w-5 h-5 ml-2" />
             </Link>
           </div>
@@ -881,22 +897,22 @@ const Home: React.FC = () => {
       {/* CTA Section */}
       <section className="py-20 bg-primary-600 dark:bg-primary-800 transition-colors duration-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Ready for Your Next Adventure?</h2>
+          <h2 className="text-4xl font-bold text-white mb-6">Sẵn sàng cho cuộc phiêu lưu tiếp theo của bạn?</h2>
           <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of travelers who have discovered amazing destinations with us. Start planning your perfect trip today.
+            Tham gia cùng hàng nghìn du khách đã khám phá những điểm đến tuyệt vời cùng chúng tôi. Bắt đầu lên kế hoạch cho chuyến đi hoàn hảo ngay hôm nay.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/tours"
               className="bg-white text-primary-600 px-8 py-4 rounded-lg font-medium hover:bg-gray-100 transition-colors duration-200"
             >
-              Browse Tours
+              {t('Tours')}
             </Link>
             <Link
               to="/contact"
               className="border-2 border-white text-white px-8 py-4 rounded-lg font-medium hover:bg-white hover:text-primary-600 transition-colors duration-200"
             >
-              Contact Us
+              {t('Contact')}
             </Link>
           </div>
         </div>

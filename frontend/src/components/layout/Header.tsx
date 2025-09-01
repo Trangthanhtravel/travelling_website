@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useTranslation } from '../../contexts/TranslationContext';
 import { Icon, Icons } from '../common/Icons';
 
 const Header: React.FC = () => {
@@ -9,6 +10,7 @@ const Header: React.FC = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const { state, logout } = useAuth();
     const { isDarkMode, toggleTheme } = useTheme();
+    const { t, isVietnamese, toggleLanguage } = useTranslation();
     const navigate = useNavigate();
 
     // Handle scroll to change header background
@@ -28,11 +30,11 @@ const Header: React.FC = () => {
     };
 
     const navigation = [
-        { name: 'Home', href: '/' },
-        { name: 'Tours', href: '/tours' },
-        { name: 'Services', href: '/services' },
-        { name: 'Blogs', href: '/blogs' },
-        { name: 'Contact', href: '/contact' },
+        { name: t('Home'), href: '/' },
+        { name: t('Tours'), href: '/tours' },
+        { name: t('Services'), href: '/services' },
+        { name: t('Blogs'), href: '/blogs' },
+        { name: t('Contact'), href: '/contact' },
     ];
 
     const logoTextClasses = isScrolled
@@ -83,6 +85,15 @@ const Header: React.FC = () => {
 
                     {/* Desktop Actions */}
                     <div className="hidden md:flex items-center space-x-4">
+                        {/* Language Toggle */}
+                        <button
+                            onClick={toggleLanguage}
+                            className={`${buttonClasses} text-xs font-medium`}
+                            title={isVietnamese ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+                        >
+                            {isVietnamese ? 'EN' : 'VI'}
+                        </button>
+
                         {/* Theme Toggle */}
                         <button
                             onClick={toggleTheme}
@@ -102,13 +113,13 @@ const Header: React.FC = () => {
                                     to="/admin/dashboard"
                                     className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-accent-orange hover:text-accent-orange-hover' : 'text-accent-orange hover:text-accent-orange-hover'}`}
                                 >
-                                    Admin Dashboard
+                                    {t('Admin Dashboard')}
                                 </Link>
                                 <button
                                     onClick={handleLogout}
                                     className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
                                 >
-                                    Logout
+                                    {t('Logout')}
                                 </button>
                             </div>
                         ) : (
@@ -116,7 +127,7 @@ const Header: React.FC = () => {
                                 to="/admin/login"
                                 className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
                             >
-                                Admin
+                                {t('Admin')}
                             </Link>
                         )}
                     </div>
@@ -152,44 +163,43 @@ const Header: React.FC = () => {
                             </Link>
                         ))}
 
+                        {/* Mobile Language Toggle */}
+                        <button
+                            onClick={toggleLanguage}
+                            className={`block w-full text-left px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-secondary' : 'text-light-text-secondary hover:text-light-text-primary'}`}
+                        >
+                            {isVietnamese ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+                        </button>
+
                         {/* Mobile Admin Section */}
-                        <div className={`border-t pt-3 mt-3 ${isDarkMode ? 'border-dark-800' : 'border-light-300'}`}>
-                            {state.isAuthenticated && state.admin ? (
-                                <>
-                                    <Link
-                                        to="/admin/dashboard"
-                                        className="block px-3 py-2 text-base font-medium text-accent-orange hover:text-accent-orange-hover transition-colors"
-                                        onClick={() => setIsMenuOpen(false)}
-                                    >
-                                        Admin Dashboard
-                                    </Link>
-                                    <button
-                                        onClick={() => {
-                                            handleLogout();
-                                            setIsMenuOpen(false);
-                                        }}
-                                        className={`block w-full text-left px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
-                                    >
-                                        Logout
-                                    </button>
-                                </>
-                            ) : (
+                        {state.isAuthenticated && state.admin ? (
+                            <>
                                 <Link
-                                    to="/admin/login"
-                                    className={`block px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
+                                    to="/admin/dashboard"
+                                    className={`block px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-accent-orange hover:text-accent-orange-hover' : 'text-accent-orange hover:text-accent-orange-hover'}`}
                                     onClick={() => setIsMenuOpen(false)}
                                 >
-                                    Admin Login
+                                    {t('Admin Dashboard')}
                                 </Link>
-                            )}
-
-                            <button
-                                onClick={toggleTheme}
-                                className={`block w-full text-left px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
+                                <button
+                                    onClick={() => {
+                                        handleLogout();
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className={`block w-full text-left px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
+                                >
+                                    {t('Logout')}
+                                </button>
+                            </>
+                        ) : (
+                            <Link
+                                to="/admin/login"
+                                className={`block px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
+                                onClick={() => setIsMenuOpen(false)}
                             >
-                                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                            </button>
-                        </div>
+                                {t('Admin')}
+                            </Link>
+                        )}
                     </div>
                 </div>
             )}
