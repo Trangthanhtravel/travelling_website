@@ -3,9 +3,11 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../components/common/Icons';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from '../contexts/TranslationContext';
 
 const Services: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -58,7 +60,7 @@ const Services: React.FC = () => {
   });
 
   const categories = [
-    { id: 'all', name: 'All Services', slug: 'all', icon: Icons.FiGrid },
+    { id: 'all', name: t('Our Services'), slug: 'all', icon: Icons.FiGrid },
     ...(categoriesData?.data?.map((cat: any) => ({
       ...cat,
       icon: getIconFromString(cat.icon)
@@ -111,8 +113,8 @@ const Services: React.FC = () => {
       <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
         <div className="text-center py-12">
           <Icon icon={Icons.FiAlertCircle} className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Error loading services</h3>
-          <p className="text-gray-600 dark:text-gray-400">Please try again later</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Lỗi khi tải dịch vụ</h3>
+          <p className="text-gray-600 dark:text-gray-400">Vui lòng thử lại sau</p>
         </div>
       </div>
     );
@@ -124,9 +126,9 @@ const Services: React.FC = () => {
       <div className="bg-accent-orange text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Travel Services</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Our Professional Services')}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Comprehensive travel solutions for all your adventure needs
+              Giải pháp du lịch toàn diện cho tất cả nhu cầu phiêu lưu của bạn
             </p>
           </div>
         </div>
@@ -138,13 +140,13 @@ const Services: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-                Search Services
+                {t('Search')} {t('Services')}
               </label>
               <div className="relative">
                 <Icon icon={Icons.FiSearch} className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-400'}`} />
                 <input
                   type="text"
-                  placeholder="Search services..."
+                  placeholder="Tìm kiếm dịch vụ..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
@@ -154,7 +156,7 @@ const Services: React.FC = () => {
 
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-                View Mode
+                Chế độ xem
               </label>
               <div className="flex items-center gap-2">
                 <button
@@ -284,7 +286,7 @@ const Services: React.FC = () => {
                     to={`/services/${service.slug}`}
                     className="w-full bg-accent-orange hover:bg-accent-orange-hover text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center"
                   >
-                    View Details
+                    {t('View Details')}
                   </Link>
                 </div>
               </div>
@@ -297,22 +299,22 @@ const Services: React.FC = () => {
           <div className="mt-8">
             <div className={`flex justify-between items-center mb-4 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
               <div className="text-sm">
-                Showing {pagination.total > 0 ? (pagination.currentPage - 1) * pagination.limit + 1 : 0} -{' '}
+                Hiển thị {pagination.total > 0 ? (pagination.currentPage - 1) * pagination.limit + 1 : 0} -{' '}
                 {pagination.currentPage * pagination.limit > pagination.total ? pagination.total : pagination.currentPage * pagination.limit}{' '}
-                of {pagination.total} services
+                của {pagination.total} dịch vụ
               </div>
 
               {/* Sort By */}
               <div>
-                <label className="sr-only">Sort by</label>
+                <label className="sr-only">{t('Sort')}</label>
                 <select
                   onChange={(e) => handleSortChange(e.target.value)}
                   className={`block appearance-none bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:border-dark-600 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}
                 >
-                  <option value="created_at-desc">Newest First</option>
-                  <option value="created_at-asc">Oldest First</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
+                  <option value="created_at-desc">{t('Newest First')}</option>
+                  <option value="created_at-asc">Cũ nhất trước</option>
+                  <option value="price-asc">{t('Price: Low to High')}</option>
+                  <option value="price-desc">{t('Price: High to Low')}</option>
                 </select>
               </div>
             </div>
@@ -324,7 +326,7 @@ const Services: React.FC = () => {
                 className={`px-4 py-2 rounded-lg font-medium transition-colors mr-2 ${isDarkMode ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
               >
                 <Icon icon={Icons.FiChevronLeft} className="w-4 h-4 mr-2" />
-                Previous
+                {t('Previous')}
               </button>
 
               <button
@@ -332,7 +334,7 @@ const Services: React.FC = () => {
                 disabled={pagination.currentPage * pagination.limit >= pagination.total}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
               >
-                Next
+                {t('Next')}
                 <Icon icon={Icons.FiChevronRight} className="w-4 h-4 ml-2" />
               </button>
             </div>
@@ -344,10 +346,10 @@ const Services: React.FC = () => {
           <div className={`text-center py-12 rounded-lg ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'}`}>
             <Icon icon={Icons.FiPackage} className={`w-12 h-12 mx-auto mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-400'}`} />
             <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>
-              No services found
+              Không tìm thấy dịch vụ
             </h3>
             <p className={`mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-              Try adjusting your search or category filter.
+              Thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc danh mục của bạn.
             </p>
           </div>
         )}

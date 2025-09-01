@@ -304,20 +304,6 @@ const Home: React.FC = () => {
               <p className="text-lg mb-8 max-w-2xl mx-auto text-light-200 drop-shadow-md">
                 {heroSlides[currentSlide]?.description || ''}
               </p>
-              <div className="space-x-4">
-                <Link
-                  to="/tours"
-                  className="inline-block bg-accent-orange hover:bg-accent-orange-hover text-white font-semibold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105"
-                >
-                  {t('Explore the world with our expert guides')}
-                </Link>
-                <Link
-                  to="/contact"
-                  className="inline-block border-2 border-white text-white hover:bg-white hover:text-accent-orange font-semibold py-4 px-8 rounded-lg transition-all duration-300"
-                >
-                  {t('Contact')}
-                </Link>
-              </div>
             </div>
           </div>
         </div>

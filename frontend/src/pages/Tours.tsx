@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from '../contexts/TranslationContext';
 import { toursAPI } from '../utils/api';
 import { Tour, TourFilters } from '../types';
 import { Icon, Icons } from '../components/common/Icons';
 
 const Tours: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<TourFilters>({
     page: 1,
@@ -37,7 +39,7 @@ const Tours: React.FC = () => {
   });
 
   const categories = [
-    { value: '', label: 'All Categories' },
+    { value: '', label: t('All Tours') },
     ...(categoriesData?.data || []).map((cat: any) => ({
       value: cat.slug,
       label: cat.name
@@ -50,11 +52,11 @@ const Tours: React.FC = () => {
   });
 
   const sortOptions = [
-    { value: 'created_at-desc', label: 'Newest First' },
-    { value: 'price-asc', label: 'Price: Low to High' },
-    { value: 'price-desc', label: 'Price: High to Low' },
-    { value: 'title-asc', label: 'Name: A to Z' },
-    { value: 'title-desc', label: 'Name: Z to A' },
+    { value: 'created_at-desc', label: t('Newest First') },
+    { value: 'price-asc', label: t('Price: Low to High') },
+    { value: 'price-desc', label: t('Price: High to Low') },
+    { value: 'title-asc', label: t('Name: A to Z') },
+    { value: 'title-desc', label: t('Name: Z to A') },
   ];
 
   const handleFilterChange = (key: keyof TourFilters, value: string | number | undefined) => {
@@ -101,9 +103,9 @@ const Tours: React.FC = () => {
       <div className="bg-accent-orange text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Discover Amazing Tours</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Discover Amazing Tours')}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Explore our curated collection of unforgettable travel experiences around the world
+              Khám phá bộ sưu tập trải nghiệm du lịch khó quên được chúng tôi tuyển chọn trên khắp thế giới
             </p>
           </div>
         </div>
@@ -115,25 +117,25 @@ const Tours: React.FC = () => {
           <div className={`lg:w-64 ${showFilters ? 'block' : 'hidden lg:block'}`}>
             <div className={`rounded-lg shadow-lg p-6 sticky top-4 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-light-50 border border-light-300'}`}>
               <div className="flex items-center justify-between mb-6">
-                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>Filters</h3>
+                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>{t('Filter')}</h3>
                 <button
                   onClick={clearFilters}
                   className="text-sm text-accent-orange hover:text-accent-orange-hover transition-colors"
                 >
-                  Clear All
+                  {t('Clear')}
                 </button>
               </div>
 
               {/* Search */}
               <div className="mb-6">
                 <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-light-text-secondary'}`}>
-                  Search Tours
+                  {t('Search')} {t('Tours')}
                 </label>
                 <div className="relative">
                   <Icon icon={Icons.FiSearch} className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`} />
                   <input
                     type="text"
-                    placeholder="Search destinations, tours..."
+                    placeholder="Tìm kiếm điểm đến, tour..."
                     className="input-field pl-10"
                     value={filters.search || ''}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
@@ -144,7 +146,7 @@ const Tours: React.FC = () => {
               {/* Category Filter */}
               <div className="mb-6">
                 <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-light-text-secondary'}`}>
-                  Category
+                  {t('Categories')}
                 </label>
                 <select
                   className="input-field"
@@ -162,19 +164,19 @@ const Tours: React.FC = () => {
               {/* Price Range */}
               <div className="mb-6">
                 <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-light-text-secondary'}`}>
-                  Price Range
+                  {t('Price')}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="number"
-                    placeholder="Min"
+                    placeholder="Tối thiểu"
                     className="input-field"
                     value={filters.minPrice || ''}
                     onChange={(e) => handleFilterChange('minPrice', Number(e.target.value) || undefined)}
                   />
                   <input
                     type="number"
-                    placeholder="Max"
+                    placeholder="Tối đa"
                     className="input-field"
                     value={filters.maxPrice || ''}
                     onChange={(e) => handleFilterChange('maxPrice', Number(e.target.value) || undefined)}
@@ -199,7 +201,7 @@ const Tours: React.FC = () => {
                     }`}
                   >
                     <Icon icon={Icons.FiFilter} className="w-4 h-4 mr-2" />
-                    Filters
+                    {t('Filter')}
                   </button>
                   
                   <div className="flex items-center gap-2">
@@ -232,7 +234,7 @@ const Tours: React.FC = () => {
 
                 <div className="flex items-center gap-4">
                   <span className={`text-sm ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                    {pagination?.total || 0} tours found
+                    {pagination?.total || 0} tour được tìm thấy
                   </span>
                   
                   <select
@@ -271,16 +273,16 @@ const Tours: React.FC = () => {
               <div className={`text-center py-12 rounded-lg ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-light-50 border border-light-300'}`}>
                 <Icon icon={Icons.FiAlertCircle} className="w-12 h-12 text-error mx-auto mb-4" />
                 <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-light-text-primary'}`}>
-                  Error loading tours
+                  Lỗi khi tải tour
                 </h3>
                 <p className={`${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'} mb-4`}>
-                  Please try again later or adjust your filters.
+                  Vui lòng thử lại sau hoặc điều chỉnh bộ lọc của bạn.
                 </p>
                 <button
                   onClick={() => window.location.reload()}
                   className="btn-primary"
                 >
-                  Try Again
+                  Thử Lại
                 </button>
               </div>
             )}
@@ -343,7 +345,7 @@ const Tours: React.FC = () => {
                         to={`/tours/${tour.slug || tour.id}`}
                         className="w-full bg-accent-orange hover:bg-accent-orange-hover text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center"
                       >
-                        View Details
+                        {t('View Details')}
                       </Link>
                     </div>
                   </div>
@@ -356,16 +358,16 @@ const Tours: React.FC = () => {
               <div className={`text-center py-12 rounded-lg ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-light-50 border border-light-300'}`}>
                 <Icon icon={Icons.FiSearch} className={`w-12 h-12 mx-auto mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`} />
                 <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-light-text-primary'}`}>
-                  No tours found
+                  Không tìm thấy tour
                 </h3>
                 <p className={`mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  Try adjusting your filters or search terms.
+                  Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn.
                 </p>
                 <button
                   onClick={clearFilters}
                   className="btn-secondary"
                 >
-                  Clear Filters
+                  {t('Clear')} {t('Filter')}
                 </button>
               </div>
             )}
@@ -383,7 +385,7 @@ const Tours: React.FC = () => {
                         : isDarkMode ? 'text-dark-text-primary hover:bg-dark-700' : 'text-light-text-primary hover:bg-light-200'
                     }`}
                   >
-                    Previous
+                    {t('Previous')}
                   </button>
                   
                   {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
@@ -411,7 +413,7 @@ const Tours: React.FC = () => {
                         : isDarkMode ? 'text-dark-text-primary hover:bg-dark-700' : 'text-light-text-primary hover:bg-light-200'
                     }`}
                   >
-                    Next
+                    {t('Next')}
                   </button>
                 </div>
               </div>
