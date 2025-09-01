@@ -26,7 +26,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   const updateGallery = async (files: FileList) => {
     const formData = new FormData();
     Array.from(files).forEach(file => {
-      formData.append('images', file);
+      formData.append('gallery', file); // Change from 'images' to 'gallery'
     });
 
     const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/tours/${tour.id}/gallery`, {

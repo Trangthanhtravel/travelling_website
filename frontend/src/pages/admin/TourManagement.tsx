@@ -109,7 +109,7 @@ const TourManagement: React.FC = () => {
       formData.append('duration', tourData.duration);
       formData.append('location', tourData.location);
       formData.append('max_participants', tourData.max_participants.toString());
-      formData.append('category', tourData.category);
+      formData.append('category_slug', tourData.category); // Fix: use category_slug
       formData.append('included', JSON.stringify(tourData.included));
       formData.append('excluded', JSON.stringify(tourData.excluded));
       formData.append('status', tourData.status);
@@ -159,7 +159,7 @@ const TourManagement: React.FC = () => {
       formData.append('duration', data.duration);
       formData.append('location', data.location);
       formData.append('max_participants', data.max_participants.toString());
-      formData.append('category', data.category);
+      formData.append('category_slug', data.category); // Fix: use category_slug
       formData.append('included', JSON.stringify(data.included));
       formData.append('excluded', JSON.stringify(data.excluded));
       formData.append('status', data.status);

@@ -39,6 +39,9 @@ const Home: React.FC = () => {
   const coreServicesRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  // Add reference for featured tours scrolling
+  const featuredToursRef = useRef<HTMLDivElement>(null);
+
   // Scroll functions
   const scrollLeft = (ref: React.RefObject<HTMLDivElement>) => {
     if (ref.current) {
@@ -614,9 +617,9 @@ const Home: React.FC = () => {
           </div>
 
           {toursLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[...Array(3)].map((_, index) => (
-                <div key={index} className="bg-white dark:bg-dark-700 rounded-xl shadow-lg animate-pulse">
+            <div className="flex space-x-6 pb-4">
+              {[...Array(4)].map((_, index) => (
+                <div key={index} className="flex-none w-80 bg-white dark:bg-dark-700 rounded-xl shadow-lg animate-pulse">
                   <div className="h-48 bg-gray-300 dark:bg-dark-600 rounded-t-xl"></div>
                   <div className="p-6">
                     <div className="h-4 bg-gray-300 dark:bg-dark-600 rounded mb-2"></div>
@@ -626,56 +629,94 @@ const Home: React.FC = () => {
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredTours?.slice(0, 3).map((tour) => (
-                <div key={tour.id} className="bg-white dark:bg-dark-850 rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 border dark:border-dark-600">
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={tour.image_url || tour.images?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
-                      alt={tour.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute top-4 right-4 bg-white dark:bg-dark-800 rounded-full px-3 py-1 text-sm font-medium text-primary-600 dark:text-primary-400">
-                      ${tour.price}
-                    </div>
-                    {tour.featured && (
-                      <div className="absolute top-4 left-4 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
-                        Featured
+          ) : featuredTours && featuredTours.length > 0 ? (
+            <div className="relative">
+              {/* Scrollable Tours Container */}
+              <div className="overflow-x-auto scrollbar-hide" ref={featuredToursRef}>
+                <div className="flex space-x-6 pb-4">
+                  {featuredTours.map((tour) => (
+                    <div key={tour.id} className="flex-none w-80 bg-white dark:bg-dark-850 rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 border dark:border-dark-600">
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={tour.image_url || tour.images?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
+                          alt={tour.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <div className="absolute top-4 right-4 bg-white dark:bg-dark-800 rounded-full px-3 py-1 text-sm font-medium text-primary-600 dark:text-primary-400">
+                          ${tour.price}
+                        </div>
+                        {tour.featured && (
+                          <div className="absolute top-4 left-4 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
+                            ⭐ Featured
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-500 mb-2">
-                      <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1" />
-                      <span>{tour.location}</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
-                      {tour.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
-                      {tour.description}
-                    </p>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
-                        <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
-                        <span>{tour.duration}</span>
+                      <div className="p-6">
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-500 mb-2">
+                          <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1" />
+                          <span>{tour.location}</span>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+                          {tour.title}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
+                          {tour.description}
+                        </p>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
+                            <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
+                            <span>{tour.duration}</span>
+                          </div>
+                          <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
+                            <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
+                            <span>Max {tour.max_participants}</span>
+                          </div>
+                        </div>
+                        <Link
+                          to={`/tours/${tour.slug || tour.id}`}
+                          className="inline-flex items-center justify-center w-full bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                        >
+                          View Details
+                          <Icon icon={Icons.FiArrowRight} className="w-4 h-4 ml-2" />
+                        </Link>
                       </div>
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
-                        <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
-                        <span>Max {tour.max_participants}</span>
-                      </div>
                     </div>
-                    <Link
-                      to={`/tours/${tour.slug || tour.id}`}
-                      className="inline-flex items-center justify-center w-full bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-                    >
-                      View Details
-                      <Icon icon={Icons.FiArrowRight} className="w-4 h-4 ml-2" />
-                    </Link>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* Scroll Navigation Buttons - Only show if there are more than 3 tours */}
+              {featuredTours.length > 3 && (
+                <>
+                  <button
+                    onClick={() => scrollLeft(featuredToursRef)}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-100 shadow-lg rounded-full p-3 hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors duration-200 z-10 border border-gray-200 dark:border-gray-300"
+                  >
+                    <Icon icon={Icons.FiChevronLeft} className="w-6 h-6 text-gray-600 dark:text-gray-700" />
+                  </button>
+                  <button
+                    onClick={() => scrollRight(featuredToursRef)}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-100 shadow-lg rounded-full p-3 hover:bg-gray-50 dark:hover:bg-gray-200 transition-colors duration-200 z-10 border border-gray-200 dark:border-gray-300"
+                  >
+                    <Icon icon={Icons.FiChevronRight} className="w-6 h-6 text-gray-600 dark:text-gray-700" />
+                  </button>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Icon icon={Icons.FiCalendar} className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No Featured Tours Available</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                We're working on adding some amazing featured tours for you.
+              </p>
+              <Link
+                to="/tours"
+                className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+              >
+                Browse All Tours
+                <Icon icon={Icons.FiArrowRight} className="w-4 h-4 ml-2" />
+              </Link>
             </div>
           )}
 
