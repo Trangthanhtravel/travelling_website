@@ -208,10 +208,18 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
                       alt={`Gallery ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg"
                       onError={(e) => {
-                        console.error('Image failed to load:', photo);
-                        (e.target as HTMLImageElement).src = '/api/placeholder/150/150';
+                        const target = e.target as HTMLImageElement;
+                        // Prevent infinite error loops by checking if we already set a fallback
+                        if (!target.src.includes('placeholder') && !target.dataset.errorHandled) {
+                          console.error('Image failed to load:', photo);
+                          target.dataset.errorHandled = 'true';
+                          target.src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80';
+                        }
                       }}
-                      onLoad={() => {
+                      onLoad={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        // Reset error handling flag on successful load
+                        delete target.dataset.errorHandled;
                         console.log('Image loaded successfully:', photo);
                       }}
                     />

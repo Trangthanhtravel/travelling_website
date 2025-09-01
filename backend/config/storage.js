@@ -23,18 +23,35 @@ const r2Helpers = {
       
       // Return the public URL - construct proper R2 public URL
       let publicUrl;
-      if (process.env.R2_PUBLIC_DOMAIN) {
+
+      // Clean up environment variables to remove any protocol prefixes
+      const cleanPublicDomain = process.env.R2_PUBLIC_DOMAIN?.replace(/^https?:\/\//, '');
+      const cleanBucketName = process.env.R2_BUCKET_NAME?.replace(/^https?:\/\//, '');
+      const cleanAccountId = process.env.CLOUDFLARE_ACCOUNT_ID?.replace(/^https?:\/\//, '');
+
+      if (cleanPublicDomain) {
         // Use custom domain if configured
-        publicUrl = `https://${process.env.R2_PUBLIC_DOMAIN}/${fileName}`;
-      } else if (process.env.R2_BUCKET_NAME && process.env.CLOUDFLARE_ACCOUNT_ID) {
+        publicUrl = `https://${cleanPublicDomain}/${fileName}`;
+      } else if (cleanBucketName && cleanAccountId) {
         // Use default R2 public URL format
-        publicUrl = `https://${process.env.R2_BUCKET_NAME}.${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com/${fileName}`;
+        publicUrl = `https://${cleanBucketName}.${cleanAccountId}.r2.cloudflarestorage.com/${fileName}`;
       } else {
-        console.error('R2 configuration incomplete. Missing R2_PUBLIC_DOMAIN or R2_BUCKET_NAME/CLOUDFLARE_ACCOUNT_ID');
+        console.error('R2 configuration incomplete. Available vars:', {
+          R2_PUBLIC_DOMAIN: process.env.R2_PUBLIC_DOMAIN,
+          R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
+          CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID
+        });
         throw new Error('R2 storage not properly configured');
       }
 
       console.log('Generated image URL:', publicUrl);
+
+      // Validate the URL format before returning
+      if (publicUrl.startsWith('https://https://') || publicUrl.includes('//https://')) {
+        console.error('Malformed URL detected:', publicUrl);
+        throw new Error('Invalid URL format generated');
+      }
+
       return publicUrl;
     } catch (error) {
       console.error('R2 upload error:', error);
