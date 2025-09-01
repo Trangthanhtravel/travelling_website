@@ -201,37 +201,62 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
                 Current Gallery ({localGallery.length}/10)
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {localGallery.map((photo, index) => (
-                  <div key={`${photo}-${index}`} className="relative group">
-                    <img
-                      src={photo}
-                      alt={`Gallery ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        // Prevent infinite error loops by checking if we already set a fallback
-                        if (!target.src.includes('placeholder') && !target.dataset.errorHandled) {
+                {localGallery.map((photo, index) => {
+                  // Skip rendering if photo URL is malformed or empty
+                  if (!photo || photo.includes('undefined') || photo.startsWith('https://https://')) {
+                    return null;
+                  }
+
+                  return (
+                    <div key={`gallery-${index}-${photo.split('/').pop()}`} className="relative group">
+                      <img
+                        src={photo}
+                        alt={`Gallery ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          // Prevent infinite error loops
+                          if (target.dataset.errorHandled === 'true') {
+                            return;
+                          }
+
                           console.error('Image failed to load:', photo);
                           target.dataset.errorHandled = 'true';
-                          target.src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80';
-                        }
-                      }}
-                      onLoad={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        // Reset error handling flag on successful load
-                        delete target.dataset.errorHandled;
-                        console.log('Image loaded successfully:', photo);
-                      }}
-                    />
-                    <button
-                      onClick={() => handleDeletePhoto(photo)}
-                      disabled={deleteMutation.isPending}
-                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
-                    >
-                      <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+
+                          // Hide the image instead of replacing with fallback to prevent more errors
+                          target.style.display = 'none';
+
+                          // Show error message in place of image
+                          const parent = target.parentElement;
+                          if (parent && !parent.querySelector('.error-message')) {
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'error-message w-full h-32 bg-red-50 border border-red-200 rounded-lg flex flex-col items-center justify-center text-red-600 text-sm';
+                            errorDiv.innerHTML = `
+                              <div class="text-center p-2">
+                                <div class="mb-1">❌ Failed to load</div>
+                                <div class="text-xs text-red-500">Check R2 bucket access</div>
+                              </div>
+                            `;
+                            parent.appendChild(errorDiv);
+                          }
+                        }}
+                        onLoad={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          delete target.dataset.errorHandled;
+                          target.style.display = 'block';
+                          console.log('Image loaded successfully:', photo);
+                        }}
+                      />
+                      <button
+                        onClick={() => handleDeletePhoto(photo)}
+                        disabled={deleteMutation.isPending}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 z-10"
+                      >
+                        <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

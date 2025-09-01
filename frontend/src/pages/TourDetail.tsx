@@ -203,33 +203,63 @@ const TourDetail: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {tour.gallery.slice(0, 8).map((photo, index) => (
-                    <button
-                      key={`gallery-${index}-${photo}`}
-                      onClick={() => {
-                        setGalleryStartIndex(index);
-                        setIsGalleryOpen(true);
-                      }}
-                      className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer"
-                    >
-                      <img
-                        src={photo}
-                        alt={`Gallery ${index + 1}`}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                          console.error('Gallery image failed to load:', photo);
-                          // Replace with placeholder image
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                  {tour.gallery.slice(0, 8).map((photo, index) => {
+                    // Skip malformed URLs
+                    if (!photo || photo.includes('undefined') || photo.startsWith('https://https://')) {
+                      return null;
+                    }
+
+                    return (
+                      <button
+                        key={`gallery-${index}-${photo.split('/').pop()}`}
+                        onClick={() => {
+                          setGalleryStartIndex(index);
+                          setIsGalleryOpen(true);
                         }}
-                        onLoad={() => {
-                          console.log('Gallery image loaded successfully:', photo);
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
-                        <Icon icon={Icons.FiMaximize2} className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                    </button>
-                  ))}
+                        className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer"
+                      >
+                        <img
+                          src={photo}
+                          alt={`Gallery ${index + 1}`}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            // Prevent infinite error loops
+                            if (target.dataset.errorHandled === 'true') {
+                              return;
+                            }
+
+                            console.error('Gallery image failed to load:', photo);
+                            target.dataset.errorHandled = 'true';
+
+                            // Hide the failed image and show error state
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent && !parent.querySelector('.error-placeholder')) {
+                              const errorDiv = document.createElement('div');
+                              errorDiv.className = 'error-placeholder absolute inset-0 bg-red-50 border border-red-200 rounded-lg flex flex-col items-center justify-center text-red-600 text-sm';
+                              errorDiv.innerHTML = `
+                                <div class="text-center p-2">
+                                  <div class="mb-1">❌</div>
+                                  <div class="text-xs">Image not accessible</div>
+                                </div>
+                              `;
+                              parent.appendChild(errorDiv);
+                            }
+                          }}
+                          onLoad={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            delete target.dataset.errorHandled;
+                            target.style.display = 'block';
+                            console.log('Gallery image loaded successfully:', photo);
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                          <Icon icon={Icons.FiMaximize2} className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </button>
+                    );
+                  })}
 
                   {tour.gallery.length > 8 && (
                     <button
