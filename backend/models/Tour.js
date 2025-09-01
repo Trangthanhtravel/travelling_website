@@ -18,7 +18,8 @@ class Tour {
     this.included = data.included ? (typeof data.included === 'string' ? JSON.parse(data.included) : data.included) : [];
     this.excluded = data.excluded ? (typeof data.excluded === 'string' ? JSON.parse(data.excluded) : data.excluded) : [];
     this.status = data.status || 'active';
-    this.featured = data.featured || false;
+    // Convert SQLite boolean (0/1) to JavaScript boolean
+    this.featured = Boolean(data.featured);
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }
@@ -67,7 +68,7 @@ class Tour {
       included: JSON.stringify(this.included),
       excluded: JSON.stringify(this.excluded),
       status: this.status,
-      featured: this.featured
+      featured: this.featured ? 1 : 0  // Convert boolean to 0/1 for SQLite
     };
 
     const sql = `
@@ -280,9 +281,10 @@ class Tour {
     // Create a copy to avoid modifying the original data
     const processedData = { ...updateData };
 
-    // Handle boolean fields properly
+    // Handle boolean fields properly - convert to 0/1 for SQLite
     if (processedData.featured !== undefined) {
-      processedData.featured = processedData.featured === true || processedData.featured === 'true' || processedData.featured === 1;
+      const boolValue = processedData.featured === true || processedData.featured === 'true' || processedData.featured === 1;
+      processedData.featured = boolValue ? 1 : 0;
     }
 
     // Handle JSON fields
@@ -308,8 +310,11 @@ class Tour {
 
     const result = await db.prepare(sql).bind(...values, this.id).run();
 
-    // Update the instance with new data (use original updateData to preserve types)
+    // Update the instance with new data (convert back to boolean for JavaScript)
     Object.assign(this, updateData);
+    if (updateData.featured !== undefined) {
+      this.featured = Boolean(updateData.featured === true || updateData.featured === 'true' || updateData.featured === 1);
+    }
 
     // Parse JSON fields back to objects for the instance
     if (this.images && typeof this.images === 'string') {

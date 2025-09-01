@@ -24,6 +24,11 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
 
   // API functions
   const updateGallery = async (files: FileList) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      throw new Error('Authentication required. Please log in again.');
+    }
+
     const formData = new FormData();
     Array.from(files).forEach(file => {
       formData.append('gallery', file); // Change from 'images' to 'gallery'
@@ -32,7 +37,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
     const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/tours/${tour.id}/gallery`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        'Authorization': `Bearer ${token}`
       },
       body: formData
     });
@@ -46,12 +51,17 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   };
 
   const deleteGalleryPhoto = async (photoUrl: string) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      throw new Error('Authentication required. Please log in again.');
+    }
+
     // Double encode the URL to handle special characters properly
     const encodedUrl = encodeURIComponent(encodeURIComponent(photoUrl));
     const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/tours/${tour.id}/gallery/${encodedUrl}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        'Authorization': `Bearer ${token}`
       }
     });
 
