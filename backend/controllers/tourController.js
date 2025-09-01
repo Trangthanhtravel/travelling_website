@@ -439,8 +439,18 @@ const deleteGalleryPhoto = async (req, res) => {
       });
     }
 
-    // Decode the photo URL parameter
-    const decodedPhotoUrl = decodeURIComponent(photoUrl);
+    // Decode the photo URL parameter - handle double encoding
+    let decodedPhotoUrl = decodeURIComponent(photoUrl);
+    // Try double decoding in case it was double encoded from frontend
+    try {
+      decodedPhotoUrl = decodeURIComponent(decodedPhotoUrl);
+    } catch (e) {
+      // Single decode was sufficient
+    }
+
+    console.log('Original URL param:', photoUrl);
+    console.log('Decoded URL:', decodedPhotoUrl);
+    console.log('Tour gallery:', tour.gallery);
 
     if (!tour.gallery || !tour.gallery.includes(decodedPhotoUrl)) {
       return res.status(404).json({

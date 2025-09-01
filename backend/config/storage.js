@@ -21,8 +21,20 @@ const r2Helpers = {
         },
       });
       
-      // Return the public URL - update this with your actual R2 custom domain
-      const publicUrl = `https://${process.env.R2_PUBLIC_DOMAIN || 'your-r2-domain.com'}/${fileName}`;
+      // Return the public URL - construct proper R2 public URL
+      let publicUrl;
+      if (process.env.R2_PUBLIC_DOMAIN) {
+        // Use custom domain if configured
+        publicUrl = `https://${process.env.R2_PUBLIC_DOMAIN}/${fileName}`;
+      } else if (process.env.R2_BUCKET_NAME && process.env.CLOUDFLARE_ACCOUNT_ID) {
+        // Use default R2 public URL format
+        publicUrl = `https://${process.env.R2_BUCKET_NAME}.${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com/${fileName}`;
+      } else {
+        console.error('R2 configuration incomplete. Missing R2_PUBLIC_DOMAIN or R2_BUCKET_NAME/CLOUDFLARE_ACCOUNT_ID');
+        throw new Error('R2 storage not properly configured');
+      }
+
+      console.log('Generated image URL:', publicUrl);
       return publicUrl;
     } catch (error) {
       console.error('R2 upload error:', error);
@@ -35,10 +47,23 @@ const r2Helpers = {
     try {
       if (!imageUrl || !imageUrl.includes('/')) return true;
 
-      // Extract the key from the URL
-      const urlParts = imageUrl.split('/');
-      const key = urlParts.slice(-2).join('/'); // folder/filename
-      
+      // Extract the key from the URL - handle both custom domain and default R2 URLs
+      let key;
+      if (imageUrl.includes(process.env.R2_PUBLIC_DOMAIN)) {
+        // Custom domain format
+        const urlParts = imageUrl.split('/');
+        key = urlParts.slice(3).join('/'); // Remove https://domain.com part
+      } else if (imageUrl.includes('.r2.cloudflarestorage.com')) {
+        // Default R2 URL format
+        const urlParts = imageUrl.split('/');
+        key = urlParts.slice(3).join('/'); // Remove https://bucket.account.r2.cloudflarestorage.com part
+      } else {
+        // Fallback - assume it's just the key part
+        const urlParts = imageUrl.split('/');
+        key = urlParts.slice(-2).join('/'); // folder/filename
+      }
+
+      console.log('Deleting R2 object with key:', key);
       await r2Bucket.delete(key);
       return true;
     } catch (error) {

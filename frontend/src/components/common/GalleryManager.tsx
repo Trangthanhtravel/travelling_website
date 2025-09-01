@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon, Icons } from './Icons';
 import toast from 'react-hot-toast';
@@ -23,7 +23,13 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   onDeleteSuccess
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [localGallery, setLocalGallery] = useState<string[]>(tour.gallery || []);
   const queryClient = useQueryClient();
+
+  // Update local gallery when tour prop changes
+  useEffect(() => {
+    setLocalGallery(tour.gallery || []);
+  }, [tour.gallery]);
 
   // API functions
   const updateGallery = async (files: FileList) => {
@@ -34,7 +40,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
 
     const formData = new FormData();
     Array.from(files).forEach(file => {
-      formData.append('gallery', file); // Change from 'images' to 'gallery'
+      formData.append('gallery', file);
     });
 
     const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/tours/${tour.id}/gallery`, {
@@ -59,8 +65,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
       throw new Error('Authentication required. Please log in again.');
     }
 
-    // Double encode the URL to handle special characters properly
-    const encodedUrl = encodeURIComponent(encodeURIComponent(photoUrl));
+    const encodedUrl = encodeURIComponent(photoUrl);
     const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/tours/${tour.id}/gallery/${encodedUrl}`, {
       method: 'DELETE',
       headers: {
@@ -80,21 +85,28 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   const uploadMutation = useMutation({
     mutationFn: updateGallery,
     onSuccess: (data) => {
-      toast.success('Gallery updated successfully!');
-      // Invalidate multiple query keys to ensure all related data is refreshed
+      console.log('Upload success:', data);
+
+      // Update local state immediately
+      if (data?.data?.gallery) {
+        setLocalGallery(data.data.gallery);
+        // Update parent component with the fresh data
+        onUpdateSuccess?.({ ...tour, gallery: data.data.gallery });
+      }
+
+      // Clear selected files
+      setSelectedFiles(null);
+
+      // Invalidate queries to refresh data from server
       queryClient.invalidateQueries({ queryKey: ['admin-tours'] });
       queryClient.invalidateQueries({ queryKey: ['admin-tour', tour.id] });
       queryClient.invalidateQueries({ queryKey: ['tour', tour.slug] });
-      setSelectedFiles(null);
 
-      // Update the tour data immediately to reflect changes
-      if (data?.data) {
-        // Pass the updated tour data to parent component
-        const updatedTour = { ...tour, gallery: data.data.gallery };
-        onUpdateSuccess?.(updatedTour);
-      }
+      // Single success notification
+      toast.success('Gallery updated successfully!');
     },
     onError: (error: any) => {
+      console.error('Upload error:', error);
       toast.error(error.message || 'Failed to update gallery');
     }
   });
@@ -102,19 +114,25 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   const deleteMutation = useMutation({
     mutationFn: deleteGalleryPhoto,
     onSuccess: (data) => {
-      toast.success('Photo deleted successfully!');
-      // Invalidate multiple query keys to ensure all related data is refreshed
+      console.log('Delete success:', data);
+
+      // Update local state immediately
+      if (data?.data?.gallery !== undefined) {
+        setLocalGallery(data.data.gallery);
+        // Update parent component with the fresh data
+        onUpdateSuccess?.({ ...tour, gallery: data.data.gallery });
+      }
+
+      // Invalidate queries to refresh data from server
       queryClient.invalidateQueries({ queryKey: ['admin-tours'] });
       queryClient.invalidateQueries({ queryKey: ['admin-tour', tour.id] });
       queryClient.invalidateQueries({ queryKey: ['tour', tour.slug] });
 
-      // Update the tour data immediately to reflect changes
-      if (data?.data?.gallery !== undefined) {
-        const updatedTour = { ...tour, gallery: data.data.gallery };
-        onUpdateSuccess?.(updatedTour);
-      }
+      // Single success notification
+      toast.success('Photo deleted successfully!');
     },
     onError: (error: any) => {
+      console.error('Delete error:', error);
       toast.error(error.message || 'Failed to delete photo');
     }
   });
@@ -143,7 +161,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   const handleUpload = () => {
     if (!selectedFiles) return;
 
-    if (tour.gallery && tour.gallery.length + selectedFiles.length > 10) {
+    if (localGallery.length + selectedFiles.length > 10) {
       toast.error('Total gallery photos cannot exceed 10');
       return;
     }
@@ -177,18 +195,25 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
 
         <div className="p-6">
           {/* Current Gallery */}
-          {tour.gallery && tour.gallery.length > 0 && (
+          {localGallery && localGallery.length > 0 && (
             <div className="mb-6">
               <h4 className="text-md font-medium text-gray-900 mb-3">
-                Current Gallery ({tour.gallery.length}/10)
+                Current Gallery ({localGallery.length}/10)
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {tour.gallery.map((photo, index) => (
-                  <div key={index} className="relative group">
+                {localGallery.map((photo, index) => (
+                  <div key={`${photo}-${index}`} className="relative group">
                     <img
                       src={photo}
                       alt={`Gallery ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg"
+                      onError={(e) => {
+                        console.error('Image failed to load:', photo);
+                        (e.target as HTMLImageElement).src = '/api/placeholder/150/150';
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully:', photo);
+                      }}
                     />
                     <button
                       onClick={() => handleDeletePhoto(photo)}
@@ -204,7 +229,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
           )}
 
           {/* Upload New Photos */}
-          {tour.gallery && tour.gallery.length < 10 && (
+          {localGallery.length < 10 && (
             <div>
               <h4 className="text-md font-medium text-gray-900 mb-3">Add New Photos</h4>
 
@@ -227,7 +252,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
                     Choose photos to upload
                   </span>
                   <span className="text-sm text-gray-600">
-                    Select up to {10 - (tour.gallery.length)} photos (max 5MB each)
+                    Select up to {10 - localGallery.length} photos (max 5MB each)
                   </span>
                 </label>
               </div>
@@ -279,7 +304,7 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
             </div>
           )}
 
-          {tour.gallery && tour.gallery.length >= 10 && (
+          {localGallery.length >= 10 && (
             <div className="text-center py-4">
               <p className="text-gray-600">
                 Gallery is full (10/10 photos). Delete some photos to add new ones.

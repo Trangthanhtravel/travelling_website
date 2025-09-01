@@ -205,7 +205,7 @@ const TourDetail: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {tour.gallery.slice(0, 8).map((photo, index) => (
                     <button
-                      key={index}
+                      key={`gallery-${index}-${photo}`}
                       onClick={() => {
                         setGalleryStartIndex(index);
                         setIsGalleryOpen(true);
@@ -216,6 +216,14 @@ const TourDetail: React.FC = () => {
                         src={photo}
                         alt={`Gallery ${index + 1}`}
                         className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        onError={(e) => {
+                          console.error('Gallery image failed to load:', photo);
+                          // Replace with placeholder image
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                        }}
+                        onLoad={() => {
+                          console.log('Gallery image loaded successfully:', photo);
+                        }}
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
                         <Icon icon={Icons.FiMaximize2} className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />

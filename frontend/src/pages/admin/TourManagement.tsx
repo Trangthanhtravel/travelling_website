@@ -457,12 +457,30 @@ const TourManagement: React.FC = () => {
           }}
           tour={galleryTour}
           onUpdateSuccess={(updatedTour) => {
-            queryClient.setQueryData(['admin-tours', selectedTour?.id], updatedTour);
-            toast.success('Gallery updated successfully');
+            // Update the local state immediately
+            setGalleryTour(updatedTour);
+
+            // Update the cached query data for the tours list
+            queryClient.setQueryData(['admin-tours', searchTerm, filterStatus], (oldData: any) => {
+              if (!oldData) return oldData;
+
+              return {
+                ...oldData,
+                data: oldData.data.map((tour: Tour) =>
+                  tour.id === updatedTour.id ? updatedTour : tour
+                )
+              };
+            });
+
+            // Also update individual tour cache if it exists
+            queryClient.setQueryData(['admin-tour', updatedTour.id], updatedTour);
+
+            // Don't show additional success message here - GalleryManager already shows one
           }}
           onDeleteSuccess={() => {
+            // Invalidate and refetch tours data
             queryClient.invalidateQueries({ queryKey: ['admin-tours'] });
-            toast.success('Tour deleted successfully');
+            // Don't show additional success message here - GalleryManager already shows one
           }}
         />
       )}
