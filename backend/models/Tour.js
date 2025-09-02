@@ -12,13 +12,13 @@ class Tour {
     this.location = data.location;
     this.max_participants = data.max_participants;
     this.category_slug = data.category_slug || data.category; // Support both new and old field names
-    this.images = data.images ? (typeof data.images === 'string' ? JSON.parse(data.images) : data.images) : [];
+    // Change from images array to single image
+    this.image = data.image || (data.images && Array.isArray(data.images) ? data.images[0] : null);
     this.gallery = data.gallery ? (typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery) : [];
     this.itinerary = data.itinerary ? (typeof data.itinerary === 'string' ? JSON.parse(data.itinerary) : data.itinerary) : {};
     this.included = data.included ? (typeof data.included === 'string' ? JSON.parse(data.included) : data.included) : [];
     this.excluded = data.excluded ? (typeof data.excluded === 'string' ? JSON.parse(data.excluded) : data.excluded) : [];
     this.status = data.status || 'active';
-    // Convert SQLite boolean (0/1) to JavaScript boolean
     this.featured = Boolean(data.featured);
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
@@ -62,7 +62,7 @@ class Tour {
       location: this.location,
       max_participants: this.max_participants,
       category_slug: this.category_slug,
-      images: JSON.stringify(this.images),
+      image: this.image, // Changed from images to image
       gallery: JSON.stringify(this.gallery),
       itinerary: JSON.stringify(this.itinerary),
       included: JSON.stringify(this.included),
@@ -72,14 +72,14 @@ class Tour {
     };
 
     const sql = `
-      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, images, gallery, itinerary, included, excluded, status, featured, created_at, updated_at)
+      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, image, gallery, itinerary, included, excluded, status, featured, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     const params = [
       tourData.title, tourData.slug, tourData.description, tourData.price,
       tourData.duration, tourData.location, tourData.max_participants,
-      tourData.category_slug, tourData.images, tourData.gallery,
+      tourData.category_slug, tourData.image, tourData.gallery,
       tourData.itinerary, tourData.included, tourData.excluded,
       tourData.status, tourData.featured
     ];
@@ -89,34 +89,25 @@ class Tour {
     return result;
   }
 
-  // Update tour images using R2
-  async updateImages(r2Bucket, newImageFiles, oldImages = []) {
+  // Update tour image using R2 (single image)
+  async updateImage(r2Bucket, newImageFile, oldImage = null) {
     try {
-      // Delete old images from R2 if they exist
-      if (oldImages.length > 0) {
-        for (const imageUrl of oldImages) {
-          await r2Helpers.deleteImage(r2Bucket, imageUrl);
-        }
+      // Delete old image from R2 if it exists
+      if (oldImage) {
+        await r2Helpers.deleteImage(r2Bucket, oldImage);
       }
 
-      // Upload new images to R2
-      const uploadedImageUrls = [];
-      if (newImageFiles && newImageFiles.length > 0) {
-        for (const file of newImageFiles) {
-          r2Helpers.validateImage(file);
-          const imageUrl = await r2Helpers.uploadImage(r2Bucket, file, 'tours');
-          uploadedImageUrls.push(imageUrl);
-        }
+      // Upload new image to R2
+      let uploadedImageUrl = null;
+      if (newImageFile) {
+        r2Helpers.validateImage(newImageFile);
+        uploadedImageUrl = await r2Helpers.uploadImage(r2Bucket, newImageFile, 'tours');
       }
 
-      this.images = uploadedImageUrls;
-      if (uploadedImageUrls.length > 0) {
-        this.image_url = uploadedImageUrls[0]; // Set first image as primary
-      }
-
-      return uploadedImageUrls;
+      this.image = uploadedImageUrl;
+      return uploadedImageUrl;
     } catch (error) {
-      console.error('Error updating tour images:', error);
+      console.error('Error updating tour image:', error);
       throw error;
     }
   }
@@ -384,7 +375,7 @@ class Tour {
     return {
       ...this,
       category: this.category_slug, // Map category_slug to category for frontend compatibility
-      images: typeof this.images === 'string' ? JSON.parse(this.images) : this.images,
+      image: this.image, // Changed from images to image
       gallery: typeof this.gallery === 'string' ? JSON.parse(this.gallery) : this.gallery,
       itinerary: typeof this.itinerary === 'string' ? JSON.parse(this.itinerary) : this.itinerary,
       included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,

@@ -477,92 +477,52 @@ const createService = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
 
-    const {
-      title,
-      subtitle,
-      description,
-      price,
-      duration,
-      category_id,
-      service_type,
-      status = 'active',
-      images,
-      itinerary,
-      included,
-      excluded,
-      featured = false
-    } = req.body;
+    const serviceData = req.body;
 
-    // Validate required fields
-    if (!title || !description || !price) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required fields: title, description, price'
-      });
+    // Parse JSON fields from FormData
+    if (serviceData.included && typeof serviceData.included === 'string') {
+      serviceData.included = JSON.parse(serviceData.included);
+    }
+    if (serviceData.excluded && typeof serviceData.excluded === 'string') {
+      serviceData.excluded = JSON.parse(serviceData.excluded);
+    }
+    if (serviceData.itinerary && typeof serviceData.itinerary === 'string') {
+      serviceData.itinerary = JSON.parse(serviceData.itinerary);
     }
 
-    // Generate slug from title
-    const slug = title.toLowerCase()
-      .replace(/[^a-z0-9 -]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim('-');
+    // Convert string values to appropriate types
+    serviceData.price = parseFloat(serviceData.price);
+    serviceData.featured = serviceData.featured === 'true';
 
-    // Parse images if it's a string
-    let imageUrls = [];
-    if (images) {
-      imageUrls = typeof images === 'string' ? JSON.parse(images) : images;
-    }
+    const service = new Service(serviceData);
 
-    // Handle file uploads if any (from multer)
-    if (req.files && req.files.length > 0) {
+    // Handle single image upload if provided
+    if (req.file) {
       try {
-        const uploadPromises = req.files.map(file =>
-          r2Helpers.uploadFile(file.buffer, `services/${slug}/${file.originalname}`, file.mimetype)
-        );
-        const newImageUrls = await Promise.all(uploadPromises);
-        imageUrls = [...imageUrls, ...newImageUrls];
-      } catch (uploadError) {
-        console.error('Error uploading images:', uploadError);
-        return res.status(500).json({ success: false, message: 'Error uploading images' });
+        const imageUrl = await service.updateImage(req.r2, req.file);
+        service.image = imageUrl;
+      } catch (imageError) {
+        console.error('Image upload error:', imageError);
+        return res.status(400).json({
+          success: false,
+          message: `Image upload failed: ${imageError.message}`
+        });
       }
     }
 
-    const serviceId = generateId();
-    const query = `
-      INSERT INTO services (
-        id, title, slug, subtitle, description, price, duration, images,
-        included, excluded, itinerary, category_id, service_type, status, 
-        featured, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-    `;
-
-    await db.prepare(query).bind(
-      serviceId,
-      title,
-      slug,
-      subtitle || null,
-      description,
-      parseFloat(price),
-      duration || null,
-      JSON.stringify(imageUrls),
-      JSON.stringify(included ? (typeof included === 'string' ? JSON.parse(included) : included) : []),
-      JSON.stringify(excluded ? (typeof excluded === 'string' ? JSON.parse(excluded) : excluded) : []),
-      JSON.stringify(itinerary ? (typeof itinerary === 'string' ? JSON.parse(itinerary) : itinerary) : []),
-      category_id || null,
-      service_type || 'general',
-      status,
-      featured ? 1 : 0
-    ).run();
+    await service.save(db);
 
     res.status(201).json({
       success: true,
-      message: 'Service created successfully',
-      data: { id: serviceId, slug }
+      data: service.toJSON(),
+      message: 'Service created successfully'
     });
   } catch (error) {
-    console.error('Error creating service:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error('Create service error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error creating service'
+    });
   }
 };
 
@@ -574,106 +534,61 @@ const updateService = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
 
-    const { id } = req.params;
-    const {
-      title,
-      subtitle,
-      description,
-      price,
-      duration,
-      category_id,
-      service_type,
-      status,
-      images,
-      itinerary,
-      included,
-      excluded,
-      featured
-    } = req.body;
-
-    // Check if service exists
-    const existingService = await db.prepare('SELECT * FROM services WHERE id = ?').bind(id).first();
-    if (!existingService) {
-      return res.status(404).json({ success: false, message: 'Service not found' });
+    const service = await Service.findById(db, req.params.id);
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
     }
 
-    // Generate new slug if title changed
-    let slug = existingService.slug;
-    if (title && title !== existingService.title) {
-      slug = title.toLowerCase()
-        .replace(/[^a-z0-9 -]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim('-');
+    const updateData = req.body;
+
+    // Parse JSON fields from FormData
+    if (updateData.included && typeof updateData.included === 'string') {
+      updateData.included = JSON.parse(updateData.included);
+    }
+    if (updateData.excluded && typeof updateData.excluded === 'string') {
+      updateData.excluded = JSON.parse(updateData.excluded);
+    }
+    if (updateData.itinerary && typeof updateData.itinerary === 'string') {
+      updateData.itinerary = JSON.parse(updateData.itinerary);
     }
 
-    // Parse existing images
-    let imageUrls = existingService.images ? JSON.parse(existingService.images) : [];
+    // Convert string values to appropriate types
+    if (updateData.price) updateData.price = parseFloat(updateData.price);
+    if (updateData.featured !== undefined) updateData.featured = updateData.featured === 'true';
 
-    // Update images if provided
-    if (images !== undefined) {
-      imageUrls = typeof images === 'string' ? JSON.parse(images) : images;
-    }
-
-    // Handle new file uploads if any
-    if (req.files && req.files.length > 0) {
+    // Handle single image upload if provided
+    if (req.file) {
       try {
-        const uploadPromises = req.files.map(file =>
-          r2Helpers.uploadFile(file.buffer, `services/${slug}/${file.originalname}`, file.mimetype)
-        );
-        const newImageUrls = await Promise.all(uploadPromises);
-        imageUrls = [...imageUrls, ...newImageUrls];
-      } catch (uploadError) {
-        console.error('Error uploading images:', uploadError);
-        return res.status(500).json({ success: false, message: 'Error uploading images' });
+        const oldImage = service.image;
+        const imageUrl = await service.updateImage(req.r2, req.file, oldImage);
+        updateData.image = imageUrl;
+      } catch (imageError) {
+        console.error('Image upload error:', imageError);
+        return res.status(400).json({
+          success: false,
+          message: `Image upload failed: ${imageError.message}`
+        });
       }
     }
 
-    const query = `
-      UPDATE services SET
-        title = COALESCE(?, title),
-        slug = ?,
-        subtitle = ?,
-        description = COALESCE(?, description),
-        price = COALESCE(?, price),
-        duration = ?,
-        images = ?,
-        included = ?,
-        excluded = ?,
-        itinerary = ?,
-        category_id = ?,
-        service_type = COALESCE(?, service_type),
-        status = COALESCE(?, status),
-        featured = COALESCE(?, featured),
-        updated_at = datetime('now')
-      WHERE id = ?
-    `;
-
-    await db.prepare(query).bind(
-      title,
-      slug,
-      subtitle,
-      description,
-      price ? parseFloat(price) : null,
-      duration,
-      JSON.stringify(imageUrls),
-      JSON.stringify(included ? (typeof included === 'string' ? JSON.parse(included) : included) : []),
-      JSON.stringify(excluded ? (typeof excluded === 'string' ? JSON.parse(excluded) : excluded) : []),
-      JSON.stringify(itinerary ? (typeof itinerary === 'string' ? JSON.parse(itinerary) : itinerary) : []),
-      category_id,
-      service_type,
-      status,
-      featured !== undefined ? (featured ? 1 : 0) : null,
-      id
-    ).run();
+    // Update service properties
+    Object.assign(service, updateData);
+    await service.update(db);
 
     res.json({
       success: true,
+      data: service.toJSON(),
       message: 'Service updated successfully'
     });
   } catch (error) {
-    console.error('Error updating service:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error('Update service error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating service'
+    });
   }
 };
 

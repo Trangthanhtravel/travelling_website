@@ -14,7 +14,8 @@ class Service {
     this.included = data.included ? (typeof data.included === 'string' ? JSON.parse(data.included) : data.included) : [];
     this.excluded = data.excluded ? (typeof data.excluded === 'string' ? JSON.parse(data.excluded) : data.excluded) : [];
     this.category = data.category; // 'domestic', 'international', 'car-rental', 'other-services'
-    this.images = data.images ? (typeof data.images === 'string' ? JSON.parse(data.images) : data.images) : [];
+    // Change from images array to single image
+    this.image = data.image || (data.images && Array.isArray(data.images) ? data.images[0] : null);
     this.gallery = data.gallery ? (typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery) : [];
     this.videos = data.videos ? (typeof data.videos === 'string' ? JSON.parse(data.videos) : data.videos) : [];
     this.featured = data.featured || false;
@@ -36,7 +37,8 @@ class Service {
       included: JSON.stringify(this.included),
       excluded: JSON.stringify(this.excluded),
       category: this.category,
-      images: JSON.stringify(this.images),
+      image: this.image, // Changed from images to image
+      gallery: JSON.stringify(this.gallery),
       videos: JSON.stringify(this.videos),
       featured: this.featured ? 1 : 0,
       status: this.status
@@ -45,30 +47,25 @@ class Service {
     return await dbHelpers.insert(db, 'services', serviceData);
   }
 
-  // Update service images using R2
-  async updateImages(r2Bucket, newImageFiles, oldImages = []) {
+  // Update service image using R2 (single image)
+  async updateImage(r2Bucket, newImageFile, oldImage = null) {
     try {
-      // Delete old images from R2 if they exist
-      if (oldImages.length > 0) {
-        for (const imageUrl of oldImages) {
-          await r2Helpers.deleteImage(r2Bucket, imageUrl);
-        }
+      // Delete old image from R2 if it exists
+      if (oldImage) {
+        await r2Helpers.deleteImage(r2Bucket, oldImage);
       }
 
-      // Upload new images to R2
-      const uploadedImageUrls = [];
-      if (newImageFiles && newImageFiles.length > 0) {
-        for (const file of newImageFiles) {
-          r2Helpers.validateImage(file);
-          const imageUrl = await r2Helpers.uploadImage(r2Bucket, file, `services/${this.category}`);
-          uploadedImageUrls.push(imageUrl);
-        }
+      // Upload new image to R2
+      let uploadedImageUrl = null;
+      if (newImageFile) {
+        r2Helpers.validateImage(newImageFile);
+        uploadedImageUrl = await r2Helpers.uploadImage(r2Bucket, newImageFile, `services/${this.category}`);
       }
 
-      this.images = uploadedImageUrls;
-      return uploadedImageUrls;
+      this.image = uploadedImageUrl;
+      return uploadedImageUrl;
     } catch (error) {
-      console.error('Error updating service images:', error);
+      console.error('Error updating service image:', error);
       throw error;
     }
   }
@@ -119,10 +116,36 @@ class Service {
     }
   }
 
+  // Update service in database
+  async update(db) {
+    const serviceData = {
+      title: this.title,
+      subtitle: this.subtitle,
+      description: this.description,
+      itinerary: JSON.stringify(this.itinerary),
+      price: this.price,
+      duration: this.duration,
+      included: JSON.stringify(this.included),
+      excluded: JSON.stringify(this.excluded),
+      category: this.category,
+      image: this.image, // Changed from images to image
+      gallery: JSON.stringify(this.gallery),
+      videos: JSON.stringify(this.videos),
+      featured: this.featured ? 1 : 0,
+      status: this.status
+    };
+
+    const fields = Object.keys(serviceData).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(serviceData);
+    const sql = `UPDATE services SET ${fields}, updated_at = datetime('now') WHERE id = ?`;
+
+    return await db.prepare(sql).bind(...values, this.id).run();
+  }
+
   // Find service by ID
   static async findById(db, id) {
-    const services = await dbHelpers.query(db, 'SELECT * FROM services WHERE id = ?', [id]);
-    return services.length > 0 ? new Service(services[0]) : null;
+    const service = await db.prepare('SELECT * FROM services WHERE id = ?').bind(id).first();
+    return service ? new Service(service) : null;
   }
 
   // Get all services with filtering
@@ -151,133 +174,104 @@ class Service {
     sql += ' ORDER BY featured DESC, created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
     
-    const services = await dbHelpers.query(db, sql, params);
-    return services.map(service => new Service(service));
-  }
+    const result = await db.prepare(sql).bind(...params).all();
+    const services = result.results || [];
 
-  // Get services by category
-  static async findByCategory(db, category) {
-    const services = await dbHelpers.query(
-      db, 
-      'SELECT * FROM services WHERE category = ? AND status = ? ORDER BY featured DESC, created_at DESC', 
-      [category, 'active']
-    );
-    return services.map(service => new Service(service));
+    // Get total count for pagination
+    const countSql = sql.replace('SELECT *', 'SELECT COUNT(*) as total').split('ORDER BY')[0];
+    const countResult = await db.prepare(countSql).bind(...params.slice(0, -2)).first();
+    const total = countResult?.total || 0;
+
+    return {
+      data: services.map(service => new Service(service)),
+      total,
+      hasMore: offset + limit < total
+    };
   }
 
   // Get featured services
   static async getFeatured(db, limit = 6) {
-    const services = await dbHelpers.query(
-      db, 
-      'SELECT * FROM services WHERE featured = 1 AND status = ? ORDER BY created_at DESC LIMIT ?', 
-      ['active', limit]
-    );
-    return services.map(service => new Service(service));
+    const sql = 'SELECT * FROM services WHERE status = ? AND featured = ? ORDER BY created_at DESC LIMIT ?';
+    const result = await db.prepare(sql).bind('active', 1, limit).all();
+    return (result.results || []).map(service => new Service(service));
   }
 
   // Search services
-  static async search(db, searchTerm) {
-    const sql = `
+  static async search(db, searchTerm, options = {}) {
+    const { limit = 20, offset = 0, category } = options;
+
+    let sql = `
       SELECT * FROM services 
-      WHERE status = 'active' 
-      AND (title LIKE ? OR subtitle LIKE ? OR description LIKE ?)
-      ORDER BY featured DESC, created_at DESC
+      WHERE status = 'active' AND (
+        title LIKE ? OR 
+        subtitle LIKE ? OR 
+        description LIKE ?
+      )
     `;
-    const searchPattern = `%${searchTerm}%`;
-    const services = await dbHelpers.query(db, sql, [searchPattern, searchPattern, searchPattern]);
-    return services.map(service => new Service(service));
+    const params = [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`];
+
+    if (category && category !== 'all') {
+      sql += ' AND category = ?';
+      params.push(category);
+    }
+
+    sql += ' ORDER BY featured DESC, created_at DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    const result = await db.prepare(sql).bind(...params).all();
+    const services = result.results || [];
+
+    // Get total count
+    const countSql = sql.replace('SELECT *', 'SELECT COUNT(*) as total').split('ORDER BY')[0];
+    const countResult = await db.prepare(countSql).bind(...params.slice(0, -2)).first();
+    const total = countResult?.total || 0;
+
+    return {
+      data: services.map(service => new Service(service)),
+      total,
+      hasMore: offset + limit < total
+    };
   }
 
-  // Update service in database
-  async update(db, updateData) {
-    // Handle JSON fields
-    if (updateData.images && typeof updateData.images !== 'string') {
-      updateData.images = JSON.stringify(updateData.images);
-    }
-    if (updateData.included && typeof updateData.included !== 'string') {
-      updateData.included = JSON.stringify(updateData.included);
-    }
-    if (updateData.excluded && typeof updateData.excluded !== 'string') {
-      updateData.excluded = JSON.stringify(updateData.excluded);
-    }
-    if (updateData.itinerary && typeof updateData.itinerary !== 'string') {
-      updateData.itinerary = JSON.stringify(updateData.itinerary);
+  // Delete service
+  async delete(r2Bucket) {
+    const db = require('../config/database').getDB();
+
+    // Delete main image from R2 if it exists
+    if (this.image) {
+      await r2Helpers.deleteImage(r2Bucket, this.image);
     }
 
-    const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-    const values = Object.values(updateData);
-    const sql = `UPDATE services SET ${fields}, updated_at = datetime('now') WHERE id = ?`;
-
-    return await dbHelpers.run(sql, [...values, this.id]);
-  }
-
-  // Delete service from database
-  async delete(db, r2Bucket) {
-    try {
-      // Delete images from R2 storage
-      if (this.images && this.images.length > 0) {
-        for (const imageUrl of this.images) {
-          await r2Helpers.deleteImage(r2Bucket, imageUrl);
-        }
+    // Delete gallery images from R2 if they exist
+    if (this.gallery && this.gallery.length > 0) {
+      for (const imageUrl of this.gallery) {
+        await r2Helpers.deleteImage(r2Bucket, imageUrl);
       }
-
-      // Delete videos from R2 storage if any
-      if (this.videos && this.videos.length > 0) {
-        for (const videoUrl of this.videos) {
-          await r2Helpers.deleteImage(r2Bucket, videoUrl); // Using same function for videos
-        }
-      }
-
-      // Delete from database
-      return await dbHelpers.query(db, 'DELETE FROM services WHERE id = ?', [this.id]);
-    } catch (error) {
-      console.error('Error deleting service:', error);
-      throw error;
     }
-  }
 
-  // Get service stats
-  static async getStats(db) {
-    try {
-      const totalServices = await dbHelpers.query(db, 'SELECT COUNT(*) as count FROM services WHERE status = ?', ['active']);
-      const featuredServices = await dbHelpers.query(db, 'SELECT COUNT(*) as count FROM services WHERE status = ? AND featured = ?', ['active', 1]);
-      const servicesByCategory = await dbHelpers.query(db, 'SELECT category, COUNT(*) as count FROM services WHERE status = ? GROUP BY category', ['active']);
-
-      return {
-        total: totalServices[0]?.count || 0,
-        featured: featuredServices[0]?.count || 0,
-        byCategory: servicesByCategory
-      };
-    } catch (error) {
-      console.error('Error getting service stats:', error);
-      throw error;
-    }
-  }
-
-  // Find service by slug
-  static async findBySlug(db, slug) {
-    try {
-      const result = await dbHelpers.query(db, 'SELECT * FROM services WHERE slug = ? AND status = ?', [slug, 'active']);
-      if (result.length === 0) return null;
-
-      return new Service(result[0]);
-    } catch (error) {
-      console.error('Error finding service by slug:', error);
-      throw error;
-    }
+    return await db.prepare('DELETE FROM services WHERE id = ?').bind(this.id).run();
   }
 
   // Convert to JSON
   toJSON() {
     return {
-      ...this,
-      images: typeof this.images === 'string' ? JSON.parse(this.images) : this.images,
-      videos: typeof this.videos === 'string' ? JSON.parse(this.videos) : this.videos,
+      id: this.id,
+      title: this.title,
+      subtitle: this.subtitle,
+      description: this.description,
+      itinerary: typeof this.itinerary === 'string' ? JSON.parse(this.itinerary) : this.itinerary,
+      price: this.price,
+      duration: this.duration,
       included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
       excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded,
-      itinerary: typeof this.itinerary === 'string' ? JSON.parse(this.itinerary) : this.itinerary,
-      location: typeof this.location === 'string' ? JSON.parse(this.location) : this.location,
-      featured: Boolean(this.featured)
+      category: this.category,
+      image: this.image, // Changed from images to image
+      gallery: typeof this.gallery === 'string' ? JSON.parse(this.gallery) : this.gallery,
+      videos: typeof this.videos === 'string' ? JSON.parse(this.videos) : this.videos,
+      featured: this.featured,
+      status: this.status,
+      created_at: this.created_at,
+      updated_at: this.updated_at
     };
   }
 }

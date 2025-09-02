@@ -176,6 +176,9 @@ const createTour = async (req, res) => {
     if (tourData.excluded && typeof tourData.excluded === 'string') {
       tourData.excluded = JSON.parse(tourData.excluded);
     }
+    if (tourData.itinerary && typeof tourData.itinerary === 'string') {
+      tourData.itinerary = JSON.parse(tourData.itinerary);
+    }
 
     // Convert string values to appropriate types
     tourData.price = parseFloat(tourData.price);
@@ -184,11 +187,11 @@ const createTour = async (req, res) => {
 
     const tour = new Tour(tourData);
 
-    // Handle image uploads if provided
-    if (req.files && req.files.length > 0) {
+    // Handle single image upload if provided
+    if (req.file) {
       try {
-        const imageUrls = await tour.updateImages(req.r2, req.files);
-        tour.images = imageUrls;
+        const imageUrl = await tour.updateImage(req.r2, req.file);
+        tour.image = imageUrl;
       } catch (imageError) {
         console.error('Image upload error:', imageError);
         return res.status(400).json({
@@ -236,18 +239,21 @@ const updateTour = async (req, res) => {
     if (updateData.excluded && typeof updateData.excluded === 'string') {
       updateData.excluded = JSON.parse(updateData.excluded);
     }
+    if (updateData.itinerary && typeof updateData.itinerary === 'string') {
+      updateData.itinerary = JSON.parse(updateData.itinerary);
+    }
 
     // Convert string values to appropriate types
     if (updateData.price) updateData.price = parseFloat(updateData.price);
     if (updateData.max_participants) updateData.max_participants = parseInt(updateData.max_participants);
     if (updateData.featured !== undefined) updateData.featured = updateData.featured === 'true';
 
-    // Handle image uploads if provided
-    if (req.files && req.files.length > 0) {
+    // Handle single image upload if provided
+    if (req.file) {
       try {
-        const oldImages = tour.images || [];
-        const imageUrls = await tour.updateImages(req.r2, req.files, oldImages);
-        updateData.images = imageUrls;
+        const oldImage = tour.image;
+        const imageUrl = await tour.updateImage(req.r2, req.file, oldImage);
+        updateData.image = imageUrl;
       } catch (imageError) {
         console.error('Image upload error:', imageError);
         return res.status(400).json({
