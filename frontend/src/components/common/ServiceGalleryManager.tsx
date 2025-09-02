@@ -94,10 +94,15 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
       // Clear selected files
       setSelectedFiles(null);
 
-      // Invalidate queries to refresh data from server - Fix the query invalidation
-      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      if (service?.id) {
-        queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+      // Safely invalidate queries with error handling
+      try {
+        queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+        if (service?.id) {
+          queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+        }
+      } catch (queryError) {
+        console.warn('Query invalidation failed:', queryError);
+        // Continue without throwing error since the operation succeeded
       }
 
       // Success notification
@@ -121,10 +126,15 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
         onSuccess?.();
       }
 
-      // Invalidate queries to refresh data from server - Fix the query invalidation
-      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      if (service?.id) {
-        queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+      // Safely invalidate queries with error handling
+      try {
+        queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+        if (service?.id) {
+          queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+        }
+      } catch (queryError) {
+        console.warn('Query invalidation failed:', queryError);
+        // Continue without throwing error since the operation succeeded
       }
 
       // Success notification

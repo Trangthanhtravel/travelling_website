@@ -318,25 +318,17 @@ const uploadImages = async (req, res) => {
       });
     }
 
-    const uploadPromises = req.files.map(async (file) => {
-      // Validate each image
-      if (!file.mimetype.startsWith('image/')) {
-        throw new Error(`Invalid file type: ${file.originalname}`);
-      }
+    // Check if R2 is properly configured
+    if (!req.r2) {
+      console.error('R2 bucket not configured. Check environment variables.');
+      return res.status(500).json({
+        success: false,
+        message: 'Image upload service not configured. Please contact administrator.'
+      });
+    }
 
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error(`File too large: ${file.originalname}`);
-      }
-
-      // Generate unique filename
-      const timestamp = Date.now();
-      const fileName = `${timestamp}_${file.originalname}`;
-
-      // Upload to R2
-      return await r2Helpers.uploadFile(file.buffer, `services/${fileName}`, file.mimetype);
-    });
-
-    const imageUrls = await Promise.all(uploadPromises);
+    // Use the correct r2Helpers method for multiple images
+    const imageUrls = await r2Helpers.uploadMultipleImages(req.r2, req.files, 'services');
 
     res.json({
       success: true,
