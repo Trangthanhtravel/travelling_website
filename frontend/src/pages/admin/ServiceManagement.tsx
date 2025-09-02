@@ -23,7 +23,8 @@ interface Service {
     category_id?: string;
     category?: Category;
     service_type?: string;
-    images: string[];
+    image: string | null; // Changed from images array to single image
+    gallery?: string[]; // Keep gallery as separate field for multiple images
     videos?: string[];
     included: string[];
     excluded: string[];
@@ -277,9 +278,9 @@ const ServiceManagement: React.FC = () => {
                   <tr key={service.id} className="hover:bg-gray-50 dark:hover:bg-dark-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {service.images && service.images.length > 0 ? (
+                        {service.image ? (
                           <img
-                            src={service.images[0]}
+                            src={service.image}
                             alt={service.title}
                             className="h-10 w-10 rounded-lg object-cover mr-3"
                             onError={(e) => {
@@ -410,7 +411,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
     itinerary: string[];
     status: "active" | "inactive";
     duration: string;
-    images: string[];
+    image: string | null;
   }>({
     title: service?.title || '',
     description: service?.description || '',
@@ -419,7 +420,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
     itinerary: service?.itinerary || [''],
     status: service?.status || 'active',
     duration: service?.duration || '',
-    images: service?.images || []
+    image: service?.image || null
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -461,12 +462,12 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      let imageUrls = formData.images;
+      let imageUrl = formData.image;
 
-      // Upload new images if any
+      // Upload new image if any
       if (selectedFiles.length > 0) {
         const newImageUrls = await uploadImages(selectedFiles);
-        imageUrls = [...imageUrls, ...newImageUrls];
+        imageUrl = newImageUrls[0] || null;
       }
 
       const serviceData = {
@@ -476,7 +477,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
         price: data.price,
         duration: data.duration,
         status: data.status,
-        images: JSON.stringify(imageUrls),
+        image: imageUrl,
         itinerary: JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')),
         included: JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')),
         excluded: JSON.stringify([]),
@@ -535,10 +536,10 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
     }));
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = () => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      image: null
     }));
   };
 
@@ -657,41 +658,36 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
               </div>
             </div>
 
-            {/* Current Images */}
-            {formData.images.length > 0 && (
+            {/* Current Image */}
+            {formData.image && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Current Images
+                  Current Image
                 </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {formData.images.map((imageUrl, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={imageUrl}
-                        alt={`Service ${index + 1}`}
-                        className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-dark-600"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Icon icon={Icons.FiX} className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <img
+                    src={formData.image}
+                    alt="Service"
+                    className="w-20 h-20 rounded-lg object-cover border border-gray-200 dark:border-dark-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                  >
+                    <Icon icon={Icons.FiX} className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* Service Images */}
+            {/* Service Image */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Add New Images
+                Add/Update Service Image
               </label>
               <input
                 type="file"
-                multiple
                 accept="image/*"
                 onChange={(e) => {
                   const files = Array.from(e.target.files || []);
@@ -700,12 +696,12 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
                 className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Upload up to 10 images (JPG, PNG, WebP - Max 5MB each)
+                Upload a new image (JPG, PNG, WebP - Max 5MB)
               </p>
               {selectedFiles.length > 0 && (
                 <div className="mt-2">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Selected files: {selectedFiles.map(f => f.name).join(', ')}
+                    Selected file: {selectedFiles.map(f => f.name).join(', ')}
                   </p>
                 </div>
               )}

@@ -765,7 +765,7 @@ const Home: React.FC = () => {
                     <div key={car.id || index} className="flex-none w-80 bg-white dark:bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-300">
                       <div className="relative h-48 overflow-hidden">
                         <img
-                          src={car.images ? (typeof car.images === 'string' ? JSON.parse(car.images)[0] : car.images[0]) : 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
+                          src={car.image || 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
                           alt={car.title}
                           className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                           onError={(e) => {

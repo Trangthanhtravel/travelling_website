@@ -38,12 +38,12 @@ router.get('/:tourId/availability', checkAvailability);
 // @route   POST /api/tours
 // @desc    Create new tour
 // @access  Private (Admin only)
-router.post('/', adminAuth, upload.array('images', 10), createTour);
+router.post('/', adminAuth, upload.single('image'), createTour);
 
 // @route   PUT /api/tours/:id
 // @desc    Update tour
 // @access  Private (Admin only)
-router.put('/:id', adminAuth, upload.array('images', 10), updateTour);
+router.put('/:id', adminAuth, upload.single('image'), updateTour);
 
 // @route   DELETE /api/tours/:id
 // @desc    Delete tour
