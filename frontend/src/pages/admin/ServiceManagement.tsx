@@ -668,7 +668,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
                     <div key={index} className="relative group">
                       <img
                         src={imageUrl}
-                        alt={`Service image ${index + 1}`}
+                        alt={`Service ${index + 1}`}
                         className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-dark-600"
                       />
                       <button
