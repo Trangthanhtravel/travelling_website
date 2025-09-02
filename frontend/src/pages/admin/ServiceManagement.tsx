@@ -87,7 +87,7 @@ const ServiceManagement: React.FC = () => {
   // Delete service mutation
   const deleteServiceMutation = useMutation({
     mutationFn: async (serviceId: string) => {
-      const response = await fetch(`${getApiUrl()}/admin/services/${serviceId}`, {
+      const response = await fetch(`${getApiUrl()}/services/admin/services/${serviceId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -109,7 +109,7 @@ const ServiceManagement: React.FC = () => {
   // Toggle service status
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ serviceId, status }: { serviceId: string; status: 'active' | 'inactive' }) => {
-      const response = await fetch(`${getApiUrl()}/admin/services/${serviceId}/status`, {
+      const response = await fetch(`${getApiUrl()}/services/admin/services/${serviceId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,

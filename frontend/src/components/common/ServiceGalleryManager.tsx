@@ -30,7 +30,7 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
 
   // API functions
   const updateGallery = async (files: FileList) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('adminToken'); // Fixed: use 'adminToken' instead of 'token'
     if (!token) {
       throw new Error('Authentication required. Please log in again.');
     }
@@ -57,7 +57,7 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
   };
 
   const deleteGalleryPhoto = async (photoUrl: string) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('adminToken'); // Fixed: use 'adminToken' instead of 'token'
     if (!token) {
       throw new Error('Authentication required. Please log in again.');
     }
