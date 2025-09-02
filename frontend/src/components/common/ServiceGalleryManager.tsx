@@ -94,9 +94,11 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
       // Clear selected files
       setSelectedFiles(null);
 
-      // Invalidate queries to refresh data from server
+      // Invalidate queries to refresh data from server - Fix the query invalidation
       queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+      if (service?.id) {
+        queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+      }
 
       // Success notification
       toast.success('Service gallery updated successfully!');
@@ -119,9 +121,11 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
         onSuccess?.();
       }
 
-      // Invalidate queries to refresh data from server
+      // Invalidate queries to refresh data from server - Fix the query invalidation
       queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+      if (service?.id) {
+        queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+      }
 
       // Success notification
       toast.success('Photo deleted successfully!');

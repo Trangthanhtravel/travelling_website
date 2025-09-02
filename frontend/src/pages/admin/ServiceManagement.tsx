@@ -54,7 +54,7 @@ const ServiceManagement: React.FC = () => {
     queryFn: async () => {
       const response = await fetch(`${getApiUrl()}/categories?type=service`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -75,7 +75,7 @@ const ServiceManagement: React.FC = () => {
 
       const response = await fetch(`${getApiUrl()}/services?${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -90,7 +90,7 @@ const ServiceManagement: React.FC = () => {
       const response = await fetch(`${getApiUrl()}/services/admin/services/${serviceId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -112,7 +112,7 @@ const ServiceManagement: React.FC = () => {
       const response = await fetch(`${getApiUrl()}/services/admin/services/${serviceId}/status`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ status })
@@ -442,7 +442,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
       const response = await fetch(`${getApiUrl()}/admin/upload-images`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         },
         body: formData
       });
@@ -490,7 +490,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
       const response = await fetch(url, {
         method: service ? 'PUT' : 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(serviceData)
