@@ -21,6 +21,21 @@ const upload = multer({
   }
 });
 
+// Create a separate multer instance for gallery uploads
+const galleryUpload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/') && file.fieldname === 'images') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed for gallery'), false);
+    }
+  }
+});
+
 // Get all services with filtering
 const getServices = async (req, res) => {
   try {
@@ -117,6 +132,7 @@ const getServices = async (req, res) => {
     const services = result.results?.map(service => ({
       ...service,
       images: service.images ? JSON.parse(service.images) : [],
+      gallery: service.gallery ? JSON.parse(service.gallery) : [],
       videos: service.videos ? JSON.parse(service.videos) : [],
       included: service.included ? JSON.parse(service.included) : [],
       excluded: service.excluded ? JSON.parse(service.excluded) : [],
@@ -176,6 +192,7 @@ const getServiceById = async (req, res) => {
         const service = {
             ...result,
             images: result.images ? JSON.parse(result.images) : [],
+            gallery: result.gallery ? JSON.parse(result.gallery) : [],
             videos: result.videos ? JSON.parse(result.videos) : [],
             included: result.included ? JSON.parse(result.included) : [],
             excluded: result.excluded ? JSON.parse(result.excluded) : [],
@@ -225,6 +242,7 @@ const getServiceBySlug = async (req, res) => {
     const service = {
       ...result,
       images: result.images ? JSON.parse(result.images) : [],
+      gallery: result.gallery ? JSON.parse(result.gallery) : [],
       videos: result.videos ? JSON.parse(result.videos) : [],
       included: result.included ? JSON.parse(result.included) : [],
       excluded: result.excluded ? JSON.parse(result.excluded) : [],
@@ -465,18 +483,21 @@ const createService = async (req, res) => {
       description,
       price,
       duration,
-      included,
-      excluded,
       category_id,
       service_type,
-      status = 'active'
+      status = 'active',
+      images,
+      itinerary,
+      included,
+      excluded,
+      featured = false
     } = req.body;
 
     // Validate required fields
-    if (!title || !description || !price || !service_type) {
+    if (!title || !description || !price) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: title, description, price, service_type'
+        message: 'Missing required fields: title, description, price'
       });
     }
 
@@ -487,14 +508,20 @@ const createService = async (req, res) => {
       .replace(/-+/g, '-')
       .trim('-');
 
-    // Handle image uploads if any
+    // Parse images if it's a string
     let imageUrls = [];
+    if (images) {
+      imageUrls = typeof images === 'string' ? JSON.parse(images) : images;
+    }
+
+    // Handle file uploads if any (from multer)
     if (req.files && req.files.length > 0) {
       try {
         const uploadPromises = req.files.map(file =>
           r2Helpers.uploadFile(file.buffer, `services/${slug}/${file.originalname}`, file.mimetype)
         );
-        imageUrls = await Promise.all(uploadPromises);
+        const newImageUrls = await Promise.all(uploadPromises);
+        imageUrls = [...imageUrls, ...newImageUrls];
       } catch (uploadError) {
         console.error('Error uploading images:', uploadError);
         return res.status(500).json({ success: false, message: 'Error uploading images' });
@@ -505,8 +532,9 @@ const createService = async (req, res) => {
     const query = `
       INSERT INTO services (
         id, title, slug, subtitle, description, price, duration, images,
-        included, excluded, category_id, service_type, status, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        included, excluded, itinerary, category_id, service_type, status, 
+        featured, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     await db.prepare(query).bind(
@@ -518,11 +546,13 @@ const createService = async (req, res) => {
       parseFloat(price),
       duration || null,
       JSON.stringify(imageUrls),
-      JSON.stringify(included || []),
-      JSON.stringify(excluded || []),
+      JSON.stringify(included ? (typeof included === 'string' ? JSON.parse(included) : included) : []),
+      JSON.stringify(excluded ? (typeof excluded === 'string' ? JSON.parse(excluded) : excluded) : []),
+      JSON.stringify(itinerary ? (typeof itinerary === 'string' ? JSON.parse(itinerary) : itinerary) : []),
       category_id || null,
-      service_type,
-      status
+      service_type || 'general',
+      status,
+      featured ? 1 : 0
     ).run();
 
     res.status(201).json({
@@ -551,11 +581,14 @@ const updateService = async (req, res) => {
       description,
       price,
       duration,
-      included,
-      excluded,
       category_id,
       service_type,
-      status
+      status,
+      images,
+      itinerary,
+      included,
+      excluded,
+      featured
     } = req.body;
 
     // Check if service exists
@@ -574,8 +607,15 @@ const updateService = async (req, res) => {
         .trim('-');
     }
 
-    // Handle image uploads if any
+    // Parse existing images
     let imageUrls = existingService.images ? JSON.parse(existingService.images) : [];
+
+    // Update images if provided
+    if (images !== undefined) {
+      imageUrls = typeof images === 'string' ? JSON.parse(images) : images;
+    }
+
+    // Handle new file uploads if any
     if (req.files && req.files.length > 0) {
       try {
         const uploadPromises = req.files.map(file =>
@@ -600,9 +640,11 @@ const updateService = async (req, res) => {
         images = ?,
         included = ?,
         excluded = ?,
+        itinerary = ?,
         category_id = ?,
         service_type = COALESCE(?, service_type),
         status = COALESCE(?, status),
+        featured = COALESCE(?, featured),
         updated_at = datetime('now')
       WHERE id = ?
     `;
@@ -615,11 +657,13 @@ const updateService = async (req, res) => {
       price ? parseFloat(price) : null,
       duration,
       JSON.stringify(imageUrls),
-      JSON.stringify(included || []),
-      JSON.stringify(excluded || []),
+      JSON.stringify(included ? (typeof included === 'string' ? JSON.parse(included) : included) : []),
+      JSON.stringify(excluded ? (typeof excluded === 'string' ? JSON.parse(excluded) : excluded) : []),
+      JSON.stringify(itinerary ? (typeof itinerary === 'string' ? JSON.parse(itinerary) : itinerary) : []),
       category_id,
       service_type,
       status,
+      featured !== undefined ? (featured ? 1 : 0) : null,
       id
     ).run();
 
@@ -736,6 +780,115 @@ const updateServiceBookingStatus = async (req, res) => {
   }
 };
 
+// Admin: Update service gallery (admin only)
+const updateServiceGallery = async (req, res) => {
+  try {
+    const db = getDB();
+    const service = await Service.findById(db, req.params.id);
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
+    }
+
+    // Check if R2 is properly configured
+    if (!req.r2) {
+      console.error('R2 bucket not configured. Check environment variables.');
+      return res.status(500).json({
+        success: false,
+        message: 'Image upload service not configured. Please contact administrator.'
+      });
+    }
+
+    // Handle gallery uploads (max 10 photos)
+    if (req.files && req.files.length > 0) {
+      if (req.files.length > 10) {
+        return res.status(400).json({
+          success: false,
+          message: 'Maximum 10 gallery photos allowed'
+        });
+      }
+
+      try {
+        const oldGallery = service.gallery || [];
+        const galleryUrls = await service.updateGallery(req.r2, req.files, oldGallery);
+
+        // Update database
+        await db.prepare('UPDATE services SET gallery = ?, updated_at = datetime("now") WHERE id = ?')
+          .bind(JSON.stringify(galleryUrls), service.id).run();
+
+        service.gallery = galleryUrls;
+
+        res.json({
+          success: true,
+          data: { gallery: galleryUrls },
+          message: 'Service gallery updated successfully'
+        });
+      } catch (imageError) {
+        console.error('Gallery upload error:', imageError);
+        return res.status(400).json({
+          success: false,
+          message: `Gallery upload failed: ${imageError.message}`
+        });
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'No gallery photos provided'
+      });
+    }
+  } catch (error) {
+    console.error('Update service gallery error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating service gallery'
+    });
+  }
+};
+
+// Admin: Delete specific gallery photo (admin only)
+const deleteServiceGalleryPhoto = async (req, res) => {
+  try {
+    const db = getDB();
+    const service = await Service.findById(db, req.params.id);
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service not found'
+      });
+    }
+
+    const photoUrl = decodeURIComponent(req.params.photoUrl);
+    console.log('Attempting to delete photo:', photoUrl);
+    console.log('Service gallery:', service.gallery);
+
+    if (!service.gallery || !service.gallery.includes(photoUrl)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Photo not found in service gallery'
+      });
+    }
+
+    // Remove the photo from the gallery
+    const updatedGallery = await service.removeGalleryPhoto(req.r2, photoUrl);
+
+    res.json({
+      success: true,
+      data: { gallery: updatedGallery },
+      message: 'Photo deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete gallery photo error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error deleting photo'
+    });
+  }
+};
+
 module.exports = {
   upload,
   getServices,
@@ -748,5 +901,7 @@ module.exports = {
   updateService,
   deleteService,
   updateServiceStatus,
-  updateServiceBookingStatus
+  updateServiceBookingStatus,
+  updateServiceGallery,
+  deleteServiceGalleryPhoto
 };

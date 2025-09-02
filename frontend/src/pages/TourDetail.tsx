@@ -372,10 +372,6 @@ const TourDetail: React.FC = () => {
                   Book Now
                 </Link>
 
-                <button className="w-full btn-secondary">
-                  Check Availability
-                </button>
-
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="flex items-center justify-center text-sm text-gray-500">
                     <Icon icon={Icons.FiCheck} className="w-4 h-4 mr-1 text-green-500" />

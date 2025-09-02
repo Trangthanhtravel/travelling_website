@@ -15,6 +15,7 @@ class Service {
     this.excluded = data.excluded ? (typeof data.excluded === 'string' ? JSON.parse(data.excluded) : data.excluded) : [];
     this.category = data.category; // 'domestic', 'international', 'car-rental', 'other-services'
     this.images = data.images ? (typeof data.images === 'string' ? JSON.parse(data.images) : data.images) : [];
+    this.gallery = data.gallery ? (typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery) : [];
     this.videos = data.videos ? (typeof data.videos === 'string' ? JSON.parse(data.videos) : data.videos) : [];
     this.featured = data.featured || false;
     this.status = data.status || 'active';
@@ -68,6 +69,52 @@ class Service {
       return uploadedImageUrls;
     } catch (error) {
       console.error('Error updating service images:', error);
+      throw error;
+    }
+  }
+
+  // Update service gallery using R2
+  async updateGallery(r2Bucket, newImageFiles, oldGallery = []) {
+    try {
+      // Upload new images to R2
+      const uploadedImageUrls = [...oldGallery]; // Keep existing gallery images
+
+      if (newImageFiles && newImageFiles.length > 0) {
+        for (const file of newImageFiles) {
+          r2Helpers.validateImage(file);
+          const imageUrl = await r2Helpers.uploadImage(r2Bucket, file, `services/${this.id}/gallery`);
+          uploadedImageUrls.push(imageUrl);
+        }
+      }
+
+      // Limit to 10 images total
+      const finalImages = uploadedImageUrls.slice(0, 10);
+      this.gallery = finalImages;
+      return finalImages;
+    } catch (error) {
+      console.error('Error updating service gallery:', error);
+      throw error;
+    }
+  }
+
+  // Remove specific gallery photo
+  async removeGalleryPhoto(r2Bucket, photoUrl) {
+    try {
+      // Delete the image from R2
+      await r2Helpers.deleteImage(r2Bucket, photoUrl);
+
+      // Remove from gallery array
+      const updatedGallery = this.gallery.filter(img => img !== photoUrl);
+      this.gallery = updatedGallery;
+
+      // Update database
+      const db = require('../config/database').getDB();
+      await db.prepare('UPDATE services SET gallery = ?, updated_at = datetime("now") WHERE id = ?')
+        .bind(JSON.stringify(updatedGallery), this.id).run();
+
+      return updatedGallery;
+    } catch (error) {
+      console.error('Error removing gallery photo:', error);
       throw error;
     }
   }

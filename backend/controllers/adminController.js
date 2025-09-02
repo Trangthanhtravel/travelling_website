@@ -3,6 +3,24 @@ const Tour = require('../models/Tour');
 const User = require('../models/User');
 const Content = require('../models/Content');
 const { r2Helpers } = require('../config/storage');
+const multer = require('multer');
+
+// Configure multer for image uploads
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  }
+});
 
 // Dashboard analytics
 const getDashboardStats = async (req, res) => {
@@ -290,11 +308,57 @@ const getAllContent = async (req, res) => {
   }
 };
 
+// Upload multiple images for services (admin only)
+const uploadImages = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image files provided'
+      });
+    }
+
+    const uploadPromises = req.files.map(async (file) => {
+      // Validate each image
+      if (!file.mimetype.startsWith('image/')) {
+        throw new Error(`Invalid file type: ${file.originalname}`);
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error(`File too large: ${file.originalname}`);
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const fileName = `${timestamp}_${file.originalname}`;
+
+      // Upload to R2
+      return await r2Helpers.uploadFile(file.buffer, `services/${fileName}`, file.mimetype);
+    });
+
+    const imageUrls = await Promise.all(uploadPromises);
+
+    res.json({
+      success: true,
+      data: { urls: imageUrls },
+      message: 'Images uploaded successfully'
+    });
+  } catch (error) {
+    console.error('Upload images error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error uploading images'
+    });
+  }
+};
+
 module.exports = {
+  upload,
   getDashboardStats,
   getAllUsers,
   updateUserRole,
   uploadImage,
+  uploadImages,
   deleteImage,
   createContent,
   updateContent,

@@ -17,6 +17,10 @@ router.put('/admin/services/:id', adminAuth, serviceController.upload.array('ima
 router.delete('/admin/services/:id', adminAuth, serviceController.deleteService);
 router.patch('/admin/services/:id/status', adminAuth, serviceController.updateServiceStatus);
 
+// Admin routes for service gallery management
+router.put('/admin/services/:id/gallery', adminAuth, serviceController.upload.array('images', 10), serviceController.updateServiceGallery);
+router.delete('/admin/services/:id/gallery/:photoUrl', adminAuth, serviceController.deleteServiceGalleryPhoto);
+
 // Admin routes for booking management
 router.get('/admin/bookings', adminAuth, serviceController.getAllServiceBookings);
 router.patch('/admin/bookings/:id/status', adminAuth, serviceController.updateServiceBookingStatus);

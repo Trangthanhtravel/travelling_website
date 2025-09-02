@@ -5,7 +5,9 @@ const {
   getDashboardStats,
   getAllUsers,
   updateUserRole,
+  upload,
   uploadImage,
+  uploadImages,
   deleteImage,
   createContent,
   updateContent,
@@ -30,7 +32,8 @@ router.get('/users', adminAuth, getAllUsers);
 router.put('/users/:userId/role', adminAuth, updateUserRole);
 
 // Image management routes
-router.post('/upload-image', adminAuth, uploadImage);
+router.post('/upload-image', adminAuth, upload.single('image'), uploadImage);
+router.post('/upload-images', adminAuth, upload.array('images', 10), uploadImages);
 router.delete('/delete-image', adminAuth, deleteImage);
 
 // Content management routes

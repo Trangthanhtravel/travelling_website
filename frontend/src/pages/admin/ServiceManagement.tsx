@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
+import ServiceGalleryManager from '../../components/common/ServiceGalleryManager';
 import toast from 'react-hot-toast';
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  type: string;
+  icon?: string;
+  color?: string;
+}
 
 interface Service {
     id: string;
@@ -10,7 +20,8 @@ interface Service {
     description: string;
     price: number;
     duration?: string;
-    category: 'tours' | 'car-rental' | 'hotel-booking' | 'train-booking' | 'cruise' | 'visa-service';
+    category_id?: string;
+    category?: Category;
     service_type?: string;
     images: string[];
     videos?: string[];
@@ -29,11 +40,30 @@ const ServiceManagement: React.FC = () => {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [galleryService, setGalleryService] = useState<Service | null>(null);
   const queryClient = useQueryClient();
 
   const getApiUrl = () => {
     return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   };
+
+  // Fetch categories for filter and form
+  const { data: categoriesData } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await fetch(`${getApiUrl()}/categories?type=service`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      return response.json();
+    },
+  });
+
+  const categories = categoriesData?.data || [];
 
   // Fetch services
   const { data: servicesData, isLoading, error } = useQuery({
@@ -117,7 +147,14 @@ const ServiceManagement: React.FC = () => {
     toggleStatusMutation.mutate({ serviceId, status: newStatus });
   };
 
-  const categories = ['all', 'tours', 'car-rental', 'hotel-booking', 'train-booking', 'cruise', 'visa-service'];
+  // Create filter options from actual categories
+  const filterOptions = [
+    { value: 'all', label: 'All Categories' },
+    ...categories.map((cat: Category) => ({
+      value: cat.slug,
+      label: cat.name
+    }))
+  ];
 
   if (error) {
     return (
@@ -177,9 +214,9 @@ const ServiceManagement: React.FC = () => {
               onChange={(e) => setFilterCategory(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
             >
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              {filterOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>
@@ -239,18 +276,34 @@ const ServiceManagement: React.FC = () => {
                 {services.map((service) => (
                   <tr key={service.id} className="hover:bg-gray-50 dark:hover:bg-dark-700">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {service.title}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
-                          {service.description}
+                      <div className="flex items-center">
+                        {service.images && service.images.length > 0 ? (
+                          <img
+                            src={service.images[0]}
+                            alt={service.title}
+                            className="h-10 w-10 rounded-lg object-cover mr-3"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center mr-3">
+                            <Icon icon={Icons.FiImage} className="w-5 h-5 text-gray-400" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {service.title}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                            {service.description}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">
-                        {service.category ? String(service.category).replace('-', ' ') : 'No Category'}
+                        {service.category?.name || 'No Category'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -285,6 +338,15 @@ const ServiceManagement: React.FC = () => {
                         >
                           <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
                         </button>
+                        <button
+                          onClick={() => {
+                            setGalleryService(service);
+                            setIsGalleryModalOpen(true);
+                          }}
+                          className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+                        >
+                          <Icon icon={Icons.FiImage} className="w-4 h-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -299,6 +361,7 @@ const ServiceManagement: React.FC = () => {
       {isModalOpen && (
         <ServiceModal
           service={editingService}
+          categories={categories}
           onClose={() => {
             setIsModalOpen(false);
             setEditingService(null);
@@ -309,8 +372,23 @@ const ServiceManagement: React.FC = () => {
             setEditingService(null);
           }}
         />
-      )
-      }
+      )}
+
+      {/* Service Gallery Manager Modal */}
+      {isGalleryModalOpen && galleryService && (
+        <ServiceGalleryManager
+          service={galleryService}
+          onClose={() => {
+            setIsGalleryModalOpen(false);
+            setGalleryService(null);
+          }}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+            setIsGalleryModalOpen(false);
+            setGalleryService(null);
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -318,24 +396,25 @@ const ServiceManagement: React.FC = () => {
 // Service Modal Component
 interface ServiceModalProps {
   service: Service | null;
+  categories: Category[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess }) => {
+const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClose, onSuccess }) => {
   const [formData, setFormData] = useState<{
-    name: string;
+    title: string;
     description: string;
-    category: "tours" | "car-rental" | "hotel-booking" | "train-booking" | "cruise" | "visa-service";
+    category_id: string;
     price: number;
     itinerary: string[];
     status: "active" | "inactive";
     duration: string;
     images: string[];
   }>({
-    name: service?.title || '',
+    title: service?.title || '',
     description: service?.description || '',
-    category: service?.category || 'tours',
+    category_id: service?.category_id || (categories.length > 0 ? categories[0].id : ''),
     price: service?.price || 0,
     itinerary: service?.itinerary || [''],
     status: service?.status || 'active',
@@ -344,16 +423,69 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const getApiUrl = () => {
     return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   };
 
+  const uploadImages = async (files: File[]): Promise<string[]> => {
+    if (files.length === 0) return [];
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('images', file);
+      });
+
+      const response = await fetch(`${getApiUrl()}/admin/upload-images`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) throw new Error('Failed to upload images');
+      const result = await response.json();
+      return result.data?.urls || [];
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error('Failed to upload images');
+      return [];
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const mutation = useMutation({
     mutationFn: async (data: any) => {
+      let imageUrls = formData.images;
+
+      // Upload new images if any
+      if (selectedFiles.length > 0) {
+        const newImageUrls = await uploadImages(selectedFiles);
+        imageUrls = [...imageUrls, ...newImageUrls];
+      }
+
+      const serviceData = {
+        title: data.title,
+        description: data.description,
+        category_id: data.category_id,
+        price: data.price,
+        duration: data.duration,
+        status: data.status,
+        images: JSON.stringify(imageUrls),
+        itinerary: JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')),
+        included: JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')),
+        excluded: JSON.stringify([]),
+        featured: false
+      };
+
       const url = service
-        ? `${getApiUrl()}/admin/services/${service.id}`
-        : `${getApiUrl()}/admin/services`;
+        ? `${getApiUrl()}/services/admin/services/${service.id}`
+        : `${getApiUrl()}/services/admin/services`;
 
       const response = await fetch(url, {
         method: service ? 'PUT' : 'POST',
@@ -361,7 +493,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(serviceData)
       });
 
       if (!response.ok) throw new Error('Failed to save service');
@@ -371,18 +503,15 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
       toast.success(service ? 'Service updated successfully' : 'Service created successfully');
       onSuccess();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error saving service:', error);
       toast.error(service ? 'Failed to update service' : 'Failed to create service');
     }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const dataToSubmit = {
-      ...formData,
-      features: formData.itinerary.filter(feature => feature.trim() !== '')
-    };
-    mutation.mutate(dataToSubmit);
+    mutation.mutate(formData);
   };
 
   const addFeature = () => {
@@ -406,12 +535,19 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
     }));
   };
 
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75" onClick={onClose}></div>
 
-        <div className="inline-block w-full max-w-2xl my-8 overflow-hidden text-left align-middle transition-all transform dark:bg-dark-800 shadow-xl rounded-2xl">
+        <div className="inline-block w-full max-w-2xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-dark-800 shadow-xl rounded-2xl">
           <div className="flex items-center justify-between p-6 border-b dark:border-dark-700">
             <h3 className="text-xl font-medium text-gray-900 dark:text-white">
               {service ? 'Edit Service' : 'Create Service'}
@@ -430,8 +566,8 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
               <input
                 type="text"
                 required
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
                 placeholder="Enter service name"
               />
@@ -460,16 +596,16 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
                 </label>
                 <select
                   required
-                  value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as "tours" | "car-rental" | "hotel-booking" | "train-booking" | "cruise" | "visa-service" }))}
+                  value={formData.category_id}
+                  onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
                 >
-                  <option value="tours">Tours</option>
-                  <option value="car-rental">Car Rental</option>
-                  <option value="hotel-booking">Hotel Booking</option>
-                  <option value="train-booking">Train Booking</option>
-                  <option value="cruise">Cruise</option>
-                  <option value="visa-service">Visa Service</option>
+                  <option value="">Select a category</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -521,10 +657,37 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
               </div>
             </div>
 
+            {/* Current Images */}
+            {formData.images.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Current Images
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {formData.images.map((imageUrl, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={imageUrl}
+                        alt={`Service image ${index + 1}`}
+                        className="w-full h-20 object-cover rounded-lg border border-gray-200 dark:border-dark-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Icon icon={Icons.FiX} className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Service Images */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Service Images
+                Add New Images
               </label>
               <input
                 type="file"
@@ -533,8 +696,6 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
                 onChange={(e) => {
                   const files = Array.from(e.target.files || []);
                   setSelectedFiles(files);
-                  // Note: In a real implementation, you would upload these files to your storage service
-                  // and get back URLs to store in formData.images
                 }}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
               />
@@ -596,13 +757,13 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, onClose, onSuccess
               </button>
               <button
                 type="submit"
-                disabled={mutation.isPending}
+                disabled={mutation.isPending || uploading}
                 className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {mutation.isPending ? (
+                {mutation.isPending || uploading ? (
                   <div className="flex items-center">
                     <Icon icon={Icons.FiLoader} className="animate-spin w-4 h-4 mr-2" />
-                    {service ? 'Updating...' : 'Creating...'}
+                    {uploading ? 'Uploading...' : (service ? 'Updating...' : 'Creating...')}
                   </div>
                 ) : (
                   service ? 'Update Service' : 'Create Service'
