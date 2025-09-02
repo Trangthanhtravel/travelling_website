@@ -155,7 +155,7 @@ const ServiceBooking: React.FC = () => {
       <h2 className={`text-xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Service Summary</h2>
       <div className="flex items-start space-x-4">
         <img
-          src={service.images?.[0] || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e'}
+          src={service.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e'}
           alt={service.title}
           className="w-24 h-24 object-cover rounded-lg"
         />

@@ -640,7 +640,7 @@ const Home: React.FC = () => {
                     <div key={tour.id} className="flex-none w-80 bg-white dark:bg-dark-850 rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 border dark:border-dark-600">
                       <div className="relative h-48 overflow-hidden">
                         <img
-                          src={tour.image_url || tour.images?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
+                          src={tour.image || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
                           alt={tour.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />

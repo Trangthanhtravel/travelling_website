@@ -63,7 +63,7 @@ const TourDetail: React.FC = () => {
       {/* Hero Image Gallery */}
       <div className="relative h-96 md:h-[500px] overflow-hidden">
         <img
-          src={tour?.images?.[selectedImage] || tour?.images?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80`}
+          src={tour?.image || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80`}
           alt={tour?.title || 'Tour'}
           className="w-full h-full object-cover"
         />

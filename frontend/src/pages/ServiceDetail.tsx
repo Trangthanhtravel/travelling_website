@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../components/common/Icons';
@@ -8,7 +7,6 @@ import { useTheme } from '../contexts/ThemeContext';
 const ServiceDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { isDarkMode } = useTheme();
-  const [selectedImage, setSelectedImage] = useState(0);
 
   const { data: serviceData, isLoading, error } = useQuery({
     queryKey: ['service', slug],
@@ -80,32 +78,11 @@ const ServiceDetail: React.FC = () => {
       {/* Hero Image Gallery */}
       <div className="relative h-96 md:h-[500px] overflow-hidden">
         <img
-          src={service.images?.[selectedImage] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80`}
+          src={service.image || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80`}
           alt={service.title}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-
-        {/* Image Navigation */}
-        {service.images && service.images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            {service.images.slice(0, 5).map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedImage(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index === selectedImage ? 'bg-white' : 'bg-white/50'
-                }`}
-              />
-            ))}
-            {service.images.length > 5 && (
-              <button className="text-white text-sm bg-black/50 px-2 py-1 rounded">
-                <Icon icon={Icons.FiCamera} className="w-4 h-4 inline mr-1" />
-                +{service.images.length - 5}
-              </button>
-            )}
-          </div>
-        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

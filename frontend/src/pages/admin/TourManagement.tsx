@@ -15,7 +15,7 @@ interface Tour {
   location: string;
   max_participants: number;
   category: string;
-  images: string[];
+  image: string;
   itinerary: any;
   included: string[];
   excluded: string[];
@@ -37,7 +37,7 @@ interface TourFormData {
   excluded: string[];
   status: 'active' | 'inactive' | 'draft';
   featured: boolean;
-  images?: FileList;
+  image?: File;
 }
 
 interface Category {
@@ -115,11 +115,9 @@ const TourManagement: React.FC = () => {
       formData.append('status', tourData.status);
       formData.append('featured', tourData.featured.toString());
 
-      // Add images if provided
-      if (tourData.images && tourData.images.length > 0) {
-        Array.from(tourData.images).forEach((file) => {
-          formData.append('images', file);
-        });
+      // Add image if provided
+      if (tourData.image) {
+        formData.append('image', tourData.image);
       }
 
       const response = await fetch(`${getApiUrl()}/tours`, {
@@ -165,11 +163,9 @@ const TourManagement: React.FC = () => {
       formData.append('status', data.status);
       formData.append('featured', data.featured.toString());
 
-      // Add new images if provided
-      if (data.images && data.images.length > 0) {
-        Array.from(data.images).forEach((file) => {
-          formData.append('images', file);
-        });
+      // Add new image if provided
+      if (data.image) {
+        formData.append('image', data.image);
       }
 
       const response = await fetch(`${getApiUrl()}/tours/${id}`, {
@@ -345,7 +341,7 @@ const TourManagement: React.FC = () => {
                         <div className="h-12 w-12 flex-shrink-0">
                           <img
                             className="h-12 w-12 rounded-lg object-cover"
-                            src={tour.images[0] || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}
+                            src={tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}
                             alt={tour.title}
                           />
                         </div>
@@ -520,7 +516,7 @@ const TourModal: React.FC<TourModalProps> = ({
     excluded: initialData?.excluded || [],
     status: initialData?.status || 'active',
     featured: initialData?.featured || false, // Initialize featured field
-    images: undefined // Initialize images as undefined
+    image: undefined // Initialize image as undefined
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -529,9 +525,9 @@ const TourModal: React.FC<TourModalProps> = ({
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setFormData({ ...formData, images: files });
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
     }
   };
 
@@ -636,9 +632,6 @@ const TourModal: React.FC<TourModalProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Status
@@ -675,22 +668,21 @@ const TourModal: React.FC<TourModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Upload Images
+                Upload Image
               </label>
               <input
                 type="file"
                 onChange={handleFileChange}
-                multiple
                 accept="image/*"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-primary-50 file:text-primary-700"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Select multiple images for your tour. Max 10 images, 5MB each.
+                Upload a single image for your tour. Max 5MB.
               </p>
-              {initialData?.images && initialData.images.length > 0 && (
+              {initialData?.image && (
                 <div className="mt-2">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Current images: {initialData.images.length} uploaded
+                    Current image: Uploaded
                   </p>
                 </div>
               )}
