@@ -98,7 +98,9 @@ const ServiceManagement: React.FC = () => {
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate and refetch data immediately
       queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
       toast.success('Service deleted successfully');
     },
     onError: () => {
@@ -120,12 +122,41 @@ const ServiceManagement: React.FC = () => {
       if (!response.ok) throw new Error('Failed to update service status');
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      toast.success('Service status updated successfully');
+    onMutate: async ({ serviceId, status }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['admin-services'] });
+
+      // Snapshot the previous value
+      const previousServices = queryClient.getQueryData(['admin-services', searchTerm, filterCategory]);
+
+      // Optimistically update the cache
+      queryClient.setQueryData(['admin-services', searchTerm, filterCategory], (old: any) => {
+        if (!old?.data) return old;
+
+        return {
+          ...old,
+          data: old.data.map((service: Service) =>
+            service.id === serviceId ? { ...service, status } : service
+          )
+        };
+      });
+
+      return { previousServices };
     },
-    onError: () => {
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousServices) {
+        queryClient.setQueryData(['admin-services', searchTerm, filterCategory], context.previousServices);
+      }
       toast.error('Failed to update service status');
+    },
+    onSettled: () => {
+      // Always refetch after error or success
+      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+    },
+    onSuccess: () => {
+      toast.success('Service status updated successfully');
     }
   });
 
