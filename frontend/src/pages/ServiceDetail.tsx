@@ -130,6 +130,43 @@ const ServiceDetail: React.FC = () => {
               </div>
             </div>
 
+            {/* Photo Gallery */}
+            {service.gallery && service.gallery.length > 0 && (
+              <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
+                <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Photo Gallery</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {service.gallery.map((photo: string, index: number) => {
+                    // Skip rendering if photo URL is malformed or empty
+                    if (!photo || photo.includes('undefined') || photo.startsWith('https://https://')) {
+                      return null;
+                    }
+
+                    return (
+                      <div key={`gallery-${index}`} className="relative group cursor-pointer">
+                        <img
+                          src={photo}
+                          alt={`${service.title} Gallery ${index + 1}`}
+                          className="w-full h-32 md:h-40 object-cover rounded-lg border border-gray-200 dark:border-dark-600 transition-transform duration-200 group-hover:scale-105"
+                          onClick={() => {
+                            // Open image in a new tab for full view
+                            window.open(photo, '_blank');
+                          }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            // Hide broken images
+                            target.style.display = 'none';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 rounded-lg flex items-center justify-center">
+                          <Icon icon={Icons.FiEye} className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Itinerary (if available) */}
             {service.itinerary && service.itinerary.length > 0 && (
               <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
