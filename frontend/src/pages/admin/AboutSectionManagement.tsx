@@ -232,7 +232,7 @@ const AboutSectionManagement: React.FC = () => {
                   value={aboutContent.tagline}
                   onChange={(e) => setAboutContent({ ...aboutContent, tagline: e.target.value })}
                   className={`w-full p-3 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
-                  placeholder="Travel Beyond Boundaries"
+                  placeholder=""
                 />
               </div>
 
