@@ -90,7 +90,7 @@ const HeroImageManagement: React.FC = () => {
 
       if (!response.ok) throw new Error('Failed to upload image');
       const result = await response.json();
-      return result.data?.url || '';
+      return result.data?.imageUrl || '';
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error('Failed to upload image');

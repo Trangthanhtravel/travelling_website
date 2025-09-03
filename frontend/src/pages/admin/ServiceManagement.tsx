@@ -369,6 +369,9 @@ const ServiceManagement: React.FC = () => {
           }}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+            // Also invalidate public service caches to update service cards and details
+            queryClient.invalidateQueries({ queryKey: ['services'] });
+            queryClient.invalidateQueries({ queryKey: ['service'] });
             setIsModalOpen(false);
             setEditingService(null);
           }}
