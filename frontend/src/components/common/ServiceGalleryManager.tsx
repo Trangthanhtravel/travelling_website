@@ -87,7 +87,7 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
       // Update local state immediately
       if (data?.data?.gallery) {
         setLocalGallery(data.data.gallery);
-        // Update parent component with the fresh data
+        // Update parent component with the fresh data but don't close modal
         onSuccess?.();
       }
 
@@ -106,7 +106,7 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
       }
 
       // Success notification
-      toast.success('Service gallery updated successfully!');
+      toast.success('Service gallery updated successfully! Modal will stay open for more uploads.');
     },
     onError: (error: any) => {
       console.error('Upload error:', error);

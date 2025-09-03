@@ -384,9 +384,11 @@ const ServiceManagement: React.FC = () => {
             setGalleryService(null);
           }}
           onSuccess={() => {
+            // Keep modal open and just refresh the data
             queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-            setIsGalleryModalOpen(false);
-            setGalleryService(null);
+            // Don't close the modal here - let it stay open
+            // setIsGalleryModalOpen(false);
+            // setGalleryService(null);
           }}
         />
       )}
@@ -500,8 +502,30 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
       if (!response.ok) throw new Error('Failed to save service');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success(service ? 'Service updated successfully' : 'Service created successfully');
+
+      // Force refresh the service data to update images immediately
+      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+      if (service?.id) {
+        queryClient.invalidateQueries({ queryKey: ['service', service.id] });
+        queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+      }
+
+      // Clear browser cache for service images by updating the image URLs with timestamp
+      if (data?.data?.image) {
+        const timestamp = Date.now();
+        const imageWithCacheBuster = data.data.image.includes('?')
+          ? `${data.data.image}&v=${timestamp}`
+          : `${data.data.image}?v=${timestamp}`;
+
+        // Force image reload in the UI
+        const images = document.querySelectorAll(`img[src*="${service?.id}"]`);
+        images.forEach((img: any) => {
+          img.src = imageWithCacheBuster;
+        });
+      }
+
       onSuccess();
     },
     onError: (error) => {
