@@ -565,14 +565,26 @@ const Home: React.FC = () => {
                               if (category.type === 'tour') {
                                 navigate(`/tours?category=${category.slug}`);
                               } else if (category.type === 'service') {
-                                navigate(`/services?category=${category.slug}`);
+                                // Check if this is a car rental category
+                                if (category.name && category.name.toLowerCase().includes('car rental')) {
+                                  navigate('/car-rental');
+                                } else {
+                                  navigate(`/services?category=${category.slug}`);
+                                }
                               } else if (category.type === 'both') {
-                                // For categories that apply to both, redirect to services by default
-                                // You could also show a modal to let users choose
-                                navigate(`/services?category=${category.slug}`);
+                                // For categories that apply to both, check if it's car rental
+                                if (category.name && category.name.toLowerCase().includes('car rental')) {
+                                  navigate('/car-rental');
+                                } else {
+                                  navigate(`/services?category=${category.slug}`);
+                                }
                               } else {
-                                // Fallback to services page
-                                navigate(`/services?category=${category.slug}`);
+                                // Check if this is a car rental category in fallback
+                                if (category.name && category.name.toLowerCase().includes('car rental')) {
+                                  navigate('/car-rental');
+                                } else {
+                                  navigate(`/services?category=${category.slug}`);
+                                }
                               }
                             }}
                             className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200"
@@ -809,6 +821,17 @@ const Home: React.FC = () => {
             >
               <Icon icon={Icons.FiChevronRight} className="w-6 h-6 text-gray-600 dark:text-gray-700" />
             </button>
+          </div>
+
+          {/* View All Car Rentals Button */}
+          <div className="text-center mt-8">
+            <Link
+              to="/car-rental"
+              className="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200"
+            >
+              <Icon icon={Icons.FiTruck} className="w-5 h-5 mr-2" />
+              View All Car Rentals
+            </Link>
           </div>
         </div>
       </section>

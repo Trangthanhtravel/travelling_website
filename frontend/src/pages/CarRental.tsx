@@ -5,11 +5,10 @@ import { Icon, Icons } from '../components/common/Icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
 
-const Services: React.FC = () => {
+const CarRental: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const [activeCategory, setActiveCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -19,77 +18,27 @@ const Services: React.FC = () => {
     sortOrder: 'desc' as 'asc' | 'desc'
   });
 
-  // Load initial category from URL params
-  useEffect(() => {
-    const categoryFromUrl = searchParams.get('category');
-    if (categoryFromUrl && categoryFromUrl !== 'all') {
-      setActiveCategory(categoryFromUrl);
-    }
-  }, [searchParams]);
-
   const getApiUrl = () => {
     return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   };
 
-  // Icon mapping for categories
-  const getIconFromString = (iconName: string) => {
-    const iconMap: { [key: string]: any } = {
-      'car': Icons.FiTruck,
-      'file-text': Icons.FiFileText,
-      'truck': Icons.FiTruck,
-      'home': Icons.FiHome,
-      'globe': Icons.FiGlobe,
-      'plane': Icons.FiSend,
-      'map-pin': Icons.FiMapPin,
-      'package': Icons.FiPackage,
-      'users': Icons.FiUsers,
-      'calendar': Icons.FiCalendar,
-      'default': Icons.FiPackage
-    };
-    return iconMap[iconName] || iconMap['default'];
-  };
-
-  // Fetch service categories from database
-  const { data: categoriesData } = useQuery({
-    queryKey: ['service-categories'],
-    queryFn: async () => {
-      const response = await fetch(`${getApiUrl()}/categories?type=service&status=active`);
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      return response.json();
-    },
-  });
-
-  const categories = [
-    { id: 'all', name: t('Our Services'), slug: 'all', icon: Icons.FiGrid },
-    ...(categoriesData?.data?.map((cat: any) => ({
-      ...cat,
-      icon: getIconFromString(cat.icon)
-    })) || [])
-  ];
-
-  // Fetch services from API with pagination
-  const { data: servicesData, isLoading, error } = useQuery({
-    queryKey: ['services', { category: activeCategory, search: searchTerm, ...filters }],
+  // Fetch car rental services from API
+  const { data: carRentalsData, isLoading, error } = useQuery({
+    queryKey: ['car-rentals', { search: searchTerm, ...filters }],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (activeCategory !== 'all') {
-        // Use category slug for filtering instead of category_id
-        params.append('category', activeCategory);
-      }
+      params.append('service_type', 'car-rental');
       if (searchTerm) params.append('search', searchTerm);
       params.append('status', 'active');
-      // Exclude car rental services
-      params.append('exclude_service_type', 'car-rental');
       params.append('page', filters.page.toString());
       params.append('limit', filters.limit.toString());
       params.append('sortBy', filters.sortBy);
       params.append('sortOrder', filters.sortOrder);
 
       const response = await fetch(`${getApiUrl()}/services?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch services');
+      if (!response.ok) throw new Error('Failed to fetch car rental services');
       return response.json();
     },
-    enabled: !!categoriesData, // Only run when categories are loaded
   });
 
   const handlePageChange = (page: number) => {
@@ -107,16 +56,16 @@ const Services: React.FC = () => {
     }));
   };
 
-  const pagination = servicesData?.pagination;
-  const services = servicesData?.data || [];
+  const pagination = carRentalsData?.pagination;
+  const carRentals = carRentalsData?.data || [];
 
   if (error) {
     return (
       <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
         <div className="text-center py-12">
           <Icon icon={Icons.FiAlertCircle} className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Lỗi khi tải dịch vụ</h3>
-          <p className="text-gray-600 dark:text-gray-400">Vui lòng thử lại sau</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Error loading car rentals</h3>
+          <p className="text-gray-600 dark:text-gray-400">Please try again later</p>
         </div>
       </div>
     );
@@ -128,9 +77,9 @@ const Services: React.FC = () => {
       <div className="bg-accent-orange text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Other Travelling Services</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Private Car Rental')}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Complete travel solutions for all your adventure needs (excluding car rentals)
+              Premium vehicle fleet for your travel needs
             </p>
           </div>
         </div>
@@ -139,16 +88,16 @@ const Services: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Filter */}
         <div className={`rounded-lg shadow-lg p-6 mb-8 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'}`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-                {t('Search')} {t('Services')}
+                {t('Search')} {t('Car Rentals')}
               </label>
               <div className="relative">
                 <Icon icon={Icons.FiSearch} className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-400'}`} />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm dịch vụ..."
+                  placeholder="Search car rentals..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
@@ -158,7 +107,24 @@ const Services: React.FC = () => {
 
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-                Chế độ xem
+                Sort By
+              </label>
+              <select
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+              >
+                <option value="created_at-desc">Newest First</option>
+                <option value="created_at-asc">Oldest First</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="title-asc">Name: A to Z</option>
+                <option value="title-desc">Name: Z to A</option>
+              </select>
+            </div>
+
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                View Mode
               </label>
               <div className="flex items-center gap-2">
                 <button
@@ -190,26 +156,6 @@ const Services: React.FC = () => {
           </div>
         </div>
 
-        {/* Category Navigation */}
-        <div className="flex flex-wrap gap-2 mb-8 justify-center">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setActiveCategory(category.slug || category.id)}
-              className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                activeCategory === (category.slug || category.id)
-                  ? 'bg-accent-orange text-white'
-                  : isDarkMode
-                  ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700 border border-dark-700'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-              }`}
-            >
-              <Icon icon={category.icon} className="w-4 h-4 mr-2" />
-              {category.name}
-            </button>
-          ))}
-        </div>
-
         {/* Loading State */}
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -226,12 +172,12 @@ const Services: React.FC = () => {
           </div>
         )}
 
-        {/* Services Grid/List */}
-        {!isLoading && services.length > 0 && (
+        {/* Car Rentals Grid/List */}
+        {!isLoading && carRentals.length > 0 && (
           <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}>
-            {services.map((service: any) => (
+            {carRentals.map((car: any) => (
               <div
-                key={service.id}
+                key={car.id}
                 className={`group overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
                   isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'
                 } ${viewMode === 'grid' ? 'rounded-xl' : 'rounded-lg flex flex-col sm:flex-row'}`}
@@ -240,14 +186,14 @@ const Services: React.FC = () => {
                   viewMode === 'grid' ? 'h-48' : 'h-48 sm:h-auto sm:w-64 flex-shrink-0'
                 }`}>
                   <img
-                    src={service.image || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
-                    alt={service.title}
+                    src={car.image || `https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
+                    alt={car.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   <div className="absolute top-4 right-4 bg-accent-orange text-white rounded-full px-3 py-1 text-sm font-medium">
-                    ${service.price}
+                    ${car.price}/{car.duration || 'day'}
                   </div>
-                  {service.featured && (
+                  {car.featured && (
                     <div className="absolute top-4 left-4 bg-warning text-white px-2 py-1 rounded text-xs font-medium">
                       Featured
                     </div>
@@ -256,36 +202,28 @@ const Services: React.FC = () => {
 
                 <div className="p-6 flex-1 flex flex-col">
                   <div className={`flex items-center text-sm mb-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
-                    <Icon icon={Icons.FiTag} className="w-4 h-4 mr-1" />
-                    <span className="capitalize">
-                      {service.category ?
-                        (typeof service.category === 'string' ?
-                          service.category.replace('-', ' ') :
-                          service.category.name || service.category.slug || 'Uncategorized'
-                        ) :
-                        'Uncategorized'
-                      }
-                    </span>
+                    <Icon icon={Icons.FiTruck} className="w-4 h-4 mr-1" />
+                    <span>Car Rental</span>
                   </div>
                   <h3 className={`font-bold mb-2 group-hover:text-accent-orange transition-colors duration-200 ${
                     viewMode === 'grid' ? 'text-xl' : 'text-lg'
                   } ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-                    {service.title}
+                    {car.title}
                   </h3>
                   <p className={`text-sm mb-4 line-clamp-2 flex-grow ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-                    {service.description}
+                    {car.description}
                   </p>
 
-                  {service.duration && (
+                  {car.duration && (
                     <div className={`flex items-center text-sm mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
                       <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
-                      <span>{service.duration}</span>
+                      <span>{car.duration}</span>
                     </div>
                   )}
 
                   {/* View Details Button */}
                   <Link
-                    to={`/services/${service.slug}`}
+                    to={`/services/${car.slug}`}
                     className="w-full bg-accent-orange hover:bg-accent-orange-hover text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center"
                   >
                     {t('View Details')}
@@ -296,63 +234,77 @@ const Services: React.FC = () => {
           </div>
         )}
 
-        {/* Pagination */}
-        {!isLoading && services.length > 0 && pagination && (
-          <div className="mt-8">
-            <div className={`flex justify-between items-center mb-4 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-              <div className="text-sm">
-                Hiển thị {pagination.total > 0 ? (pagination.currentPage - 1) * pagination.limit + 1 : 0} -{' '}
-                {pagination.currentPage * pagination.limit > pagination.total ? pagination.total : pagination.currentPage * pagination.limit}{' '}
-                của {pagination.total} dịch vụ
-              </div>
-
-              {/* Sort By */}
-              <div>
-                <label className="sr-only">{t('Sort')}</label>
-                <select
-                  onChange={(e) => handleSortChange(e.target.value)}
-                  className={`block appearance-none bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:border-dark-600 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}
-                >
-                  <option value="created_at-desc">{t('Newest First')}</option>
-                  <option value="created_at-asc">Cũ nhất trước</option>
-                  <option value="price-asc">{t('Price: Low to High')}</option>
-                  <option value="price-desc">{t('Price: High to Low')}</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-center">
-              <button
-                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                disabled={pagination.currentPage === 1}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors mr-2 ${isDarkMode ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-              >
-                <Icon icon={Icons.FiChevronLeft} className="w-4 h-4 mr-2" />
-                {t('Previous')}
-              </button>
-
-              <button
-                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                disabled={pagination.currentPage * pagination.limit >= pagination.total}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-              >
-                {t('Next')}
-                <Icon icon={Icons.FiChevronRight} className="w-4 h-4 ml-2" />
-              </button>
-            </div>
+        {/* Empty State */}
+        {!isLoading && carRentals.length === 0 && (
+          <div className="text-center py-12">
+            <Icon icon={Icons.FiTruck} className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No car rentals found</h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              {searchTerm ? 'Try adjusting your search terms' : 'No car rental services are currently available'}
+            </p>
           </div>
         )}
 
-        {/* Empty State */}
-        {!isLoading && services.length === 0 && (
-          <div className={`text-center py-12 rounded-lg ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'}`}>
-            <Icon icon={Icons.FiPackage} className={`w-12 h-12 mx-auto mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-400'}`} />
-            <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>
-              Không tìm thấy dịch vụ
-            </h3>
-            <p className={`mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-              Thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc danh mục của bạn.
-            </p>
+        {/* Pagination */}
+        {!isLoading && carRentals.length > 0 && pagination && (
+          <div className="mt-8">
+            <div className={`flex justify-between items-center mb-4 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+              <div className="text-sm">
+                Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+              </div>
+              <div className="text-sm">
+                Page {pagination.page} of {pagination.pages}
+              </div>
+            </div>
+
+            {pagination.pages > 1 && (
+              <div className="flex justify-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page <= 1}
+                  className={`px-3 py-2 rounded-lg border ${
+                    pagination.page <= 1
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-gray-50 dark:hover:bg-dark-700'
+                  } ${isDarkMode ? 'border-dark-600 text-dark-text-primary' : 'border-gray-300 text-gray-700'}`}
+                >
+                  Previous
+                </button>
+
+                {[...Array(Math.min(5, pagination.pages))].map((_, index) => {
+                  const page = Math.max(1, pagination.page - 2) + index;
+                  if (page > pagination.pages) return null;
+
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-2 rounded-lg border ${
+                        page === pagination.page
+                          ? 'bg-accent-orange text-white border-accent-orange'
+                          : isDarkMode
+                          ? 'border-dark-600 text-dark-text-primary hover:bg-dark-700'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page >= pagination.pages}
+                  className={`px-3 py-2 rounded-lg border ${
+                    pagination.page >= pagination.pages
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-gray-50 dark:hover:bg-dark-700'
+                  } ${isDarkMode ? 'border-dark-600 text-dark-text-primary' : 'border-gray-300 text-gray-700'}`}
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -360,4 +312,4 @@ const Services: React.FC = () => {
   );
 };
 
-export default Services;
+export default CarRental;

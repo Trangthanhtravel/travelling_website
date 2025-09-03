@@ -13,6 +13,7 @@ import Tours from './pages/Tours';
 import TourDetail from './pages/TourDetail';
 import Booking from './pages/Booking';
 import Services from './pages/Services';
+import CarRental from './pages/CarRental';
 import ServiceDetail from './pages/ServiceDetail';
 import ServiceBooking from './pages/ServiceBooking';
 import Blogs from './pages/Blogs';
@@ -56,6 +57,7 @@ const AppContent: React.FC = () => {
             <Route path="/tours" element={<Tours />} />
             <Route path="/tours/:slug" element={<TourDetail />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/car-rental" element={<CarRental />} />
             <Route path="/services/:slug" element={<ServiceDetail />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/blog/:slug" element={<BlogDetail />} />
