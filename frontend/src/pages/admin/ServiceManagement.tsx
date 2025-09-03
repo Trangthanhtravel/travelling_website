@@ -502,7 +502,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
       if (!response.ok) throw new Error('Failed to save service');
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data, queryClient) => {
       toast.success(service ? 'Service updated successfully' : 'Service created successfully');
 
       // Force refresh the service data to update images immediately
