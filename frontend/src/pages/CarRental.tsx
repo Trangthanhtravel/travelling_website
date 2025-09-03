@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../components/common/Icons';
 import { useTheme } from '../contexts/ThemeContext';
@@ -8,7 +8,6 @@ import { useTranslation } from '../contexts/TranslationContext';
 const CarRental: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
