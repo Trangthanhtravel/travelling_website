@@ -128,7 +128,6 @@ class Service {
       service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: JSON.stringify(this.gallery),
-      featured: this.featured ? 1 : 0,
       status: this.status
     };
 
@@ -159,7 +158,7 @@ class Service {
 
   // Get all services with filtering
   static async findAll(db, options = {}) {
-    const { limit = 20, offset = 0, category, featured, status = 'active', search } = options;
+    const { limit = 20, offset = 0, category, status = 'active', search } = options;
     
     let sql = 'SELECT * FROM services WHERE status = ?';
     const params = [status];
@@ -169,18 +168,13 @@ class Service {
       params.push(category);
     }
     
-    if (featured !== undefined) {
-      sql += ' AND featured = ?';
-      params.push(featured ? 1 : 0);
-    }
-    
     if (search) {
       sql += ' AND (title LIKE ? OR subtitle LIKE ? OR description LIKE ?)';
       const searchPattern = `%${search}%`;
       params.push(searchPattern, searchPattern, searchPattern);
     }
     
-    sql += ' ORDER BY featured DESC, created_at DESC LIMIT ? OFFSET ?';
+    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
     
     const result = await db.prepare(sql).bind(...params).all();
@@ -196,13 +190,6 @@ class Service {
       total,
       hasMore: offset + limit < total
     };
-  }
-
-  // Get featured services
-  static async getFeatured(db, limit = 6) {
-    const sql = 'SELECT * FROM services WHERE status = ? AND featured = ? ORDER BY created_at DESC LIMIT ?';
-    const result = await db.prepare(sql).bind('active', 1, limit).all();
-    return (result.results || []).map(service => new Service(service));
   }
 
   // Search services
@@ -224,7 +211,7 @@ class Service {
       params.push(category);
     }
 
-    sql += ' ORDER BY featured DESC, created_at DESC LIMIT ? OFFSET ?';
+    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
 
     const result = await db.prepare(sql).bind(...params).all();
@@ -277,7 +264,6 @@ class Service {
       service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: typeof this.gallery === 'string' ? JSON.parse(this.gallery) : this.gallery,
-      featured: this.featured,
       status: this.status,
       created_at: this.created_at,
       updated_at: this.updated_at
