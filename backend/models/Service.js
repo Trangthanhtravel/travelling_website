@@ -13,7 +13,8 @@ class Service {
     this.duration = data.duration;
     this.included = data.included ? (typeof data.included === 'string' ? JSON.parse(data.included) : data.included) : [];
     this.excluded = data.excluded ? (typeof data.excluded === 'string' ? JSON.parse(data.excluded) : data.excluded) : [];
-    this.category = data.category; // 'domestic', 'international', 'car-rental', 'other-services'
+    this.category_id = data.category_id; // Use category_id instead of category
+    this.service_type = data.service_type;
     // Change from images array to single image
     this.image = data.image || (data.images && Array.isArray(data.images) ? data.images[0] : null);
     this.gallery = data.gallery ? (typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery) : [];
@@ -36,7 +37,8 @@ class Service {
       duration: this.duration,
       included: JSON.stringify(this.included),
       excluded: JSON.stringify(this.excluded),
-      category: this.category,
+      category_id: this.category_id, // Use category_id instead of category
+      service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: JSON.stringify(this.gallery),
       videos: JSON.stringify(this.videos),
@@ -127,7 +129,8 @@ class Service {
       duration: this.duration,
       included: JSON.stringify(this.included),
       excluded: JSON.stringify(this.excluded),
-      category: this.category,
+      category_id: this.category_id, // Use category_id instead of category
+      service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: JSON.stringify(this.gallery),
       videos: JSON.stringify(this.videos),
@@ -264,7 +267,8 @@ class Service {
       duration: this.duration,
       included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
       excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded,
-      category: this.category,
+      category_id: this.category_id, // Use category_id instead of category
+      service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: typeof this.gallery === 'string' ? JSON.parse(this.gallery) : this.gallery,
       videos: typeof this.videos === 'string' ? JSON.parse(this.videos) : this.videos,

@@ -432,59 +432,27 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
     return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
   };
 
-  const uploadImages = async (files: File[]): Promise<string[]> => {
-    if (files.length === 0) return [];
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      files.forEach(file => {
-        formData.append('images', file);
-      });
-
-      const response = await fetch(`${getApiUrl()}/admin/upload-images`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        body: formData
-      });
-
-      if (!response.ok) throw new Error('Failed to upload images');
-      const result = await response.json();
-      return result.data?.urls || [];
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      toast.error('Failed to upload images');
-      return [];
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      let imageUrl = formData.image;
+      // Create FormData for the request
+      const formData = new FormData();
 
-      // Upload new image if any
+      // Add service data
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('category_id', data.category_id);
+      formData.append('price', data.price.toString());
+      formData.append('duration', data.duration);
+      formData.append('status', data.status);
+      formData.append('itinerary', JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')));
+      formData.append('included', JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')));
+      formData.append('excluded', JSON.stringify([]));
+      formData.append('featured', 'false');
+
+      // Add image file if selected
       if (selectedFiles.length > 0) {
-        const newImageUrls = await uploadImages(selectedFiles);
-        imageUrl = newImageUrls[0] || null;
+        formData.append('image', selectedFiles[0]);
       }
-
-      const serviceData = {
-        title: data.title,
-        description: data.description,
-        category_id: data.category_id,
-        price: data.price,
-        duration: data.duration,
-        status: data.status,
-        image: imageUrl,
-        itinerary: JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')),
-        included: JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')),
-        excluded: JSON.stringify([]),
-        featured: false
-      };
 
       const url = service
         ? `${getApiUrl()}/services/admin/services/${service.id}`
@@ -493,13 +461,17 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
       const response = await fetch(url, {
         method: service ? 'PUT' : 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          // Don't set Content-Type for FormData - let browser set it with boundary
         },
-        body: JSON.stringify(serviceData)
+        body: formData
       });
 
-      if (!response.ok) throw new Error('Failed to save service');
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Service save error:', errorData);
+        throw new Error('Failed to save service');
+      }
       return response.json();
     },
     onSuccess: (data) => {
