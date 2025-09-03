@@ -61,7 +61,7 @@ class Service {
       let uploadedImageUrl = null;
       if (newImageFile) {
         r2Helpers.validateImage(newImageFile);
-        uploadedImageUrl = await r2Helpers.uploadImage(r2Bucket, newImageFile, `services/${this.category}`);
+        uploadedImageUrl = await r2Helpers.uploadImage(r2Bucket, newImageFile, `services/${this.id}`);
       }
 
       this.image = uploadedImageUrl;
