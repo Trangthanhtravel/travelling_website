@@ -341,10 +341,24 @@ const HeroImageManagement: React.FC = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={handleAddNew}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg flex items-center justify-center gap-2"
+                    disabled={uploading}
+                    className={`flex-1 py-2 rounded flex items-center justify-center gap-2 text-white ${
+                      uploading 
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-green-600 hover:bg-green-700'
+                    }`}
                   >
-                    <Icon icon={Icons.FiCheck} className="w-4 h-4" />
-                    Save
+                    {uploading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Icon icon={Icons.FiCheck} className="w-4 h-4" />
+                        Save
+                      </>
+                    )}
                   </button>
                   <button
                     onClick={() => {
@@ -445,10 +459,24 @@ const HeroImageManagement: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={handleSave}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded flex items-center justify-center gap-2"
+                        disabled={uploading}
+                        className={`flex-1 py-2 rounded flex items-center justify-center gap-2 text-white ${
+                          uploading 
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-green-600 hover:bg-green-700'
+                        }`}
                       >
-                        <Icon icon={Icons.FiCheck} className="w-4 h-4" />
-                        Save
+                        {uploading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Icon icon={Icons.FiCheck} className="w-4 h-4" />
+                            Save
+                          </>
+                        )}
                       </button>
                       <button
                         onClick={() => setEditingIndex(null)}
