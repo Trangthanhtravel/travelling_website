@@ -5,11 +5,12 @@ const { r2Helpers } = require('../config/storage');
 class Content {
   constructor(data) {
     this.id = data.id || uuidv4();
-    this.type = data.type;
+    this.key = data.key;
     this.title = data.title;
     this.content = data.content;
-    this.image_url = data.image_url;
-    this.status = data.status || 'published';
+    this.type = data.type;
+    this.language = data.language || 'en';
+    this.status = data.status || 'active';
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }
@@ -18,14 +19,20 @@ class Content {
   async save(db) {
     const contentData = {
       id: this.id,
-      type: this.type,
+      key: this.key,
       title: this.title,
       content: this.content,
-      image_url: this.image_url,
-      status: this.status
+      type: this.type,
+      language: this.language || 'en',
+      status: this.status || 'active'
     };
     
-    return await dbHelpers.insert(db, 'content', contentData);
+    const fields = Object.keys(contentData).join(', ');
+    const placeholders = Object.keys(contentData).map(() => '?').join(', ');
+    const values = Object.values(contentData);
+
+    const sql = `INSERT INTO content (${fields}, created_at, updated_at) VALUES (${placeholders}, datetime('now'), datetime('now'))`;
+    return await db.prepare(sql).bind(...values).run();
   }
 
   // Update content image using R2
@@ -53,17 +60,14 @@ class Content {
 
   // Find content by ID
   static async findById(db, id) {
-    const content = await dbHelpers.query(db, 'SELECT * FROM content WHERE id = ?', [id]);
-    return content.length > 0 ? new Content(content[0]) : null;
+    const result = await db.prepare('SELECT * FROM content WHERE id = ?').bind(id).first();
+    return result ? new Content(result) : null;
   }
 
   // Find content by type
-  static async findByType(db, type, status = 'published') {
-    const content = await dbHelpers.query(
-      db, 
-      'SELECT * FROM content WHERE type = ? AND status = ? ORDER BY created_at DESC', 
-      [type, status]
-    );
+  static async findByType(db, type, status = 'active') {
+    const result = await db.prepare('SELECT * FROM content WHERE type = ? AND status = ? ORDER BY created_at DESC').bind(type, status).all();
+    const content = result.results || [];
     return content.map(item => new Content(item));
   }
 
@@ -92,13 +96,17 @@ class Content {
     sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
     
-    const content = await dbHelpers.query(db, sql, params);
+    const result = await db.prepare(sql).bind(...params).all();
+    const content = result.results || [];
     return content.map(item => new Content(item));
   }
 
   // Update content
   async update(db, updateData) {
-    return await dbHelpers.update(db, 'content', updateData, 'id = ?', [this.id]);
+    const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(updateData);
+    const sql = `UPDATE content SET ${fields}, updated_at = datetime('now') WHERE id = ?`;
+    return await db.prepare(sql).bind(...values, this.id).run();
   }
 
   // Delete content
@@ -108,7 +116,7 @@ class Content {
       await r2Helpers.deleteImage(r2Bucket, this.image_url);
     }
     
-    return await dbHelpers.delete(db, 'content', 'id = ?', [this.id]);
+    return await db.prepare('DELETE FROM content WHERE id = ?').bind(this.id).run();
   }
 }
 
