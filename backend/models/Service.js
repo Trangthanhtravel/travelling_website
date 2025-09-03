@@ -138,11 +138,23 @@ class Service {
       status: this.status
     };
 
+    console.log('🔧 Service.update() - serviceData being prepared:', {
+      id: this.id,
+      image: serviceData.image,
+      title: serviceData.title
+    });
+
     const fields = Object.keys(serviceData).map(key => `${key} = ?`).join(', ');
     const values = Object.values(serviceData);
     const sql = `UPDATE services SET ${fields}, updated_at = datetime('now') WHERE id = ?`;
 
-    return await db.prepare(sql).bind(...values, this.id).run();
+    console.log('🔧 Service.update() - SQL query:', sql);
+    console.log('🔧 Service.update() - Values:', [...values, this.id]);
+
+    const result = await db.prepare(sql).bind(...values, this.id).run();
+    console.log('🔧 Service.update() - Database result:', result);
+
+    return result;
   }
 
   // Find service by ID

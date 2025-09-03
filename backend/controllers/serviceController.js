@@ -581,16 +581,41 @@ const updateService = async (req, res) => {
       }
     }
 
+    // Log what we're about to update
+    console.log('🔄 About to update service with data:', updateData);
+    console.log('🔄 Service object before update:', {
+      id: service.id,
+      image: service.image,
+      title: service.title
+    });
+
     // Update service properties
     Object.assign(service, updateData);
-    await service.update(db);
+
+    console.log('🔄 Service object after assign, before DB update:', {
+      id: service.id,
+      image: service.image,
+      title: service.title
+    });
+
+    // Update in database
+    const dbResult = await service.update(db);
+    console.log('💾 Database update result:', dbResult);
+
+    // Verify the update by fetching from database
+    const updatedServiceFromDb = await Service.findById(db, service.id);
+    console.log('🔍 Service fetched from DB after update:', {
+      id: updatedServiceFromDb.id,
+      image: updatedServiceFromDb.image,
+      title: updatedServiceFromDb.title
+    });
 
     console.log('💾 Service updated in database with new image:', updateData.image);
     console.log('🔄 Returning updated service data:', service.toJSON());
 
     res.json({
       success: true,
-      data: service.toJSON(),
+      data: updatedServiceFromDb.toJSON(),
       message: 'Service updated successfully'
     });
   } catch (error) {
