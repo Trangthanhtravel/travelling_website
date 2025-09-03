@@ -133,7 +133,6 @@ const getServices = async (req, res) => {
       ...service,
       images: service.images ? JSON.parse(service.images) : [],
       gallery: service.gallery ? JSON.parse(service.gallery) : [],
-      videos: service.videos ? JSON.parse(service.videos) : [],
       included: service.included ? JSON.parse(service.included) : [],
       excluded: service.excluded ? JSON.parse(service.excluded) : [],
       location: service.location ? JSON.parse(service.location) : null,
@@ -192,7 +191,6 @@ const getServiceById = async (req, res) => {
             ...result,
             images: result.images ? JSON.parse(result.images) : [],
             gallery: result.gallery ? JSON.parse(result.gallery) : [],
-            videos: result.videos ? JSON.parse(result.videos) : [],
             included: result.included ? JSON.parse(result.included) : [],
             excluded: result.excluded ? JSON.parse(result.excluded) : [],
             // Remove itinerary reference since it doesn't exist in database
@@ -242,7 +240,6 @@ const getServiceBySlug = async (req, res) => {
       ...result,
       images: result.images ? JSON.parse(result.images) : [],
       gallery: result.gallery ? JSON.parse(result.gallery) : [],
-      videos: result.videos ? JSON.parse(result.videos) : [],
       included: result.included ? JSON.parse(result.included) : [],
       excluded: result.excluded ? JSON.parse(result.excluded) : [],
       location: result.location ? JSON.parse(result.location) : null,

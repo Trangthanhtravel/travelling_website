@@ -25,7 +25,6 @@ interface Service {
     service_type?: string;
     image: string | null; // Changed from images array to single image
     gallery?: string[]; // Keep gallery as separate field for multiple images
-    videos?: string[];
     included: string[];
     excluded: string[];
     itinerary?: string[];

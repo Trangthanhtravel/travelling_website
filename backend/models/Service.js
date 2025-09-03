@@ -17,7 +17,6 @@ class Service {
     // Change from images array to single image
     this.image = data.image || (data.images && Array.isArray(data.images) ? data.images[0] : null);
     this.gallery = data.gallery ? (typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery) : [];
-    this.videos = data.videos ? (typeof data.videos === 'string' ? JSON.parse(data.videos) : data.videos) : [];
     this.featured = data.featured || false;
     this.status = data.status || 'active';
     this.created_at = data.created_at;
@@ -40,7 +39,6 @@ class Service {
       service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: JSON.stringify(this.gallery),
-      videos: JSON.stringify(this.videos),
       featured: this.featured ? 1 : 0,
       status: this.status
     };
@@ -132,7 +130,6 @@ class Service {
       service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: JSON.stringify(this.gallery),
-      videos: JSON.stringify(this.videos),
       featured: this.featured ? 1 : 0,
       status: this.status
     };
@@ -282,7 +279,6 @@ class Service {
       service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: typeof this.gallery === 'string' ? JSON.parse(this.gallery) : this.gallery,
-      videos: typeof this.videos === 'string' ? JSON.parse(this.videos) : this.videos,
       featured: this.featured,
       status: this.status,
       created_at: this.created_at,
