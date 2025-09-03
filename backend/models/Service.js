@@ -17,7 +17,6 @@ class Service {
     // Change from images array to single image
     this.image = data.image || (data.images && Array.isArray(data.images) ? data.images[0] : null);
     this.gallery = data.gallery ? (typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery) : [];
-    this.featured = data.featured || false;
     this.status = data.status || 'active';
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
@@ -39,7 +38,6 @@ class Service {
       service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: JSON.stringify(this.gallery),
-      featured: this.featured ? 1 : 0,
       status: this.status
     };
     

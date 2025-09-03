@@ -48,7 +48,6 @@ const getServices = async (req, res) => {
       category,
       serviceType,
       status = 'active',
-      featured,
       search,
       page = 1,
       limit = 12,
@@ -83,11 +82,6 @@ const getServices = async (req, res) => {
     if (serviceType) {
       conditions.push('s.service_type = ?');
       params.push(serviceType);
-    }
-
-    if (featured !== undefined) {
-      conditions.push('s.featured = ?');
-      params.push(featured === 'true' ? 1 : 0);
     }
 
     if (search) {
@@ -136,7 +130,6 @@ const getServices = async (req, res) => {
       included: service.included ? JSON.parse(service.included) : [],
       excluded: service.excluded ? JSON.parse(service.excluded) : [],
       location: service.location ? JSON.parse(service.location) : null,
-      featured: Boolean(service.featured),
       category: service.category_id ? {
         id: service.category_id,
         name: service.category_name,
@@ -195,7 +188,6 @@ const getServiceById = async (req, res) => {
             excluded: result.excluded ? JSON.parse(result.excluded) : [],
             // Remove itinerary reference since it doesn't exist in database
             location: result.location ? JSON.parse(result.location) : null,
-            featured: Boolean(result.featured),
             category: result.category_id ? {
                 id: result.category_id,
                 name: result.category_name,
@@ -243,7 +235,6 @@ const getServiceBySlug = async (req, res) => {
       included: result.included ? JSON.parse(result.included) : [],
       excluded: result.excluded ? JSON.parse(result.excluded) : [],
       location: result.location ? JSON.parse(result.location) : null,
-      featured: Boolean(result.featured),
       category: result.category_id ? {
         id: result.category_id,
         name: result.category_name,
@@ -484,7 +475,6 @@ const createService = async (req, res) => {
 
     // Convert string values to appropriate types
     serviceData.price = parseFloat(serviceData.price);
-    serviceData.featured = serviceData.featured === 'true';
 
     const service = new Service(serviceData);
 
@@ -546,7 +536,6 @@ const updateService = async (req, res) => {
 
     // Convert string values to appropriate types
     if (updateData.price) updateData.price = parseFloat(updateData.price);
-    if (updateData.featured !== undefined) updateData.featured = updateData.featured === 'true';
 
     // Handle single image upload if provided
     if (req.file) {
