@@ -387,11 +387,17 @@ const ServiceManagement: React.FC = () => {
             setGalleryService(null);
           }}
           onSuccess={() => {
-            // Keep modal open and just refresh the data
+            // Invalidate all service-related caches to ensure gallery updates appear everywhere
             queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-            // Don't close the modal here - let it stay open
-            // setIsGalleryModalOpen(false);
-            // setGalleryService(null);
+            queryClient.invalidateQueries({ queryKey: ['services'] }); // Public services list
+            queryClient.invalidateQueries({ queryKey: ['service'] }); // Service detail pages
+
+            // Also invalidate specific service caches
+            if (galleryService?.id) {
+              queryClient.invalidateQueries({ queryKey: ['admin-service', galleryService.id] });
+              }
+
+            // Don't close the modal here - let it stay open for more uploads
           }}
         />
       )}
@@ -408,6 +414,8 @@ interface ServiceModalProps {
 }
 
 const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClose, onSuccess }) => {
+  const queryClient = useQueryClient(); // Add this line to get queryClient instance
+
   const [formData, setFormData] = useState<{
     title: string;
     description: string;
@@ -479,6 +487,25 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
     },
     onSuccess: (data) => {
       toast.success(service ? 'Service updated successfully' : 'Service created successfully');
+
+      // Invalidate all service-related caches to ensure the new image appears everywhere
+      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+      queryClient.invalidateQueries({ queryKey: ['services'] }); // Public services list
+      queryClient.invalidateQueries({ queryKey: ['service'] }); // Service detail pages
+
+      // If updating an existing service, also invalidate its specific cache
+      if (service?.id) {
+        queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
+      }
+
+      // Force a hard refresh of the updated service data
+      if (data?.data?.id) {
+        queryClient.invalidateQueries({ queryKey: ['admin-service', data.data.id] });
+        if (data.data.slug) {
+          queryClient.invalidateQueries({ queryKey: ['service', data.data.slug] });
+        }
+      }
+
       onSuccess();
     },
     onError: (error) => {
