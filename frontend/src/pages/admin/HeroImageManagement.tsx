@@ -39,7 +39,7 @@ const HeroImageManagement: React.FC = () => {
 
   useEffect(() => {
     fetchHeroImages();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchHeroImages = async () => {
     try {

@@ -45,7 +45,7 @@ const AboutSectionManagement: React.FC = () => {
 
   useEffect(() => {
     fetchAboutContent();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchAboutContent = async () => {
     try {
