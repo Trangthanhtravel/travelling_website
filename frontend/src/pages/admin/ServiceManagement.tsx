@@ -426,7 +426,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploading, setUploading] = useState(false);
+  const [uploading] = useState(false);
 
   const getApiUrl = () => {
     return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';

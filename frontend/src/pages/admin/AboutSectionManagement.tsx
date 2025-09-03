@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Icon, Icons } from '../../components/common/Icons';
+import toast from 'react-hot-toast';
 
 interface AboutContent {
   backgroundImage: string;
@@ -21,6 +22,8 @@ const AboutSectionManagement: React.FC = () => {
   const { isDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [aboutContent, setAboutContent] = useState<AboutContent>({
     backgroundImage: '',
     quote: '',
@@ -36,15 +39,19 @@ const AboutSectionManagement: React.FC = () => {
     }
   });
 
+  const getApiUrl = () => {
+    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  };
+
   useEffect(() => {
     fetchAboutContent();
   }, []);
 
   const fetchAboutContent = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/content?type=setting`, {
+      const response = await fetch(`${getApiUrl()}/admin/content?type=setting`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
       });
 
@@ -69,16 +76,50 @@ const AboutSectionManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching about content:', error);
+      toast.error('Failed to fetch about content');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(`${getApiUrl()}/admin/upload-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) throw new Error('Failed to upload image');
+      const result = await response.json();
+      return result.data?.url || '';
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+      throw error;
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      let backgroundImageUrl = aboutContent.backgroundImage;
+
+      // Upload new background image if selected
+      if (selectedFile) {
+        backgroundImageUrl = await uploadImage(selectedFile);
+      }
+
       const contentItems = [
-        { key: 'about_background_image', title: 'About Background Image', content: aboutContent.backgroundImage },
+        { key: 'about_background_image', title: 'About Background Image', content: backgroundImageUrl },
         { key: 'about_quote', title: 'About Quote', content: aboutContent.quote },
         { key: 'about_tagline', title: 'About Tagline', content: aboutContent.tagline },
         { key: 'about_title', title: 'About Title', content: aboutContent.title },
@@ -92,45 +133,51 @@ const AboutSectionManagement: React.FC = () => {
 
       for (const item of contentItems) {
         // First try to get existing content
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/content/${item.key}`, {
+        const response = await fetch(`${getApiUrl()}/admin/content`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
           }
         });
 
         if (response.ok) {
-          // Update existing content
-          const existingData = await response.json();
-          await fetch(`${process.env.REACT_APP_API_URL}/content/${existingData.data.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ content: item.content })
-          });
-        } else {
-          // Create new content
-          await fetch(`${process.env.REACT_APP_API_URL}/content`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-              key: item.key,
-              title: item.title,
-              content: item.content,
-              type: 'setting'
-            })
-          });
+          const data = await response.json();
+          const existingItem = data.data.find((content: any) => content.key === item.key);
+
+          if (existingItem) {
+            // Update existing content
+            await fetch(`${getApiUrl()}/admin/content/${existingItem.id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+              },
+              body: JSON.stringify({ content: item.content })
+            });
+          } else {
+            // Create new content
+            await fetch(`${getApiUrl()}/admin/content`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+              },
+              body: JSON.stringify({
+                key: item.key,
+                title: item.title,
+                content: item.content,
+                type: 'setting'
+              })
+            });
+          }
         }
       }
 
-      alert('About section and statistics updated successfully!');
+      setSelectedFile(null);
+      toast.success('About section updated successfully');
+      fetchAboutContent();
     } catch (error) {
       console.error('Error saving about content:', error);
-      alert('Error saving about content. Please try again.');
+      toast.error('Error saving about content. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -197,15 +244,37 @@ const AboutSectionManagement: React.FC = () => {
               {/* Background Image */}
               <div>
                 <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                  Background Image URL
+                  Background Image
                 </label>
-                <input
-                  type="url"
-                  value={aboutContent.backgroundImage}
-                  onChange={(e) => setAboutContent({ ...aboutContent, backgroundImage: e.target.value })}
-                  className={`w-full p-3 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
-                  placeholder="https://example.com/background-image.jpg"
-                />
+                <div className="flex items-center gap-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setSelectedFile(file);
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setAboutContent({ ...aboutContent, backgroundImage: reader.result as string });
+                        };
+                        reader.readAsDataURL(file);
+                      } else {
+                        setAboutContent({ ...aboutContent, backgroundImage: '' });
+                      }
+                    }}
+                    className={`w-full p-3 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
+                  />
+                </div>
+                {aboutContent.backgroundImage && (
+                  <div className="mt-4">
+                    <img
+                      src={aboutContent.backgroundImage}
+                      alt="Background Preview"
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Quote */}
@@ -531,4 +600,3 @@ const AboutSectionManagement: React.FC = () => {
 };
 
 export default AboutSectionManagement;
-

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Icon, Icons } from '../../components/common/Icons';
+import toast from 'react-hot-toast';
 
 interface HeroImage {
   id: number;
@@ -29,6 +30,12 @@ const HeroImageManagement: React.FC = () => {
     subtitle: ''
   });
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const getApiUrl = () => {
+    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  };
 
   useEffect(() => {
     fetchHeroImages();
@@ -36,9 +43,9 @@ const HeroImageManagement: React.FC = () => {
 
   const fetchHeroImages = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/content`, {
+      const response = await fetch(`${getApiUrl()}/admin/content`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
       });
 
@@ -61,8 +68,35 @@ const HeroImageManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching hero images:', error);
+      toast.error('Failed to fetch hero images');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(`${getApiUrl()}/admin/upload-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) throw new Error('Failed to upload image');
+      const result = await response.json();
+      return result.data?.url || '';
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+      throw error;
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -74,6 +108,7 @@ const HeroImageManagement: React.FC = () => {
       title: heroData.title?.content || '',
       subtitle: heroData.subtitle?.content || ''
     });
+    setSelectedFile(null);
   };
 
   const handleSave = async () => {
@@ -82,12 +117,18 @@ const HeroImageManagement: React.FC = () => {
     try {
       const heroData = heroImages[editingIndex];
       const heroIndex = editingIndex + 1;
+      let imageUrl = editForm.imageUrl;
+
+      // Upload new image if selected
+      if (selectedFile) {
+        imageUrl = await uploadImage(selectedFile);
+      }
 
       // Update or create image URL
       if (heroData.image) {
-        await updateContent(heroData.image.id, editForm.imageUrl);
+        await updateContent(heroData.image.id, imageUrl);
       } else {
-        await createContent(`hero_image_${heroIndex}`, `Hero Image ${heroIndex}`, editForm.imageUrl);
+        await createContent(`hero_image_${heroIndex}`, `Hero Image ${heroIndex}`, imageUrl);
       }
 
       // Update or create title
@@ -105,27 +146,37 @@ const HeroImageManagement: React.FC = () => {
       }
 
       setEditingIndex(null);
+      setSelectedFile(null);
+      toast.success('Hero image updated successfully');
       fetchHeroImages();
     } catch (error) {
       console.error('Error saving hero image:', error);
-      alert('Error saving hero image. Please try again.');
+      toast.error('Error saving hero image. Please try again.');
     }
   };
 
   const handleAddNew = async () => {
     try {
       const nextIndex = heroImages.length + 1;
+      let imageUrl = editForm.imageUrl;
 
-      await createContent(`hero_image_${nextIndex}`, `Hero Image ${nextIndex}`, editForm.imageUrl);
+      // Upload new image if selected
+      if (selectedFile) {
+        imageUrl = await uploadImage(selectedFile);
+      }
+
+      await createContent(`hero_image_${nextIndex}`, `Hero Image ${nextIndex}`, imageUrl);
       await createContent(`hero_title_${nextIndex}`, `Hero Title ${nextIndex}`, editForm.title);
       await createContent(`hero_subtitle_${nextIndex}`, `Hero Subtitle ${nextIndex}`, editForm.subtitle);
 
       setIsAddingNew(false);
       setEditForm({ imageUrl: '', title: '', subtitle: '' });
+      setSelectedFile(null);
+      toast.success('Hero image added successfully');
       fetchHeroImages();
     } catch (error) {
       console.error('Error adding new hero image:', error);
-      alert('Error adding new hero image. Please try again.');
+      toast.error('Error adding new hero image. Please try again.');
     }
   };
 
@@ -147,11 +198,11 @@ const HeroImageManagement: React.FC = () => {
   };
 
   const updateContent = async (id: number, content: string) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/content/${id}`, {
+    const response = await fetch(`${getApiUrl()}/admin/content/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
       },
       body: JSON.stringify({ content })
     });
@@ -162,11 +213,11 @@ const HeroImageManagement: React.FC = () => {
   };
 
   const createContent = async (key: string, title: string, content: string) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/content`, {
+    const response = await fetch(`${getApiUrl()}/admin/content`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
       },
       body: JSON.stringify({ key, title, content, type: 'setting' })
     });
@@ -177,10 +228,10 @@ const HeroImageManagement: React.FC = () => {
   };
 
   const deleteContent = async (id: number) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/content/${id}`, {
+    const response = await fetch(`${getApiUrl()}/admin/content/${id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
       }
     });
 
@@ -243,14 +294,21 @@ const HeroImageManagement: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                    Image URL
+                    Image
                   </label>
                   <input
-                    type="url"
-                    value={editForm.imageUrl}
-                    onChange={(e) => setEditForm({ ...editForm, imageUrl: e.target.value })}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setSelectedFile(file);
+                      if (file) {
+                        setEditForm({ ...editForm, imageUrl: URL.createObjectURL(file) });
+                      } else {
+                        setEditForm({ ...editForm, imageUrl: '' });
+                      }
+                    }}
                     className={`w-full p-2 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
-                    placeholder="https://example.com/image.jpg"
                   />
                 </div>
 
@@ -342,12 +400,20 @@ const HeroImageManagement: React.FC = () => {
                   <div className="space-y-3">
                     <div>
                       <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                        Image URL
+                        Image
                       </label>
                       <input
-                        type="url"
-                        value={editForm.imageUrl}
-                        onChange={(e) => setEditForm({ ...editForm, imageUrl: e.target.value })}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setSelectedFile(file);
+                          if (file) {
+                            setEditForm({ ...editForm, imageUrl: URL.createObjectURL(file) });
+                          } else {
+                            setEditForm({ ...editForm, imageUrl: '' });
+                          }
+                        }}
                         className={`w-full p-2 border rounded ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
                       />
                     </div>
