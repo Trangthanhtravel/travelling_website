@@ -169,7 +169,7 @@ const Home: React.FC = () => {
 
           const backgroundImage = aboutData.find((item: any) => item.key === 'about_background_image')?.content || 'https://static.wixstatic.com/media/8fa70e_ca95c635557f41c7b98ac645bb27d085~mv2.jpg/v1/fill/w_675,h_312,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/This%20was%20indeed%20one-of-a-kind%20experience.jpg%201x,%20https://static.wixstatic.com/media/8fa70e_ca95c635557f41c7b98ac645bb27d085~mv2.jpg/v1/fill/w_1350,h_624,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/This%20was%20indeed%20one-of-a-kind%20experience.jpg%202x';
           const quote = aboutData.find((item: any) => item.key === 'about_quote')?.content || 'For over 15 years, Trang Thanh Travel has been a trusted companion, helping customers have smooth and memorable trips. From organizing tours, events, to renting private cars, making visas, or booking airline tickets, cruises, trains, hotels, we can take care of everything so that you have the most perfect experience.';
-          const tagline = aboutData.find((item: any) => item.key === 'about_tagline')?.content || 'Travel Beyond Boundaries';
+          const tagline = aboutData.find((item: any) => item.key === 'about_tagline')?.content || '';
           const title = aboutData.find((item: any) => item.key === 'about_title')?.content || 'About Our Journey';
           const description = aboutData.find((item: any) => item.key === 'about_description')?.content || 'Discover how we create extraordinary travel experiences that connect you with the world\'s most beautiful destinations and cultures.';
           const youtubeId = aboutData.find((item: any) => item.key === 'about_youtube_id')?.content || '8VJpaYXrPPQ';
@@ -888,12 +888,6 @@ const Home: React.FC = () => {
             Tham gia cùng hàng nghìn du khách đã khám phá những điểm đến tuyệt vời cùng chúng tôi. Bắt đầu lên kế hoạch cho chuyến đi hoàn hảo ngay hôm nay.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/tours"
-              className="bg-white text-primary-600 px-8 py-4 rounded-lg font-medium hover:bg-gray-100 transition-colors duration-200"
-            >
-              {t('Tours')}
-            </Link>
             <Link
               to="/contact"
               className="border-2 border-white text-white px-8 py-4 rounded-lg font-medium hover:bg-white hover:text-primary-600 transition-colors duration-200"
