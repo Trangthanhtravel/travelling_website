@@ -120,6 +120,9 @@ import {
     FiTag,
     FiShare,
     FiMaximize2,
+    FiTarget,
+    FiShield,
+    FiAward,
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 
@@ -259,6 +262,9 @@ export const Icons = {
     FiTag,
     FiShare,
     FiMaximize2,
+    FiTarget,
+    FiShield,
+    FiAward,
 };
 
 export default Icons;

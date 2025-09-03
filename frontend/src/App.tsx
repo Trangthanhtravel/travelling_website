@@ -9,6 +9,7 @@ import Footer from './components/layout/Footer';
 import SocialChatBox from './components/common/SocialChatBox';
 import ScrollToTop from './components/common/ScrollToTop';
 import Home from './pages/Home';
+import About from './pages/About';
 import Tours from './pages/Tours';
 import TourDetail from './pages/TourDetail';
 import Booking from './pages/Booking';
@@ -54,6 +55,7 @@ const AppContent: React.FC = () => {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
             <Route path="/tours" element={<Tours />} />
             <Route path="/tours/:slug" element={<TourDetail />} />
             <Route path="/services" element={<Services />} />
