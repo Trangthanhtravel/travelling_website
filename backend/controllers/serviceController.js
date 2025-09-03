@@ -136,7 +136,6 @@ const getServices = async (req, res) => {
       videos: service.videos ? JSON.parse(service.videos) : [],
       included: service.included ? JSON.parse(service.included) : [],
       excluded: service.excluded ? JSON.parse(service.excluded) : [],
-      itinerary: service.itinerary ? JSON.parse(service.itinerary) : [],
       location: service.location ? JSON.parse(service.location) : null,
       featured: Boolean(service.featured),
       category: service.category_id ? {
@@ -196,7 +195,7 @@ const getServiceById = async (req, res) => {
             videos: result.videos ? JSON.parse(result.videos) : [],
             included: result.included ? JSON.parse(result.included) : [],
             excluded: result.excluded ? JSON.parse(result.excluded) : [],
-            itinerary: result.itinerary ? JSON.parse(result.itinerary) : [],
+            // Remove itinerary reference since it doesn't exist in database
             location: result.location ? JSON.parse(result.location) : null,
             featured: Boolean(result.featured),
             category: result.category_id ? {
@@ -246,7 +245,6 @@ const getServiceBySlug = async (req, res) => {
       videos: result.videos ? JSON.parse(result.videos) : [],
       included: result.included ? JSON.parse(result.included) : [],
       excluded: result.excluded ? JSON.parse(result.excluded) : [],
-      itinerary: result.itinerary ? JSON.parse(result.itinerary) : [],
       location: result.location ? JSON.parse(result.location) : null,
       featured: Boolean(result.featured),
       category: result.category_id ? {
@@ -486,9 +484,6 @@ const createService = async (req, res) => {
     if (serviceData.excluded && typeof serviceData.excluded === 'string') {
       serviceData.excluded = JSON.parse(serviceData.excluded);
     }
-    if (serviceData.itinerary && typeof serviceData.itinerary === 'string') {
-      serviceData.itinerary = JSON.parse(serviceData.itinerary);
-    }
 
     // Convert string values to appropriate types
     serviceData.price = parseFloat(serviceData.price);
@@ -550,9 +545,6 @@ const updateService = async (req, res) => {
     }
     if (updateData.excluded && typeof updateData.excluded === 'string') {
       updateData.excluded = JSON.parse(updateData.excluded);
-    }
-    if (updateData.itinerary && typeof updateData.itinerary === 'string') {
-      updateData.itinerary = JSON.parse(updateData.itinerary);
     }
 
     // Convert string values to appropriate types

@@ -8,7 +8,6 @@ class Service {
     this.title = data.title;
     this.subtitle = data.subtitle;
     this.description = data.description;
-    this.itinerary = data.itinerary ? (typeof data.itinerary === 'string' ? JSON.parse(data.itinerary) : data.itinerary) : [];
     this.price = data.price;
     this.duration = data.duration;
     this.included = data.included ? (typeof data.included === 'string' ? JSON.parse(data.included) : data.included) : [];
@@ -32,7 +31,7 @@ class Service {
       title: this.title,
       subtitle: this.subtitle,
       description: this.description,
-      itinerary: JSON.stringify(this.itinerary),
+      // Remove itinerary from save operation
       price: this.price,
       duration: this.duration,
       included: JSON.stringify(this.included),
@@ -124,7 +123,7 @@ class Service {
       title: this.title,
       subtitle: this.subtitle,
       description: this.description,
-      itinerary: JSON.stringify(this.itinerary),
+      // Remove itinerary from update operation
       price: this.price,
       duration: this.duration,
       included: JSON.stringify(this.included),
@@ -274,7 +273,7 @@ class Service {
       title: this.title,
       subtitle: this.subtitle,
       description: this.description,
-      itinerary: typeof this.itinerary === 'string' ? JSON.parse(this.itinerary) : this.itinerary,
+      // Remove itinerary reference since it doesn't exist
       price: this.price,
       duration: this.duration,
       included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
