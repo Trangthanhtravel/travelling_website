@@ -47,6 +47,8 @@ const getServices = async (req, res) => {
     const {
       category,
       serviceType,
+      service_type,
+      exclude_service_type,
       status = 'active',
       search,
       page = 1,
@@ -82,6 +84,16 @@ const getServices = async (req, res) => {
     if (serviceType) {
       conditions.push('s.service_type = ?');
       params.push(serviceType);
+    }
+
+    if (service_type) {
+      conditions.push('s.service_type = ?');
+      params.push(service_type);
+    }
+
+    if (exclude_service_type) {
+      conditions.push('(s.service_type != ? OR s.service_type IS NULL)');
+      params.push(exclude_service_type);
     }
 
     if (search) {
