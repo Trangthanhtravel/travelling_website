@@ -562,11 +562,18 @@ const updateService = async (req, res) => {
     // Handle single image upload if provided
     if (req.file) {
       try {
+        console.log('🔄 Processing image update for service:', service.id);
+        console.log('📁 Old image URL:', service.image);
+        console.log('📤 New image file:', req.file.originalname, 'Size:', req.file.size);
+
         const oldImage = service.image;
         const imageUrl = await service.updateImage(req.r2, req.file, oldImage);
         updateData.image = imageUrl;
+
+        console.log('✅ Image successfully uploaded to:', imageUrl);
+        console.log('🗑️ Old image deletion attempted for:', oldImage);
       } catch (imageError) {
-        console.error('Image upload error:', imageError);
+        console.error('❌ Image upload error:', imageError);
         return res.status(400).json({
           success: false,
           message: `Image upload failed: ${imageError.message}`
@@ -577,6 +584,9 @@ const updateService = async (req, res) => {
     // Update service properties
     Object.assign(service, updateData);
     await service.update(db);
+
+    console.log('💾 Service updated in database with new image:', updateData.image);
+    console.log('🔄 Returning updated service data:', service.toJSON());
 
     res.json({
       success: true,
