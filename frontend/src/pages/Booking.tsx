@@ -145,7 +145,7 @@ const DirectBooking: React.FC = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
       {/* Hero Image Section */}
-      <div className="relative h-64 md:h-80 overflow-hidden">
+      <div className="relative h-48 md:h-60 overflow-hidden">
         <img
           src={tourData?.image || tourData?.gallery?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80`}
           alt={tourData?.title || 'Tour Image'}
@@ -154,10 +154,10 @@ const DirectBooking: React.FC = () => {
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white px-4">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">
               Book Your Tour
             </h1>
-            <p className="text-lg md:text-xl opacity-90">
+            <p className="text-base md:text-lg opacity-90">
               {tourData?.title || 'Amazing Adventure Awaits'}
             </p>
           </div>
