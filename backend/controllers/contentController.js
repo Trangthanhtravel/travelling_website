@@ -1,4 +1,5 @@
 const { db } = require('../config/database');
+const { r2Helpers } = require('../config/storage');
 
 // Get all content
 const getAllContent = async (req, res) => {
@@ -150,6 +151,70 @@ const updateContent = async (req, res) => {
   }
 };
 
+// Update content with image (admin only)
+const updateContentWithImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image file provided'
+      });
+    }
+
+    // Check if R2 is properly configured
+    if (!req.r2) {
+      return res.status(500).json({
+        success: false,
+        message: 'Image upload service not configured'
+      });
+    }
+
+    const existing = await db.prepare(
+      'SELECT * FROM content WHERE id = ?'
+    ).bind(id).first();
+
+    if (!existing) {
+      return res.status(404).json({
+        success: false,
+        message: 'Content not found'
+      });
+    }
+
+    // Validate and upload image to R2
+    r2Helpers.validateImage(req.file);
+
+    // Delete old image if it exists
+    if (existing.content && existing.content.startsWith('https://')) {
+      await r2Helpers.deleteImage(req.r2, existing.content);
+    }
+
+    // Upload new image
+    const imageUrl = await r2Helpers.uploadImage(req.r2, req.file, 'content');
+
+    // Update content with new image URL
+    const now = new Date().toISOString();
+    await db.prepare(`
+      UPDATE content 
+      SET content = ?, updated_at = ?
+      WHERE id = ?
+    `).bind(imageUrl, now, id).run();
+
+    res.json({
+      success: true,
+      message: 'Content image updated successfully',
+      data: { imageUrl }
+    });
+  } catch (error) {
+    console.error('Update content with image error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating content image'
+    });
+  }
+};
+
 // Delete content (admin only)
 const deleteContent = async (req, res) => {
   try {
@@ -211,5 +276,6 @@ module.exports = {
   createContent,
   updateContent,
   deleteContent,
-  getHeroImages
+  getHeroImages,
+  updateContentWithImage
 };
