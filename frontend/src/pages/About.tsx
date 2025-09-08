@@ -2,10 +2,12 @@ import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from '../contexts/TranslationContext';
 import { Icon, Icons } from '../components/common/Icons';
 
 const About: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const servicesRef = useRef<HTMLDivElement>(null);
 
@@ -116,9 +118,9 @@ const About: React.FC = () => {
       <div className="bg-accent-orange text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">About Us</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('About Us')}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Discover our journey, values, and commitment to exceptional travel experiences
+              {t('Learn more about our company and our commitment to excellence')}
             </p>
           </div>
         </div>
@@ -175,7 +177,7 @@ const About: React.FC = () => {
       <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-800' : 'bg-gray-100'}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className={`text-4xl font-bold mb-16 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-            Vision & Mission
+            {t('Our Vision')} & {t('Our Mission')}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -185,7 +187,7 @@ const About: React.FC = () => {
                 <Icon icon={Icons.FiEye} className="w-8 h-8 text-white" />
               </div>
               <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-                Our Vision
+                {t('Our Vision')}
               </h3>
               <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
                 {aboutVision}
@@ -198,7 +200,7 @@ const About: React.FC = () => {
                 <Icon icon={Icons.FiTarget} className="w-8 h-8 text-white" />
               </div>
               <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-                Our Mission
+                {t('Our Mission')}
               </h3>
               <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
                 {aboutMission}
@@ -209,7 +211,7 @@ const About: React.FC = () => {
           {/* Values */}
           <div className="mt-16">
             <h3 className={`text-2xl font-bold mb-8 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-              Our Core Values
+              {t('Our Values')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className={`p-6 rounded-xl ${isDarkMode ? 'bg-dark-900 border border-dark-700' : 'bg-white shadow-md'}`}>
@@ -243,10 +245,10 @@ const About: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className={`text-4xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-              What We Do
+              {t('What We Do')}
             </h2>
             <p className={`text-xl max-w-2xl mx-auto ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-              Comprehensive travel solutions designed to make your journey seamless and memorable
+              {t('Our professional travel services designed to make your journey unforgettable')}
             </p>
           </div>
 
