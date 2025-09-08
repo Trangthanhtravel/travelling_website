@@ -39,11 +39,13 @@ const vietnameseTranslations: Translations = {
   'Next': 'Tiếp Theo',
   'Previous': 'Trước',
 
-  // Home Page
+  // Home Page - Hero Section
   'Welcome to': 'Chào Mừng Đến Với',
   'Discover Amazing Tours': 'Khám Phá Những Tour Tuyệt Vời',
   'Explore the world with our expert guides': 'Khám phá thế giới cùng hướng dẫn viên chuyên nghiệp',
   'Get started on your next adventure': 'Bắt đầu cuộc phiêu lưu tiếp theo của bạn',
+
+  // Home Page - Main Sections
   'Featured Tours': 'Tour Nổi Bật',
   'Popular Destinations': 'Điểm Đến Phổ Biến',
   'Why Choose Us': 'Tại Sao Chọn Chúng Tôi',
@@ -54,6 +56,7 @@ const vietnameseTranslations: Translations = {
   'Google Review': 'Đánh Giá Google',
   'Customer Reviews': 'Đánh Giá Khách Hàng',
   'Latest News': 'Tin Tức Mới Nhất',
+  'Comprehensive travel solutions to make your journey seamless and memorable': 'Giải pháp du lịch toàn diện để làm cho hành trình của bạn trở nên liền mạch và đáng nhớ',
 
   // Tours Page
   'All Tours': 'Tất Cả Tour',
@@ -71,7 +74,7 @@ const vietnameseTranslations: Translations = {
   'Duration': 'Thời Gian',
   'Price': 'Giá',
   'Difficulty': 'Độ Khó',
-  'Group Size': 'Kích Thước Nhóm',
+  'Group Size': 'Số Lượng Khách',
   'Tour Details': 'Chi Tiết Tour',
   'Itinerary': 'Lịch Trình',
   'Inclusions': 'Bao Gồm',
@@ -115,6 +118,42 @@ const vietnameseTranslations: Translations = {
   'Sunday': 'Chủ Nhật',
   'Closed': 'Đóng Cửa',
 
+  // Blogs Page - NEW TRANSLATIONS
+  'Travel Blog': 'Blog Du Lịch',
+  'Discover amazing destinations and travel tips from our experts': 'Khám phá những điểm đến tuyệt vời và mẹo du lịch từ các chuyên gia của chúng tôi',
+  'Error Loading Blogs': 'Lỗi Khi Tải Blog',
+  'Sorry, we couldn\'t load the blogs. Please try again.': 'Xin lỗi, chúng tôi không thể tải blog. Vui lòng thử lại.',
+  'All Categories': 'Tất Cả Danh Mục',
+  'Most Recent': 'Mới Nhất',
+  'Oldest First': 'Cũ Nhất Trước',
+  'Most Popular': 'Phổ Biến Nhất',
+  'Show Filters': 'Hiển Thị Bộ Lọc',
+  'Hide Filters': 'Ẩn Bộ Lọc',
+  'Clear All Filters': 'Xóa Tất Cả Bộ Lọc',
+  'No blogs found': 'Không tìm thấy blog',
+  'Try adjusting your search or filters.': 'Thử điều chỉnh tìm kiếm hoặc bộ lọc của bạn.',
+
+  // About Page - NEW TRANSLATIONS
+  'About Us': 'Về Chúng Tôi',
+  'Learn more about our company and our commitment to excellence': 'Tìm hiểu thêm về công ty chúng tôi và cam kết của chúng tôi về sự xuất sắc',
+  'Our Story': 'Câu Chuyện Của Chúng Tôi',
+  'Our Mission': 'Sứ Mệnh',
+  'Our Vision': 'Tầm Nhìn',
+  'Our Team': 'Đội Ngũ',
+  'Company History': 'Lịch Sử Công Ty',
+  'Awards & Recognition': 'Giải Thưởng & Công Nhận',
+  'Our Values': 'Giá Trị Cốt Lõi',
+  'Quality Service': 'Dịch Vụ Chất Lượng',
+  'Customer Satisfaction': 'Sự Hài Lòng Khách Hàng',
+  'Sustainable Tourism': 'Du Lịch Bền Vững',
+  'Local Expertise': 'Chuyên Môn Địa Phương',
+  'What We Do': 'Chúng Tôi Làm Gì',
+  'Our professional travel services designed to make your journey unforgettable': 'Dịch vụ du lịch chuyên nghiệp của chúng tôi đư��c thiết kế để làm cho hành trình của bạn trở nên khó quên',
+
+  // Booking Policy Page - NEW TRANSLATIONS
+  'Booking Terms & Conditions': 'Điều Khoản & Điều Kiện Đặt Tour',
+  'Please read our booking terms and conditions carefully before making a reservation': 'Vui lòng đọc kỹ các điều khoản và điều kiện đặt tour của chúng tôi trước khi đặt chỗ',
+
   // Booking Page
   'Book Your Tour': 'Đặt Tour Của Bạn',
   'Booking Details': 'Chi Tiết Đặt Tour',
@@ -145,7 +184,7 @@ const vietnameseTranslations: Translations = {
   // Form Validation
   'Name is required': 'Tên là bắt buộc',
   'Email is required': 'Email là bắt buộc',
-  'Invalid email': 'Email không h��p lệ',
+  'Invalid email': 'Email không hợp lệ',
   'Subject is required': 'Chủ đề là bắt buộc',
   'Message is required': 'Tin nhắn là bắt buộc',
   'Message must be at least 10 characters': 'Tin nhắn phải có ít nhất 10 ký tự',
@@ -161,7 +200,6 @@ const vietnameseTranslations: Translations = {
   'Loading...': 'Đang tải...',
 
   // Footer
-  'About Us': 'Về Chúng Tôi',
   'Your trusted travel partner for unforgettable adventures. We create personalized experiences that connect you with the world\'s most beautiful destinations.': 'Đối tác du lịch đáng tin cậy của bạn cho những cuộc phiêu lưu khó quên. Chúng tôi tạo ra những trải nghiệm cá nhân hóa kết nối bạn với những điểm đến đẹp nhất thế giới.',
   'Booking Policy': 'Chính Sách Đặt Tour',
   'Quick Links': 'Liên Kết Nhanh',
@@ -209,7 +247,6 @@ const vietnameseTranslations: Translations = {
   'Search car rentals...': 'Tìm kiếm dịch vụ thuê xe...',
   'View Mode': 'Chế Độ Xem',
   'Newest First': 'Mới Nhất Trước',
-  'Oldest First': 'Cũ Nhất Trước',
   'Price: Low to High': 'Giá: Thấp Đến Cao',
   'Price: High to Low': 'Giá: Cao Đến Thấp',
   'Name: A to Z': 'Tên: A đến Z',
@@ -220,7 +257,7 @@ const vietnameseTranslations: Translations = {
   'Drop-off Location': 'Địa Điểm Trả Xe',
   'Pick-up Date': 'Ngày Nhận Xe',
   'Drop-off Date': 'Ngày Trả Xe',
-  'Driver Age': 'Tu���i Tài Xế',
+  'Driver Age': 'Tuổi Tài Xế',
   'With Driver': 'Có Tài Xế',
   'Self Drive': 'Tự Lái',
   'Book Vehicle': 'Đặt Xe',
@@ -234,19 +271,6 @@ const vietnameseTranslations: Translations = {
   'GPS Navigation': 'Định Vị GPS',
   'Insurance': 'Bảo Hiểm',
   'Unlimited Mileage': 'Không Giới Hạn Km',
-
-  // About Page
-  'Our Story': 'Câu Chuyện Của Chúng Tôi',
-  'Our Mission': 'Sứ Mệnh',
-  'Our Vision': 'Tầm Nhìn',
-  'Our Team': 'Đội Ngũ',
-  'Company History': 'Lịch Sử Công Ty',
-  'Awards & Recognition': 'Giải Thưởng & Công Nhận',
-  'Our Values': 'Giá Trị Cốt Lõi',
-  'Quality Service': 'Dịch Vụ Chất Lượng',
-  'Customer Satisfaction': 'Sự Hài Lòng Khách Hàng',
-  'Sustainable Tourism': 'Du Lịch Bền Vững',
-  'Local Expertise': 'Chuyên Môn Địa Phương',
 
   // Statistics & Numbers
   'Tours Completed': 'Tour Đã Hoàn Thành',
@@ -286,7 +310,7 @@ const vietnameseTranslations: Translations = {
   // Service Types
   'Transportation': 'Vận Chuyển',
   'Accommodation': 'Lưu Trú',
-  'Tour Guide': 'Hướng D���n Viên',
+  'Tour Guide': 'Hướng Dẫn Viên',
   'Meals': 'Bữa Ăn',
   'Activities': 'Hoạt Động',
   'Equipment': 'Thiết Bị',
@@ -389,7 +413,17 @@ const vietnameseTranslations: Translations = {
   'Toggle Navigation': 'Chuyển Đổi Điều Hướng',
   'Mobile Menu': 'Menu Di Động',
   'Desktop View': 'Chế Độ Desktop',
-  'Mobile View': 'Chế Độ Di Động'
+  'Mobile View': 'Chế Độ Di Động',
+
+  // Additional missing translations for Home page
+  'Choose from our premium vehicle fleet': 'Chọn từ đội xe cao cấp của chúng tôi',
+  'Detailed insights and stories from our travel experts': 'Thông tin chi tiết và câu chuyện từ các chuyên gia du lịch của chúng tôi',
+  'Ready for your next adventure?': 'Sẵn sàng cho cuộc phiêu lưu tiếp theo của bạn?',
+  'Join thousands of travelers who have discovered amazing destinations with us. Start planning your perfect trip today.': 'Tham gia cùng hàng nghìn du khách đã khám phá những điểm đến tuyệt vời cùng chúng tôi. Bắt đầu lên kế hoạch cho chuyến đi hoàn hảo ngay hôm nay.',
+  'View All Car Rentals': 'Xem Tất Cả Dịch Vụ Thuê Xe',
+  'No Featured Tours Available': 'Không Có Tour Nổi Bật',
+  'We\'re working on adding some amazing featured tours for you.': 'Chúng tôi đang nỗ lực thêm những tour nổi bật tuyệt vời cho bạn.',
+  'Browse All Tours': 'Duyệt Tất Cả Tour'
 };
 
 interface TranslationContextType {

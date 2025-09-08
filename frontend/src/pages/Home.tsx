@@ -480,7 +480,7 @@ const Home: React.FC = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-light-text-primary mb-4">{t('Our Services')}</h2>
             <p className="text-xl text-light-text-muted max-w-2xl mx-auto">
-              Giải pháp du lịch toàn diện để làm cho hành trình của bạn trở nên liền mạch và đáng nhớ
+              {t('Comprehensive travel solutions to make your journey seamless and memorable')}
             </p>
           </div>
 
@@ -626,7 +626,7 @@ const Home: React.FC = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{t('Featured Tours')}</h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Khám phá bộ sưu tập tour và trải nghiệm đặc biệt được chúng tôi tuyển chọn
+              {t('Explore our curated collection of unforgettable travel experiences around the world')}
             </p>
           </div>
 
@@ -752,7 +752,7 @@ const Home: React.FC = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-900 mb-4">{t('Car Rental')}</h2>
             <p className="text-xl text-gray-600 dark:text-gray-600 max-w-2xl mx-auto">
-              Chọn từ đội xe cao cấp của chúng tôi
+              {t('Choose from our premium vehicle fleet')}
             </p>
           </div>
 
@@ -830,7 +830,7 @@ const Home: React.FC = () => {
               className="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200"
             >
               <Icon icon={Icons.FiTruck} className="w-5 h-5 mr-2" />
-              View All Car Rentals
+              {t('View All Car Rentals')}
             </Link>
           </div>
         </div>
@@ -844,7 +844,7 @@ const Home: React.FC = () => {
               {t('Latest News')}
             </h2>
             <p className="text-xl text-light-text-muted max-w-2xl mx-auto">
-              Thông tin chi tiết và câu chuyện từ các chuyên gia du lịch của chúng tôi
+              {t('Detailed insights and stories from our travel experts')}
             </p>
           </div>
 
@@ -906,9 +906,9 @@ const Home: React.FC = () => {
       {/* CTA Section */}
       <section className="py-20 bg-primary-600 dark:bg-primary-800 transition-colors duration-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Sẵn sàng cho cuộc phiêu lưu tiếp theo của bạn?</h2>
+          <h2 className="text-4xl font-bold text-white mb-6">{t('Ready for your next adventure?')}</h2>
           <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-            Tham gia cùng hàng nghìn du khách đã khám phá những điểm đến tuyệt vời cùng chúng tôi. Bắt đầu lên kế hoạch cho chuyến đi hoàn hảo ngay hôm nay.
+            {t('Join thousands of travelers who have discovered amazing destinations with us. Start planning your perfect trip today.')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
