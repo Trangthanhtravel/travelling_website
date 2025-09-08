@@ -105,7 +105,7 @@ const Tours: React.FC = () => {
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Discover Amazing Tours')}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Khám phá bộ sưu tập trải nghiệm du lịch khó quên được chúng tôi tuyển chọn trên khắp thế giới
+              {t('Explore our curated collection of unforgettable travel experiences around the world')}
             </p>
           </div>
         </div>
@@ -135,7 +135,7 @@ const Tours: React.FC = () => {
                   <Icon icon={Icons.FiSearch} className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`} />
                   <input
                     type="text"
-                    placeholder="Tìm kiếm điểm đến, tour..."
+                    placeholder={t('Search destinations, tours...')}
                     className="input-field pl-10"
                     value={filters.search || ''}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
@@ -169,14 +169,14 @@ const Tours: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="number"
-                    placeholder="Tối thiểu"
+                    placeholder={t('Minimum')}
                     className="input-field"
                     value={filters.minPrice || ''}
                     onChange={(e) => handleFilterChange('minPrice', Number(e.target.value) || undefined)}
                   />
                   <input
                     type="number"
-                    placeholder="Tối đa"
+                    placeholder={t('Maximum')}
                     className="input-field"
                     value={filters.maxPrice || ''}
                     onChange={(e) => handleFilterChange('maxPrice', Number(e.target.value) || undefined)}
@@ -234,7 +234,7 @@ const Tours: React.FC = () => {
 
                 <div className="flex items-center gap-4">
                   <span className={`text-sm ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                    {pagination?.total || 0} tour được tìm thấy
+                    {pagination?.total || 0} {t('tours found')}
                   </span>
                   
                   <select
@@ -273,16 +273,16 @@ const Tours: React.FC = () => {
               <div className={`text-center py-12 rounded-lg ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-light-50 border border-light-300'}`}>
                 <Icon icon={Icons.FiAlertCircle} className="w-12 h-12 text-error mx-auto mb-4" />
                 <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-light-text-primary'}`}>
-                  Lỗi khi tải tour
+                  {t('Error loading tours')}
                 </h3>
                 <p className={`${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'} mb-4`}>
-                  Vui lòng thử lại sau hoặc điều chỉnh bộ lọc của bạn.
+                  {t('Please try again later or adjust your filters.')}
                 </p>
                 <button
                   onClick={() => window.location.reload()}
                   className="btn-primary"
                 >
-                  Thử Lại
+                  {t('Try Again')}
                 </button>
               </div>
             )}
@@ -358,10 +358,10 @@ const Tours: React.FC = () => {
               <div className={`text-center py-12 rounded-lg ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-light-50 border border-light-300'}`}>
                 <Icon icon={Icons.FiSearch} className={`w-12 h-12 mx-auto mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`} />
                 <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-light-text-primary'}`}>
-                  Không tìm thấy tour
+                  {t('No tours found')}
                 </h3>
                 <p className={`mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn.
+                  {t('Try adjusting your filters or search keywords.')}
                 </p>
                 <button
                   onClick={clearFilters}

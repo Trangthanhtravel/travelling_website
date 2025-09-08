@@ -57,6 +57,16 @@ const vietnameseTranslations: Translations = {
 
   // Tours Page
   'All Tours': 'Tất Cả Tour',
+  'Explore our curated collection of unforgettable travel experiences around the world': 'Khám phá bộ sưu tập trải nghiệm du lịch khó quên được chúng tôi tuyển chọn trên khắp thế giới',
+  'Search destinations, tours...': 'Tìm kiếm điểm đến, tour...',
+  'Minimum': 'Tối thiểu',
+  'Maximum': 'Tối đa',
+  'tours found': 'tour được tìm thấy',
+  'Error loading tours': 'Lỗi khi tải tour',
+  'Please try again later or adjust your filters.': 'Vui lòng thử lại sau hoặc điều chỉnh bộ lọc của bạn.',
+  'Try Again': 'Thử Lại',
+  'No tours found': 'Không tìm thấy tour',
+  'Try adjusting your filters or search keywords.': 'Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn.',
   'Tour Categories': 'Danh Mục Tour',
   'Duration': 'Thời Gian',
   'Price': 'Giá',

@@ -115,8 +115,8 @@ const Services: React.FC = () => {
       <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
         <div className="text-center py-12">
           <Icon icon={Icons.FiAlertCircle} className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Lỗi khi tải dịch vụ</h3>
-          <p className="text-gray-600 dark:text-gray-400">Vui lòng thử lại sau</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('Error loading services')}</h3>
+          <p className="text-gray-600 dark:text-gray-400">{t('Please try again later')}</p>
         </div>
       </div>
     );
@@ -128,9 +128,9 @@ const Services: React.FC = () => {
       <div className="bg-accent-orange text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Other Travelling Services</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Our Professional Services')}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Complete travel solutions for all your adventure needs (excluding car rentals)
+              {t('Complete travel solutions for all your adventure needs')}
             </p>
           </div>
         </div>
@@ -148,7 +148,7 @@ const Services: React.FC = () => {
                 <Icon icon={Icons.FiSearch} className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-400'}`} />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm dịch vụ..."
+                  placeholder={t('Search services...')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
@@ -158,7 +158,7 @@ const Services: React.FC = () => {
 
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-                Chế độ xem
+                {t('View Mode')}
               </label>
               <div className="flex items-center gap-2">
                 <button
@@ -301,9 +301,9 @@ const Services: React.FC = () => {
           <div className="mt-8">
             <div className={`flex justify-between items-center mb-4 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
               <div className="text-sm">
-                Hiển thị {pagination.total > 0 ? (pagination.currentPage - 1) * pagination.limit + 1 : 0} -{' '}
+                {t('Showing')} {pagination.total > 0 ? (pagination.currentPage - 1) * pagination.limit + 1 : 0} -{' '}
                 {pagination.currentPage * pagination.limit > pagination.total ? pagination.total : pagination.currentPage * pagination.limit}{' '}
-                của {pagination.total} dịch vụ
+                {t('of')} {pagination.total} {t('services')}
               </div>
 
               {/* Sort By */}
@@ -314,7 +314,7 @@ const Services: React.FC = () => {
                   className={`block appearance-none bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:border-dark-600 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}
                 >
                   <option value="created_at-desc">{t('Newest First')}</option>
-                  <option value="created_at-asc">Cũ nhất trước</option>
+                  <option value="created_at-asc">{t('Oldest First')}</option>
                   <option value="price-asc">{t('Price: Low to High')}</option>
                   <option value="price-desc">{t('Price: High to Low')}</option>
                 </select>
@@ -348,10 +348,10 @@ const Services: React.FC = () => {
           <div className={`text-center py-12 rounded-lg ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'}`}>
             <Icon icon={Icons.FiPackage} className={`w-12 h-12 mx-auto mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-400'}`} />
             <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>
-              Không tìm thấy dịch vụ
+              {t('No services found')}
             </h3>
             <p className={`mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-              Thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc danh mục của bạn.
+              {t('Try adjusting your search keywords or category filters.')}
             </p>
           </div>
         )}
