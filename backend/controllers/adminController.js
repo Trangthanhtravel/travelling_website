@@ -232,9 +232,9 @@ const updateContent = async (req, res) => {
 
     // Handle image upload if provided
     if (req.file) {
-      const oldImageUrl = content.image_url;
+      const oldImageUrl = content.content; // Fix: content stores the image URL, not image_url
       const imageUrl = await content.updateImage(req.r2, req.file, oldImageUrl);
-      updateData.image_url = imageUrl;
+      updateData.content = imageUrl; // Fix: update the content field with new image URL
     }
 
     await content.update(req.db, updateData);

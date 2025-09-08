@@ -337,7 +337,7 @@ const ContentManagement: React.FC = () => {
                         <img
                           src={editForm.content}
                           alt="Preview"
-                          className="w-full h-48 object-cover rounded-lg"
+                          className="w-full h-auto max-h-96 object-contain rounded-lg border"
                           onError={(e) => {
                             e.currentTarget.src = 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
                           }}
