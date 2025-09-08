@@ -47,25 +47,45 @@ const ContentManagement: React.FC = () => {
 
   // Update content mutation
   const updateContentMutation = useMutation({
-    mutationFn: async (data: { id: number; title: string; content: string }) => {
-      const response = await fetch(`${getApiUrl()}/admin/content/${data.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          title: data.title,
-          content: data.content
-        })
-      });
-      if (!response.ok) throw new Error('Failed to update content');
-      return response.json();
+    mutationFn: async (data: { id: number; title: string; content: string; hasImageUpdate?: boolean; imageFile?: File }) => {
+      if (data.hasImageUpdate && data.imageFile) {
+        // If we have an image update, use FormData to send both data and file
+        const formData = new FormData();
+        formData.append('title', data.title);
+        formData.append('content', data.content);
+        formData.append('image', data.imageFile);
+
+        const response = await fetch(`${getApiUrl()}/admin/content/${data.id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          },
+          body: formData
+        });
+        if (!response.ok) throw new Error('Failed to update content with image');
+        return response.json();
+      } else {
+        // Regular JSON update for text content
+        const response = await fetch(`${getApiUrl()}/admin/content/${data.id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: data.title,
+            content: data.content
+          })
+        });
+        if (!response.ok) throw new Error('Failed to update content');
+        return response.json();
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-content'] });
       setIsEditModalOpen(false);
       setSelectedContent(null);
+      setEditForm({ title: '', content: '', image: null });
     }
   });
 
@@ -86,7 +106,9 @@ const ContentManagement: React.FC = () => {
       return response.json();
     },
     onSuccess: (data) => {
-      setEditForm(prev => ({ ...prev, content: data.imageUrl }));
+      // Fix: Access the correct nested structure
+      const imageUrl = data.data.imageUrl;
+      setEditForm(prev => ({ ...prev, content: imageUrl }));
       setUploadingImage(false);
     }
   });
@@ -110,10 +132,15 @@ const ContentManagement: React.FC = () => {
 
   const handleSave = () => {
     if (selectedContent) {
+      const isImageContent = selectedContent.key.includes('image');
+      const hasNewImage = editForm.image !== null;
+
       updateContentMutation.mutate({
         id: selectedContent.id,
         title: editForm.title,
-        content: editForm.content
+        content: editForm.content,
+        hasImageUpdate: isImageContent && hasNewImage,
+        imageFile: hasNewImage ? editForm.image! : undefined
       });
     }
   };
