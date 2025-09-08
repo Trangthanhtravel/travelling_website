@@ -39,7 +39,7 @@ router.delete('/delete-image', adminAuth, deleteImage);
 // Content management routes
 router.get('/content', adminAuth, getAllContent);
 router.post('/content', adminAuth, createContent);
-router.put('/content/:contentId', adminAuth, updateContent);
+router.put('/content/:contentId', adminAuth, upload.single('image'), updateContent);
 router.delete('/content/:contentId', adminAuth, deleteContent);
 
 // Tour management routes
