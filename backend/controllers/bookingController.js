@@ -6,16 +6,31 @@ const emailService = require('../services/emailService');
 // Create booking without user account
 const createDirectBooking = async (req, res) => {
   try {
+    console.log('Received booking data:', req.body);
+
     const {
-      type, // 'tour' or 'service'
-      itemId, // tour or service ID
-      customerInfo, // { name, email, phone }
-      bookingDetails, // { startDate, totalTravelers, specialRequests }
-      pricing // { totalAmount, currency }
+      // Updated to match frontend structure
+      tourId,
+      tourSlug,
+      tourTitle,
+      customerName,
+      customerEmail,
+      customerPhone,
+      startDate,
+      adults,
+      children,
+      infants,
+      totalTravelers,
+      totalAmount,
+      currency,
+      specialRequests,
+      emergencyContactName,
+      emergencyContactPhone,
+      emergencyContactRelationship
     } = req.body;
 
     // Validate required fields
-    if (!type || !itemId || !customerInfo || !bookingDetails || !pricing) {
+    if (!tourId || !customerName || !customerEmail || !customerPhone || !startDate || !totalTravelers || !totalAmount) {
       return res.status(400).json({
         success: false,
         message: 'Missing required booking information'
@@ -24,53 +39,80 @@ const createDirectBooking = async (req, res) => {
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(customerInfo.email)) {
+    if (!emailRegex.test(customerEmail)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid email format'
       });
     }
 
-    // Get tour or service details
-    let tourOrService;
-    if (type === 'tour') {
-      tourOrService = await Tour.findBySlug(req.db, itemId);
-    } else if (type === 'service') {
-      tourOrService = await Service.findBySlug(req.db, itemId);
-    }
+    // Validate date
+    const bookingDate = new Date(startDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    if (!tourOrService) {
-      return res.status(404).json({
+    if (bookingDate < today) {
+      return res.status(400).json({
         success: false,
-        message: `${type} not found`
+        message: 'Start date cannot be in the past'
       });
     }
 
-    // Create booking object
+    // Get tour details using the tour ID
+    const tour = await Tour.findById(req.db, tourId);
+    if (!tour) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tour not found'
+      });
+    }
+
+    // Generate unique booking number
+    const bookingNumber = `BK${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+
+    // Create booking object matching database schema
     const bookingData = {
-      bookingNumber: `BK${Date.now()}`,
-      type,
-      itemId,
-      customerName: customerInfo.name,
-      customerEmail: customerInfo.email,
-      customerPhone: customerInfo.phone,
-      startDate: bookingDetails.startDate,
-      totalTravelers: bookingDetails.totalTravelers,
-      specialRequests: bookingDetails.specialRequests || null,
-      totalAmount: pricing.totalAmount,
-      currency: pricing.currency || 'USD',
+      type: 'tour',
+      item_id: tourId,
+      customer_name: customerName,
+      customer_email: customerEmail,
+      customer_phone: customerPhone,
+      start_date: startDate,
+      total_travelers: totalTravelers,
+      special_requests: specialRequests || null,
+      total_amount: totalAmount,
+      currency: currency || 'USD',
       status: 'pending',
-      createdAt: new Date()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      // Additional fields for tracking
+      adults: adults || 0,
+      children: children || 0,
+      infants: infants || 0,
+      emergency_contact_name: emergencyContactName || null,
+      emergency_contact_phone: emergencyContactPhone || null,
+      emergency_contact_relationship: emergencyContactRelationship || null,
+      booking_number: bookingNumber
     };
 
     const booking = new Booking(bookingData);
-    await booking.save(req.db);
+    const savedBooking = await booking.save(req.db);
 
-    // Send email notifications using the new email service
+    // Send email notifications
     try {
       await Promise.all([
-        emailService.sendAdminBookingNotification(req.db, booking, customerInfo, tourOrService),
-        emailService.sendCustomerConfirmation(req.db, booking, customerInfo, tourOrService)
+        emailService.sendAdminBookingNotification(req.db, {
+          ...savedBooking,
+          tour_title: tour.title,
+          tour_slug: tourSlug
+        }),
+        emailService.sendCustomerConfirmation(req.db, {
+          ...savedBooking,
+          tour_title: tour.title,
+          tour_slug: tourSlug,
+          customer_name: customerName,
+          customer_email: customerEmail
+        })
       ]);
     } catch (emailError) {
       console.error('Email notification error:', emailError);
@@ -80,13 +122,18 @@ const createDirectBooking = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Booking request submitted successfully. We will contact you soon!',
-      bookingNumber: booking.bookingNumber
+      data: {
+        bookingNumber: bookingNumber,
+        bookingId: savedBooking.id,
+        status: 'pending',
+        tourTitle: tour.title
+      }
     });
   } catch (error) {
     console.error('Create booking error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error creating booking'
+      message: 'Error creating booking. Please try again.'
     });
   }
 };

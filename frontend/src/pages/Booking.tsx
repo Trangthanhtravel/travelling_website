@@ -6,6 +6,7 @@ import { toursAPI, bookingsAPI } from '../utils/api';
 import { BookingForm } from '../types';
 import { Icon, Icons } from '../components/common/Icons';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from '../contexts/TranslationContext';
 import toast from 'react-hot-toast';
 
 // Extended booking form for direct bookings
@@ -22,6 +23,7 @@ const DirectBooking: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
   const [pricing, setPricing] = useState<any>(null);
 
   const { data: response, isLoading: tourLoading } = useQuery({
@@ -36,11 +38,11 @@ const DirectBooking: React.FC = () => {
   const createBookingMutation = useMutation({
     mutationFn: bookingsAPI.createDirectBooking,
     onSuccess: (data) => {
-      toast.success('Booking request submitted successfully! We will contact you soon.');
+      toast.success(`${t('Booking submitted successfully')}! ${t('We will contact you soon')}.`);
       navigate('/');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to submit booking');
+      toast.error(error.response?.data?.message || t('Something went wrong'));
     },
   });
 
@@ -100,357 +102,319 @@ const DirectBooking: React.FC = () => {
   }, [tourData, watchedValues.totalTravelers]);
 
   const onSubmit = async (data: DirectBookingForm) => {
-    if (!tourData || !pricing) return;
+    if (!tourData) return;
 
-    const bookingData = {
-      type: 'tour' as const,
-      itemId: slug!, // Use slug instead of trying to get ID from tour data
-      customerInfo: data.customerInfo,
-      bookingDetails: {
+    try {
+      const bookingData = {
+        tourId: tourData.id,
+        tourSlug: slug,
+        tourTitle: tourData.title,
+        customerName: data.customerInfo.name,
+        customerEmail: data.customerInfo.email,
+        customerPhone: data.customerInfo.phone,
         startDate: data.startDate,
+        adults: data.numberOfTravelers.adults,
+        children: data.numberOfTravelers.children,
+        infants: data.numberOfTravelers.infants,
         totalTravelers: data.totalTravelers,
-        specialRequests: data.specialRequests || undefined,
-      },
-      pricing: {
-        totalAmount: pricing.totalAmount,
-        currency: pricing.currency,
-      },
-    };
+        totalAmount: pricing?.totalAmount || 0,
+        currency: pricing?.currency || 'USD',
+        specialRequests: data.specialRequests,
+        emergencyContactName: data.emergencyContact.name,
+        emergencyContactPhone: data.emergencyContact.phone,
+        emergencyContactRelationship: data.emergencyContact.relationship,
+      };
 
-    createBookingMutation.mutate(bookingData);
+      await createBookingMutation.mutateAsync(bookingData);
+    } catch (error) {
+      console.error('Booking submission error:', error);
+    }
   };
 
   if (tourLoading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
-        <Icon icon={Icons.FiLoader} className={`animate-spin h-8 w-8 ${isDarkMode ? 'text-primary-400' : 'text-primary-600'}`} />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">{t('Loading...')}</p>
+        </div>
       </div>
     );
   }
 
   if (!tourData) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Tour not found</h2>
-          <p className={`mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>The tour you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('Tour Not Found')}</h2>
+          <p className="text-gray-600 mb-4">{t('The tour you are looking for does not exist.')}</p>
+          <button
+            onClick={() => navigate('/tours')}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            {t('Browse Tours')}
+          </button>
         </div>
       </div>
     );
   }
 
-  // Debug: Log the actual structure of tourData
-  console.log('Tour Data Structure:', tourData);
-
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
-      {/* Hero Image Section */}
-      <div className="relative h-48 md:h-60 overflow-hidden">
-        <img
-          src={tourData?.image || tourData?.gallery?.[0] || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80`}
-          alt={tourData?.title || 'Tour Image'}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-white px-4">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">
-              Book Your Tour
-            </h1>
-            <p className="text-base md:text-lg opacity-90">
-              {tourData?.title || 'Amazing Adventure Awaits'}
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('Book Your Tour')}</h1>
+            <h2 className="text-xl text-blue-600 mb-4">{tourData.title}</h2>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className={`shadow-lg rounded-lg overflow-hidden ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
-          {/* Tour Summary */}
-          <div className="bg-primary-600 text-white p-6">
-            <h2 className="text-2xl font-bold">{tourData?.title || 'Tour Title'}</h2>
-            <p className="mt-2 opacity-90">
-              {tourData?.duration || 'Duration TBD'} • {tourData?.location || tourData?.destination || 'Location TBD'}
-            </p>
-            <div className="mt-4 flex items-center justify-between">
-              <span className="text-lg">Price per person:</span>
-              <span className="text-2xl font-bold">
-                ${tourData?.price || 0}
-              </span>
-            </div>
-          </div>
-
-          {/* Booking Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-8">
-            {/* Customer Information */}
-            <div>
-              <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Contact Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Tour Summary */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
-                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Full Name *
-                  </label>
-                  <input
-                    {...register('customerInfo.name')}
-                    type="text"
-                    className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                      isDarkMode 
-                        ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400' 
-                        : 'border-gray-300 bg-white text-gray-900'
-                    }`}
-                    placeholder="Enter your full name"
-                  />
-                  {errors.customerInfo?.name && (
-                    <p className="mt-1 text-sm text-red-500">{errors.customerInfo.name.message}</p>
-                  )}
+                  <span className="font-medium text-gray-700">{t('Duration')}:</span>
+                  <span className="ml-2 text-gray-600">
+                    {tourData.duration_days} {t('days')} / {tourData.duration_days - 1} {t('nights')}
+                  </span>
                 </div>
-
                 <div>
-                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Email Address *
-                  </label>
-                  <input
-                    {...register('customerInfo.email')}
-                    type="email"
-                    className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                      isDarkMode 
-                        ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400' 
-                        : 'border-gray-300 bg-white text-gray-900'
-                    }`}
-                    placeholder="Enter your email"
-                  />
-                  {errors.customerInfo?.email && (
-                    <p className="mt-1 text-sm text-red-500">{errors.customerInfo.email.message}</p>
-                  )}
+                  <span className="font-medium text-gray-700">{t('Price per Person')}:</span>
+                  <span className="ml-2 text-gray-600">${tourData.price}</span>
                 </div>
-
-                <div className="md:col-span-2">
-                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Phone Number *
-                  </label>
-                  <input
-                    {...register('customerInfo.phone')}
-                    type="tel"
-                    className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                      isDarkMode 
-                        ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400' 
-                        : 'border-gray-300 bg-white text-gray-900'
-                    }`}
-                    placeholder="Enter your phone number"
-                  />
-                  {errors.customerInfo?.phone && (
-                    <p className="mt-1 text-sm text-red-500">{errors.customerInfo.phone.message}</p>
-                  )}
+                <div>
+                  <span className="font-medium text-gray-700">{t('Tour Type')}:</span>
+                  <span className="ml-2 text-gray-600">{tourData.difficulty || t('Standard')}</span>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Booking Details */}
-            <div>
-              <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Booking Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Start Date *
-                  </label>
-                  <input
-                    {...register('startDate')}
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
-                    className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                      isDarkMode 
-                        ? 'bg-dark-700 border-dark-600 text-white' 
-                        : 'border-gray-300 bg-white text-gray-900'
-                    }`}
-                  />
-                  {errors.startDate && (
-                    <p className="mt-1 text-sm text-red-500">{errors.startDate.message}</p>
-                  )}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Booking Form */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Customer Information */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Customer Information')}</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Full Name')} *
+                      </label>
+                      <input
+                        type="text"
+                        {...register('customerInfo.name', { required: t('Name is required') })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={t('Enter your full name')}
+                      />
+                      {errors.customerInfo?.name && (
+                        <p className="mt-1 text-sm text-red-600">{errors.customerInfo.name.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Email Address')} *
+                      </label>
+                      <input
+                        type="email"
+                        {...register('customerInfo.email', {
+                          required: t('Email is required'),
+                          pattern: {
+                            value: /^\S+@\S+$/i,
+                            message: t('Invalid email')
+                          }
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={t('Enter your email')}
+                      />
+                      {errors.customerInfo?.email && (
+                        <p className="mt-1 text-sm text-red-600">{errors.customerInfo.email.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Phone Number')} *
+                      </label>
+                      <input
+                        type="tel"
+                        {...register('customerInfo.phone', { required: t('Phone is required') })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={t('Enter your phone number')}
+                      />
+                      {errors.customerInfo?.phone && (
+                        <p className="mt-1 text-sm text-red-600">{errors.customerInfo.phone.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Start Date')} *
+                      </label>
+                      <input
+                        type="date"
+                        {...register('startDate', { required: t('Date is required') })}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      {errors.startDate && (
+                        <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Travelers *
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
+                {/* Number of Travelers */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Number of Travelers')}</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className={`block text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Adults</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Adults')} (18+)
+                      </label>
                       <input
-                        {...register('numberOfTravelers.adults', { valueAsNumber: true })}
                         type="number"
                         min="1"
-                        className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                          isDarkMode 
-                            ? 'bg-dark-700 border-dark-600 text-white' 
-                            : 'border-gray-300 bg-white text-gray-900'
-                        }`}
+                        {...register('numberOfTravelers.adults', {
+                          required: true,
+                          min: 1,
+                          valueAsNumber: true
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
+
                     <div>
-                      <label className={`block text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Children</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Children')} (2-17)
+                      </label>
                       <input
-                        {...register('numberOfTravelers.children', { valueAsNumber: true })}
                         type="number"
                         min="0"
-                        className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                          isDarkMode 
-                            ? 'bg-dark-700 border-dark-600 text-white' 
-                            : 'border-gray-300 bg-white text-gray-900'
-                        }`}
+                        {...register('numberOfTravelers.children', {
+                          min: 0,
+                          valueAsNumber: true
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
+
                     <div>
-                      <label className={`block text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Infants</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Infants')} (0-2)
+                      </label>
                       <input
-                        {...register('numberOfTravelers.infants', { valueAsNumber: true })}
                         type="number"
                         min="0"
-                        className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                          isDarkMode 
-                            ? 'bg-dark-700 border-dark-600 text-white' 
-                            : 'border-gray-300 bg-white text-gray-900'
-                        }`}
+                        {...register('numberOfTravelers.infants', {
+                          min: 0,
+                          valueAsNumber: true
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   </div>
-                  {errors.numberOfTravelers && (
-                    <p className="mt-1 text-sm text-red-500">Please specify valid traveler counts</p>
-                  )}
-                  <p className={`mt-1 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Total: {watchedValues.totalTravelers || 1} travelers
-                  </p>
+
+                  <div className="mt-4 p-3 bg-blue-50 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      {t('Total Travelers')}: <span className="font-medium">{watchedValues.totalTravelers || 1}</span>
+                    </p>
+                  </div>
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Special Requests
-                  </label>
+                {/* Emergency Contact */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Emergency Contact')}</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Emergency Contact Name')}
+                      </label>
+                      <input
+                        type="text"
+                        {...register('emergencyContact.name')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={t('Contact person name')}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Emergency Contact Phone')}
+                      </label>
+                      <input
+                        type="tel"
+                        {...register('emergencyContact.phone')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={t('Contact phone number')}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Relationship')}
+                      </label>
+                      <input
+                        type="text"
+                        {...register('emergencyContact.relationship')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={t('e.g., Spouse, Parent')}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Special Requests */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Special Requests')}</h3>
+
                   <textarea
                     {...register('specialRequests')}
-                    rows={3}
-                    className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                      isDarkMode 
-                        ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400' 
-                        : 'border-gray-300 bg-white text-gray-900'
-                    }`}
-                    placeholder="Any special requirements or requests..."
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder={t('Any special requirements, dietary restrictions, medical conditions, or other requests...')}
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Emergency Contact (Optional) */}
-            <div>
-              <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Emergency Contact (Optional)</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Name</label>
-                  <input
-                    {...register('emergencyContact.name')}
-                    type="text"
-                    className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                      isDarkMode 
-                        ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400' 
-                        : 'border-gray-300 bg-white text-gray-900'
-                    }`}
-                    placeholder="Emergency contact name"
-                  />
-                </div>
-                <div>
-                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Phone</label>
-                  <input
-                    {...register('emergencyContact.phone')}
-                    type="tel"
-                    className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                      isDarkMode 
-                        ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400' 
-                        : 'border-gray-300 bg-white text-gray-900'
-                    }`}
-                    placeholder="Emergency contact phone"
-                  />
-                </div>
-                <div>
-                  <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Relationship</label>
-                  <input
-                    {...register('emergencyContact.relationship')}
-                    type="text"
-                    className={`mt-1 block w-full rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                      isDarkMode 
-                        ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400' 
-                        : 'border-gray-300 bg-white text-gray-900'
-                    }`}
-                    placeholder="Relationship to traveler"
-                  />
-                </div>
-              </div>
-            </div>
+              {/* Booking Summary */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Booking Summary')}</h3>
 
-            {/* Pricing Summary */}
-            {pricing && (
-              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-dark-700 border border-dark-600' : 'bg-gray-50'}`}>
-                <h3 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Pricing Summary</h3>
-                <div className="space-y-2">
-                  <div className={`flex justify-between ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <span>Price per person:</span>
-                    <span>${pricing.basePrice}</span>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('Base Price')}:</span>
+                      <span className="font-medium">${pricing?.basePrice || tourData.price}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('Number of Travelers')}:</span>
+                      <span className="font-medium">{pricing?.totalTravelers || 1}</span>
+                    </div>
+                    <hr className="border-gray-200" />
+                    <div className="flex justify-between text-lg font-semibold">
+                      <span>{t('Total Amount')}:</span>
+                      <span className="text-blue-600">${pricing?.totalAmount || tourData.price}</span>
+                    </div>
                   </div>
-                  <div className={`flex justify-between ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <span>Total travelers:</span>
-                    <span>{pricing.totalTravelers}</span>
-                  </div>
-                  <hr className={`my-2 ${isDarkMode ? 'border-dark-600' : 'border-gray-200'}`} />
-                  <div className={`flex justify-between font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    <span>Total Amount:</span>
-                    <span>${pricing.totalAmount}</span>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* Terms and Policy Notice */}
-            <div className={`p-4 rounded-lg border ${isDarkMode ? 'bg-dark-700 border-dark-600' : 'bg-blue-50 border-blue-200'}`}>
-              <div className="flex items-start space-x-3">
-                <Icon icon={Icons.FiInfo} className={`w-5 h-5 mt-0.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-                <div className="flex-1">
-                  <h4 className={`font-medium ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>
-                    Booking Terms & Conditions
-                  </h4>
-                  <p className={`mt-1 text-sm ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}`}>
-                    By submitting this booking request, you acknowledge that you have read and agree to our{' '}
-                    <a
-                      href="/booking-policy"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`underline font-medium hover:no-underline ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}
-                    >
-                      Booking Terms & Conditions
-                    </a>
-                    . Please review our cancellation policy, payment terms, and travel requirements before confirming your booking.
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isSubmitting ? t('Processing...') : t('Book Now')}
+                  </button>
+
+                  <p className="text-xs text-gray-500 mt-3 text-center">
+                    {t('By clicking Book Now, you agree to our Terms of Service and Privacy Policy')}
                   </p>
                 </div>
               </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={isSubmitting || createBookingMutation.isPending}
-                className={`px-8 py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${
-                  isSubmitting || createBookingMutation.isPending
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-primary-600 hover:bg-primary-700 text-white'
-                }`}
-              >
-                {isSubmitting || createBookingMutation.isPending ? (
-                  <div className="flex items-center">
-                    <Icon icon={Icons.FiLoader} className="animate-spin w-4 h-4 mr-2" />
-                    Submitting...
-                  </div>
-                ) : (
-                  'Submit Booking Request'
-                )}
-              </button>
             </div>
           </form>
         </div>

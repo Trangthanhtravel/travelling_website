@@ -4,8 +4,11 @@ import { Link } from 'react-router-dom';
 import { Icon, Icons } from '../components/common/Icons';
 import { BlogFilters } from '../types';
 import { blogAPI } from '../utils/api';
+import { useTranslation } from '../contexts/TranslationContext';
 
 const Blogs: React.FC = () => {
+  const { t } = useTranslation();
+
   const [filters, setFilters] = useState<BlogFilters>({
     page: 1,
     limit: 12,
@@ -67,13 +70,13 @@ const Blogs: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Blogs</h2>
-          <p className="text-gray-600 mb-4">Sorry, we couldn't load the blogs. Please try again.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('Error Loading Blogs')}</h2>
+          <p className="text-gray-600 mb-4">{t('Sorry, we couldn\'t load the blogs. Please try again.')}</p>
           <button
             onClick={() => refetch()}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Try Again
+            {t('Try Again')}
           </button>
         </div>
       </div>
@@ -86,9 +89,9 @@ const Blogs: React.FC = () => {
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Travel Blog</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Travel Blog')}</h1>
             <p className="text-xl mb-8 opacity-90">
-              Discover amazing destinations and travel tips from our experts
+              {t('Discover amazing destinations and travel tips from our experts')}
             </p>
           </div>
         </div>
@@ -103,7 +106,7 @@ const Blogs: React.FC = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search blogs..."
+                  placeholder={t('Search blogs...')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -124,10 +127,10 @@ const Blogs: React.FC = () => {
               }}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="created_at-desc">Latest First</option>
-              <option value="created_at-asc">Oldest First</option>
-              <option value="views-desc">Most Popular</option>
-              <option value="title-asc">Title A-Z</option>
+              <option value="created_at-desc">{t('Latest First')}</option>
+              <option value="created_at-asc">{t('Oldest First')}</option>
+              <option value="views-desc">{t('Most Popular')}</option>
+              <option value="title-asc">{t('Title A-Z')}</option>
             </select>
 
             {/* Clear Filters */}
@@ -136,7 +139,7 @@ const Blogs: React.FC = () => {
                 onClick={clearFilters}
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
-                Clear Filters
+                {t('Clear Filters')}
               </button>
             )}
           </div>
@@ -167,8 +170,8 @@ const Blogs: React.FC = () => {
           {blogs.length === 0 ? (
             <div className="text-center py-12">
               <Icon icon={Icons.FiSearch} className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No blogs found</h3>
-              <p className="text-gray-600">Try adjusting your search or filters</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('No blogs found')}</h3>
+              <p className="text-gray-600">{t('Try adjusting your search or filters')}</p>
             </div>
           ) : (
             <>
@@ -202,41 +205,33 @@ const Blogs: React.FC = () => {
                         </div>
                       )}
 
-                      <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
-                        <Link
-                          to={`/blog/${blog.slug}`}
-                          className="hover:text-blue-600 transition-colors"
-                        >
-                          {blog.title}
-                        </Link>
+                      {/* Title */}
+                      <h2 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
+                        {blog.title}
                       </h2>
 
-                      <p className="text-gray-600 mb-4 line-clamp-3">
-                        {blog.excerpt}
-                      </p>
+                      {/* Excerpt */}
+                      {blog.excerpt && (
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                          {blog.excerpt}
+                        </p>
+                      )}
 
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <div className="flex items-center gap-4">
-                          <span className="flex items-center gap-1">
-                            <Icon icon={Icons.FiEye} className="h-4 w-4" />
-                            {blog.views || 0}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Icon icon={Icons.FiClock} className="h-4 w-4" />
-                            {blog.reading_time || 5} min read
-                          </span>
-                        </div>
-                        <time dateTime={blog.published_at || blog.created_at}>
-                          {new Date(blog.published_at || blog.created_at).toLocaleDateString()}
-                        </time>
+                      {/* Meta info */}
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                        <span>{t('Published on')}: {new Date(blog.created_at).toLocaleDateString()}</span>
+                        {blog.read_time && (
+                          <span>{blog.read_time} {t('minutes')} {t('Read Time')}</span>
+                        )}
                       </div>
 
+                      {/* Read more button */}
                       <Link
-                        to={`/blog/${blog.slug}`}
-                        className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-800 font-medium"
+                        to={`/blogs/${blog.slug}`}
+                        className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
                       >
-                        Read More
-                        <Icon icon={Icons.FiArrowRight} className="h-4 w-4" />
+                        {t('Read More')}
+                        <Icon icon={Icons.FiArrowRight} className="ml-1 h-4 w-4" />
                       </Link>
                     </div>
                   </article>
@@ -244,40 +239,42 @@ const Blogs: React.FC = () => {
               </div>
 
               {/* Pagination */}
-              {pagination.totalPages > 1 && (
-                <div className="flex justify-center items-center mt-12 gap-2">
-                  <button
-                    onClick={() => handlePageChange(pagination.currentPage - 1)}
-                    disabled={!pagination.hasPrev}
-                    className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    Previous
-                  </button>
+              {pagination && pagination.totalPages > 1 && (
+                <div className="flex justify-center mt-12">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage - 1)}
+                      disabled={pagination.currentPage <= 1}
+                      className="px-3 py-2 rounded-md bg-white border border-gray-300 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t('Previous')}
+                    </button>
 
-                  {[...Array(pagination.totalPages)].map((_, index) => {
-                    const page = index + 1;
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`px-4 py-2 rounded-lg ${
-                          page === pagination.currentPage
-                            ? 'bg-blue-600 text-white'
-                            : 'border border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
+                    {[...Array(pagination.totalPages)].map((_, index) => {
+                      const page = index + 1;
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-2 rounded-md text-sm font-medium ${
+                            page === pagination.currentPage
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white border border-gray-300 text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
 
-                  <button
-                    onClick={() => handlePageChange(pagination.currentPage + 1)}
-                    disabled={!pagination.hasNext}
-                    className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    Next
-                  </button>
+                    <button
+                      onClick={() => handlePageChange(pagination.currentPage + 1)}
+                      disabled={pagination.currentPage >= pagination.totalPages}
+                      className="px-3 py-2 rounded-md bg-white border border-gray-300 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {t('Next')}
+                    </button>
+                  </div>
                 </div>
               )}
             </>

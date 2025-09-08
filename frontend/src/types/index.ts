@@ -76,19 +76,26 @@ export interface TourFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
-// Booking types (simplified - no payments, no reviews)
+// Booking types (updated to match frontend-backend alignment)
 export interface Booking {
-  id: string;
+  id: number;
   type: 'tour' | 'service';
-  item_id: string;
+  item_id: number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
   start_date: string;
   total_travelers: number;
+  adults?: number;
+  children?: number;
+  infants?: number;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_contact_relationship?: string;
   special_requests?: string;
   total_amount: number;
   currency: string;
+  booking_number?: string;
   status: 'pending' | 'confirmed' | 'contacted' | 'completed' | 'cancelled';
   contacted_at?: string;
   confirmed_at?: string;
@@ -97,29 +104,40 @@ export interface Booking {
 }
 
 export interface BookingForm {
-    tourId: string;
-    startDate: string;
-    numberOfTravelers: {
-        adults: number;
-        children: number;
-        infants: number;
-    };
-    travelers: Traveler[];
-    specialRequests?: string;
-    emergencyContact?: {
-        name: string;
-        phone: string;
-        relationship: string;
-    };
+  tourId: number;
+  startDate: string;
+  numberOfTravelers: {
+    adults: number;
+    children: number;
+    infants: number;
+  };
+  specialRequests?: string;
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
 }
 
-export interface Traveler {
-    name: string;
-    age?: number;
-    type: 'adult' | 'child' | 'infant';
-    passportNumber?: string;
-    nationality?: string;
-    dietaryRequirements?: string;
+// Direct booking form structure that matches what frontend sends to backend
+export interface DirectBookingRequest {
+  tourId: number;
+  tourSlug?: string;
+  tourTitle?: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  startDate: string;
+  adults: number;
+  children: number;
+  infants: number;
+  totalTravelers: number;
+  totalAmount: number;
+  currency?: string;
+  specialRequests?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelationship?: string;
 }
 
 // Content types (for blogs, etc.)

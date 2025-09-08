@@ -38,6 +38,11 @@ const vietnameseTranslations: Translations = {
   'Back': 'Quay Lại',
   'Next': 'Tiếp Theo',
   'Previous': 'Trước',
+  'Continue': 'Tiếp Tục',
+  'Finish': 'Hoàn Thành',
+  'Download': 'Tải Xuống',
+  'Upload': 'Tải Lên',
+  'Share': 'Chia Sẻ',
 
   // Home Page - Hero Section
   'Welcome to': 'Chào Mừng Đến Với',
@@ -62,6 +67,7 @@ const vietnameseTranslations: Translations = {
   'All Tours': 'Tất Cả Tour',
   'Explore our curated collection of unforgettable travel experiences around the world': 'Khám phá bộ sưu tập trải nghiệm du lịch khó quên được chúng tôi tuyển chọn trên khắp thế giới',
   'Search destinations, tours...': 'Tìm kiếm điểm đến, tour...',
+  'Search tours...': 'Tìm kiếm tour...',
   'Minimum': 'Tối thiểu',
   'Maximum': 'Tối đa',
   'tours found': 'tour được tìm thấy',
@@ -88,6 +94,21 @@ const vietnameseTranslations: Translations = {
   'night': 'đêm',
   'from': 'từ',
   'per person': 'mỗi người',
+  'Starting from': 'Bắt đầu từ',
+  'Tour Type': 'Loại Tour',
+  'Available Dates': 'Ngày Có Sẵn',
+  'Meeting Point': 'Điểm Hẹn',
+  'Language': 'Ngôn Ngữ',
+  'Age Restriction': 'Hạn Chế Tuổi',
+  'Physical Rating': 'Đánh Giá Thể Chất',
+  'Overview': 'Tổng Quan',
+  'Highlights': 'Điểm Nổi Bật',
+  'What\'s Included': 'Bao Gồm Gì',
+  'What\'s Not Included': 'Không Bao Gồm Gì',
+  'Important Notes': 'Ghi Chú Quan Trọng',
+  'Cancellation Policy': 'Chính Sách Hủy Tour',
+  'Reviews': 'Đánh Giá',
+  'Write a Review': 'Viết Đánh Giá',
 
   // Services Page
   'Our Professional Services': 'Dịch Vụ Chuyên Nghiệp',
@@ -99,6 +120,11 @@ const vietnameseTranslations: Translations = {
   'Event Planning': 'Tổ Chức Sự Kiện',
   'Service Details': 'Chi Tiết Dịch Vụ',
   'Available Services': 'Dịch Vụ Có Sẵn',
+  'Service Features': 'Tính Năng Dịch Vụ',
+  'Service Gallery': 'Thư Viện Ảnh Dịch Vụ',
+  'Request Quote': 'Yêu Cầu Báo Giá',
+  'Book Service': 'Đặt Dịch Vụ',
+  'No services available at the moment.': 'Hiện tại không có dịch vụ nào.',
 
   // Contact Page
   'Get in Touch': 'Liên Hệ Với Chúng Tôi',
@@ -118,7 +144,7 @@ const vietnameseTranslations: Translations = {
   'Sunday': 'Chủ Nhật',
   'Closed': 'Đóng Cửa',
 
-  // Blogs Page - NEW TRANSLATIONS
+  // Blogs Page
   'Travel Blog': 'Blog Du Lịch',
   'Discover amazing destinations and travel tips from our experts': 'Khám phá những điểm đến tuyệt vời và mẹo du lịch từ các chuyên gia của chúng tôi',
   'Error Loading Blogs': 'Lỗi Khi Tải Blog',
@@ -132,10 +158,33 @@ const vietnameseTranslations: Translations = {
   'Clear All Filters': 'Xóa Tất Cả Bộ Lọc',
   'No blogs found': 'Không tìm thấy blog',
   'Try adjusting your search or filters.': 'Thử điều chỉnh tìm kiếm hoặc bộ lọc của bạn.',
+  'Search blogs...': 'Tìm kiếm blog...',
+  'Latest First': 'Mới Nhất Trước',
+  'Title A-Z': 'Tiêu Đề A-Z',
+  'Clear Filters': 'Xóa Bộ Lọc',
+  'Try adjusting your search or filters': 'Thử điều chỉnh tìm kiếm hoặc bộ lọc của bạn',
 
-  // About Page - NEW TRANSLATIONS
+  // Blog Detail Page
+  'Latest Articles': 'Bài Viết Mới Nhất',
+  'Travel Tips': 'Mẹo Du Lịch',
+  'Destinations': 'Điểm Đến',
+  'Travel Guides': 'Hướng Dẫn Du Lịch',
+  'Published on': 'Xuất Bản Vào',
+  'Read Time': 'Thời Gian Đọc',
+  'minutes': 'phút',
+  'minute': 'phút',
+  'Related Articles': 'Bài Viết Liên Quan',
+  'Share Article': 'Chia Sẻ Bài Viết',
+  'Categories': 'Danh Mục',
+  'Tags': 'Thẻ',
+  'Comments': 'Bình Luận',
+  'Leave a Comment': 'Để Lại Bình Luận',
+  'Your Comment': 'Bình Luận Của Bạn',
+  'Post Comment': 'Đăng Bình Luận',
+
+  // About Page
   'About Us': 'Về Chúng Tôi',
-  'Learn more about our company and our commitment to excellence': 'Tìm hiểu thêm về công ty chúng tôi và cam kết của chúng tôi về sự xuất sắc',
+  'Learn more about our company and our commitment to excellence': 'Tìm hiểu thêm v�� công ty chúng tôi và cam kết của chúng tôi về sự xuất sắc',
   'Our Story': 'Câu Chuyện Của Chúng Tôi',
   'Our Mission': 'Sứ Mệnh',
   'Our Vision': 'Tầm Nhìn',
@@ -148,7 +197,7 @@ const vietnameseTranslations: Translations = {
   'Sustainable Tourism': 'Du Lịch Bền Vững',
   'Local Expertise': 'Chuyên Môn Địa Phương',
   'What We Do': 'Chúng Tôi Làm Gì',
-  'Our professional travel services designed to make your journey unforgettable': 'Dịch vụ du lịch chuyên nghiệp của chúng tôi đư��c thiết kế để làm cho hành trình của bạn trở nên khó quên',
+  'Our professional travel services designed to make your journey unforgettable': 'Dịch vụ du lịch chuyên nghiệp của chúng tôi được thiết kế để làm cho hành trình của bạn trở nên khó quên',
   'Vision & Mission': 'Tầm Nhìn & Sứ Mệnh',
   'Passion': 'Đam Mê',
   'Trust': 'Tin Cậy',
@@ -162,11 +211,15 @@ const vietnameseTranslations: Translations = {
   'Contact Us': 'Liên Hệ Chúng Tôi',
   '15+ Years of Excellence': '15+ Năm Xuất Sắc',
   'Serving travelers since 2009': 'Phục vụ du khách từ năm 2009',
-  'No services available at the moment.': 'Hiện tại không có dịch vụ nào.',
 
-  // Booking Policy Page - NEW TRANSLATIONS
+  // Booking Policy Page
   'Booking Terms & Conditions': 'Điều Khoản & Điều Kiện Đặt Tour',
   'Please read our booking terms and conditions carefully before making a reservation': 'Vui lòng đọc kỹ các điều khoản và điều kiện đặt tour của chúng tôi trước khi đặt chỗ',
+  'Terms of Service': 'Điều Khoản Dịch Vụ',
+  'Privacy Policy': 'Chính Sách Bảo Mật',
+  'Refund Policy': 'Chính Sách Hoàn Tiền',
+  'Liability': 'Trách Nhiệm Pháp Lý',
+  'Force Majeure': 'Bất Khả Kháng',
 
   // Booking Page
   'Book Your Tour': 'Đặt Tour Của Bạn',
@@ -176,71 +229,125 @@ const vietnameseTranslations: Translations = {
   'Number of Travelers': 'Số Lượng Du Khách',
   'Adults': 'Người Lớn',
   'Children': 'Trẻ Em',
+  'Infants': 'Trẻ Sơ Sinh',
   'Special Requirements': 'Yêu Cầu Đặc Biệt',
   'Total Price': 'Tổng Giá',
   'Confirm Booking': 'Xác Nhận Đặt Tour',
   'Booking Summary': 'Tóm Tắt Đặt Tour',
   'Payment Method': 'Phương Thức Thanh Toán',
+  'Customer Information': 'Thông Tin Khách Hàng',
+  'Emergency Contact': 'Liên Hệ Khẩn Cấp',
+  'Emergency Contact Name': 'Tên Người Liên Hệ Khẩn Cấp',
+  'Emergency Contact Phone': 'Điện Thoại Liên Hệ Khẩn Cấp',
+  'Relationship': 'Mối Quan Hệ',
+  'Special Requests': 'Yêu Cầu Đặc Biệt',
+  'Dietary Requirements': 'Yêu Cầu Chế Độ Ăn',
+  'Medical Conditions': 'Tình Trạng Y Tế',
+  'Accessibility Needs': 'Nhu Cầu Hỗ Trợ',
+  'Additional Notes': 'Ghi Chú Thêm',
+  'Total Travelers': 'Tổng Số Du Khách',
+  'Base Price': 'Giá Cơ Bản',
+  'Total Amount': 'Tổng Số Tiền',
+  'Price per Person': 'Giá Mỗi Người',
+  'Booking Fee': 'Phí Đặt Tour',
+  'Tax': 'Thuế',
+  'Final Total': 'Tổng Cộng Cuối',
+  'Processing...': 'Đang Xử Lý...',
+  'Start Date': 'Ngày Bắt Đầu',
+  'Select Date': 'Chọn Ngày',
 
-  // Blog Page
-  'Latest Articles': 'Bài Viết Mới Nhất',
-  'Travel Tips': 'Mẹo Du Lịch',
-  'Destinations': 'Điểm Đến',
-  'Travel Guides': 'Hướng Dẫn Du Lịch',
-  'Published on': 'Xuất Bản Vào',
-  'Read Time': 'Thời Gian Đọc',
-  'minutes': 'phút',
-  'Related Articles': 'Bài Viết Liên Quan',
-  'Share Article': 'Chia Sẻ Bài Viết',
-  'Categories': 'Danh Mục',
-  'Tags': 'Thẻ',
+  // Service Booking Page
+  'Service Booking': 'Đặt Dịch Vụ',
+  'Service Information': 'Thông Tin Dịch Vụ',
+  'Service Date': 'Ngày Dịch Vụ',
+  'Service Duration': 'Thời Gian Dịch Vụ',
+  'Service Location': 'Địa Điểm Dịch Vụ',
+  'Pick-up Location': 'Địa Điểm Đón',
+  'Drop-off Location': 'Địa Điểm Trả',
+  'Preferred Time': 'Thời Gian Ưa Thích',
+  'Number of People': 'Số Lượng Người',
+  'Vehicle Type': 'Loại Xe',
+  'Room Type': 'Loại Phòng',
+  'Check-in Date': 'Ngày Nhận Phòng',
+  'Check-out Date': 'Ngày Trả Phòng',
+  'Number of Rooms': 'Số Phòng',
+  'Number of Guests': 'Số Khách',
 
-  // Form Validation
+  // Car Rental Page
+  'Car Rental Services': 'Dịch Vụ Thuê Xe',
+  'Rent a Car': 'Thuê Xe',
+  'Pick-up Date': 'Ngày Nhận Xe',
+  'Return Date': 'Ngày Trả Xe',
+  'Pick-up Time': 'Giờ Nhận Xe',
+  'Return Time': 'Giờ Trả Xe',
+  'Driver Age': 'Tuổi Tài Xế',
+  'With Driver': 'Có Tài Xế',
+  'Self Drive': 'Tự Lái',
+  'Car Features': 'Tính Năng Xe',
+  'Fuel Type': 'Loại Nhiên Liệu',
+  'Transmission': 'Hộp Số',
+  'Seats': 'Số Ghế',
+  'Air Conditioning': 'Điều Hòa',
+  'GPS Navigation': 'Định Vị GPS',
+  'Insurance': 'Bảo Hiểm',
+
+  // Form Validation & Messages
   'Name is required': 'Tên là bắt buộc',
   'Email is required': 'Email là bắt buộc',
   'Invalid email': 'Email không hợp lệ',
+  'Phone is required': 'Số điện thoại là bắt buộc',
+  'Invalid phone number': 'Số điện thoại không hợp lệ',
   'Subject is required': 'Chủ đề là bắt buộc',
   'Message is required': 'Tin nhắn là bắt buộc',
-  'Message must be at least 10 characters': 'Tin nhắn phải có ít nhất 10 ký tự',
-  'Phone number is required': 'Số điện thoại là bắt buộc',
   'Date is required': 'Ngày là bắt buộc',
+  'Invalid date': 'Ngày không hợp lệ',
+  'Field is required': 'Trường này là bắt buộc',
+  'Please fill in all required fields': 'Vui lòng điền tất cả các trường bắt buộc',
+  'Please select a valid option': 'Vui lòng chọn một tùy chọn hợp lệ',
+  'Minimum length is': 'Độ dài tối thiểu là',
+  'Maximum length is': 'Độ dài tối đa là',
+  'characters': 'ký tự',
 
-  // Success/Error Messages
-  'Message sent successfully!': 'Tin nhắn đã được gửi thành công!',
-  'We\'ll get back to you soon.': 'Chúng tôi sẽ liên hệ lại với bạn sớm.',
-  'Failed to send message. Please try again.': 'Không thể gửi tin nhắn. Vui lòng thử lại.',
-  'Booking confirmed successfully!': 'Đặt tour thành công!',
-  'Something went wrong. Please try again.': 'Có lỗi xảy ra. Vui lòng thử lại.',
+  // Success & Error Messages
+  'Success': 'Thành Công',
+  'Error': 'Lỗi',
+  'Warning': 'Cảnh Báo',
+  'Information': 'Thông Tin',
+  'Message sent successfully': 'Tin nhắn đã được gửi thành công',
+  'Booking submitted successfully': 'Đặt tour đã được gửi thành công',
+  'We will contact you soon': 'Chúng tôi sẽ liên hệ với bạn sớm',
+  'Something went wrong': 'Đã xảy ra lỗi',
+  'Please try again': 'Vui lòng thử lại',
   'Loading...': 'Đang tải...',
+  'Failed to load': 'Không thể tải',
+  'No data available': 'Không có dữ liệu',
+  'Data not found': 'Không tìm thấy dữ liệu',
 
-  // Footer
-  'Your trusted travel partner for unforgettable adventures. We create personalized experiences that connect you with the world\'s most beautiful destinations.': 'Đối tác du lịch đáng tin cậy của bạn cho những cuộc phiêu lưu khó quên. Chúng tôi tạo ra những trải nghiệm cá nhân hóa kết nối bạn với những điểm đến đẹp nhất thế giới.',
-  'Booking Policy': 'Chính Sách Đặt Tour',
-  'Quick Links': 'Liên Kết Nhanh',
-  'Follow Us': 'Theo Dõi Chúng Tôi',
-  'Newsletter': 'Bản Tin',
-  'Subscribe to our newsletter': 'Đăng ký nhận bản tin của chúng tôi',
-  'Enter your email': 'Nhập email của bạn',
-  'Subscribe': 'Đăng Ký',
-  'Privacy Policy': 'Chính Sách Bảo Mật',
-  'Terms of Service': 'Điều Khoản Dịch Vụ',
-  'All rights reserved': 'Tất cả quyền được bảo lưu',
+  // Status & States
+  'Available': 'Có Sẵn',
+  'Unavailable': 'Không Có Sẵn',
+  'Sold Out': 'Hết Chỗ',
+  'Coming Soon': 'Sắp Ra Mắt',
+  'New': 'Mới',
+  'Popular': 'Phổ Biến',
+  'Featured': 'Nổi Bật',
+  'Recommended': 'Đề Xuất',
+  'Best Seller': 'Bán Chạy Nhất',
+  'Limited Time': 'Thời Gian Có Hạn',
+  'Discount': 'Giảm Giá',
+  'Free': 'Miễn Phí',
+  'Premium': 'Cao Cấp',
+  'Standard': 'Tiêu Chuẩn',
+  'Basic': 'Cơ Bản',
 
-  // Common Descriptions
-  'Professional tour guides': 'Hướng dẫn viên chuyên nghiệp',
-  'Best price guarantee': 'Đảm bảo giá tốt nhất',
-  '24/7 customer support': 'Hỗ trợ khách hàng 24/7',
-  'Secure booking': 'Đặt tour an toàn',
-  'Free cancellation': 'Hủy miễn phí',
-  'No hidden fees': 'Không có phí ẩn',
-
-  // Time and Date
-  'Today': 'Hôm nay',
-  'Yesterday': 'Hôm qua',
-  'Tomorrow': 'Ngày mai',
-  'Week': 'Tuần',
-  'Month': 'Tháng',
-  'Year': 'Năm',
+  // Time & Date
+  'Today': 'Hôm Nay',
+  'Tomorrow': 'Ngày Mai',
+  'Yesterday': 'Hôm Qua',
+  'This Week': 'Tuần Này',
+  'Next Week': 'Tuần Tới',
+  'This Month': 'Tháng Này',
+  'Next Month': 'Tháng Tới',
   'January': 'Tháng Một',
   'February': 'Tháng Hai',
   'March': 'Tháng Ba',
@@ -253,221 +360,132 @@ const vietnameseTranslations: Translations = {
   'October': 'Tháng Mười',
   'November': 'Tháng Mười Một',
   'December': 'Tháng Mười Hai',
+  'Monday': 'Thứ Hai',
+  'Tuesday': 'Thứ Ba',
+  'Wednesday': 'Thứ Tư',
+  'Thursday': 'Thứ Năm',
+  'Friday': 'Thứ Sáu',
+  'Morning': 'Buổi Sáng',
+  'Afternoon': 'Buổi Chiều',
+  'Evening': 'Buổi Tối',
+  'Night': 'Buổi Đêm',
 
-  // Car Rental specific
-  'Car Rental Services': 'Dịch Vụ Thuê Xe',
-  'Premium vehicle fleet for your travel needs': 'Đội xe cao cấp cho nhu cầu du lịch của bạn',
-  'Car Rentals': 'Thuê Xe',
-  'Search car rentals...': 'Tìm kiếm dịch vụ thuê xe...',
-  'View Mode': 'Chế Độ Xem',
-  'Newest First': 'Mới Nhất Trước',
-  'Price: Low to High': 'Giá: Thấp Đến Cao',
-  'Price: High to Low': 'Giá: Cao Đến Thấp',
-  'Name: A to Z': 'Tên: A đến Z',
-  'Name: Z to A': 'Tên: Z đến A',
-  'Choose Your Vehicle': 'Chọn Xe Của Bạn',
-  'Rental Duration': 'Thời Gian Thuê',
-  'Pick-up Location': 'Địa Điểm Nhận Xe',
-  'Drop-off Location': 'Địa Điểm Trả Xe',
-  'Pick-up Date': 'Ngày Nhận Xe',
-  'Drop-off Date': 'Ngày Trả Xe',
-  'Driver Age': 'Tuổi Tài Xế',
-  'With Driver': 'Có Tài Xế',
-  'Self Drive': 'Tự Lái',
-  'Book Vehicle': 'Đặt Xe',
-  'Vehicle Type': 'Loại Xe',
-  'Transmission': 'Hộp Số',
-  'Automatic': 'Tự Động',
-  'Manual': 'Số Sàn',
-  'Fuel Type': 'Loại Nhiên Liệu',
-  'Seats': 'Số Ghế',
-  'Air Conditioning': 'Điều Hòa',
-  'GPS Navigation': 'Định Vị GPS',
-  'Insurance': 'Bảo Hiểm',
-  'Unlimited Mileage': 'Không Giới Hạn Km',
-
-  // Statistics & Numbers
-  'Tours Completed': 'Tour Đã Hoàn Thành',
-  'Countries Visited': 'Quốc Gia Đã Đến',
-  'Tour Guides': 'Hướng Dẫn Viên',
-  'Customer Rating': 'Đánh Giá Khách Hàng',
-  'Positive Reviews': 'Đánh Giá Tích Cực',
-  'Repeat Customers': 'Khách Hàng Quay Lại',
-
-  // Tour Types & Categories
-  'Adventure Tours': 'Tour Phiêu Lưu',
-  'Cultural Tours': 'Tour Văn Hóa',
-  'Food Tours': 'Tour Ẩm Thực',
-  'Beach Tours': 'Tour Biển',
-  'Mountain Tours': 'Tour Núi',
-  'City Tours': 'Tour Thành Phố',
-  'Historical Tours': 'Tour Lịch Sử',
-  'Nature Tours': 'Tour Thiên Nhiên',
-  'Photography Tours': 'Tour Chụp Ảnh',
-  'Luxury Tours': 'Tour Cao Cấp',
-  'Budget Tours': 'Tour Tiết Kiệm',
-  'Family Tours': 'Tour Gia Đình',
-  'Honeymoon Tours': 'Tour Tuần Trăng Mật',
-  'Group Tours': 'Tour Nhóm',
-  'Private Tours': 'Tour Riêng',
-
-  // Booking Status
-  'Available': 'Có Sẵn',
-  'Sold Out': 'Hết Chỗ',
-  'Last Few Spots': 'Còn Ít Chỗ',
-  'Booking Confirmed': 'Đã Xác Nhận Đặt Tour',
-  'Booking Pending': 'Đang Chờ Xác Nhận',
-  'Booking Cancelled': 'Đã Hủy',
-  'Payment Required': 'Cần Thanh Toán',
-  'Payment Completed': 'Đã Thanh Toán',
-
-  // Service Types
-  'Transportation': 'Vận Chuyển',
-  'Accommodation': 'Lưu Trú',
-  'Tour Guide': 'Hướng Dẫn Viên',
-  'Meals': 'Bữa Ăn',
-  'Activities': 'Hoạt Động',
-  'Equipment': 'Thiết Bị',
-  'Entrance Fees': 'Phí Vào Cửa',
-
-  // Difficulty Levels
-  'Easy': 'Dễ',
-  'Moderate': 'Trung Bình',
-  'Challenging': 'Khó',
-  'Difficult': 'Rất Khó',
-  'Expert': 'Chuyên Gia',
-
-  // Weather & Seasons
-  'Best Time to Visit': 'Thời Gian Tốt Nhất',
-  'Weather': 'Thời Tiết',
-  'Spring': 'Mùa Xuân',
-  'Summer': 'Mùa Hè',
-  'Autumn': 'Mùa Thu',
-  'Winter': 'Mùa Đông',
-  'Rainy Season': 'Mùa Mưa',
-  'Dry Season': 'Mùa Khô',
-
-  // Additional Forms & Actions
-  'Select Date': 'Chọn Ngày',
-  'Select Time': 'Chọn Giờ',
-  'Select Option': 'Chọn Tùy Chọn',
-  'Choose Package': 'Chọn Gói',
-  'Download Brochure': 'Tải Brochure',
-  'Share Tour': 'Chia Sẻ Tour',
-  'Add to Wishlist': 'Thêm Vào Danh Sách Yêu Thích',
-  'Compare Tours': 'So Sánh Tour',
-  'Print Itinerary': 'In Lịch Trình',
-  'Send to Friend': 'Gửi Cho Bạn',
-
-  // Social Media & Contact
-  'Follow us on Facebook': 'Theo dõi chúng tôi trên Facebook',
-  'Follow us on Instagram': 'Theo dõi chúng tôi trên Instagram',
-  'Follow us on Twitter': 'Theo dõi chúng tôi trên Twitter',
-  'Follow us on YouTube': 'Theo dõi chúng tôi trên YouTube',
-  'Call Us': 'Gọi Cho Chúng Tôi',
-  'Email Us': 'Gửi Email',
-  'WhatsApp': 'WhatsApp',
-  'Live Chat': 'Chat Trực Tuyến',
-
-  // Error Messages & Validation
-  'Please fill in all required fields': 'Vui lòng điền tất cả các trường bắt buộc',
-  'Please select a valid date': 'Vui lòng chọn ngày hợp lệ',
-  'Please enter a valid phone number': 'Vui lòng nhập số điện thoại hợp lệ',
-  'Connection error': 'Lỗi kết nối',
-  'Server error': 'Lỗi máy chủ',
-  'No results found': 'Không tìm thấy kết quả',
-  'Page not found': 'Không tìm thấy trang',
-
-  // Currency & Payment
-  'Currency': 'Tiền Tệ',
-  'VND': 'VNĐ',
-  'USD': 'USD',
-  'Credit Card': 'Thẻ Tín Dụng',
-  'Debit Card': 'Thẻ Ghi Nợ',
-  'Bank Transfer': 'Chuyển Khoản',
-  'Cash': 'Tiền Mặt',
-  'Online Payment': 'Thanh Toán Online',
-  'Installment': 'Trả Góp',
-  'Deposit': 'Đặt Cọc',
-  'Full Payment': 'Thanh Toán Đủ',
-  'Refund': 'Hoàn Tiền',
-
-  // Admin Panel
-  'Dashboard': 'Bảng Điều Khiển',
-  'Manage Tours': 'Quản Lý Tour',
-  'Manage Bookings': 'Quản Lý Đặt Tour',
-  'Manage Customers': 'Quản Lý Khách Hàng',
-  'Manage Services': 'Quản Lý Dịch Vụ',
-  'Manage Content': 'Quản Lý Nội Dung',
-  'Settings': 'Cài Đặt',
-  'Reports': 'Báo Cáo',
-  'Statistics': 'Thống Kê',
-  'User Management': 'Quản Lý Người Dùng',
-  'Content Management': 'Quản Lý Nội Dung',
-  'Upload Image': 'Tải Ảnh Lên',
-  'Gallery': 'Thư Viện',
-  'SEO Settings': 'Cài Đặt SEO',
-
-  // Additional UI Elements
-  'Show More': 'Hiển Thị Thêm',
-  'Show Less': 'Hiển Thị Ít Hơn',
+  // Common UI Elements
+  'Menu': 'Menu',
+  'Navigation': 'Điều Hướng',
+  'Footer': 'Chân Trang',
+  'Header': 'Đầu Trang',
+  'Sidebar': 'Thanh Bên',
+  'Main Content': 'Nội Dung Chính',
+  'Page': 'Trang',
+  'of': 'của',
+  'Show': 'Hiển Thị',
+  'Hide': 'Ẩn',
+  'Open': 'Mở',
   'Expand': 'Mở Rộng',
   'Collapse': 'Thu Gọn',
-  'Download': 'Tải Xuống',
-  'Upload': 'Tải Lên',
-  'Copy': 'Sao Chép',
-  'Paste': 'Dán',
+  'Toggle': 'Chuyển Đổi',
+  'More': 'Thêm',
+  'Less': 'Ít Hơn',
+  'All': 'Tất Cả',
+  'None': 'Không Có',
+  'Other': 'Khác',
   'Select All': 'Chọn Tất Cả',
   'Deselect All': 'Bỏ Chọn Tất Cả',
+  'Apply': 'Áp Dụng',
+  'Reset': 'Đặt Lại',
   'Refresh': 'Làm Mới',
   'Reload': 'Tải Lại',
 
-  // Responsive Design
-  'Menu': 'Menu',
-  'Toggle Navigation': 'Chuyển Đổi Điều Hướng',
-  'Mobile Menu': 'Menu Di Động',
-  'Desktop View': 'Chế Độ Desktop',
-  'Mobile View': 'Chế Độ Di Động',
+  // Pagination
+  'First': 'Đầu Tiên',
+  'Last': 'Cuối Cùng',
+  'Go to page': 'Đi đến trang',
+  'Items per page': 'Mục mỗi trang',
+  'Showing': 'Hiển thị',
+  'to': 'đến',
+  'entries': 'mục',
+  'No items to display': 'Không có mục nào để hiển thị',
 
-  // Additional missing translations for Home page
-  'Choose from our premium vehicle fleet': 'Chọn từ đội xe cao cấp của chúng tôi',
-  'Detailed insights and stories from our travel experts': 'Thông tin chi tiết và câu chuyện từ các chuyên gia du lịch của chúng tôi',
-  'Ready for your next adventure?': 'Sẵn sàng cho cuộc phiêu lưu tiếp theo của bạn?',
-  'Join thousands of travelers who have discovered amazing destinations with us. Start planning your perfect trip today.': 'Tham gia cùng hàng nghìn du khách đã khám phá những điểm đến tuyệt vời cùng chúng tôi. Bắt đầu lên kế hoạch cho chuyến đi hoàn hảo ngay hôm nay.',
-  'View All Car Rentals': 'Xem Tất Cả Dịch Vụ Thuê Xe',
-  'No Featured Tours Available': 'Không Có Tour Nổi Bật',
-  'We\'re working on adding some amazing featured tours for you.': 'Chúng tôi đang nỗ lực thêm những tour nổi bật tuyệt vời cho bạn.',
-  'Browse All Tours': 'Duyệt Tất Cả Tour'
+  // Social Media & Sharing
+  'Follow Us': 'Theo Dõi Chúng Tôi',
+  'Share on Facebook': 'Chia Sẻ Trên Facebook',
+  'Share on Twitter': 'Chia Sẻ Trên Twitter',
+  'Share on Instagram': 'Chia Sẻ Trên Instagram',
+  'Share on LinkedIn': 'Chia Sẻ Trên LinkedIn',
+  'Copy Link': 'Sao Chép Liên Kết',
+  'Link Copied': 'Đã Sao Chép Liên Kết',
+
+  // Footer Content
+  'All rights reserved': 'Tất cả quy��n được bảo lưu',
+  'Cookie Policy': 'Chính Sách Cookie',
+  'Quick Links': 'Liên Kết Nhanh',
+  'Useful Links': 'Liên Kết Hữu Ích',
+  'Help': 'Trợ Giúp',
+  'Support': 'Hỗ Trợ',
+  'FAQ': 'Câu Hỏi Thường Gặp',
+  'Newsletter': 'Bản Tin',
+  'Subscribe': 'Đăng Ký',
+  'Subscribe to our newsletter': 'Đăng ký nhận bản tin của chúng tôi',
+  'Enter your email': 'Nhập email của bạn',
+  'Company': 'Công Ty',
+  'Address': 'Địa Chỉ',
+  'Phone': 'Điện Thoại',
+  'Email': 'Email',
+  'Website': 'Trang Web',
+
+  // Error Pages
+  'Page Not Found': 'Không Tìm Thấy Trang',
+  'The page you are looking for does not exist': 'Trang bạn đang tìm kiếm không tồn tại',
+  'Go Back Home': 'Quay Về Trang Chủ',
+  'Internal Server Error': 'Lỗi Máy Chủ Nội Bộ',
+  'Something went wrong on our end': 'Đã xảy ra lỗi ở phía chúng tôi',
+
+  // Accessibility
+  'Skip to main content': 'Chuyển đến nội dung chính',
+  'Close dialog': 'Đóng hộp thoại',
+  'Open menu': 'Mở menu',
+  'Close menu': 'Đóng menu',
+  'Clear search': 'Xóa tìm kiếm',
+
+  // Language Switcher
+  'English': 'Tiếng Anh',
+  'Vietnamese': 'Tiếng Việt',
+  'Switch Language': 'Chuyển Ngôn Ngữ',
+
+  // Additional Missing Translations
+  'Tour Not Found': 'Không Tìm Thấy Tour',
+  'The tour you are looking for does not exist.': 'Tour bạn đang tìm kiếm không tồn tại.',
+  'Browse Tours': 'Duyệt Tour',
+  'Enter your full name': 'Nhập họ tên đầy đủ',
+  'Enter your phone number': 'Nhập số điện thoại của bạn',
+  'Contact person name': 'Tên người liên hệ',
+  'Contact phone number': 'Số điện thoại liên hệ',
+  'e.g., Spouse, Parent': 'ví dụ: Vợ/Chồng, Cha/Mẹ',
+  'Any special requirements, dietary restrictions, medical conditions, or other requests...': 'Bất kỳ yêu cầu đặc biệt, hạn chế về chế độ ăn uống, tình trạng y tế hoặc yêu cầu khác...',
+  'By clicking Book Now, you agree to our Terms of Service and Privacy Policy': 'Bằng cách nhấp vào Đặt Ngay, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi',
 };
 
 interface TranslationContextType {
+  language: 'en' | 'vi';
+  setLanguage: (language: 'en' | 'vi') => void;
   t: (key: string) => string;
-  isVietnamese: boolean;
-  toggleLanguage: () => void;
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
-interface TranslationProviderProps {
-  children: ReactNode;
-}
-
-export const TranslationProvider: React.FC<TranslationProviderProps> = ({ children }) => {
-  const [isVietnamese, setIsVietnamese] = useState(false);
+export const TranslationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [language, setLanguage] = useState<'en' | 'vi'>('en');
 
   const t = (key: string): string => {
-    if (isVietnamese && vietnameseTranslations[key]) {
+    if (language === 'vi' && vietnameseTranslations[key]) {
       return vietnameseTranslations[key];
     }
-    return key; // Return the key itself if translation not found
-  };
-
-  const toggleLanguage = () => {
-    setIsVietnamese(!isVietnamese);
+    return key; // Return the key itself if translation not found (English)
   };
 
   return (
-    <TranslationContext.Provider value={{ t, isVietnamese, toggleLanguage }}>
+    <TranslationContext.Provider value={{ language, setLanguage, t }}>
       {children}
     </TranslationContext.Provider>
   );

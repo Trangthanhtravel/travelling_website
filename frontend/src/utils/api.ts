@@ -110,25 +110,26 @@ export const servicesAPI = {
 
 // Bookings API
 export const bookingsAPI = {
-    // Public - Direct booking without authentication
+    // Public - Direct booking without authentication (updated to match backend expectations)
     createDirectBooking: (bookingData: {
-        type: 'tour' | 'service';
-        itemId: string;
-        customerInfo: {
-            name: string;
-            email: string;
-            phone: string;
-        };
-        bookingDetails: {
-            startDate: string;
-            totalTravelers: number;
-            specialRequests?: string;
-        };
-        pricing: {
-            totalAmount: number;
-            currency: string;
-        };
-    }): Promise<AxiosResponse<ApiResponse<{ bookingNumber: string }>>> =>
+        tourId: number;
+        tourSlug?: string;
+        tourTitle?: string;
+        customerName: string;
+        customerEmail: string;
+        customerPhone: string;
+        startDate: string;
+        adults: number;
+        children: number;
+        infants: number;
+        totalTravelers: number;
+        totalAmount: number;
+        currency?: string;
+        specialRequests?: string;
+        emergencyContactName?: string;
+        emergencyContactPhone?: string;
+        emergencyContactRelationship?: string;
+    }): Promise<AxiosResponse<ApiResponse<{ bookingNumber: string; bookingId: number; status: string; tourTitle: string }>>> =>
         api.post('/bookings', bookingData),
 
     // Admin only
@@ -137,6 +138,15 @@ export const bookingsAPI = {
 
     updateBookingStatus: (id: string, status: string): Promise<AxiosResponse<ApiResponse<void>>> =>
         adminAPI.put(`/bookings/${id}/status`, { status }),
+
+    getBookingById: (id: string): Promise<AxiosResponse<ApiResponse<Booking>>> =>
+        adminAPI.get(`/bookings/${id}`),
+
+    addBookingNote: (id: string, content: string): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.post(`/bookings/${id}/notes`, { content }),
+
+    getBookingStats: (): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.get('/bookings/stats'),
 };
 
 // Blog API (replacing content API with proper blog endpoints)

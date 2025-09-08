@@ -16,10 +16,23 @@ class Booking {
     this.total_travelers = data.total_travelers;
     this.special_requests = data.special_requests;
     
+    // Individual traveler counts (matching frontend)
+    this.adults = data.adults || 0;
+    this.children = data.children || 0;
+    this.infants = data.infants || 0;
+
+    // Emergency contact information
+    this.emergency_contact_name = data.emergency_contact_name;
+    this.emergency_contact_phone = data.emergency_contact_phone;
+    this.emergency_contact_relationship = data.emergency_contact_relationship;
+
     // Pricing
     this.total_amount = data.total_amount;
     this.currency = data.currency || 'USD';
     
+    // Booking tracking
+    this.booking_number = data.booking_number;
+
     // Status and tracking
     this.status = data.status || 'pending';
     this.contacted_at = data.contacted_at;
@@ -36,14 +49,18 @@ class Booking {
     const sql = `
       INSERT INTO bookings (
         type, item_id, customer_name, customer_email, customer_phone,
-        start_date, total_travelers, special_requests, total_amount, currency,
+        start_date, total_travelers, adults, children, infants,
+        emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+        special_requests, total_amount, currency, booking_number,
         status, contacted_at, confirmed_at, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const params = [
       this.type, this.item_id, this.customer_name, this.customer_email, this.customer_phone,
-      this.start_date, this.total_travelers, this.special_requests, this.total_amount, this.currency,
+      this.start_date, this.total_travelers, this.adults, this.children, this.infants,
+      this.emergency_contact_name, this.emergency_contact_phone, this.emergency_contact_relationship,
+      this.special_requests, this.total_amount, this.currency, this.booking_number,
       this.status, this.contacted_at, this.confirmed_at, this.created_at, this.updated_at
     ];
 
