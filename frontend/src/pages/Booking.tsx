@@ -407,25 +407,50 @@ const DirectBooking: React.FC = () => {
               </div>
             )}
 
+            {/* Terms and Policy Notice */}
+            <div className={`p-4 rounded-lg border ${isDarkMode ? 'bg-dark-700 border-dark-600' : 'bg-blue-50 border-blue-200'}`}>
+              <div className="flex items-start space-x-3">
+                <Icon icon={Icons.FiInfo} className={`w-5 h-5 mt-0.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                <div className="flex-1">
+                  <h4 className={`font-medium ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>
+                    Booking Terms & Conditions
+                  </h4>
+                  <p className={`mt-1 text-sm ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}`}>
+                    By submitting this booking request, you acknowledge that you have read and agree to our{' '}
+                    <a
+                      href="/booking-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`underline font-medium hover:no-underline ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}
+                    >
+                      Booking Terms & Conditions
+                    </a>
+                    . Please review our cancellation policy, payment terms, and travel requirements before confirming your booking.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Submit Button */}
-            <div className={`border-t pt-6 ${isDarkMode ? 'border-dark-600' : 'border-gray-200'}`}>
+            <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={isSubmitting || !pricing}
-                className="w-full bg-primary-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                disabled={isSubmitting || createBookingMutation.isPending}
+                className={`px-8 py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${
+                  isSubmitting || createBookingMutation.isPending
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-primary-600 hover:bg-primary-700 text-white'
+                }`}
               >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center">
-                    <Icon icon={Icons.FiLoader} className="animate-spin h-5 w-5 mr-2" />
-                    Submitting Request...
+                {isSubmitting || createBookingMutation.isPending ? (
+                  <div className="flex items-center">
+                    <Icon icon={Icons.FiLoader} className="animate-spin w-4 h-4 mr-2" />
+                    Submitting...
                   </div>
                 ) : (
                   'Submit Booking Request'
                 )}
               </button>
-              <p className={`mt-2 text-sm text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                We will contact you within 24 hours to confirm your booking and provide payment instructions.
-              </p>
             </div>
           </form>
         </div>

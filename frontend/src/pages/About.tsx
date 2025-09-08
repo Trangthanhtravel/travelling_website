@@ -22,6 +22,47 @@ const About: React.FC = () => {
     }
   };
 
+  // Fetch editable About Us content
+  const { data: aboutHistoryData, isLoading: historyLoading } = useQuery({
+    queryKey: ['about-us-history'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_history`);
+      if (!response.ok) throw new Error('Failed to fetch about us history');
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: aboutImageData } = useQuery({
+    queryKey: ['about-us-image'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_image`);
+      if (!response.ok) throw new Error('Failed to fetch about us image');
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: aboutVisionData } = useQuery({
+    queryKey: ['about-us-vision'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_vision`);
+      if (!response.ok) throw new Error('Failed to fetch about us vision');
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: aboutMissionData } = useQuery({
+    queryKey: ['about-us-mission'],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_mission`);
+      if (!response.ok) throw new Error('Failed to fetch about us mission');
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Fetch featured categories from database for the "What We Do" section
   const { data: featuredCategoriesData, isLoading: categoriesLoading } = useQuery({
     queryKey: ['featured-categories-about'],
@@ -34,6 +75,10 @@ const About: React.FC = () => {
   });
 
   const featuredCategories = featuredCategoriesData?.data || [];
+  const aboutHistory = aboutHistoryData?.data?.content || '';
+  const aboutImage = aboutImageData?.data?.content || 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+  const aboutVision = aboutVisionData?.data?.content || '';
+  const aboutMission = aboutMissionData?.data?.content || '';
 
   // Map category icons to actual icons
   const getIconByName = (iconName: string) => {
@@ -85,40 +130,35 @@ const About: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left side - Text Content */}
             <div className="space-y-6">
-              <div className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-                <p className="mb-6">
-                  For over 15 years, Trang Thanh Travel has been a trusted companion in the travel industry,
-                  helping thousands of customers create smooth and memorable journeys. What started as a small
-                  family business with a passion for exploration has grown into one of Vietnam's most reliable
-                  travel service providers.
-                </p>
-                <p className="mb-6">
-                  Founded in 2009 with a simple mission to make travel accessible and enjoyable for everyone,
-                  we began by organizing local tours around Ho Chi Minh City. Our founders, driven by their
-                  love for Vietnamese culture and hospitality, recognized the need for personalized,
-                  high-quality travel services that truly cater to our customers' unique needs.
-                </p>
-                <p className="mb-6">
-                  Over the years, we have expanded our services to include domestic and international tours,
-                  car rentals, visa assistance, hotel bookings, and comprehensive travel planning. Our growth
-                  has been fueled by word-of-mouth recommendations from satisfied customers who have experienced
-                  our commitment to excellence firsthand.
-                </p>
-                <p>
-                  Today, Trang Thanh Travel stands as a testament to the power of dedication, quality service,
-                  and genuine care for our customers. We continue to evolve while staying true to our core
-                  values of reliability, authenticity, and exceptional customer service.
-                </p>
-              </div>
+              {historyLoading ? (
+                <div className="animate-pulse space-y-4">
+                  <div className={`h-4 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
+                  <div className={`h-4 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
+                  <div className={`h-4 rounded w-3/4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
+                  <div className={`h-4 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
+                  <div className={`h-4 rounded w-5/6 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
+                </div>
+              ) : (
+                <div className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: aboutHistory.replace(/\n/g, '<br />')
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Right side - Image */}
             <div className="relative">
               <div className="relative h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                 <img
-                  src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                  src={aboutImage}
                   alt="Trang Thanh Travel History"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div className="absolute bottom-6 left-6 text-white">
@@ -148,9 +188,7 @@ const About: React.FC = () => {
                 Our Vision
               </h3>
               <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-                To be the leading travel company in Southeast Asia, known for creating extraordinary and
-                sustainable travel experiences that connect people with diverse cultures, beautiful destinations,
-                and unforgettable memories while promoting responsible tourism practices.
+                {aboutVision}
               </p>
             </div>
 
@@ -163,10 +201,7 @@ const About: React.FC = () => {
                 Our Mission
               </h3>
               <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-                To provide exceptional, personalized travel services that exceed our customers' expectations.
-                We are committed to delivering seamless journeys through our comprehensive range of services
-                including tours, transportation, accommodation, and travel assistance, all while maintaining
-                the highest standards of safety, reliability, and customer satisfaction.
+                {aboutMission}
               </p>
             </div>
           </div>

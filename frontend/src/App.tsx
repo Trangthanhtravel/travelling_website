@@ -13,6 +13,7 @@ import About from './pages/About';
 import Tours from './pages/Tours';
 import TourDetail from './pages/TourDetail';
 import Booking from './pages/Booking';
+import BookingPolicy from './pages/BookingPolicy';
 import Services from './pages/Services';
 import CarRental from './pages/CarRental';
 import ServiceDetail from './pages/ServiceDetail';
@@ -23,6 +24,7 @@ import Contact from './pages/Contact'; // Add Contact import
 import Login from './pages/auth/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import BlogManagement from './pages/admin/BlogManagement';
+import ContentManagement from './pages/admin/ContentManagement';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
@@ -69,6 +71,7 @@ const AppContent: React.FC = () => {
             {/* Customer Booking Routes - No authentication required */}
             <Route path="/booking/:slug" element={<Booking />} />
             <Route path="/service-booking/:slug" element={<ServiceBooking />} />
+            <Route path="/booking-policy" element={<BookingPolicy />} />
 
             {/* Admin Routes */}
             <Route path="/admin/*" element={
@@ -79,6 +82,11 @@ const AppContent: React.FC = () => {
             <Route path="/admin/blogs" element={
               <ProtectedRoute requiredRole="admin">
                 <BlogManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/content" element={
+              <ProtectedRoute requiredRole="admin">
+                <ContentManagement />
               </ProtectedRoute>
             } />
           </Routes>

@@ -11,6 +11,7 @@ import HeroImageManagement from './HeroImageManagement';
 import AboutSectionManagement from './AboutSectionManagement';
 import SocialLinksManagement from './SocialLinksManagement';
 import EmailSettingsManagement from './EmailSettingsManagement';
+import ContentManagement from './ContentManagement';
 
 interface DashboardStats {
   totalBookings: number;
@@ -182,7 +183,8 @@ const AdminDashboard: React.FC = () => {
     { id: 'categories', name: 'Categories', icon: Icons.FiGrid },
     { id: 'bookings', name: 'Bookings', icon: Icons.FiCalendar },
     { id: 'customers', name: 'Customers', icon: Icons.FiUsers },
-    { id: 'content', name: 'Blogs', icon: Icons.FiFileText },
+    { id: 'blogs', name: 'Blogs', icon: Icons.FiFileText },
+    { id: 'content', name: 'Content', icon: Icons.FiEdit },
     { id: 'hero-images', name: 'Hero Images', icon: Icons.FiImage },
     { id: 'about-section', name: 'About Section', icon: Icons.FiInfo },
     { id: 'social-links', name: 'Social Links', icon: Icons.FiMessageCircle },
@@ -240,8 +242,10 @@ const AdminDashboard: React.FC = () => {
         return <BookingManagement />;
       case 'customers':
         return <CustomerManagement />;
-      case 'content':
+      case 'blogs':
         return <BlogManagement />;
+      case 'content':
+        return <ContentManagement />;
       case 'hero-images':
         return <HeroImageManagement />;
       case 'about-section':

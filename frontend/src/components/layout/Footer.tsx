@@ -65,6 +65,11 @@ const Footer: React.FC = () => {
                   {t('Contact')}
                 </Link>
               </li>
+              <li>
+                <Link to="/booking-policy" className={`transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-200 hover:text-light-50'}`}>
+                  {t('Booking Policy')}
+                </Link>
+              </li>
             </ul>
           </div>
 
