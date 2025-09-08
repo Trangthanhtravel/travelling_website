@@ -34,7 +34,7 @@ const ContentManagement: React.FC = () => {
   const { data: contentData, isLoading } = useQuery({
     queryKey: ['admin-content'],
     queryFn: async () => {
-      const response = await fetch(`${getApiUrl()}/content`, {
+      const response = await fetch(`${getApiUrl()}/admin/content`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
@@ -48,7 +48,7 @@ const ContentManagement: React.FC = () => {
   // Update content mutation
   const updateContentMutation = useMutation({
     mutationFn: async (data: { id: number; title: string; content: string }) => {
-      const response = await fetch(`${getApiUrl()}/content/${data.id}`, {
+      const response = await fetch(`${getApiUrl()}/admin/content/${data.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
@@ -75,7 +75,7 @@ const ContentManagement: React.FC = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch(`${getApiUrl()}/admin/upload`, {
+      const response = await fetch(`${getApiUrl()}/admin/upload-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
