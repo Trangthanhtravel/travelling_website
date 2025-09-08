@@ -60,7 +60,7 @@ const Contact: React.FC = () => {
             {t('Get in Touch')}
           </h1>
           <p className={`text-xl max-w-3xl mx-auto ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-            Chúng tôi luôn sẵn sàng hỗ trợ bạn lên kế hoạch cho chuyến du lịch hoàn hảo. Hãy liên hệ với chúng tôi ngay hôm nay!
+            {t('We are always ready to help you plan the perfect trip. Contact us today!')}
           </p>
         </div>
 

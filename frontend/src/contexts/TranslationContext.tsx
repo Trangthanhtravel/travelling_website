@@ -89,6 +89,7 @@ const vietnameseTranslations: Translations = {
 
   // Contact Page
   'Get in Touch': 'Liên Hệ Với Chúng Tôi',
+  'We are always ready to help you plan the perfect trip. Contact us today!': 'Chúng tôi luôn sẵn sàng hỗ trợ bạn lên kế hoạch cho chuyến du lịch hoàn hảo. Hãy liên hệ với chúng tôi ngay hôm nay!',
   'Contact Information': 'Thông Tin Liên Hệ',
   'Send us a Message': 'Gửi Tin Nhắn Cho Chúng Tôi',
   'Full Name': 'Họ và Tên',
@@ -134,7 +135,7 @@ const vietnameseTranslations: Translations = {
   // Form Validation
   'Name is required': 'Tên là bắt buộc',
   'Email is required': 'Email là bắt buộc',
-  'Invalid email': 'Email không hợp lệ',
+  'Invalid email': 'Email không h��p lệ',
   'Subject is required': 'Chủ đề là bắt buộc',
   'Message is required': 'Tin nhắn là bắt buộc',
   'Message must be at least 10 characters': 'Tin nhắn phải có ít nhất 10 ký tự',
@@ -151,6 +152,8 @@ const vietnameseTranslations: Translations = {
 
   // Footer
   'About Us': 'Về Chúng Tôi',
+  'Your trusted travel partner for unforgettable adventures. We create personalized experiences that connect you with the world\'s most beautiful destinations.': 'Đối tác du lịch đáng tin cậy của bạn cho những cuộc phiêu lưu khó quên. Chúng tôi tạo ra những trải nghiệm cá nhân hóa kết nối bạn với những điểm đến đẹp nhất thế giới.',
+  'Booking Policy': 'Chính Sách Đặt Tour',
   'Quick Links': 'Liên Kết Nhanh',
   'Follow Us': 'Theo Dõi Chúng Tôi',
   'Newsletter': 'Bản Tin',
@@ -187,7 +190,196 @@ const vietnameseTranslations: Translations = {
   'September': 'Tháng Chín',
   'October': 'Tháng Mười',
   'November': 'Tháng Mười Một',
-  'December': 'Tháng Mười Hai'
+  'December': 'Tháng Mười Hai',
+
+  // Car Rental specific
+  'Car Rental Services': 'Dịch Vụ Thuê Xe',
+  'Premium vehicle fleet for your travel needs': 'Đội xe cao cấp cho nhu cầu du lịch của bạn',
+  'Car Rentals': 'Thuê Xe',
+  'Search car rentals...': 'Tìm kiếm dịch vụ thuê xe...',
+  'View Mode': 'Chế Độ Xem',
+  'Newest First': 'Mới Nhất Trước',
+  'Oldest First': 'Cũ Nhất Trước',
+  'Price: Low to High': 'Giá: Thấp Đến Cao',
+  'Price: High to Low': 'Giá: Cao Đến Thấp',
+  'Name: A to Z': 'Tên: A đến Z',
+  'Name: Z to A': 'Tên: Z đến A',
+  'Choose Your Vehicle': 'Chọn Xe Của Bạn',
+  'Rental Duration': 'Thời Gian Thuê',
+  'Pick-up Location': 'Địa Điểm Nhận Xe',
+  'Drop-off Location': 'Địa Điểm Trả Xe',
+  'Pick-up Date': 'Ngày Nhận Xe',
+  'Drop-off Date': 'Ngày Trả Xe',
+  'Driver Age': 'Tu���i Tài Xế',
+  'With Driver': 'Có Tài Xế',
+  'Self Drive': 'Tự Lái',
+  'Book Vehicle': 'Đặt Xe',
+  'Vehicle Type': 'Loại Xe',
+  'Transmission': 'Hộp Số',
+  'Automatic': 'Tự Động',
+  'Manual': 'Số Sàn',
+  'Fuel Type': 'Loại Nhiên Liệu',
+  'Seats': 'Số Ghế',
+  'Air Conditioning': 'Điều Hòa',
+  'GPS Navigation': 'Định Vị GPS',
+  'Insurance': 'Bảo Hiểm',
+  'Unlimited Mileage': 'Không Giới Hạn Km',
+
+  // About Page
+  'Our Story': 'Câu Chuyện Của Chúng Tôi',
+  'Our Mission': 'Sứ Mệnh',
+  'Our Vision': 'Tầm Nhìn',
+  'Our Team': 'Đội Ngũ',
+  'Company History': 'Lịch Sử Công Ty',
+  'Awards & Recognition': 'Giải Thưởng & Công Nhận',
+  'Our Values': 'Giá Trị Cốt Lõi',
+  'Quality Service': 'Dịch Vụ Chất Lượng',
+  'Customer Satisfaction': 'Sự Hài Lòng Khách Hàng',
+  'Sustainable Tourism': 'Du Lịch Bền Vững',
+  'Local Expertise': 'Chuyên Môn Địa Phương',
+
+  // Statistics & Numbers
+  'Tours Completed': 'Tour Đã Hoàn Thành',
+  'Countries Visited': 'Quốc Gia Đã Đến',
+  'Tour Guides': 'Hướng Dẫn Viên',
+  'Customer Rating': 'Đánh Giá Khách Hàng',
+  'Positive Reviews': 'Đánh Giá Tích Cực',
+  'Repeat Customers': 'Khách Hàng Quay Lại',
+
+  // Tour Types & Categories
+  'Adventure Tours': 'Tour Phiêu Lưu',
+  'Cultural Tours': 'Tour Văn Hóa',
+  'Food Tours': 'Tour Ẩm Thực',
+  'Beach Tours': 'Tour Biển',
+  'Mountain Tours': 'Tour Núi',
+  'City Tours': 'Tour Thành Phố',
+  'Historical Tours': 'Tour Lịch Sử',
+  'Nature Tours': 'Tour Thiên Nhiên',
+  'Photography Tours': 'Tour Chụp Ảnh',
+  'Luxury Tours': 'Tour Cao Cấp',
+  'Budget Tours': 'Tour Tiết Kiệm',
+  'Family Tours': 'Tour Gia Đình',
+  'Honeymoon Tours': 'Tour Tuần Trăng Mật',
+  'Group Tours': 'Tour Nhóm',
+  'Private Tours': 'Tour Riêng',
+
+  // Booking Status
+  'Available': 'Có Sẵn',
+  'Sold Out': 'Hết Chỗ',
+  'Last Few Spots': 'Còn Ít Chỗ',
+  'Booking Confirmed': 'Đã Xác Nhận Đặt Tour',
+  'Booking Pending': 'Đang Chờ Xác Nhận',
+  'Booking Cancelled': 'Đã Hủy',
+  'Payment Required': 'Cần Thanh Toán',
+  'Payment Completed': 'Đã Thanh Toán',
+
+  // Service Types
+  'Transportation': 'Vận Chuyển',
+  'Accommodation': 'Lưu Trú',
+  'Tour Guide': 'Hướng D���n Viên',
+  'Meals': 'Bữa Ăn',
+  'Activities': 'Hoạt Động',
+  'Equipment': 'Thiết Bị',
+  'Entrance Fees': 'Phí Vào Cửa',
+
+  // Difficulty Levels
+  'Easy': 'Dễ',
+  'Moderate': 'Trung Bình',
+  'Challenging': 'Khó',
+  'Difficult': 'Rất Khó',
+  'Expert': 'Chuyên Gia',
+
+  // Weather & Seasons
+  'Best Time to Visit': 'Thời Gian Tốt Nhất',
+  'Weather': 'Thời Tiết',
+  'Spring': 'Mùa Xuân',
+  'Summer': 'Mùa Hè',
+  'Autumn': 'Mùa Thu',
+  'Winter': 'Mùa Đông',
+  'Rainy Season': 'Mùa Mưa',
+  'Dry Season': 'Mùa Khô',
+
+  // Additional Forms & Actions
+  'Select Date': 'Chọn Ngày',
+  'Select Time': 'Chọn Giờ',
+  'Select Option': 'Chọn Tùy Chọn',
+  'Choose Package': 'Chọn Gói',
+  'Download Brochure': 'Tải Brochure',
+  'Share Tour': 'Chia Sẻ Tour',
+  'Add to Wishlist': 'Thêm Vào Danh Sách Yêu Thích',
+  'Compare Tours': 'So Sánh Tour',
+  'Print Itinerary': 'In Lịch Trình',
+  'Send to Friend': 'Gửi Cho Bạn',
+
+  // Social Media & Contact
+  'Follow us on Facebook': 'Theo dõi chúng tôi trên Facebook',
+  'Follow us on Instagram': 'Theo dõi chúng tôi trên Instagram',
+  'Follow us on Twitter': 'Theo dõi chúng tôi trên Twitter',
+  'Follow us on YouTube': 'Theo dõi chúng tôi trên YouTube',
+  'Call Us': 'Gọi Cho Chúng Tôi',
+  'Email Us': 'Gửi Email',
+  'WhatsApp': 'WhatsApp',
+  'Live Chat': 'Chat Trực Tuyến',
+
+  // Error Messages & Validation
+  'Please fill in all required fields': 'Vui lòng điền tất cả các trường bắt buộc',
+  'Please select a valid date': 'Vui lòng chọn ngày hợp lệ',
+  'Please enter a valid phone number': 'Vui lòng nhập số điện thoại hợp lệ',
+  'Connection error': 'Lỗi kết nối',
+  'Server error': 'Lỗi máy chủ',
+  'No results found': 'Không tìm thấy kết quả',
+  'Page not found': 'Không tìm thấy trang',
+
+  // Currency & Payment
+  'Currency': 'Tiền Tệ',
+  'VND': 'VNĐ',
+  'USD': 'USD',
+  'Credit Card': 'Thẻ Tín Dụng',
+  'Debit Card': 'Thẻ Ghi Nợ',
+  'Bank Transfer': 'Chuyển Khoản',
+  'Cash': 'Tiền Mặt',
+  'Online Payment': 'Thanh Toán Online',
+  'Installment': 'Trả Góp',
+  'Deposit': 'Đặt Cọc',
+  'Full Payment': 'Thanh Toán Đủ',
+  'Refund': 'Hoàn Tiền',
+
+  // Admin Panel
+  'Dashboard': 'Bảng Điều Khiển',
+  'Manage Tours': 'Quản Lý Tour',
+  'Manage Bookings': 'Quản Lý Đặt Tour',
+  'Manage Customers': 'Quản Lý Khách Hàng',
+  'Manage Services': 'Quản Lý Dịch Vụ',
+  'Manage Content': 'Quản Lý Nội Dung',
+  'Settings': 'Cài Đặt',
+  'Reports': 'Báo Cáo',
+  'Statistics': 'Thống Kê',
+  'User Management': 'Quản Lý Người Dùng',
+  'Content Management': 'Quản Lý Nội Dung',
+  'Upload Image': 'Tải Ảnh Lên',
+  'Gallery': 'Thư Viện',
+  'SEO Settings': 'Cài Đặt SEO',
+
+  // Additional UI Elements
+  'Show More': 'Hiển Thị Thêm',
+  'Show Less': 'Hiển Thị Ít Hơn',
+  'Expand': 'Mở Rộng',
+  'Collapse': 'Thu Gọn',
+  'Download': 'Tải Xuống',
+  'Upload': 'Tải Lên',
+  'Copy': 'Sao Chép',
+  'Paste': 'Dán',
+  'Select All': 'Chọn Tất Cả',
+  'Deselect All': 'Bỏ Chọn Tất Cả',
+  'Refresh': 'Làm Mới',
+  'Reload': 'Tải Lại',
+
+  // Responsive Design
+  'Menu': 'Menu',
+  'Toggle Navigation': 'Chuyển Đổi Điều Hướng',
+  'Mobile Menu': 'Menu Di Động',
+  'Desktop View': 'Chế Độ Desktop',
+  'Mobile View': 'Chế Độ Di Động'
 };
 
 interface TranslationContextType {
@@ -203,13 +395,13 @@ interface TranslationProviderProps {
 }
 
 export const TranslationProvider: React.FC<TranslationProviderProps> = ({ children }) => {
-  const [isVietnamese, setIsVietnamese] = useState(true); // Default to Vietnamese
+  const [isVietnamese, setIsVietnamese] = useState(false);
 
   const t = (key: string): string => {
-    if (!isVietnamese) {
-      return key; // Return original English text
+    if (isVietnamese && vietnameseTranslations[key]) {
+      return vietnameseTranslations[key];
     }
-    return vietnameseTranslations[key] || key;
+    return key; // Return the key itself if translation not found
   };
 
   const toggleLanguage = () => {
@@ -223,9 +415,9 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
   );
 };
 
-export const useTranslation = (): TranslationContextType => {
+export const useTranslation = () => {
   const context = useContext(TranslationContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useTranslation must be used within a TranslationProvider');
   }
   return context;

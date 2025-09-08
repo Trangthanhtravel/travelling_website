@@ -22,8 +22,7 @@ const Footer: React.FC = () => {
               />
             </div>
             <p className={`mb-6 max-w-md ${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>
-              Đối tác du lịch đáng tin cậy của bạn cho những cuộc phiêu lưu khó quên.
-              Chúng tôi tạo ra những trải nghiệm cá nhân hóa kết nối bạn với những điểm đến đẹp nhất thế giới.
+              {t('Your trusted travel partner for unforgettable adventures. We create personalized experiences that connect you with the world\'s most beautiful destinations.')}
             </p>
             <div className={`space-y-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>
               <div className="flex items-center">

@@ -32,11 +32,11 @@ const Header: React.FC = () => {
     const navigation = [
         { name: t('Home'), href: '/' },
         { name: t('Tours'), href: '/tours' },
-        { name: 'Private Car Rental', href: '/car-rental' },
-        { name: 'Other Travelling Services', href: '/services' },
+        { name: t('Car Rental'), href: '/car-rental' },
+        { name: t('Services'), href: '/services' },
         { name: t('Blogs'), href: '/blogs' },
         { name: t('Contact'), href: '/contact' },
-        { name: t('About us'), href: '/about' },
+        { name: t('About Us'), href: '/about' },
     ];
 
     const logoTextClasses = isScrolled
