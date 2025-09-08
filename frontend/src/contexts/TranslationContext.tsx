@@ -467,28 +467,36 @@ const vietnameseTranslations: Translations = {
 };
 
 interface TranslationContextType {
-  language: 'en' | 'vi';
-  setLanguage: (language: 'en' | 'vi') => void;
-  t: (key: string) => string;
+    t: (key: string) => string;
+    isVietnamese: boolean;
+    toggleLanguage: () => void;
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
-export const TranslationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<'en' | 'vi'>('en');
+interface TranslationProviderProps {
+    children: ReactNode;
+}
 
-  const t = (key: string): string => {
-    if (language === 'vi' && vietnameseTranslations[key]) {
-      return vietnameseTranslations[key];
-    }
-    return key; // Return the key itself if translation not found (English)
-  };
+export const TranslationProvider: React.FC<TranslationProviderProps> = ({ children }) => {
+    const [isVietnamese, setIsVietnamese] = useState(false);
 
-  return (
-    <TranslationContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </TranslationContext.Provider>
-  );
+    const t = (key: string): string => {
+        if (isVietnamese && vietnameseTranslations[key]) {
+            return vietnameseTranslations[key];
+        }
+        return key; // Return the key itself if translation not found
+    };
+
+    const toggleLanguage = () => {
+        setIsVietnamese(!isVietnamese);
+    };
+
+    return (
+        <TranslationContext.Provider value={{ t, isVietnamese, toggleLanguage }}>
+            {children}
+        </TranslationContext.Provider>
+    );
 };
 
 export const useTranslation = () => {
