@@ -69,12 +69,13 @@ const getTours = async (req, res) => {
       page = 1,
       limit = 12,
       location,
-      category, // Now uses dynamic category slugs from database
+      category,
       minPrice,
       maxPrice,
       search,
       sortBy = 'created_at',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
+      language = 'en' // Add language parameter
     } = req.query;
 
     const offset = (page - 1) * limit;
@@ -82,7 +83,7 @@ const getTours = async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       location,
-      category, // Uses category_slug for filtering
+      category,
       minPrice: minPrice ? parseFloat(minPrice) : undefined,
       maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
       sortBy,
@@ -96,9 +97,19 @@ const getTours = async (req, res) => {
       result = await Tour.findAll(db, options);
     }
 
+    // Apply localization to the results
+    const localizedTours = result.data.map(tour => {
+      const tourJson = tour.toJSON();
+      const localizedContent = tour.getLocalizedContent(language);
+      return {
+        ...tourJson,
+        ...localizedContent
+      };
+    });
+
     res.json({
       success: true,
-      data: result.data.map(tour => tour.toJSON()),
+      data: localizedTours,
       pagination: result.pagination
     });
   } catch (error) {
@@ -110,12 +121,14 @@ const getTours = async (req, res) => {
   }
 };
 
-// Get single tour by ID
-const getTour = async (req, res) => {
+// Get tour by ID
+const getTourById = async (req, res) => {
   try {
     const db = getDB();
-    const tour = await Tour.findById(db, req.params.id);
+    const { id } = req.params;
+    const { language = 'en' } = req.query;
 
+    const tour = await Tour.findById(db, id);
     if (!tour) {
       return res.status(404).json({
         success: false,
@@ -123,12 +136,18 @@ const getTour = async (req, res) => {
       });
     }
 
+    const tourJson = tour.toJSON();
+    const localizedContent = tour.getLocalizedContent(language);
+
     res.json({
       success: true,
-      data: tour.toJSON()
+      data: {
+        ...tourJson,
+        ...localizedContent
+      }
     });
   } catch (error) {
-    console.error('Get tour error:', error);
+    console.error('Get tour by ID error:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching tour'
@@ -136,13 +155,14 @@ const getTour = async (req, res) => {
   }
 };
 
-// Get tour by slug - now properly implemented
+// Get tour by slug
 const getTourBySlug = async (req, res) => {
   try {
     const db = getDB();
     const { slug } = req.params;
-    const tour = await Tour.findBySlug(db, slug);
+    const { language = 'en' } = req.query;
 
+    const tour = await Tour.findBySlug(db, slug);
     if (!tour) {
       return res.status(404).json({
         success: false,
@@ -150,9 +170,15 @@ const getTourBySlug = async (req, res) => {
       });
     }
 
+    const tourJson = tour.toJSON();
+    const localizedContent = tour.getLocalizedContent(language);
+
     res.json({
       success: true,
-      data: tour.toJSON()
+      data: {
+        ...tourJson,
+        ...localizedContent
+      }
     });
   } catch (error) {
     console.error('Get tour by slug error:', error);
@@ -167,46 +193,44 @@ const getTourBySlug = async (req, res) => {
 const createTour = async (req, res) => {
   try {
     const db = getDB();
-    const tourData = req.body;
+    const r2Bucket = process.env.R2_BUCKET;
 
-    // Parse JSON fields from FormData
-    if (tourData.included && typeof tourData.included === 'string') {
-      tourData.included = JSON.parse(tourData.included);
-    }
-    if (tourData.excluded && typeof tourData.excluded === 'string') {
-      tourData.excluded = JSON.parse(tourData.excluded);
-    }
-    if (tourData.itinerary && typeof tourData.itinerary === 'string') {
-      tourData.itinerary = JSON.parse(tourData.itinerary);
-    }
+    // Parse JSON fields from form data
+    const tourData = { ...req.body };
 
-    // Convert string values to appropriate types
-    tourData.price = parseFloat(tourData.price);
-    tourData.max_participants = parseInt(tourData.max_participants);
-    tourData.featured = tourData.featured === 'true';
+    // Parse JSON fields
+    ['itinerary', 'included', 'excluded', 'itinerary_vi', 'included_vi', 'excluded_vi'].forEach(field => {
+      if (tourData[field] && typeof tourData[field] === 'string') {
+        try {
+          tourData[field] = JSON.parse(tourData[field]);
+        } catch (e) {
+          // If parsing fails, keep as string or set to appropriate default
+          if (field.includes('included') || field.includes('excluded')) {
+            tourData[field] = [];
+          } else if (field.includes('itinerary')) {
+            tourData[field] = {};
+          }
+        }
+      }
+    });
+
+    // Convert featured to boolean
+    tourData.featured = tourData.featured === 'true' || tourData.featured === true;
 
     const tour = new Tour(tourData);
 
-    // Handle single image upload if provided
+    // Handle image upload
     if (req.file) {
-      try {
-        const imageUrl = await tour.updateImage(req.r2, req.file);
-        tour.image = imageUrl;
-      } catch (imageError) {
-        console.error('Image upload error:', imageError);
-        return res.status(400).json({
-          success: false,
-          message: `Image upload failed: ${imageError.message}`
-        });
-      }
+      await tour.updateImage(r2Bucket, req.file);
     }
 
+    // Save to database
     await tour.save(db);
 
     res.status(201).json({
       success: true,
-      data: tour.toJSON(),
-      message: 'Tour created successfully'
+      message: 'Tour created successfully',
+      data: tour.toJSON()
     });
   } catch (error) {
     console.error('Create tour error:', error);
@@ -221,8 +245,10 @@ const createTour = async (req, res) => {
 const updateTour = async (req, res) => {
   try {
     const db = getDB();
-    const tour = await Tour.findById(db, req.params.id);
+    const r2Bucket = process.env.R2_BUCKET;
+    const { id } = req.params;
 
+    const tour = await Tour.findById(db, id);
     if (!tour) {
       return res.status(404).json({
         success: false,
@@ -230,45 +256,42 @@ const updateTour = async (req, res) => {
       });
     }
 
-    const updateData = req.body;
+    // Parse JSON fields from form data
+    const updateData = { ...req.body };
 
-    // Parse JSON fields from FormData
-    if (updateData.included && typeof updateData.included === 'string') {
-      updateData.included = JSON.parse(updateData.included);
-    }
-    if (updateData.excluded && typeof updateData.excluded === 'string') {
-      updateData.excluded = JSON.parse(updateData.excluded);
-    }
-    if (updateData.itinerary && typeof updateData.itinerary === 'string') {
-      updateData.itinerary = JSON.parse(updateData.itinerary);
-    }
-
-    // Convert string values to appropriate types
-    if (updateData.price) updateData.price = parseFloat(updateData.price);
-    if (updateData.max_participants) updateData.max_participants = parseInt(updateData.max_participants);
-    if (updateData.featured !== undefined) updateData.featured = updateData.featured === 'true';
-
-    // Handle single image upload if provided
-    if (req.file) {
-      try {
-        const oldImage = tour.image;
-        const imageUrl = await tour.updateImage(req.r2, req.file, oldImage);
-        updateData.image = imageUrl;
-      } catch (imageError) {
-        console.error('Image upload error:', imageError);
-        return res.status(400).json({
-          success: false,
-          message: `Image upload failed: ${imageError.message}`
-        });
+    // Parse JSON fields
+    ['itinerary', 'included', 'excluded', 'itinerary_vi', 'included_vi', 'excluded_vi'].forEach(field => {
+      if (updateData[field] && typeof updateData[field] === 'string') {
+        try {
+          updateData[field] = JSON.parse(updateData[field]);
+        } catch (e) {
+          // If parsing fails, keep existing value
+          delete updateData[field];
+        }
       }
+    });
+
+    // Convert featured to boolean if provided
+    if (updateData.featured !== undefined) {
+      updateData.featured = updateData.featured === 'true' || updateData.featured === true;
     }
 
-    await tour.update(db, updateData);
+    // Update tour properties
+    Object.assign(tour, updateData);
+
+    // Handle image upload
+    if (req.file) {
+      const oldImage = tour.image;
+      await tour.updateImage(r2Bucket, req.file, oldImage);
+    }
+
+    // Update in database
+    await tour.update(db);
 
     res.json({
       success: true,
-      data: tour.toJSON(),
-      message: 'Tour updated successfully'
+      message: 'Tour updated successfully',
+      data: tour.toJSON()
     });
   } catch (error) {
     console.error('Update tour error:', error);
@@ -481,10 +504,14 @@ const deleteGalleryPhoto = async (req, res) => {
   }
 };
 
+// Get tour by ID (alias for getTourById)
+const getTour = getTourById;
+
 module.exports = {
   getTours,
   getFeaturedTours,
   getTourBySlug,
+  getTourById,
   getTour,
   createTour,
   updateTour,

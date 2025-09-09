@@ -20,6 +20,16 @@ class Tour {
     this.excluded = data.excluded ? (typeof data.excluded === 'string' ? JSON.parse(data.excluded) : data.excluded) : [];
     this.status = data.status || 'active';
     this.featured = Boolean(data.featured);
+
+    // Vietnamese language fields
+    this.title_vi = data.title_vi;
+    this.description_vi = data.description_vi;
+    this.location_vi = data.location_vi;
+    this.duration_vi = data.duration_vi;
+    this.itinerary_vi = data.itinerary_vi ? (typeof data.itinerary_vi === 'string' ? JSON.parse(data.itinerary_vi) : data.itinerary_vi) : {};
+    this.included_vi = data.included_vi ? (typeof data.included_vi === 'string' ? JSON.parse(data.included_vi) : data.included_vi) : [];
+    this.excluded_vi = data.excluded_vi ? (typeof data.excluded_vi === 'string' ? JSON.parse(data.excluded_vi) : data.excluded_vi) : [];
+
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }
@@ -68,12 +78,20 @@ class Tour {
       included: JSON.stringify(this.included),
       excluded: JSON.stringify(this.excluded),
       status: this.status,
-      featured: this.featured ? 1 : 0  // Convert boolean to 0/1 for SQLite
+      featured: this.featured ? 1 : 0, // Convert boolean to 0/1 for SQLite
+      // Vietnamese fields
+      title_vi: this.title_vi,
+      description_vi: this.description_vi,
+      location_vi: this.location_vi,
+      duration_vi: this.duration_vi,
+      itinerary_vi: JSON.stringify(this.itinerary_vi),
+      included_vi: JSON.stringify(this.included_vi),
+      excluded_vi: JSON.stringify(this.excluded_vi)
     };
 
     const sql = `
-      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, image, gallery, itinerary, included, excluded, status, featured, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, image, gallery, itinerary, included, excluded, status, featured, title_vi, description_vi, location_vi, duration_vi, itinerary_vi, included_vi, excluded_vi, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     const params = [
@@ -81,7 +99,9 @@ class Tour {
       tourData.duration, tourData.location, tourData.max_participants,
       tourData.category_slug, tourData.image, tourData.gallery,
       tourData.itinerary, tourData.included, tourData.excluded,
-      tourData.status, tourData.featured
+      tourData.status, tourData.featured,
+      tourData.title_vi, tourData.description_vi, tourData.location_vi,
+      tourData.duration_vi, tourData.itinerary_vi, tourData.included_vi, tourData.excluded_vi
     ];
 
     const result = await db.prepare(sql).bind(...params).run();
@@ -380,6 +400,30 @@ class Tour {
       itinerary: typeof this.itinerary === 'string' ? JSON.parse(this.itinerary) : this.itinerary,
       included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
       excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded
+    };
+  }
+
+  // Get localized content based on language
+  getLocalizedContent(language = 'en') {
+    if (language === 'vi') {
+      return {
+        title: this.title_vi || this.title,
+        description: this.description_vi || this.description,
+        location: this.location_vi || this.location,
+        duration: this.duration_vi || this.duration,
+        itinerary: this.itinerary_vi && Object.keys(this.itinerary_vi).length > 0 ? this.itinerary_vi : this.itinerary,
+        included: this.included_vi && this.included_vi.length > 0 ? this.included_vi : this.included,
+        excluded: this.excluded_vi && this.excluded_vi.length > 0 ? this.excluded_vi : this.excluded
+      };
+    }
+    return {
+      title: this.title,
+      description: this.description,
+      location: this.location,
+      duration: this.duration,
+      itinerary: this.itinerary,
+      included: this.included,
+      excluded: this.excluded
     };
   }
 }

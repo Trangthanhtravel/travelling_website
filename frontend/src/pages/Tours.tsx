@@ -9,7 +9,7 @@ import { Icon, Icons } from '../components/common/Icons';
 
 const Tours: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation(); // Add language and getLocalizedContent
   const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<TourFilters>({
     page: 1,
@@ -46,9 +46,11 @@ const Tours: React.FC = () => {
     }))
   ];
 
+  // Fetch tours with language parameter
   const { data: toursData, isLoading, error } = useQuery({
-    queryKey: ['tours', filters],
-    queryFn: () => toursAPI.getTours(filters),
+    queryKey: ['tours', filters, language], // Add language to query key
+    queryFn: () => toursAPI.getTours({ ...filters, language }), // Pass language to API
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const sortOptions = [
@@ -96,6 +98,88 @@ const Tours: React.FC = () => {
 
   // Ensure tours is treated as an array
   const toursArray: Tour[] = Array.isArray(tours) ? tours : [];
+
+  // Tour Card Component with bilingual support
+  const TourCard: React.FC<{ tour: Tour }> = ({ tour }) => {
+    // Use localized content from the API response (backend already handles localization)
+    const title = tour.title;
+    const description = tour.description;
+    const location = tour.location;
+    const duration = tour.duration;
+
+    return (
+      <div className={`group bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
+        isDarkMode ? 'border border-gray-700' : 'border border-gray-200'
+      }`}>
+        <div className="relative overflow-hidden">
+          <img
+            src={tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}
+            alt={title}
+            className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+          <div className="absolute bottom-4 left-4 text-white">
+            <div className="flex items-center space-x-2">
+              <Icon icon={Icons.FiMapPin} className="w-4 h-4" />
+              <span className="text-sm font-medium">{location}</span>
+            </div>
+          </div>
+          {tour.featured && (
+            <div className="absolute top-4 right-4">
+              <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                ⭐ {t('Featured')}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="p-6">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+            {title}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
+            {description}
+          </p>
+
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
+                <Icon icon={Icons.FiClock} className="w-4 h-4" />
+                <span className="text-sm">{duration}</span>
+              </div>
+              <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
+                <Icon icon={Icons.FiUsers} className="w-4 h-4" />
+                <span className="text-sm">{tour.max_participants}</span>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                ${tour.price}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {t('per person')}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex space-x-2">
+            <Link
+              to={`/tours/${tour.slug}`}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200 text-sm font-medium"
+            >
+              {t('View Details')}
+            </Link>
+            <Link
+              to={`/booking?tour=${tour.id}`}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200 text-sm font-medium"
+            >
+              {t('Book Now')}
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
@@ -291,64 +375,7 @@ const Tours: React.FC = () => {
             {!isLoading && !error && toursArray.length > 0 && (
               <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}>
                 {toursArray.map((tour: Tour) => (
-                  <div
-                    key={tour.id}
-                    className={`group overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
-                      isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-light-50 border border-light-300'
-                    } ${viewMode === 'grid' ? 'rounded-xl' : 'rounded-lg flex flex-col sm:flex-row'}`}
-                  >
-                    <div className={`relative overflow-hidden ${
-                      viewMode === 'grid' ? 'h-48' : 'h-48 sm:h-auto sm:w-64 flex-shrink-0'
-                    }`}>
-                      <img
-                        src={tour.image || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
-                        alt={tour.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                      <div className="absolute top-4 right-4 bg-accent-orange text-white rounded-full px-3 py-1 text-sm font-medium">
-                        ${tour.price || tour.pricing?.basePrice || 0}
-                      </div>
-                      {tour.featured && (
-                        <div className="absolute top-4 left-4 bg-warning text-white px-2 py-1 rounded text-xs font-medium">
-                          Featured
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-6 flex-1 flex flex-col">
-                      <div className={`flex items-center text-sm mb-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                        <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1" />
-                        <span>{tour.location}</span>
-                      </div>
-                      <h3 className={`font-bold mb-2 group-hover:text-accent-orange transition-colors duration-200 ${
-                        viewMode === 'grid' ? 'text-xl' : 'text-lg'
-                      } ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                        {tour.title}
-                      </h3>
-                      <p className={`text-sm mb-4 line-clamp-2 flex-grow ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                        {tour.description}
-                      </p>
-
-                      <div className="flex items-center justify-between mb-4">
-                        <div className={`flex items-center text-sm ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                          <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
-                          <span>{tour.duration}</span>
-                        </div>
-                        <div className={`flex items-center text-sm ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                          <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
-                          <span>Max {tour.max_participants || tour.maxParticipants || 0}</span>
-                        </div>
-                      </div>
-
-                      {/* View Details Button */}
-                      <Link
-                        to={`/tours/${tour.slug || tour.id}`}
-                        className="w-full bg-accent-orange hover:bg-accent-orange-hover text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center"
-                      >
-                        {t('View Details')}
-                      </Link>
-                    </div>
-                  </div>
+                  <TourCard key={tour.id} tour={tour} />
                 ))}
               </div>
             )}

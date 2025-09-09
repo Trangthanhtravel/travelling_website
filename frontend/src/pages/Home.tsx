@@ -227,7 +227,7 @@ const Home: React.FC = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const featuredTours = featuredToursData?.data || [];
+  const featuredTours = featuredToursData || [];
 
   // Fetch featured categories from database
   const { data: featuredCategoriesData, isLoading: categoriesLoading } = useQuery({
@@ -253,7 +253,7 @@ const Home: React.FC = () => {
   });
 
   // Filter car rental services from all services
-  const carRentals = (carRentalsData?.data || []).filter((service: any) =>
+  const carRentals = (carRentalsData || []).filter((service: any) =>
     service.service_type === 'car-rental'
   ).slice(0, 6); // Limit to 6 car rentals for homepage
 

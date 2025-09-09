@@ -12,12 +12,20 @@ class Service {
     this.duration = data.duration;
     this.included = data.included ? (typeof data.included === 'string' ? JSON.parse(data.included) : data.included) : [];
     this.excluded = data.excluded ? (typeof data.excluded === 'string' ? JSON.parse(data.excluded) : data.excluded) : [];
-    this.category_id = data.category_id; // Use category_id instead of category
+    this.category_id = data.category_id;
     this.service_type = data.service_type;
-    // Change from images array to single image
     this.image = data.image || (data.images && Array.isArray(data.images) ? data.images[0] : null);
     this.gallery = data.gallery ? (typeof data.gallery === 'string' ? JSON.parse(data.gallery) : data.gallery) : [];
     this.status = data.status || 'active';
+
+    // Vietnamese language fields
+    this.title_vi = data.title_vi;
+    this.subtitle_vi = data.subtitle_vi;
+    this.description_vi = data.description_vi;
+    this.duration_vi = data.duration_vi;
+    this.included_vi = data.included_vi ? (typeof data.included_vi === 'string' ? JSON.parse(data.included_vi) : data.included_vi) : [];
+    this.excluded_vi = data.excluded_vi ? (typeof data.excluded_vi === 'string' ? JSON.parse(data.excluded_vi) : data.excluded_vi) : [];
+
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }
@@ -29,16 +37,22 @@ class Service {
       title: this.title,
       subtitle: this.subtitle,
       description: this.description,
-      // Remove itinerary from save operation
       price: this.price,
       duration: this.duration,
       included: JSON.stringify(this.included),
       excluded: JSON.stringify(this.excluded),
-      category_id: this.category_id, // Use category_id instead of category
+      category_id: this.category_id,
       service_type: this.service_type,
-      image: this.image, // Changed from images to image
+      image: this.image,
       gallery: JSON.stringify(this.gallery),
-      status: this.status
+      status: this.status,
+      // Vietnamese fields
+      title_vi: this.title_vi,
+      subtitle_vi: this.subtitle_vi,
+      description_vi: this.description_vi,
+      duration_vi: this.duration_vi,
+      included_vi: JSON.stringify(this.included_vi),
+      excluded_vi: JSON.stringify(this.excluded_vi)
     };
     
     return await dbHelpers.insert(db, 'services', serviceData);
@@ -124,11 +138,18 @@ class Service {
       duration: this.duration,
       included: JSON.stringify(this.included),
       excluded: JSON.stringify(this.excluded),
-      category_id: this.category_id, // Use category_id instead of category
+      category_id: this.category_id,
       service_type: this.service_type,
       image: this.image, // Changed from images to image
       gallery: JSON.stringify(this.gallery),
-      status: this.status
+      status: this.status,
+      // Vietnamese fields
+      title_vi: this.title_vi,
+      subtitle_vi: this.subtitle_vi,
+      description_vi: this.description_vi,
+      duration_vi: this.duration_vi,
+      included_vi: JSON.stringify(this.included_vi),
+      excluded_vi: JSON.stringify(this.excluded_vi)
     };
 
     console.log('🔧 Service.update() - serviceData being prepared:', {
@@ -260,13 +281,35 @@ class Service {
       duration: this.duration,
       included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
       excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded,
-      category_id: this.category_id, // Use category_id instead of category
+      category_id: this.category_id,
       service_type: this.service_type,
-      image: this.image, // Changed from images to image
+      image: this.image,
       gallery: typeof this.gallery === 'string' ? JSON.parse(this.gallery) : this.gallery,
       status: this.status,
       created_at: this.created_at,
       updated_at: this.updated_at
+    };
+  }
+
+  // Get localized content based on language
+  getLocalizedContent(language = 'en') {
+    if (language === 'vi') {
+      return {
+        title: this.title_vi || this.title,
+        subtitle: this.subtitle_vi || this.subtitle,
+        description: this.description_vi || this.description,
+        duration: this.duration_vi || this.duration,
+        included: this.included_vi && this.included_vi.length > 0 ? this.included_vi : this.included,
+        excluded: this.excluded_vi && this.excluded_vi.length > 0 ? this.excluded_vi : this.excluded
+      };
+    }
+    return {
+      title: this.title,
+      subtitle: this.subtitle,
+      description: this.description,
+      duration: this.duration,
+      included: this.included,
+      excluded: this.excluded
     };
   }
 }

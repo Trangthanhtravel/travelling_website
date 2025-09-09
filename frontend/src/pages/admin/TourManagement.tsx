@@ -1,51 +1,38 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
+import TourModal from '../../components/admin/TourModal';
 import GalleryManager from '../../components/common/GalleryManager';
 import toast from 'react-hot-toast';
 
-// Tour types (corrected to match backend)
+// Tour types (updated to include Vietnamese fields)
 interface Tour {
   id: number;
   title: string;
+  title_vi?: string;
   slug?: string;
   description: string;
+  description_vi?: string;
   price: number;
   duration: string;
+  duration_vi?: string;
   location: string;
+  location_vi?: string;
   max_participants: number;
   category: string;
   image: string;
   itinerary: any;
+  itinerary_vi?: any;
   included: string[];
+  included_vi?: string[];
   excluded: string[];
+  excluded_vi?: string[];
   status: 'active' | 'inactive' | 'draft';
   featured: boolean;
   created_at: string;
   updated_at: string;
 }
 
-interface TourFormData {
-  title: string;
-  description: string;
-  price: number;
-  duration: string;
-  location: string;
-  max_participants: number;
-  category: string;
-  included: string[];
-  excluded: string[];
-  status: 'active' | 'inactive' | 'draft';
-  featured: boolean;
-  image?: File;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  type: string;
-}
 
 const TourManagement: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -99,15 +86,19 @@ const TourManagement: React.FC = () => {
 
   // Create tour mutation with proper FormData for image upload
   const createTourMutation = useMutation({
-    mutationFn: async (tourData: TourFormData) => {
+    mutationFn: async (tourData: any) => {
       const formData = new FormData();
 
       // Add all tour fields
-      formData.append('title', tourData.title);
-      formData.append('description', tourData.description);
+      formData.append('title', tourData.title.en);
+      formData.append('title_vi', tourData.title.vi);
+      formData.append('description', tourData.description.en);
+      formData.append('description_vi', tourData.description.vi);
       formData.append('price', tourData.price.toString());
-      formData.append('duration', tourData.duration);
-      formData.append('location', tourData.location);
+      formData.append('duration', tourData.duration.en);
+      formData.append('duration_vi', tourData.duration.vi);
+      formData.append('location', tourData.location.en);
+      formData.append('location_vi', tourData.location.vi);
       formData.append('max_participants', tourData.max_participants.toString());
       formData.append('category_slug', tourData.category); // Fix: use category_slug
       formData.append('included', JSON.stringify(tourData.included));
@@ -147,15 +138,19 @@ const TourManagement: React.FC = () => {
 
   // Update tour mutation with proper FormData handling
   const updateTourMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: TourFormData }) => {
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
       const formData = new FormData();
 
       // Add all tour fields
-      formData.append('title', data.title);
-      formData.append('description', data.description);
+      formData.append('title', data.title.en);
+      formData.append('title_vi', data.title.vi);
+      formData.append('description', data.description.en);
+      formData.append('description_vi', data.description.vi);
       formData.append('price', data.price.toString());
-      formData.append('duration', data.duration);
-      formData.append('location', data.location);
+      formData.append('duration', data.duration.en);
+      formData.append('duration_vi', data.duration.vi);
+      formData.append('location', data.location.en);
+      formData.append('location_vi', data.location.vi);
       formData.append('max_participants', data.max_participants.toString());
       formData.append('category_slug', data.category); // Fix: use category_slug
       formData.append('included', JSON.stringify(data.included));
@@ -217,15 +212,15 @@ const TourManagement: React.FC = () => {
     }
   });
 
+  const handleEditTour = (tour: Tour) => {
+    setSelectedTour(tour);
+    setIsEditModalOpen(true);
+  };
+
   const handleDeleteTour = (tour: Tour) => {
     if (window.confirm(`Are you sure you want to delete "${tour.title}"? This action cannot be undone.`)) {
       deleteTourMutation.mutate(tour.id);
     }
-  };
-
-  const handleEditTour = (tour: Tour) => {
-    setSelectedTour(tour);
-    setIsEditModalOpen(true);
   };
 
   const handleOpenGallery = (tour: Tour) => {
@@ -480,247 +475,6 @@ const TourManagement: React.FC = () => {
           }}
         />
       )}
-    </div>
-  );
-};
-
-// Tour Modal Component
-interface TourModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: any) => void;
-  isLoading: boolean;
-  title: string;
-  initialData?: Tour;
-  categories: Category[];
-}
-
-const TourModal: React.FC<TourModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  isLoading,
-  title,
-  initialData,
-  categories
-}) => {
-  const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    price: initialData?.price || 0,
-    duration: initialData?.duration || '',
-    location: initialData?.location || '',
-    max_participants: initialData?.max_participants || 1,
-    category: initialData?.category || '',
-    included: initialData?.included || [],
-    excluded: initialData?.excluded || [],
-    status: initialData?.status || 'active',
-    featured: initialData?.featured || false, // Initialize featured field
-    image: undefined // Initialize image as undefined
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFormData({ ...formData, image: file });
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-dark-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            >
-              <Icon icon={Icons.FiX} className="w-6 h-6" />
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Title
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Price ($)
-                </label>
-                <input
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Duration
-                </label>
-                <input
-                  type="text"
-                  value={formData.duration}
-                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  placeholder="e.g., 5 days"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Max Participants
-                </label>
-                <input
-                  type="number"
-                  value={formData.max_participants}
-                  onChange={(e) => setFormData({ ...formData, max_participants: Number(e.target.value) })}
-                  min="1"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Status
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' | 'draft' })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="draft">Draft</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Category
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.slug}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Upload Image
-              </label>
-              <input
-                type="file"
-                onChange={handleFileChange}
-                accept="image/*"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-primary-50 file:text-primary-700"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Upload a single image for your tour. Max 5MB.
-              </p>
-              {initialData?.image && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Current image: Uploaded
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Featured Tour Toggle */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.featured}
-                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-400"
-              />
-              <label className="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Featured Tour
-              </label>
-            </div>
-
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-              >
-                {isLoading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>}
-                {initialData ? 'Update' : 'Create'} Tour
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
   );
 };

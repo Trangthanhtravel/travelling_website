@@ -32,7 +32,7 @@ const DirectBooking: React.FC = () => {
   });
 
   // Extract the actual tour data from the API response with proper type checking
-  const tourData: any = response?.data?.data || response?.data || null;
+  const tourData: any = response?.data || null;
 
   const createBookingMutation = useMutation({
     mutationFn: bookingsAPI.createDirectBooking,

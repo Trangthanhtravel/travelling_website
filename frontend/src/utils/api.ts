@@ -58,54 +58,108 @@ export const authAPI = {
 
 // Tours API (Public)
 export const toursAPI = {
-    getTours: (filters?: TourFilters): Promise<AxiosResponse<PaginationResponse<Tour>>> =>
-        api.get('/tours', { params: filters }),
+    // Get all tours with filters and language support
+    getTours: async (filters?: TourFilters & { language?: string }): Promise<ApiResponse<PaginationResponse<Tour>>> => {
+        const params = new URLSearchParams();
 
-    getFeaturedTours: (): Promise<AxiosResponse<ApiResponse<Tour[]>>> =>
-        api.get('/tours/featured'),
+        if (filters) {
+            if (filters.page) params.append('page', filters.page.toString());
+            if (filters.limit) params.append('limit', filters.limit.toString());
+            if (filters.search) params.append('search', filters.search);
+            if (filters.category) params.append('category', filters.category);
+            if (filters.location) params.append('location', filters.location);
+            if (filters.minPrice) params.append('minPrice', filters.minPrice.toString());
+            if (filters.maxPrice) params.append('maxPrice', filters.maxPrice.toString());
+            if (filters.sortBy) params.append('sortBy', filters.sortBy);
+            if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
+            if (filters.status) params.append('status', filters.status);
+            if (filters.language) params.append('language', filters.language); // Add language parameter
+        }
 
-    getTourBySlug: (slug: string): Promise<AxiosResponse<ApiResponse<Tour>>> =>
-        api.get(`/tours/${slug}`),
+        const response: AxiosResponse<ApiResponse<PaginationResponse<Tour>>> = await api.get(`/tours?${params}`);
+        return response.data;
+    },
 
-    checkAvailability: (tourId: string, date: string, participants: number): Promise<AxiosResponse<ApiResponse<any>>> =>
-        api.get(`/tours/${tourId}/availability`, { params: { date, participants } }),
+    // Get featured tours with language support
+    getFeaturedTours: async (limit?: number, language?: string): Promise<ApiResponse<Tour[]>> => {
+        const params = new URLSearchParams();
+        if (limit) params.append('limit', limit.toString());
+        if (language) params.append('language', language);
 
-    // Admin only
-    createTour: (tourData: FormData): Promise<AxiosResponse<ApiResponse<Tour>>> =>
-        adminAPI.post('/tours', tourData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        }),
+        const response: AxiosResponse<ApiResponse<Tour[]>> = await api.get(`/tours/featured?${params}`);
+        return response.data;
+    },
 
-    updateTour: (id: string, tourData: Partial<Tour>): Promise<AxiosResponse<ApiResponse<Tour>>> =>
-        adminAPI.put(`/tours/${id}`, tourData),
+    // Get tour by ID with language support
+    getTour: async (id: string, language?: string): Promise<ApiResponse<Tour>> => {
+        const params = new URLSearchParams();
+        if (language) params.append('language', language);
 
-    updateTourWithImages: (id: string, tourData: FormData): Promise<AxiosResponse<ApiResponse<Tour>>> =>
-        adminAPI.put(`/tours/${id}`, tourData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        }),
+        const response: AxiosResponse<ApiResponse<Tour>> = await api.get(`/tours/${id}?${params}`);
+        return response.data;
+    },
 
-    updateTourGallery: (id: string, galleryData: FormData): Promise<AxiosResponse<ApiResponse<Tour>>> =>
-        adminAPI.put(`/tours/${id}/gallery`, galleryData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        }),
+    // Get tour by slug with language support
+    getTourBySlug: async (slug: string, language?: string): Promise<ApiResponse<Tour>> => {
+        const params = new URLSearchParams();
+        if (language) params.append('language', language);
 
-    deleteGalleryPhoto: (id: string, photoUrl: string): Promise<AxiosResponse<ApiResponse<void>>> =>
-        adminAPI.delete(`/tours/${id}/gallery/${encodeURIComponent(photoUrl)}`),
+        const response: AxiosResponse<ApiResponse<Tour>> = await api.get(`/tours/slug/${slug}?${params}`);
+        return response.data;
+    },
 
-    deleteTour: (id: string): Promise<AxiosResponse<ApiResponse<void>>> =>
-        adminAPI.delete(`/tours/${id}`),
+    // Check tour availability
+    checkAvailability: async (tourId: string, date: string, participants: number): Promise<ApiResponse<any>> => {
+        const response: AxiosResponse<ApiResponse<any>> = await api.get(`/tours/${tourId}/availability`, {
+            params: { date, participants }
+        });
+        return response.data;
+    },
 };
 
 // Services API (Public)
 export const servicesAPI = {
-    getServices: (): Promise<AxiosResponse<ApiResponse<any[]>>> =>
-        api.get('/services'),
+    // Get all services with language support
+    getServices: async (filters?: { category?: string; search?: string; language?: string }): Promise<ApiResponse<Service[]>> => {
+        const params = new URLSearchParams();
+        if (filters?.category) params.append('category', filters.category);
+        if (filters?.search) params.append('search', filters.search);
+        if (filters?.language) params.append('language', filters.language);
 
-    getServiceById: (id: string): Promise<AxiosResponse<ApiResponse<Service>>> =>
-        api.get(`/services/${id}`),
+        const response: AxiosResponse<ApiResponse<Service[]>> = await api.get(`/services?${params}`);
+        return response.data;
+    },
 
-    getServiceBySlug: (slug: string): Promise<AxiosResponse<ApiResponse<Service>>> =>
-        api.get(`/services/${slug}`),
+    // Get service by ID with language support
+    getServiceById: async (id: string, language?: string): Promise<ApiResponse<Service>> => {
+        const params = new URLSearchParams();
+        if (language) params.append('language', language);
+
+        const response: AxiosResponse<ApiResponse<Service>> = await api.get(`/services/${id}?${params}`);
+        return response.data;
+    },
+
+    // Get service by slug with language support
+    getServiceBySlug: async (slug: string, language?: string): Promise<ApiResponse<Service>> => {
+        const params = new URLSearchParams();
+        if (language) params.append('language', language);
+
+        const response: AxiosResponse<ApiResponse<Service>> = await api.get(`/services/slug/${slug}?${params}`);
+        return response.data;
+    },
+};
+
+// Categories API with language support
+export const categoriesAPI = {
+    // Get categories with language support
+    getCategories: async (type?: string, language?: string): Promise<ApiResponse<any[]>> => {
+        const params = new URLSearchParams();
+        if (type) params.append('type', type);
+        if (language) params.append('language', language);
+
+        const response: AxiosResponse<ApiResponse<any[]>> = await api.get(`/categories?${params}`);
+        return response.data;
+    },
 };
 
 // Bookings API

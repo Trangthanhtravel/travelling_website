@@ -11,8 +11,28 @@ class Category {
     this.color = data.color;
     this.status = data.status || 'active';
     this.sort_order = data.sort_order || 0;
+    this.featured = Boolean(data.featured);
+
+    // Vietnamese language fields
+    this.name_vi = data.name_vi;
+    this.description_vi = data.description_vi;
+
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
+  }
+
+  // Get localized content based on language
+  getLocalizedContent(language = 'en') {
+    if (language === 'vi') {
+      return {
+        name: this.name_vi || this.name,
+        description: this.description_vi || this.description
+      };
+    }
+    return {
+      name: this.name,
+      description: this.description
+    };
   }
 
   // Get all categories with filtering

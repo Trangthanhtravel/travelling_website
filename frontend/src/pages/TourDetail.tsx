@@ -18,7 +18,7 @@ const TourDetail: React.FC = () => {
   });
 
   // Extract the actual tour data from the API response with proper typing
-  const tour: any = response?.data?.data || response?.data || null;
+  const tour: any = response?.data || null;
 
   if (isLoading) {
     return (

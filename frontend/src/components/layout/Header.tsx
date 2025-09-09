@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTranslation } from '../../contexts/TranslationContext';
+import LanguageSwitcher from '../common/LanguageSwitcher';
 import { Icon, Icons } from '../common/Icons';
 
 const Header: React.FC = () => {
@@ -10,7 +11,7 @@ const Header: React.FC = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const { state, logout } = useAuth();
     const { isDarkMode, toggleTheme } = useTheme();
-    const { t, isVietnamese, toggleLanguage } = useTranslation();
+    const { t, language, setLanguage } = useTranslation(); // Use the correct interface
     const navigate = useNavigate();
 
     // Handle scroll to change header background
@@ -28,6 +29,13 @@ const Header: React.FC = () => {
         logout();
         navigate('/');
     };
+
+    // Helper functions for mobile menu
+    const toggleLanguage = () => {
+        setLanguage(language === 'en' ? 'vi' : 'en');
+    };
+
+    const isVietnamese = language === 'vi';
 
     const navigation = [
         { name: t('Home'), href: '/' },
@@ -71,8 +79,9 @@ const Header: React.FC = () => {
                     </div>
 
                     {/* Desktop Navigation */}
-                    <nav className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-4">
+                    <div className="hidden md:flex items-center space-x-6">
+                        {/* Navigation Links */}
+                        <div className="flex space-x-1">
                             {navigation.map((item) => (
                                 <Link
                                     key={item.name}
@@ -83,68 +92,62 @@ const Header: React.FC = () => {
                                 </Link>
                             ))}
                         </div>
-                    </nav>
 
-                    {/* Desktop Actions */}
-                    <div className="hidden md:flex items-center space-x-4">
-                        {/* Language Toggle */}
-                        <button
-                            onClick={toggleLanguage}
-                            className={`${buttonClasses} text-xs font-medium`}
-                            title={isVietnamese ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
-                        >
-                            {isVietnamese ? 'EN' : 'VI'}
-                        </button>
+                        {/* Language Switcher */}
+                        <LanguageSwitcher />
 
                         {/* Theme Toggle */}
                         <button
                             onClick={toggleTheme}
                             className={buttonClasses}
-                            aria-label="Toggle theme"
+                            title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                         >
-                            <Icon
-                                icon={isDarkMode ? Icons.FiSun : Icons.FiMoon}
-                                className="h-5 w-5"
-                            />
+                            <Icon icon={isDarkMode ? Icons.FiSun : Icons.FiMoon} className="w-5 h-5" />
                         </button>
 
-                        {/* Admin Section */}
-                        {state.isAuthenticated && state.admin ? (
-                            <div className="flex items-center space-x-3">
+                        {/* Admin/Auth Section */}
+                        {state.isAuthenticated ? (
+                            <div className="flex items-center space-x-4">
                                 <Link
-                                    to="/admin/dashboard"
-                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-accent-orange hover:text-accent-orange-hover' : 'text-accent-orange hover:text-accent-orange-hover'}`}
+                                    to="/admin"
+                                    className="flex items-center space-x-2 px-4 py-2 bg-accent-orange text-white rounded-lg hover:bg-accent-orange-dark transition-colors duration-300"
                                 >
-                                    {t('Admin Dashboard')}
+                                    <Icon icon={Icons.FiSettings} className="w-4 h-4" />
+                                    <span>{t('Admin Dashboard')}</span>
                                 </Link>
                                 <button
                                     onClick={handleLogout}
-                                    className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
+                                    className="flex items-center space-x-2 px-4 py-2 border border-accent-orange text-accent-orange rounded-lg hover:bg-accent-orange hover:text-white transition-colors duration-300"
                                 >
-                                    {t('Logout')}
+                                    <Icon icon={Icons.FiLogOut} className="w-4 h-4" />
+                                    <span>{t('Logout')}</span>
                                 </button>
                             </div>
                         ) : (
                             <Link
-                                to="/admin/login"
-                                className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
+                                to="/auth/login"
+                                className="flex items-center space-x-2 px-4 py-2 bg-accent-orange text-white rounded-lg hover:bg-accent-orange-dark transition-colors duration-300"
                             >
-                                {t('Admin')}
+                                <Icon icon={Icons.FiLogIn} className="w-4 h-4" />
+                                <span>{t('Login')}</span>
                             </Link>
                         )}
                     </div>
 
                     {/* Mobile menu button */}
-                    <div className="md:hidden">
+                    <div className="md:hidden flex items-center space-x-2">
+                        <LanguageSwitcher />
+                        <button
+                            onClick={toggleTheme}
+                            className={buttonClasses}
+                        >
+                            <Icon icon={isDarkMode ? Icons.FiSun : Icons.FiMoon} className="w-5 h-5" />
+                        </button>
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className={buttonClasses}
-                            aria-label="Toggle menu"
                         >
-                            <Icon
-                                icon={isMenuOpen ? Icons.FiX : Icons.FiMenu}
-                                className="h-6 w-6"
-                            />
+                            <Icon icon={isMenuOpen ? Icons.FiX : Icons.FiMenu} className="w-6 h-6" />
                         </button>
                     </div>
                 </div>

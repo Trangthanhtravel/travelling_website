@@ -14,7 +14,7 @@ const ServiceDetail: React.FC = () => {
     enabled: !!slug,
   });
 
-  const service = serviceData?.data?.data;
+  const service = serviceData?.data;
 
   if (isLoading) {
     return (

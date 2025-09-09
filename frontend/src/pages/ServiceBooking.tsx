@@ -42,7 +42,7 @@ const ServiceBooking: React.FC = () => {
     enabled: !!slug,
   });
 
-  const service = serviceData?.data.data;
+  const service = serviceData?.data;
 
   const {
     register,

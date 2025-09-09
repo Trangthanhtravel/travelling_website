@@ -4,6 +4,13 @@ interface Translations {
   [key: string]: string;
 }
 
+interface TranslationContextType {
+  language: 'en' | 'vi';
+  setLanguage: (lang: 'en' | 'vi') => void;
+  t: (key: string) => string;
+  getLocalizedContent: (content: any, field: string) => string;
+}
+
 const vietnameseTranslations: Translations = {
   // Navigation
   'Home': 'Trang Chủ',
@@ -487,37 +494,35 @@ const vietnameseTranslations: Translations = {
   'Enter drop-off location': 'Nhập địa điểm trả',
 };
 
-interface TranslationContextType {
-    t: (key: string) => string;
-    isVietnamese: boolean;
-    toggleLanguage: () => void;
-}
-
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
-interface TranslationProviderProps {
-    children: ReactNode;
-}
+export const TranslationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [language, setLanguage] = useState<'en' | 'vi'>('en');
 
-export const TranslationProvider: React.FC<TranslationProviderProps> = ({ children }) => {
-    const [isVietnamese, setIsVietnamese] = useState(false);
+  const t = (key: string): string => {
+    if (language === 'vi' && vietnameseTranslations[key]) {
+      return vietnameseTranslations[key];
+    }
+    return key; // Return the key itself if no translation found
+  };
 
-    const t = (key: string): string => {
-        if (isVietnamese && vietnameseTranslations[key]) {
-            return vietnameseTranslations[key];
-        }
-        return key; // Return the key itself if translation not found
-    };
+  // Helper function to get localized content from database objects
+  const getLocalizedContent = (content: any, field: string): string => {
+    if (!content) return '';
 
-    const toggleLanguage = () => {
-        setIsVietnamese(!isVietnamese);
-    };
+    if (language === 'vi') {
+      const viField = `${field}_vi`;
+      return content[viField] || content[field] || '';
+    }
 
-    return (
-        <TranslationContext.Provider value={{ t, isVietnamese, toggleLanguage }}>
-            {children}
-        </TranslationContext.Provider>
-    );
+    return content[field] || '';
+  };
+
+  return (
+    <TranslationContext.Provider value={{ language, setLanguage, t, getLocalizedContent }}>
+      {children}
+    </TranslationContext.Provider>
+  );
 };
 
 export const useTranslation = () => {
