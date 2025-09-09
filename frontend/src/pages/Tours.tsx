@@ -93,8 +93,8 @@ const Tours: React.FC = () => {
     });
   };
 
-  const pagination = toursData?.data?.pagination;
-  const tours = toursData?.data?.data || [];
+  const pagination = toursData?.data.pagination;
+  const tours = toursData?.data || [];
 
   // Ensure tours is treated as an array
   const toursArray: Tour[] = Array.isArray(tours) ? tours : [];
