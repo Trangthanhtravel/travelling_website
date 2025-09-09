@@ -104,7 +104,7 @@ export const toursAPI = {
         const params = new URLSearchParams();
         if (language) params.append('language', language);
 
-        const response: AxiosResponse<ApiResponse<Tour>> = await api.get(`/tours/slug/${slug}?${params}`);
+        const response: AxiosResponse<ApiResponse<Tour>> = await api.get(`/tours/${slug}?${params}`);
         return response.data;
     },
 
@@ -144,7 +144,7 @@ export const servicesAPI = {
         const params = new URLSearchParams();
         if (language) params.append('language', language);
 
-        const response: AxiosResponse<ApiResponse<Service>> = await api.get(`/services/slug/${slug}?${params}`);
+        const response: AxiosResponse<ApiResponse<Service>> = await api.get(`/services/${slug}?${params}`);
         return response.data;
     },
 };

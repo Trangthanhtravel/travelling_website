@@ -227,7 +227,7 @@ const ServiceDetail: React.FC = () => {
               </div>
 
               <Link
-                to={`/services/${service.slug}/booking`}
+                to={`/service-booking/${service.slug}`}
                 className="w-full bg-accent-orange hover:bg-accent-orange-dark text-white py-3 rounded-lg font-medium transition-colors duration-200 block text-center"
               >
                 {t('Book Now')}

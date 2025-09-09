@@ -170,7 +170,7 @@ const Tours: React.FC = () => {
               {t('View Details')}
             </Link>
             <Link
-              to={`/tours/${tour.slug}/booking`}
+              to={`/booking/${tour.slug}`}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200 text-sm font-medium"
             >
               {t('Book Now')}
