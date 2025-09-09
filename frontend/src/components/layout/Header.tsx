@@ -89,12 +89,14 @@ const Header: React.FC = () => {
                         {/* Language Switcher */}
                         <LanguageSwitcher />
 
-                        {/* Theme Toggle */}<Link
-                        to="/admin/login"
-                        className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
+                        {/* Theme Toggle */}
+                        <button
+                        onClick={toggleTheme}
+                        className={buttonClasses}
+                        title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                     >
-                        {t('Admin')}
-                    </Link>
+                        <Icon icon={isDarkMode ? Icons.FiSun : Icons.FiMoon} className="w-5 h-5" />
+                    </button>
 
 
                         {/* Admin/Auth Section */}
