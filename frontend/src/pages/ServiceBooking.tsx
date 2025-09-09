@@ -4,6 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Icon, Icons } from '../components/common/Icons';
 import { servicesAPI, bookingsAPI } from '../utils/api';
+import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import toast from 'react-hot-toast';
 
@@ -31,6 +32,7 @@ interface ServiceBookingFormData {
 const ServiceBooking: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { isDarkMode } = useTheme();
   const { t } = useTranslation();
 
   // Fetch service data
@@ -104,7 +106,6 @@ const ServiceBooking: React.FC = () => {
       return await bookingsAPI.createDirectBooking(bookingPayload);
     },
     onSuccess: (response) => {
-      const bookingData = response.data.data;
       toast.success(`${t('Booking submitted successfully')}! ${t('We will contact you soon')}.`);
       navigate('/services');
     },
@@ -119,10 +120,10 @@ const ServiceBooking: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('Loading...')}</p>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('Loading...')}</p>
         </div>
       </div>
     );
@@ -130,10 +131,10 @@ const ServiceBooking: React.FC = () => {
 
   if (!service) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('Service Not Found')}</h2>
-          <p className="text-gray-600 mb-4">{t('The service you are looking for does not exist.')}</p>
+          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Service Not Found')}</h2>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>{t('The service you are looking for does not exist.')}</p>
           <button
             onClick={() => navigate('/services')}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -146,7 +147,7 @@ const ServiceBooking: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} py-8`}>
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -161,8 +162,8 @@ const ServiceBooking: React.FC = () => {
           </div>
 
           {/* Service Summary */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('Service Summary')}</h2>
+          <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6 mb-6`}>
+            <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Service Summary')}</h2>
             <div className="flex items-start space-x-4">
               <img
                 src={service.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e'}
@@ -170,9 +171,9 @@ const ServiceBooking: React.FC = () => {
                 className="w-24 h-24 object-cover rounded-lg"
               />
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">{service.title}</h3>
-                <p className="text-sm text-gray-600">{service.subtitle}</p>
-                <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{service.title}</h3>
+                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{service.subtitle}</p>
+                <div className={`mt-2 flex items-center space-x-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   {service.duration && (
                     <span className="flex items-center">
                       <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
@@ -192,18 +193,22 @@ const ServiceBooking: React.FC = () => {
               {/* Booking Form */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Customer Information */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Customer Information')}</h3>
+                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
+                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Customer Information')}</h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                         {t('Full Name')} *
                       </label>
                       <input
                         type="text"
                         {...register('customerName', { required: t('Name is required') })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                         placeholder={t('Enter your full name')}
                       />
                       {errors.customerName && (
@@ -212,7 +217,7 @@ const ServiceBooking: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                         {t('Email Address')} *
                       </label>
                       <input
@@ -224,7 +229,11 @@ const ServiceBooking: React.FC = () => {
                             message: t('Invalid email')
                           }
                         })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                         placeholder={t('Enter your email')}
                       />
                       {errors.customerEmail && (
@@ -233,13 +242,17 @@ const ServiceBooking: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                         {t('Phone Number')} *
                       </label>
                       <input
                         type="tel"
                         {...register('customerPhone', { required: t('Phone is required') })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                         placeholder={t('Enter your phone number')}
                       />
                       {errors.customerPhone && (
@@ -248,14 +261,18 @@ const ServiceBooking: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                         {t('Service Date')} *
                       </label>
                       <input
                         type="date"
                         {...register('startDate', { required: t('Date is required') })}
                         min={new Date().toISOString().split('T')[0]}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-600 text-white' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                       />
                       {errors.startDate && (
                         <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
@@ -265,12 +282,12 @@ const ServiceBooking: React.FC = () => {
                 </div>
 
                 {/* Number of People */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Number of People')}</h3>
+                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
+                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Number of People')}</h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                         {t('Adults')} (18+)
                       </label>
                       <input
@@ -281,12 +298,16 @@ const ServiceBooking: React.FC = () => {
                           min: 1,
                           valueAsNumber: true
                         })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-600 text-white' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                         {t('Children')} (2-17)
                       </label>
                       <input
@@ -296,13 +317,17 @@ const ServiceBooking: React.FC = () => {
                           min: 0,
                           valueAsNumber: true
                         })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-600 text-white' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                       />
                     </div>
                   </div>
 
-                  <div className="mt-4 p-3 bg-blue-50 rounded-md">
-                    <p className="text-sm text-blue-800">
+                  <div className={`mt-4 p-3 ${isDarkMode ? 'bg-blue-900' : 'bg-blue-50'} rounded-md`}>
+                    <p className={`text-sm ${isDarkMode ? 'text-blue-200' : 'text-blue-800'}`}>
                       {t('Total People')}: <span className="font-medium">{watchedValues.totalTravelers || 1}</span>
                     </p>
                   </div>
@@ -310,18 +335,22 @@ const ServiceBooking: React.FC = () => {
 
                 {/* Service-Specific Fields for Car Rental */}
                 {service.category === 'car-rental' && (
-                  <div className="bg-white rounded-lg shadow-sm p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Trip Details')}</h3>
+                  <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
+                    <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Trip Details')}</h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                           {t('From')} *
                         </label>
                         <input
                           type="text"
                           {...register('departureLocation', { required: t('Pick-up location is required') })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isDarkMode 
+                              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-300 text-gray-900'
+                          }`}
                           placeholder={t('Enter pick-up location')}
                         />
                         {errors.departureLocation && (
@@ -330,13 +359,17 @@ const ServiceBooking: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                           {t('To')} *
                         </label>
                         <input
                           type="text"
                           {...register('destinationLocation', { required: t('Drop-off location is required') })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isDarkMode 
+                              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-300 text-gray-900'
+                          }`}
                           placeholder={t('Enter drop-off location')}
                         />
                         {errors.destinationLocation && (
@@ -351,20 +384,24 @@ const ServiceBooking: React.FC = () => {
                             {...register('returnTrip')}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="ml-2 text-sm text-gray-700">{t('Return Trip Required')}</span>
+                          <span className={`ml-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('Return Trip Required')}</span>
                         </label>
                       </div>
 
                       {watchedValues.returnTrip && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                             {t('Return Date')} *
                           </label>
                           <input
                             type="date"
                             {...register('returnDate', { required: watchedValues.returnTrip ? t('Return date is required') : false })}
                             min={watchedValues.startDate || new Date().toISOString().split('T')[0]}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                              isDarkMode 
+                                ? 'bg-gray-700 border-gray-600 text-white' 
+                                : 'bg-white border-gray-300 text-gray-900'
+                            }`}
                           />
                           {errors.returnDate && (
                             <p className="mt-1 text-sm text-red-600">{errors.returnDate.message}</p>
@@ -373,13 +410,17 @@ const ServiceBooking: React.FC = () => {
                       )}
 
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                           {t('Let us know the details of your trip')}
                         </label>
                         <textarea
                           {...register('specialRequests')}
                           rows={4}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            isDarkMode 
+                              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-300 text-gray-900'
+                          }`}
                           placeholder={t('Please provide details about your trip, special requirements, or any other information that would help us serve you better...')}
                         />
                       </div>
@@ -387,19 +428,22 @@ const ServiceBooking: React.FC = () => {
                   </div>
                 )}
 
-
                 {/* Additional Information */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Additional Information')}</h3>
+                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
+                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Additional Information')}</h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                         {t('Gender')}
                       </label>
                       <select
                         {...register('gender')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-600 text-white' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                       >
                         <option value="">{t('Select gender')}</option>
                         <option value="male">{t('Male')}</option>
@@ -409,64 +453,76 @@ const ServiceBooking: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                         {t('Date of Birth')}
                       </label>
                       <input
                         type="date"
                         {...register('dateOfBirth')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          isDarkMode 
+                            ? 'bg-gray-700 border-gray-600 text-white' 
+                            : 'bg-white border-gray-300 text-gray-900'
+                        }`}
                       />
                     </div>
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                       {t('Address')} ({t('Optional')})
                     </label>
                     <input
                       type="text"
                       {...register('address')}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        isDarkMode 
+                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
                       placeholder={t('Enter your address')}
                     />
                   </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {t('Special Requests')}
-                        </label>
-                        <textarea
-                            {...register('specialRequests')}
-                            rows={4}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder={t('Any special requirements or requests...')}
-                        />
-                    </div>
+                  <div>
+                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
+                      {t('Special Requests')}
+                    </label>
+                    <textarea
+                      {...register('specialRequests')}
+                      rows={4}
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        isDarkMode 
+                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                          : 'bg-white border-gray-300 text-gray-900'
+                      }`}
+                      placeholder={t('Any special requirements or requests...')}
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Booking Summary */}
               <div className="lg:col-span-1">
-                <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Booking Summary')}</h3>
+                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6 sticky top-6`}>
+                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Booking Summary')}</h3>
 
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">{t('Service')}:</span>
-                      <span className="font-medium">{service.title}</span>
+                      <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('Service')}:</span>
+                      <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{service.title}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">{t('Base Price')}:</span>
-                      <span className="font-medium">${service.price}</span>
+                      <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('Base Price')}:</span>
+                      <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>${service.price}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">{t('Number of People')}:</span>
-                      <span className="font-medium">{watchedValues.totalTravelers || 1}</span>
+                      <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('Number of People')}:</span>
+                      <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{watchedValues.totalTravelers || 1}</span>
                     </div>
-                    <hr className="border-gray-200" />
+                    <hr className={`${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`} />
                     <div className="flex justify-between text-lg font-semibold">
-                      <span>{t('Total Amount')}:</span>
+                      <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{t('Total Amount')}:</span>
                       <span className="text-blue-600">${(service.price || 0) * (watchedValues.totalTravelers || 1)}</span>
                     </div>
                   </div>
@@ -479,7 +535,7 @@ const ServiceBooking: React.FC = () => {
                     {isSubmitting ? t('Processing...') : t('Book Service')}
                   </button>
 
-                  <p className="text-xs text-gray-500 mt-3 text-center">
+                  <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-3 text-center`}>
                     {t('By clicking Book Service, you agree to our Terms of Service and Privacy Policy')}
                   </p>
                 </div>
