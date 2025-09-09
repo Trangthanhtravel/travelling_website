@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { toursAPI, bookingsAPI } from '../utils/api';
@@ -492,7 +492,15 @@ const DirectBooking: React.FC = () => {
                   </button>
 
                   <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-3 text-center`}>
-                    {t('By clicking Book Now, you agree to our Terms of Service and Privacy Policy')}
+                    {t('By clicking Book Now, you agree to our')}{' '}
+                    <Link
+                      to="/booking-policy"
+                      className="text-blue-500 hover:text-blue-600 underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t('Terms of Service and Booking Policy')}
+                    </Link>
                   </p>
                 </div>
               </div>

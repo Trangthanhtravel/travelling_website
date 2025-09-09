@@ -536,7 +536,15 @@ const ServiceBooking: React.FC = () => {
                   </button>
 
                   <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-3 text-center`}>
-                    {t('By clicking Book Service, you agree to our Terms of Service and Privacy Policy')}
+                    {t('By clicking Book Service, you agree to our')}{' '}
+                    <Link
+                      to="/booking-policy"
+                      className="text-blue-500 hover:text-blue-600 underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t('Terms of Service and Booking Policy')}
+                    </Link>
                   </p>
                 </div>
               </div>
