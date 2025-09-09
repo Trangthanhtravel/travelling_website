@@ -96,14 +96,13 @@ const Header: React.FC = () => {
                         {/* Language Switcher */}
                         <LanguageSwitcher />
 
-                        {/* Theme Toggle */}
-                        <button
-                            onClick={toggleTheme}
-                            className={buttonClasses}
-                            title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                        >
-                            <Icon icon={isDarkMode ? Icons.FiSun : Icons.FiMoon} className="w-5 h-5" />
-                        </button>
+                        {/* Theme Toggle */}<Link
+                        to="/admin/login"
+                        className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
+                    >
+                        {t('Admin')}
+                    </Link>
+
 
                         {/* Admin/Auth Section */}
                         {state.isAuthenticated ? (
@@ -125,11 +124,10 @@ const Header: React.FC = () => {
                             </div>
                         ) : (
                             <Link
-                                to="/auth/login"
-                                className="flex items-center space-x-2 px-4 py-2 bg-accent-orange text-white rounded-lg hover:bg-accent-orange-dark transition-colors duration-300"
+                                to="/admin/login"
+                                className={`text-sm font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-text-muted hover:text-light-text-primary'}`}
                             >
-                                <Icon icon={Icons.FiLogIn} className="w-4 h-4" />
-                                <span>{t('Login')}</span>
+                                {t('Admin')}
                             </Link>
                         )}
                     </div>
