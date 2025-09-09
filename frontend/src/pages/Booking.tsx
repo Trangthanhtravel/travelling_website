@@ -165,15 +165,53 @@ const DirectBooking: React.FC = () => {
           {/* Header */}
           <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6 mb-6`}>
             <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>{t('Book Your Tour')}</h1>
-            <h2 className="text-xl text-blue-600 mb-4">{tourData.title}</h2>
 
-            {/* Tour Summary */}
+            {/* Tour Summary with Image */}
+            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 mb-4`}>
+              <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-3`}>{t('Tour Summary')}</h2>
+              <div className="flex items-start space-x-4">
+                <img
+                  src={tourData.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e'}
+                  alt={tourData.title}
+                  className="w-24 h-24 object-cover rounded-lg"
+                />
+                <div className="flex-1">
+                  <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-1`}>{tourData.title}</h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>{tourData.description?.substring(0, 100)}...</p>
+                  <div className={`flex items-center space-x-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {tourData.duration && (
+                      <span className="flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12,6 12,12 16,14"></polyline>
+                        </svg>
+                        {tourData.duration}
+                      </span>
+                    )}
+                    <span className="font-semibold text-blue-600">
+                      {t('Starting from')} ${tourData.price}
+                    </span>
+                    {tourData.location && (
+                      <span className="flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                          <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        {tourData.location}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Tour Details */}
             <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4`}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
                   <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('Duration')}:</span>
                   <span className={`ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {tourData.duration_days} {t('days')} / {tourData.duration_days - 1} {t('nights')}
+                    {tourData.duration || `${tourData.duration_days || 'N/A'} ${t('days')}`}
                   </span>
                 </div>
                 <div>
@@ -181,8 +219,8 @@ const DirectBooking: React.FC = () => {
                   <span className={`ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>${tourData.price}</span>
                 </div>
                 <div>
-                  <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('Tour Type')}:</span>
-                  <span className={`ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{tourData.difficulty || t('Standard')}</span>
+                  <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('Category')}:</span>
+                  <span className={`ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{tourData.category || t('Standard')}</span>
                 </div>
               </div>
             </div>
