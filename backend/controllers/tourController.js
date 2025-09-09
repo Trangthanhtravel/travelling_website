@@ -42,14 +42,24 @@ const galleryUpload = multer({
 // Get featured tours for homepage
 const getFeaturedTours = async (req, res) => {
   try {
-    const { limit = 6 } = req.query;
+    const { limit = 6, language = 'en' } = req.query; // Add language parameter
     const db = getDB();
 
     const featuredTours = await Tour.getFeatured(db, parseInt(limit));
 
+    // Apply localization to featured tours
+    const localizedTours = featuredTours.map(tour => {
+      const tourJson = tour.toJSON();
+      const localizedContent = tour.getLocalizedContent(language);
+      return {
+        ...tourJson,
+        ...localizedContent
+      };
+    });
+
     res.json({
       success: true,
-      data: featuredTours.map(tour => tour.toJSON())
+      data: localizedTours
     });
   } catch (error) {
     console.error('Get featured tours error:', error);

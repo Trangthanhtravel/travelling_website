@@ -17,7 +17,7 @@ interface HeroSlide {
 
 const Home: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation(); // Add language to the destructuring
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [heroLoading, setHeroLoading] = useState(true);
@@ -221,7 +221,7 @@ const Home: React.FC = () => {
   const { data: featuredToursData, isLoading: toursLoading } = useQuery({
     queryKey: ['featured-tours'],
     queryFn: async () => {
-      const response = await toursAPI.getFeaturedTours();
+      const response = await toursAPI.getFeaturedTours(6, language); // Pass language parameter
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
