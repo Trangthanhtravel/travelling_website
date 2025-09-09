@@ -293,12 +293,6 @@ const Services: React.FC = () => {
                     }`}>
                       {getLocalizedContent(service.category, 'name') || service.category?.name || t('Service')}
                     </span>
-                    <div className="flex items-center">
-                      <Icon icon={Icons.FiStar} className="w-4 h-4 text-yellow-400 mr-1" />
-                      <span className={`text-sm ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-                        4.8
-                      </span>
-                    </div>
                   </div>
                   <h3 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     {getLocalizedContent(service, 'title') || service.title}
@@ -310,19 +304,9 @@ const Services: React.FC = () => {
                   <div className="flex space-x-2">
                     <Link
                       to={`/services/${service.slug}`}
-                      className="flex-1 bg-accent-orange hover:bg-accent-orange-dark text-white py-2 px-4 rounded-lg text-center text-sm font-medium transition-colors duration-200"
+                      className="w-full bg-accent-orange hover:bg-accent-orange-dark text-white py-2 px-4 rounded-lg text-center text-sm font-medium transition-colors duration-200"
                     >
                       {t('View Details')}
-                    </Link>
-                    <Link
-                      to={`/services/${service.slug}/booking`}
-                      className={`flex-1 border py-2 px-4 rounded-lg text-center text-sm font-medium transition-colors duration-200 ${
-                        isDarkMode
-                          ? 'border-dark-600 text-dark-text-primary hover:bg-dark-700'
-                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      {t('Book Now')}
                     </Link>
                   </div>
                 </div>
@@ -354,12 +338,6 @@ const Services: React.FC = () => {
                       }`}>
                         {getLocalizedContent(service.category, 'name') || service.category?.name || t('Service')}
                       </span>
-                      <div className="flex items-center">
-                        <Icon icon={Icons.FiStar} className="w-4 h-4 text-yellow-400 mr-1" />
-                        <span className={`text-sm ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-                          4.8
-                        </span>
-                      </div>
                     </div>
                     <h3 className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                       {getLocalizedContent(service, 'title') || service.title}
@@ -375,16 +353,6 @@ const Services: React.FC = () => {
                           className="bg-accent-orange hover:bg-accent-orange-dark text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200"
                         >
                           {t('View Details')}
-                        </Link>
-                        <Link
-                          to={`/services/${service.slug}/booking`}
-                          className={`border py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                            isDarkMode
-                              ? 'border-dark-600 text-dark-text-primary hover:bg-dark-700'
-                              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                          }`}
-                        >
-                          {t('Book Now')}
                         </Link>
                       </div>
                       {service.price && (

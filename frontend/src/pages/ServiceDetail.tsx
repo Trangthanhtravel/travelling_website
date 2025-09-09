@@ -111,15 +111,6 @@ const ServiceDetail: React.FC = () => {
                 </p>
               )}
               <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <Icon icon={Icons.FiStar} className="w-5 h-5 text-yellow-400 mr-1" />
-                  <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'} font-medium`}>
-                    4.8
-                  </span>
-                  <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} ml-1`}>
-                    (124 {t('Reviews')})
-                  </span>
-                </div>
                 {service.price && (
                   <div className="flex items-center">
                     <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>

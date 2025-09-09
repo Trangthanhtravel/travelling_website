@@ -9,7 +9,7 @@ import { Icon, Icons } from '../components/common/Icons';
 
 const Tours: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { t, language } = useTranslation(); // Add language and getLocalizedContent
+  const { t, language, getLocalizedContent } = useTranslation(); // Add getLocalizedContent
   const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<TourFilters>({
     page: 1,
@@ -28,11 +28,11 @@ const Tours: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Fetch tour categories from database
+  // Fetch tour categories from database with language support
   const { data: categoriesData } = useQuery({
-    queryKey: ['tour-categories'],
+    queryKey: ['tour-categories', language], // Add language to query key
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories?type=tour&status=active`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories?type=tour&status=active&language=${language}`);
       if (!response.ok) throw new Error('Failed to fetch categories');
       return response.json();
     },
@@ -42,7 +42,7 @@ const Tours: React.FC = () => {
     { value: '', label: t('All Tours') },
     ...(categoriesData?.data || []).map((cat: any) => ({
       value: cat.slug,
-      label: cat.name
+      label: getLocalizedContent(cat, 'name') || cat.name // Use getLocalizedContent for category names
     }))
   ];
 
@@ -170,7 +170,7 @@ const Tours: React.FC = () => {
               {t('View Details')}
             </Link>
             <Link
-              to={`/booking?tour=${tour.id}`}
+              to={`/tours/${tour.slug}/booking`}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200 text-sm font-medium"
             >
               {t('Book Now')}
