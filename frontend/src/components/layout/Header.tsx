@@ -11,7 +11,7 @@ const Header: React.FC = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const { state, logout } = useAuth();
     const { isDarkMode, toggleTheme } = useTheme();
-    const { t, language, setLanguage } = useTranslation(); // Use the correct interface
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     // Handle scroll to change header background
@@ -29,13 +29,6 @@ const Header: React.FC = () => {
         logout();
         navigate('/');
     };
-
-    // Helper functions for mobile menu
-    const toggleLanguage = () => {
-        setLanguage(language === 'en' ? 'vi' : 'en');
-    };
-
-    const isVietnamese = language === 'vi';
 
     const navigation = [
         { name: t('Home'), href: '/' },
@@ -166,13 +159,6 @@ const Header: React.FC = () => {
                             </Link>
                         ))}
 
-                        {/* Mobile Language Toggle */}
-                        <button
-                            onClick={toggleLanguage}
-                            className={`block w-full text-left px-3 py-2 text-base font-medium transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-secondary' : 'text-light-text-secondary hover:text-light-text-primary'}`}
-                        >
-                            {isVietnamese ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
-                        </button>
 
                         {/* Mobile Admin Section */}
                         {state.isAuthenticated && state.admin ? (

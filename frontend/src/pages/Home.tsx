@@ -219,7 +219,7 @@ const Home: React.FC = () => {
 
   // Fetch featured tours from real API using the dedicated featured endpoint
   const { data: featuredToursData, isLoading: toursLoading } = useQuery({
-    queryKey: ['featured-tours'],
+    queryKey: ['featured-tours', language], // Include language in query key
     queryFn: async () => {
       const response = await toursAPI.getFeaturedTours(6, language); // Pass language parameter
       return response.data;
@@ -231,9 +231,9 @@ const Home: React.FC = () => {
 
   // Fetch featured categories from database
   const { data: featuredCategoriesData, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['featured-categories'],
+    queryKey: ['featured-categories', language], // Include language in query key for categories too
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories?featured=1&status=active`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories?featured=1&status=active&language=${language}`);
       if (!response.ok) throw new Error('Failed to fetch featured categories');
       return response.json();
     },
