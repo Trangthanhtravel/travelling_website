@@ -184,7 +184,7 @@ const vietnameseTranslations: Translations = {
 
   // About Page
   'About Us': 'Về Chúng Tôi',
-  'Learn more about our company and our commitment to excellence': 'Tìm hiểu thêm v�� công ty chúng tôi và cam kết của chúng tôi về sự xuất sắc',
+  'Learn more about our company and our commitment to excellence': 'Tìm hiểu thêm về công ty chúng tôi và cam kết của chúng tôi về sự xuất sắc',
   'Our Story': 'Câu Chuyện Của Chúng Tôi',
   'Our Mission': 'Sứ Mệnh',
   'Our Vision': 'Tầm Nhìn',
@@ -417,7 +417,7 @@ const vietnameseTranslations: Translations = {
   'Link Copied': 'Đã Sao Chép Liên Kết',
 
   // Footer Content
-  'All rights reserved': 'Tất cả quy��n được bảo lưu',
+  'All rights reserved': 'Tất cả quyền được bảo lưu',
   'Cookie Policy': 'Chính Sách Cookie',
   'Quick Links': 'Liên Kết Nhanh',
   'Useful Links': 'Liên Kết Hữu Ích',
