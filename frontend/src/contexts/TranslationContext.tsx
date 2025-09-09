@@ -119,6 +119,7 @@ const vietnameseTranslations: Translations = {
 
   // Services Page
   'Our Professional Services': 'Dịch Vụ Chuyên Nghiệp',
+  'Complete travel solutions for all your adventure needs': 'Giải pháp du lịch toàn diện để làm cho hành trình của bạn trở nên liền mạch và đáng nhớ',
   'Car Rental': 'Thuê Xe',
   'Hotel Booking': 'Đặt Khách Sạn',
   'Flight Booking': 'Đặt Vé Máy Bay',
@@ -131,7 +132,30 @@ const vietnameseTranslations: Translations = {
   'Service Gallery': 'Thư Viện Ảnh Dịch Vụ',
   'Request Quote': 'Yêu Cầu Báo Giá',
   'Book Service': 'Đặt Dịch Vụ',
+  'Book This Service': 'Đặt Dịch Vụ Này',
+  'Service Type': 'Loại Dịch Vụ',
+  'Availability': 'Tình Trạng',
+  'Available': 'Có Sẵn',
+  'Response Time': 'Thời Gian Phản Hồi',
+  'Within 2 hours': 'Trong Vòng 2 Giờ',
+  'Contact for Custom Quote': 'Liên Hệ Để Báo Giá Riêng',
+  'Service Not Found': 'Không Tìm Thấy Dịch Vụ',
+  'The service you\'re looking for doesn\'t exist or has been removed.': 'Dịch vụ bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.',
+  'Browse All Services': 'Xem Tất Cả Dịch Vụ',
+  'General Service': 'Dịch Vụ Tổng Quát',
+  'per service': 'mỗi dịch vụ',
+  'No description available for this service.': 'Không có mô tả cho dịch vụ này.',
   'No services available at the moment.': 'Hiện tại không có dịch vụ nào.',
+  'Error loading services': 'Lỗi khi tải dịch vụ',
+  'Please try again later': 'Vui lòng thử lại sau',
+  'services found': 'dịch vụ được tìm thấy',
+  'No services found': 'Không tìm thấy dịch vụ',
+  'Try adjusting your search or filters.': 'Thử điều chỉnh tìm kiếm hoặc bộ lọc của bạn.',
+  'Search services...': 'Tìm kiếm dịch vụ...',
+  'Title Z-A': 'Tiêu Đề Z-A',
+  'Price Low to High': 'Giá Thấp Đến Cao',
+  'Price High to Low': 'Giá Cao Đến Thấp',
+  'Service': 'Dịch Vụ',
 
   // Contact Page
   'Get in Touch': 'Liên Hệ Với Chúng Tôi',
@@ -164,7 +188,6 @@ const vietnameseTranslations: Translations = {
   'Hide Filters': 'Ẩn Bộ Lọc',
   'Clear All Filters': 'Xóa Tất Cả Bộ Lọc',
   'No blogs found': 'Không tìm thấy blog',
-  'Try adjusting your search or filters.': 'Thử điều chỉnh tìm kiếm hoặc bộ lọc của bạn.',
   'Search blogs...': 'Tìm kiếm blog...',
   'Latest First': 'Mới Nhất Trước',
   'Title A-Z': 'Tiêu Đề A-Z',
@@ -360,7 +383,6 @@ const vietnameseTranslations: Translations = {
   'Data not found': 'Không tìm thấy dữ liệu',
 
   // Status & States
-  'Available': 'Có Sẵn',
   'Unavailable': 'Không Có Sẵn',
   'Sold Out': 'Hết Chỗ',
   'Coming Soon': 'Sắp Ra Mắt',
@@ -501,7 +523,6 @@ const vietnameseTranslations: Translations = {
   'By clicking Book Now, you agree to our Terms of Service and Privacy Policy': 'Bằng cách nhấp vào Đặt Ngay, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi',
 
   // Service Booking Additional Translations
-  'Service Not Found': 'Không Tìm Thấy Dịch Vụ',
   'The service you are looking for does not exist.': 'Dịch vụ bạn đang tìm kiếm không tồn tại.',
   'Browse Services': 'Duyệt Dịch Vụ',
   'Back to Service Details': 'Quay Lại Chi Tiết Dịch Vụ',
@@ -516,7 +537,6 @@ const vietnameseTranslations: Translations = {
   'Date of Birth': 'Ngày Sinh',
   'Enter your address': 'Nhập địa chỉ của bạn',
   'Any special requirements or requests...': 'Bất kỳ yêu cầu đặc biệt hoặc yêu cầu nào...',
-  'Service': 'Dịch Vụ',
   'By clicking Book Service, you agree to our Terms of Service and Privacy Policy': 'Bằng cách nhấp vào Đặt Dịch Vụ, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi',
   'Enter pick-up location': 'Nhập địa điểm đón',
   'Enter drop-off location': 'Nhập địa điểm trả',

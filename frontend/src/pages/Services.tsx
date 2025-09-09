@@ -7,7 +7,7 @@ import { useTranslation } from '../contexts/TranslationContext';
 
 const Services: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
+  const { t, language, getLocalizedContent } = useTranslation();
   const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -49,11 +49,11 @@ const Services: React.FC = () => {
     return iconMap[iconName] || iconMap['default'];
   };
 
-  // Fetch service categories from database
+  // Fetch service categories from database with language support
   const { data: categoriesData } = useQuery({
-    queryKey: ['service-categories'],
+    queryKey: ['service-categories', language],
     queryFn: async () => {
-      const response = await fetch(`${getApiUrl()}/categories?type=service&status=active`);
+      const response = await fetch(`${getApiUrl()}/categories?type=service&status=active&language=${language}`);
       if (!response.ok) throw new Error('Failed to fetch categories');
       return response.json();
     },
@@ -63,13 +63,14 @@ const Services: React.FC = () => {
     { id: 'all', name: t('Our Services'), slug: 'all', icon: Icons.FiGrid },
     ...(categoriesData?.data?.map((cat: any) => ({
       ...cat,
+      name: getLocalizedContent(cat, 'name') || cat.name,
       icon: getIconFromString(cat.icon)
     })) || [])
   ];
 
-  // Fetch services from API with pagination
+  // Fetch services from API with pagination and language support
   const { data: servicesData, isLoading, error } = useQuery({
-    queryKey: ['services', { category: activeCategory, search: searchTerm, ...filters }],
+    queryKey: ['services', { category: activeCategory, search: searchTerm, language, ...filters }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (activeCategory !== 'all') {
@@ -84,6 +85,7 @@ const Services: React.FC = () => {
       params.append('limit', filters.limit.toString());
       params.append('sortBy', filters.sortBy);
       params.append('sortOrder', filters.sortOrder);
+      params.append('language', language);
 
       const response = await fetch(`${getApiUrl()}/services?${params}`);
       if (!response.ok) throw new Error('Failed to fetch services');
@@ -151,145 +153,252 @@ const Services: React.FC = () => {
                   placeholder={t('Search services...')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg ${
+                    isDarkMode
+                      ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400'
+                      : 'border-gray-300 text-gray-900'
+                  } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
                 />
               </div>
             </div>
-
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-                {t('View Mode')}
+                {t('Sort By')}
               </label>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-accent-orange text-white'
-                      : isDarkMode
-                      ? 'text-dark-text-muted hover:text-dark-text-primary hover:bg-dark-700'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Icon icon={Icons.FiGrid} className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-accent-orange text-white'
-                      : isDarkMode
-                      ? 'text-dark-text-muted hover:text-dark-text-primary hover:bg-dark-700'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Icon icon={Icons.FiList} className="w-4 h-4" />
-                </button>
-              </div>
+              <select
+                value={`${filters.sortBy}-${filters.sortOrder}`}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className={`w-full p-3 border rounded-lg ${
+                  isDarkMode
+                    ? 'bg-dark-700 border-dark-600 text-white'
+                    : 'border-gray-300 text-gray-900'
+                } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+              >
+                <option value="created_at-desc">{t('Latest First')}</option>
+                <option value="created_at-asc">{t('Oldest First')}</option>
+                <option value="title-asc">{t('Title A-Z')}</option>
+                <option value="title-desc">{t('Title Z-A')}</option>
+                <option value="price-asc">{t('Price Low to High')}</option>
+                <option value="price-desc">{t('Price High to Low')}</option>
+              </select>
             </div>
           </div>
         </div>
 
-        {/* Category Navigation */}
-        <div className="flex flex-wrap gap-2 mb-8 justify-center">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setActiveCategory(category.slug || category.id)}
-              className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                activeCategory === (category.slug || category.id)
-                  ? 'bg-accent-orange text-white'
-                  : isDarkMode
-                  ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700 border border-dark-700'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-              }`}
-            >
-              <Icon icon={category.icon} className="w-4 h-4 mr-2" />
-              {category.name}
-            </button>
-          ))}
+        {/* Categories */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-3 mb-4">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setActiveCategory(category.slug)}
+                className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+                  activeCategory === category.slug
+                    ? 'bg-accent-orange text-white'
+                    : isDarkMode
+                    ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700 border border-dark-600'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                }`}
+              >
+                <Icon icon={category.icon} className="w-4 h-4 mr-2" />
+                {category.name}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Loading State */}
-        {isLoading && (
+        {/* View Mode Toggle */}
+        <div className="flex justify-between items-center mb-6">
+          <p className={`text-sm ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
+            {pagination?.total || 0} {t('services found')}
+          </p>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded ${
+                viewMode === 'grid'
+                  ? 'bg-accent-orange text-white'
+                  : isDarkMode
+                  ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700'
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
+            >
+              <Icon icon={Icons.FiGrid} className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded ${
+                viewMode === 'list'
+                  ? 'bg-accent-orange text-white'
+                  : isDarkMode
+                  ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700'
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
+            >
+              <Icon icon={Icons.FiList} className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Services Grid/List */}
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, index) => (
-              <div key={index} className={`rounded-xl shadow-lg animate-pulse ${isDarkMode ? 'bg-dark-800' : 'bg-white'}`}>
-                <div className={`h-48 rounded-t-xl ${isDarkMode ? 'bg-dark-700' : 'bg-gray-200'}`}></div>
+              <div key={index} className={`rounded-lg shadow-lg overflow-hidden ${isDarkMode ? 'bg-dark-800' : 'bg-white'}`}>
+                <div className={`h-48 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} animate-pulse`}></div>
                 <div className="p-6">
-                  <div className={`h-4 rounded mb-2 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-200'}`}></div>
-                  <div className={`h-6 rounded mb-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-200'}`}></div>
-                  <div className={`h-4 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-gray-200'}`}></div>
+                  <div className={`h-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded mb-2 animate-pulse`}></div>
+                  <div className={`h-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded w-2/3 mb-4 animate-pulse`}></div>
+                  <div className={`h-8 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded animate-pulse`}></div>
                 </div>
               </div>
             ))}
           </div>
-        )}
-
-        {/* Services Grid/List */}
-        {!isLoading && services.length > 0 && (
-          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}>
+        ) : services.length === 0 ? (
+          <div className="text-center py-12">
+            <Icon icon={Icons.FiPackage} className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              {t('No services found')}
+            </h3>
+            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              {t('Try adjusting your search or filters.')}
+            </p>
+          </div>
+        ) : viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service: any) => (
               <div
                 key={service.id}
-                className={`group overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
-                  isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'
-                } ${viewMode === 'grid' ? 'rounded-xl' : 'rounded-lg flex flex-col sm:flex-row'}`}
+                className={`rounded-lg shadow-lg overflow-hidden transition-transform duration-200 hover:scale-105 ${
+                  isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'
+                }`}
               >
-                <div className={`relative overflow-hidden ${
-                  viewMode === 'grid' ? 'h-48' : 'h-48 sm:h-auto sm:w-64 flex-shrink-0'
-                }`}>
+                <div className="relative h-48 overflow-hidden">
                   <img
-                    src={service.image || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80`}
-                    alt={service.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    src={service.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
+                    alt={getLocalizedContent(service, 'title') || service.title}
+                    className="w-full h-full object-cover"
                   />
-                  <div className="absolute top-4 right-4 bg-accent-orange text-white rounded-full px-3 py-1 text-sm font-medium">
-                    ${service.price}
-                  </div>
-                  {service.featured && (
-                    <div className="absolute top-4 left-4 bg-warning text-white px-2 py-1 rounded text-xs font-medium">
-                      Featured
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  {service.price && (
+                    <div className="absolute top-4 right-4 bg-accent-orange text-white px-3 py-1 rounded-full text-sm font-medium">
+                      ${service.price}
                     </div>
                   )}
                 </div>
-
-                <div className="p-6 flex-1 flex flex-col">
-                  <div className={`flex items-center text-sm mb-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
-                    <Icon icon={Icons.FiTag} className="w-4 h-4 mr-1" />
-                    <span className="capitalize">
-                      {service.category ?
-                        (typeof service.category === 'string' ?
-                          service.category.replace('-', ' ') :
-                          service.category.name || service.category.slug || 'Uncategorized'
-                        ) :
-                        'Uncategorized'
-                      }
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      isDarkMode ? 'bg-dark-700 text-dark-text-muted' : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {getLocalizedContent(service.category, 'name') || service.category?.name || t('Service')}
                     </span>
-                  </div>
-                  <h3 className={`font-bold mb-2 group-hover:text-accent-orange transition-colors duration-200 ${
-                    viewMode === 'grid' ? 'text-xl' : 'text-lg'
-                  } ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-                    {service.title}
-                  </h3>
-                  <p className={`text-sm mb-4 line-clamp-2 flex-grow ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-                    {service.description}
-                  </p>
-
-                  {service.duration && (
-                    <div className={`flex items-center text-sm mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
-                      <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
-                      <span>{service.duration}</span>
+                    <div className="flex items-center">
+                      <Icon icon={Icons.FiStar} className="w-4 h-4 text-yellow-400 mr-1" />
+                      <span className={`text-sm ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                        4.8
+                      </span>
                     </div>
-                  )}
-
-                  {/* View Details Button */}
-                  <Link
-                    to={`/services/${service.slug}`}
-                    className="w-full bg-accent-orange hover:bg-accent-orange-hover text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center"
-                  >
-                    {t('View Details')}
-                  </Link>
+                  </div>
+                  <h3 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {getLocalizedContent(service, 'title') || service.title}
+                  </h3>
+                  <p className={`text-sm mb-4 line-clamp-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {getLocalizedContent(service, 'subtitle') || service.subtitle ||
+                     getLocalizedContent(service, 'description') || service.description}
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link
+                      to={`/services/${service.slug}`}
+                      className="flex-1 bg-accent-orange hover:bg-accent-orange-dark text-white py-2 px-4 rounded-lg text-center text-sm font-medium transition-colors duration-200"
+                    >
+                      {t('View Details')}
+                    </Link>
+                    <Link
+                      to={`/services/${service.slug}/booking`}
+                      className={`flex-1 border py-2 px-4 rounded-lg text-center text-sm font-medium transition-colors duration-200 ${
+                        isDarkMode
+                          ? 'border-dark-600 text-dark-text-primary hover:bg-dark-700'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {t('Book Now')}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // List view
+          <div className="space-y-6">
+            {services.map((service: any) => (
+              <div
+                key={service.id}
+                className={`rounded-lg shadow-lg overflow-hidden ${
+                  isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'
+                }`}
+              >
+                <div className="md:flex">
+                  <div className="md:w-1/3">
+                    <img
+                      src={service.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
+                      alt={getLocalizedContent(service, 'title') || service.title}
+                      className="w-full h-48 md:h-full object-cover"
+                    />
+                  </div>
+                  <div className="md:w-2/3 p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        isDarkMode ? 'bg-dark-700 text-dark-text-muted' : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {getLocalizedContent(service.category, 'name') || service.category?.name || t('Service')}
+                      </span>
+                      <div className="flex items-center">
+                        <Icon icon={Icons.FiStar} className="w-4 h-4 text-yellow-400 mr-1" />
+                        <span className={`text-sm ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                          4.8
+                        </span>
+                      </div>
+                    </div>
+                    <h3 className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      {getLocalizedContent(service, 'title') || service.title}
+                    </h3>
+                    <p className={`mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {getLocalizedContent(service, 'subtitle') || service.subtitle ||
+                       getLocalizedContent(service, 'description') || service.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex space-x-2">
+                        <Link
+                          to={`/services/${service.slug}`}
+                          className="bg-accent-orange hover:bg-accent-orange-dark text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200"
+                        >
+                          {t('View Details')}
+                        </Link>
+                        <Link
+                          to={`/services/${service.slug}/booking`}
+                          className={`border py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                            isDarkMode
+                              ? 'border-dark-600 text-dark-text-primary hover:bg-dark-700'
+                              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {t('Book Now')}
+                        </Link>
+                      </div>
+                      {service.price && (
+                        <div className="text-right">
+                          <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            ${service.price}
+                          </span>
+                          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {t('per service')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -297,62 +406,56 @@ const Services: React.FC = () => {
         )}
 
         {/* Pagination */}
-        {!isLoading && services.length > 0 && pagination && (
-          <div className="mt-8">
-            <div className={`flex justify-between items-center mb-4 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
-              <div className="text-sm">
-                {t('Showing')} {pagination.total > 0 ? (pagination.currentPage - 1) * pagination.limit + 1 : 0} -{' '}
-                {pagination.currentPage * pagination.limit > pagination.total ? pagination.total : pagination.currentPage * pagination.limit}{' '}
-                {t('of')} {pagination.total} {t('services')}
-              </div>
-
-              {/* Sort By */}
-              <div>
-                <label className="sr-only">{t('Sort')}</label>
-                <select
-                  onChange={(e) => handleSortChange(e.target.value)}
-                  className={`block appearance-none bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:border-dark-600 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}
-                >
-                  <option value="created_at-desc">{t('Newest First')}</option>
-                  <option value="created_at-asc">{t('Oldest First')}</option>
-                  <option value="price-asc">{t('Price: Low to High')}</option>
-                  <option value="price-desc">{t('Price: High to Low')}</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-center">
+        {pagination && pagination.totalPages > 1 && (
+          <div className="mt-8 flex justify-center">
+            <nav className="flex items-center space-x-2">
               <button
                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                 disabled={pagination.currentPage === 1}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors mr-2 ${isDarkMode ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  pagination.currentPage === 1
+                    ? 'cursor-not-allowed opacity-50'
+                    : isDarkMode
+                    ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700 border border-dark-600'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                }`}
               >
-                <Icon icon={Icons.FiChevronLeft} className="w-4 h-4 mr-2" />
                 {t('Previous')}
               </button>
 
+              {[...Array(pagination.totalPages)].map((_, index) => {
+                const page = index + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                      page === pagination.currentPage
+                        ? 'bg-accent-orange text-white'
+                        : isDarkMode
+                        ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700 border border-dark-600'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
               <button
                 onClick={() => handlePageChange(pagination.currentPage + 1)}
-                disabled={pagination.currentPage * pagination.limit >= pagination.total}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${isDarkMode ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                disabled={pagination.currentPage === pagination.totalPages}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  pagination.currentPage === pagination.totalPages
+                    ? 'cursor-not-allowed opacity-50'
+                    : isDarkMode
+                    ? 'bg-dark-800 text-dark-text-primary hover:bg-dark-700 border border-dark-600'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                }`}
               >
                 {t('Next')}
-                <Icon icon={Icons.FiChevronRight} className="w-4 h-4 ml-2" />
               </button>
-            </div>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!isLoading && services.length === 0 && (
-          <div className={`text-center py-12 rounded-lg ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white border border-gray-200'}`}>
-            <Icon icon={Icons.FiPackage} className={`w-12 h-12 mx-auto mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-400'}`} />
-            <h3 className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>
-              {t('No services found')}
-            </h3>
-            <p className={`mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-              {t('Try adjusting your search keywords or category filters.')}
-            </p>
+            </nav>
           </div>
         )}
       </div>

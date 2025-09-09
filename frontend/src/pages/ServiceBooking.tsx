@@ -33,12 +33,12 @@ const ServiceBooking: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
+  const { t, language, getLocalizedContent } = useTranslation();
 
-  // Fetch service data
+  // Fetch service data with language support
   const { data: serviceData, isLoading } = useQuery({
-    queryKey: ['service', slug],
-    queryFn: () => servicesAPI.getServiceBySlug(slug!),
+    queryKey: ['service', slug, language],
+    queryFn: () => servicesAPI.getServiceBySlug(slug!, language),
     enabled: !!slug,
   });
 
@@ -74,13 +74,13 @@ const ServiceBooking: React.FC = () => {
 
   const createBookingMutation = useMutation({
     mutationFn: async (formData: ServiceBookingFormData) => {
-      if (!service) throw new Error('Service not found');
+      if (!service) throw new Error(t('Service not found'));
 
       // Create booking payload with all required fields
       const bookingPayload = {
         serviceId: parseInt(service.id), // Convert to number
         serviceSlug: slug,
-        serviceTitle: service.title,
+        serviceTitle: getLocalizedContent(service, 'title') || service.title,
         customerName: formData.customerName,
         customerEmail: formData.customerEmail,
         customerPhone: formData.customerPhone,
@@ -103,14 +103,14 @@ const ServiceBooking: React.FC = () => {
         returnDate: formData.returnDate,
       };
 
-      return await bookingsAPI.createDirectBooking(bookingPayload);
+      return bookingsAPI.createDirectBooking(bookingPayload);
     },
-    onSuccess: (response) => {
-      toast.success(`${t('Booking submitted successfully')}! ${t('We will contact you soon')}.`);
+    onSuccess: () => {
+      toast.success(t('Booking submitted successfully! We will contact you shortly.'));
       navigate('/services');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || t('Something went wrong'));
+      toast.error(error.message || t('Failed to submit booking. Please try again.'));
     },
   });
 
@@ -120,436 +120,352 @@ const ServiceBooking: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{t('Loading...')}</p>
-        </div>
+      <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'} flex items-center justify-center`}>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent-orange"></div>
       </div>
     );
   }
 
   if (!service) {
     return (
-      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
+      <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'} flex items-center justify-center`}>
         <div className="text-center">
-          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Service Not Found')}</h2>
-          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>{t('The service you are looking for does not exist.')}</p>
-          <button
-            onClick={() => navigate('/services')}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            {t('Browse Services')}
-          </button>
+          <h1 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            {t('Service Not Found')}
+          </h1>
+          <p className={`mb-8 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            {t('The service you\'re looking for doesn\'t exist or has been removed.')}
+          </p>
+          <Link to="/services" className="btn-primary">
+            {t('Browse All Services')}
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} py-8`}>
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <Link
-              to={`/services/${slug}`}
-              className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
-            >
-              <Icon icon={Icons.FiArrowLeft} className="w-4 h-4 mr-1" />
-              {t('Back to Service Details')}
-            </Link>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'}`}>
+      {/* Header */}
+      <div className="bg-accent-orange text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              {t('Book Service')}
+            </h1>
+            <p className="text-xl text-white/90">
+              {getLocalizedContent(service, 'title') || service.title}
+            </p>
           </div>
+        </div>
+      </div>
 
-          {/* Service Summary */}
-          <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6 mb-6`}>
-            <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Service Summary')}</h2>
-            <div className="flex items-start space-x-4">
-              <img
-                src={service.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e'}
-                alt={service.title}
-                className="w-24 h-24 object-cover rounded-lg"
-              />
-              <div className="flex-1">
-                <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{service.title}</h3>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{service.subtitle}</p>
-                <div className={`mt-2 flex items-center space-x-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {service.duration && (
-                    <span className="flex items-center">
-                      <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
-                      {service.duration}
-                    </span>
-                  )}
-                  <span className="font-semibold text-blue-600">
-                    {t('Starting from')} ${service.price}
-                  </span>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Booking Form */}
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Personal Information */}
+              <div className={`rounded-lg shadow-lg p-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
+                <h2 className={`text-xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {t('Personal Information')}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                      {t('Full Name')} *
+                    </label>
+                    <input
+                      type="text"
+                      {...register('customerName', { required: t('Full name is required') })}
+                      className={`w-full p-3 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400'
+                          : 'border-gray-300 text-gray-900'
+                      } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+                      placeholder={t('Enter your full name')}
+                    />
+                    {errors.customerName && (
+                      <p className="text-red-500 text-sm mt-1">{errors.customerName.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                      {t('Email Address')} *
+                    </label>
+                    <input
+                      type="email"
+                      {...register('customerEmail', {
+                        required: t('Email is required'),
+                        pattern: {
+                          value: /^\S+@\S+$/i,
+                          message: t('Please enter a valid email address')
+                        }
+                      })}
+                      className={`w-full p-3 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400'
+                          : 'border-gray-300 text-gray-900'
+                      } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+                      placeholder={t('Enter your email address')}
+                    />
+                    {errors.customerEmail && (
+                      <p className="text-red-500 text-sm mt-1">{errors.customerEmail.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                      {t('Phone Number')} *
+                    </label>
+                    <input
+                      type="tel"
+                      {...register('customerPhone', { required: t('Phone number is required') })}
+                      className={`w-full p-3 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400'
+                          : 'border-gray-300 text-gray-900'
+                      } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+                      placeholder={t('Enter your phone number')}
+                    />
+                    {errors.customerPhone && (
+                      <p className="text-red-500 text-sm mt-1">{errors.customerPhone.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                      {t('Service Date')} *
+                    </label>
+                    <input
+                      type="date"
+                      {...register('startDate', { required: t('Service date is required') })}
+                      min={new Date().toISOString().split('T')[0]}
+                      className={`w-full p-3 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-white'
+                          : 'border-gray-300 text-gray-900'
+                      } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+                    />
+                    {errors.startDate && (
+                      <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Booking Form */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Customer Information */}
-                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
-                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Customer Information')}</h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                        {t('Full Name')} *
-                      </label>
-                      <input
-                        type="text"
-                        {...register('customerName', { required: t('Name is required') })}
-                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
-                        placeholder={t('Enter your full name')}
-                      />
-                      {errors.customerName && (
-                        <p className="mt-1 text-sm text-red-600">{errors.customerName.message}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                        {t('Email Address')} *
-                      </label>
-                      <input
-                        type="email"
-                        {...register('customerEmail', {
-                          required: t('Email is required'),
-                          pattern: {
-                            value: /^\S+@\S+$/i,
-                            message: t('Invalid email')
-                          }
-                        })}
-                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
-                        placeholder={t('Enter your email')}
-                      />
-                      {errors.customerEmail && (
-                        <p className="mt-1 text-sm text-red-600">{errors.customerEmail.message}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                        {t('Phone Number')} *
-                      </label>
-                      <input
-                        type="tel"
-                        {...register('customerPhone', { required: t('Phone is required') })}
-                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
-                        placeholder={t('Enter your phone number')}
-                      />
-                      {errors.customerPhone && (
-                        <p className="mt-1 text-sm text-red-600">{errors.customerPhone.message}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                        {t('Service Date')} *
-                      </label>
-                      <input
-                        type="date"
-                        {...register('startDate', { required: t('Date is required') })}
-                        min={new Date().toISOString().split('T')[0]}
-                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
-                      />
-                      {errors.startDate && (
-                        <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Number of People */}
-                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
-                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Number of People')}</h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                        {t('Adults')} (18+)
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        {...register('adults', {
-                          required: true,
-                          min: 1,
-                          valueAsNumber: true
-                        })}
-                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                        {t('Children')} (2-17)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        {...register('children', {
-                          min: 0,
-                          valueAsNumber: true
-                        })}
-                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
-                      />
-                    </div>
+              {/* Service Details */}
+              <div className={`rounded-lg shadow-lg p-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
+                <h2 className={`text-xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {t('Service Details')}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                      {t('Adults')} *
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      {...register('adults', {
+                        required: t('Number of adults is required'),
+                        min: { value: 1, message: t('At least 1 adult is required') }
+                      })}
+                      className={`w-full p-3 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-white'
+                          : 'border-gray-300 text-gray-900'
+                      } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+                    />
+                    {errors.adults && (
+                      <p className="text-red-500 text-sm mt-1">{errors.adults.message}</p>
+                    )}
                   </div>
 
-                  <div className={`mt-4 p-3 ${isDarkMode ? 'bg-blue-900' : 'bg-blue-50'} rounded-md`}>
-                    <p className={`text-sm ${isDarkMode ? 'text-blue-200' : 'text-blue-800'}`}>
-                      {t('Total People')}: <span className="font-medium">{watchedValues.totalTravelers || 1}</span>
-                    </p>
+                  <div>
+                    <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                      {t('Children')}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      {...register('children')}
+                      className={`w-full p-3 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-dark-700 border-dark-600 text-white'
+                          : 'border-gray-300 text-gray-900'
+                      } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+                    />
                   </div>
-                </div>
 
-                {/* Service-Specific Fields for Car Rental */}
-                {service.category === 'car-rental' && (
-                  <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
-                    <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Trip Details')}</h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Car Rental Specific Fields */}
+                  {service.service_type === 'car-rental' && (
+                    <>
                       <div>
-                        <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                          {t('From')} *
+                        <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                          {t('Departure Location')}
                         </label>
                         <input
                           type="text"
-                          {...register('departureLocation', { required: t('Pick-up location is required') })}
-                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            isDarkMode 
-                              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                              : 'bg-white border-gray-300 text-gray-900'
-                          }`}
-                          placeholder={t('Enter pick-up location')}
+                          {...register('departureLocation')}
+                          className={`w-full p-3 border rounded-lg ${
+                            isDarkMode
+                              ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400'
+                              : 'border-gray-300 text-gray-900'
+                          } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+                          placeholder={t('Enter departure location')}
                         />
-                        {errors.departureLocation && (
-                          <p className="mt-1 text-sm text-red-600">{errors.departureLocation.message}</p>
-                        )}
                       </div>
 
                       <div>
-                        <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                          {t('To')} *
+                        <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                          {t('Destination Location')}
                         </label>
                         <input
                           type="text"
-                          {...register('destinationLocation', { required: t('Drop-off location is required') })}
-                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            isDarkMode 
-                              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                              : 'bg-white border-gray-300 text-gray-900'
-                          }`}
-                          placeholder={t('Enter drop-off location')}
+                          {...register('destinationLocation')}
+                          className={`w-full p-3 border rounded-lg ${
+                            isDarkMode
+                              ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400'
+                              : 'border-gray-300 text-gray-900'
+                          } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+                          placeholder={t('Enter destination location')}
                         />
-                        {errors.destinationLocation && (
-                          <p className="mt-1 text-sm text-red-600">{errors.destinationLocation.message}</p>
-                        )}
                       </div>
 
                       <div className="md:col-span-2">
-                        <label className="flex items-center">
+                        <div className="flex items-center">
                           <input
                             type="checkbox"
                             {...register('returnTrip')}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            className="w-4 h-4 text-accent-orange border-gray-300 rounded focus:ring-accent-orange"
                           />
-                          <span className={`ml-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('Return Trip Required')}</span>
-                        </label>
+                          <label className={`ml-2 text-sm ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                            {t('Return Trip Required')}
+                          </label>
+                        </div>
                       </div>
 
                       {watchedValues.returnTrip && (
                         <div>
-                          <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                            {t('Return Date')} *
+                          <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                            {t('Return Date')}
                           </label>
                           <input
                             type="date"
-                            {...register('returnDate', { required: watchedValues.returnTrip ? t('Return date is required') : false })}
+                            {...register('returnDate')}
                             min={watchedValues.startDate || new Date().toISOString().split('T')[0]}
-                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                              isDarkMode 
-                                ? 'bg-gray-700 border-gray-600 text-white' 
-                                : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`w-full p-3 border rounded-lg ${
+                              isDarkMode
+                                ? 'bg-dark-700 border-dark-600 text-white'
+                                : 'border-gray-300 text-gray-900'
+                            } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
                           />
-                          {errors.returnDate && (
-                            <p className="mt-1 text-sm text-red-600">{errors.returnDate.message}</p>
-                          )}
                         </div>
                       )}
+                    </>
+                  )}
+                </div>
 
-                      <div className="md:col-span-2">
-                        <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                          {t('Let us know the details of your trip')}
-                        </label>
-                        <textarea
-                          {...register('specialRequests')}
-                          rows={4}
-                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            isDarkMode 
-                              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                              : 'bg-white border-gray-300 text-gray-900'
-                          }`}
-                          placeholder={t('Please provide details about your trip, special requirements, or any other information that would help us serve you better...')}
-                        />
-                      </div>
-                    </div>
+                <div className="mt-4">
+                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+                    {t('Special Requests')}
+                  </label>
+                  <textarea
+                    {...register('specialRequests')}
+                    rows={3}
+                    className={`w-full p-3 border rounded-lg ${
+                      isDarkMode
+                        ? 'bg-dark-700 border-dark-600 text-white placeholder-gray-400'
+                        : 'border-gray-300 text-gray-900'
+                    } focus:ring-2 focus:ring-accent-orange focus:border-transparent`}
+                    placeholder={t('Any special requests or additional information...')}
+                  />
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex space-x-4">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/services/${slug}`)}
+                  className={`flex-1 py-3 px-6 border rounded-lg font-medium transition-colors duration-200 ${
+                    isDarkMode
+                      ? 'border-dark-600 text-dark-text-primary hover:bg-dark-700'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {t('Back')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-accent-orange hover:bg-accent-orange-dark text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? t('Submitting...') : t('Submit Booking')}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Service Summary */}
+          <div className="lg:col-span-1">
+            <div className={`rounded-lg shadow-lg p-6 sticky top-8 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
+              <h3 className={`text-xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {t('Booking Summary')}
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {getLocalizedContent(service, 'title') || service.title}
+                  </h4>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {getLocalizedContent(service, 'subtitle') || service.subtitle}
+                  </p>
+                </div>
+
+                {service.price && (
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-dark-600">
+                    <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
+                      {t('Price per person')}
+                    </span>
+                    <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      ${service.price}
+                    </span>
                   </div>
                 )}
 
-                {/* Additional Information */}
-                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
-                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Additional Information')}</h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                        {t('Gender')}
-                      </label>
-                      <select
-                        {...register('gender')}
-                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
-                      >
-                        <option value="">{t('Select gender')}</option>
-                        <option value="male">{t('Male')}</option>
-                        <option value="female">{t('Female')}</option>
-                        <option value="other">{t('Other')}</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                        {t('Date of Birth')}
-                      </label>
-                      <input
-                        type="date"
-                        {...register('dateOfBirth')}
-                        className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode 
-                            ? 'bg-gray-700 border-gray-600 text-white' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                      {t('Address')} ({t('Optional')})
-                    </label>
-                    <input
-                      type="text"
-                      {...register('address')}
-                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDarkMode 
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                      placeholder={t('Enter your address')}
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                      {t('Special Requests')}
-                    </label>
-                    <textarea
-                      {...register('specialRequests')}
-                      rows={4}
-                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDarkMode 
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                      placeholder={t('Any special requirements or requests...')}
-                    />
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
+                    {t('Total Travelers')}
+                  </span>
+                  <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {watchedValues.totalTravelers || 1}
+                  </span>
                 </div>
+
+                {service.price && (
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-dark-600">
+                    <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      {t('Total Amount')}
+                    </span>
+                    <span className="font-bold text-accent-orange text-xl">
+                      ${(service.price * (watchedValues.totalTravelers || 1)).toFixed(2)}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Booking Summary */}
-              <div className="lg:col-span-1">
-                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6 sticky top-6`}>
-                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>{t('Booking Summary')}</h3>
-
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('Service')}:</span>
-                      <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{service.title}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('Base Price')}:</span>
-                      <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>${service.price}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('Number of People')}:</span>
-                      <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{watchedValues.totalTravelers || 1}</span>
-                    </div>
-                    <hr className={`${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`} />
-                    <div className="flex justify-between text-lg font-semibold">
-                      <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{t('Total Amount')}:</span>
-                      <span className="text-blue-600">${(service.price || 0) * (watchedValues.totalTravelers || 1)}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {isSubmitting ? t('Processing...') : t('Book Service')}
-                  </button>
-
-                  <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-3 text-center`}>
-                    {t('By clicking Book Service, you agree to our')}{' '}
-                    <Link
-                      to="/booking-policy"
-                      className="text-blue-500 hover:text-blue-600 underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {t('Terms of Service and Booking Policy')}
-                    </Link>
-                  </p>
-                </div>
+              <div className={`mt-6 p-4 rounded-lg ${isDarkMode ? 'bg-dark-700' : 'bg-gray-50'}`}>
+                <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <Icon icon={Icons.FiInfo} className="w-4 h-4 inline mr-1" />
+                  {t('You will receive a confirmation email with booking details and payment instructions.')}
+                </p>
               </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
