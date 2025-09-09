@@ -110,11 +110,17 @@ export const servicesAPI = {
 
 // Bookings API
 export const bookingsAPI = {
-    // Public - Direct booking without authentication (updated to match backend expectations)
+    // Public - Direct booking without authentication (updated to handle both tours and services)
     createDirectBooking: (bookingData: {
-        tourId: number;
+        // Tour fields
+        tourId?: number;
         tourSlug?: string;
         tourTitle?: string;
+        // Service fields
+        serviceId?: number;
+        serviceSlug?: string;
+        serviceTitle?: string;
+        // Common fields
         customerName: string;
         customerEmail: string;
         customerPhone: string;
@@ -126,10 +132,20 @@ export const bookingsAPI = {
         totalAmount: number;
         currency?: string;
         specialRequests?: string;
+        // Personal information
+        gender?: string;
+        dateOfBirth?: string;
+        address?: string;
+        // Emergency contact (tours)
         emergencyContactName?: string;
         emergencyContactPhone?: string;
         emergencyContactRelationship?: string;
-    }): Promise<AxiosResponse<ApiResponse<{ bookingNumber: string; bookingId: number; status: string; tourTitle: string }>>> =>
+        // Service-specific fields
+        departureLocation?: string;
+        destinationLocation?: string;
+        returnTrip?: boolean;
+        returnDate?: string;
+    }): Promise<AxiosResponse<ApiResponse<{ bookingNumber: string; bookingId: number; status: string; itemTitle: string; type: string }>>> =>
         api.post('/bookings', bookingData),
 
     // Admin only

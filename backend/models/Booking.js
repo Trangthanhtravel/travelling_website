@@ -21,10 +21,21 @@ class Booking {
     this.children = data.children || 0;
     this.infants = data.infants || 0;
 
+    // Personal information
+    this.gender = data.gender;
+    this.date_of_birth = data.date_of_birth;
+    this.address = data.address;
+
     // Emergency contact information
     this.emergency_contact_name = data.emergency_contact_name;
     this.emergency_contact_phone = data.emergency_contact_phone;
     this.emergency_contact_relationship = data.emergency_contact_relationship;
+
+    // Service-specific fields
+    this.departure_location = data.departure_location;
+    this.destination_location = data.destination_location;
+    this.return_trip = data.return_trip || false;
+    this.return_date = data.return_date;
 
     // Pricing
     this.total_amount = data.total_amount;
@@ -39,7 +50,9 @@ class Booking {
     this.confirmed_at = data.confirmed_at;
     
     // Timestamps
+        gender, date_of_birth, address,
     this.created_at = data.created_at || new Date().toISOString();
+        departure_location, destination_location, return_trip, return_date,
     this.updated_at = data.updated_at || new Date().toISOString();
   }
 
@@ -48,7 +61,9 @@ class Booking {
     const db = getDB();
     const sql = `
       INSERT INTO bookings (
+      this.gender, this.date_of_birth, this.address,
         type, item_id, customer_name, customer_email, customer_phone,
+      this.departure_location, this.destination_location, this.return_trip, this.return_date,
         start_date, total_travelers, adults, children, infants,
         emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
         special_requests, total_amount, currency, booking_number,

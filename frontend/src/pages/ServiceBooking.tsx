@@ -2,60 +2,36 @@ import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import { Icon, Icons } from '../components/common/Icons';
 import { servicesAPI, bookingsAPI } from '../utils/api';
-import { useTheme } from '../contexts/ThemeContext';
-import { ServiceBookingForm } from '../types';
+import { useTranslation } from '../contexts/TranslationContext';
 import toast from 'react-hot-toast';
 
-// Validation schemas for different service types
-const baseSchema = {
-  name: yup.string().required('Name is required'),
-  email: yup.string().email('Invalid email').required('Email is required'),
-  gender: yup.string().oneOf(['male', 'female', 'other']).required('Gender is required'),
-  dateOfBirth: yup.string().optional(),
-  phone: yup.string().required('Phone number is required'),
-  address: yup.string().optional(),
-  passengers: yup.object({
-    adults: yup.number().min(1, 'At least 1 adult required').required(),
-    children: yup.number().min(0).required(),
-  }).required(),
-};
-
-const tourSchema = yup.object({
-  ...baseSchema,
-  serviceType: yup.string().equals(['tours']).required(),
-  departureDate: yup.string().required('Departure date is required'),
-});
-
-const carRentalSchema = yup.object({
-  ...baseSchema,
-  serviceType: yup.string().equals(['car-rental']).required(),
-  departureDate: yup.string().required('Departure date is required'),
-  from: yup.string().required('Departure location is required'),
-  to: yup.string().required('Destination is required'),
-  returnTrip: yup.boolean().required(),
-  returnDate: yup.string().when('returnTrip', {
-    is: true,
-    then: (schema) => schema.required('Return date is required'),
-    otherwise: (schema) => schema.optional(),
-  }),
-  tripDetails: yup.string().required('Trip details are required'),
-});
-
-const otherServiceSchema = yup.object({
-  ...baseSchema,
-  serviceType: yup.string().equals(['other-services']).required(),
-  departureDate: yup.string().optional(),
-  requestDetails: yup.string().required('Request details are required'),
-});
+// Service booking form interface aligned with backend
+interface ServiceBookingFormData {
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  startDate: string;
+  adults: number;
+  children: number;
+  totalTravelers: number;
+  specialRequests?: string;
+  // Service-specific fields
+  serviceType?: string;
+  departureLocation?: string;
+  destinationLocation?: string;
+  returnTrip?: boolean;
+  returnDate?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  address?: string;
+}
 
 const ServiceBooking: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
 
   // Fetch service data
   const { data: serviceData, isLoading } = useQuery({
@@ -66,354 +42,448 @@ const ServiceBooking: React.FC = () => {
 
   const service = serviceData?.data.data;
 
-  // Determine which schema to use based on service category
-  const getSchema = () => {
-    if (!service) return tourSchema;
-    switch (service.category) {
-      case 'tours': return tourSchema;
-      case 'car-rental': return carRentalSchema;
-      default: return otherServiceSchema;
-    }
-  };
-
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
-  } = useForm<ServiceBookingForm>({
-    resolver: yupResolver(getSchema()) as any,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<ServiceBookingFormData>({
     defaultValues: {
-      serviceId: slug || '',
-      serviceType: service?.category || 'tours',
-      passengers: { adults: 1, children: 0 },
+      customerName: '',
+      customerEmail: '',
+      customerPhone: '',
+      startDate: '',
+      adults: 1,
+      children: 0,
+      totalTravelers: 1,
+      specialRequests: '',
       returnTrip: false,
-    }
+    },
   });
 
-  const watchReturnTrip = watch('returnTrip');
+  const watchedValues = watch();
+
+  // Calculate total travelers when individual counts change
+  React.useEffect(() => {
+    const total = (watchedValues.adults || 0) + (watchedValues.children || 0);
+    setValue('totalTravelers', total);
+  }, [watchedValues.adults, watchedValues.children, setValue]);
 
   const createBookingMutation = useMutation({
-    mutationFn: async (bookingData: ServiceBookingForm) => {
-      // Transform data to match the database schema and backend API
-      const totalTravelers = bookingData.passengers.adults + bookingData.passengers.children;
+    mutationFn: async (formData: ServiceBookingFormData) => {
+      if (!service) throw new Error('Service not found');
 
-      // Build special requests from various fields
-      const specialRequestsParts = [];
-      if (bookingData.requestDetails) specialRequestsParts.push(`Service Requirements: ${bookingData.requestDetails}`);
-      if (bookingData.tripDetails) specialRequestsParts.push(`Trip Details: ${bookingData.tripDetails}`);
-      if (bookingData.from && bookingData.to) specialRequestsParts.push(`Route: ${bookingData.from} to ${bookingData.to}`);
-      if (bookingData.returnTrip && bookingData.returnDate) specialRequestsParts.push(`Return Trip: ${bookingData.returnDate}`);
-      if (bookingData.gender) specialRequestsParts.push(`Gender: ${bookingData.gender}`);
-      if (bookingData.dateOfBirth) specialRequestsParts.push(`Date of Birth: ${bookingData.dateOfBirth}`);
-      if (bookingData.address) specialRequestsParts.push(`Address: ${bookingData.address}`);
-
+      // Create booking payload with all required fields
       const bookingPayload = {
-        type: 'service' as const,
-        itemId: slug!,
-        customerInfo: {
-          name: bookingData.name,
-          email: bookingData.email,
-          phone: bookingData.phone,
-        },
-        bookingDetails: {
-          startDate: bookingData.departureDate || new Date().toISOString().split('T')[0],
-          totalTravelers,
-          specialRequests: specialRequestsParts.join('; '),
-        },
-        pricing: {
-          totalAmount: service?.price || 0,
-          currency: 'USD',
-        },
+        serviceId: parseInt(service.id), // Convert to number
+        serviceSlug: slug,
+        serviceTitle: service.title,
+        customerName: formData.customerName,
+        customerEmail: formData.customerEmail,
+        customerPhone: formData.customerPhone,
+        startDate: formData.startDate,
+        adults: formData.adults,
+        children: formData.children,
+        infants: 0,
+        totalTravelers: formData.totalTravelers,
+        totalAmount: (service.price || 0) * formData.totalTravelers,
+        currency: 'USD',
+        specialRequests: formData.specialRequests || '',
+        // Additional personal information
+        gender: formData.gender,
+        dateOfBirth: formData.dateOfBirth,
+        address: formData.address,
+        // Car rental specific fields
+        departureLocation: formData.departureLocation,
+        destinationLocation: formData.destinationLocation,
+        returnTrip: formData.returnTrip,
+        returnDate: formData.returnDate,
       };
 
       return await bookingsAPI.createDirectBooking(bookingPayload);
     },
-    onSuccess: (data) => {
-      toast.success('Booking request submitted successfully! Our team will contact you shortly.');
-      navigate('/');
+    onSuccess: (response) => {
+      const bookingData = response.data.data;
+      toast.success(`${t('Booking submitted successfully')}! ${t('We will contact you soon')}.`);
+      navigate('/services');
     },
     onError: (error: any) => {
-      toast.error(error?.message || 'Failed to submit booking request');
+      toast.error(error.response?.data?.message || t('Something went wrong'));
     },
   });
 
-  const onSubmit = (data: ServiceBookingForm) => {
+  const onSubmit = (data: ServiceBookingFormData) => {
     createBookingMutation.mutate(data);
   };
 
-  if (isLoading || !service) {
+  if (isLoading) {
     return (
-      <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'} flex items-center justify-center`}>
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">{t('Loading...')}</p>
+        </div>
       </div>
     );
   }
 
-  const renderServiceSummary = () => (
-    <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
-      <h2 className={`text-xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Service Summary</h2>
-      <div className="flex items-start space-x-4">
-        <img
-          src={service.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e'}
-          alt={service.title}
-          className="w-24 h-24 object-cover rounded-lg"
-        />
-        <div className="flex-1">
-          <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{service.title}</h3>
-          <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{service.subtitle}</p>
-          <div className={`mt-2 flex items-center space-x-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            {service.duration && (
-              <span className="flex items-center">
-                <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
-                {service.duration}
-              </span>
-            )}
-            <span className="font-semibold text-primary-600">${service.price}</span>
-          </div>
+  if (!service) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('Service Not Found')}</h2>
+          <p className="text-gray-600 mb-4">{t('The service you are looking for does not exist.')}</p>
+          <button
+            onClick={() => navigate('/services')}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            {t('Browse Services')}
+          </button>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-gray-50'} py-8`}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <Link to={`/services/${slug}`} className={`flex items-center text-sm ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
-            <Icon icon={Icons.FiArrowLeft} className="w-4 h-4 mr-1" />
-            Back to Service Details
-          </Link>
-        </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <Link
+              to={`/services/${slug}`}
+              className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
+            >
+              <Icon icon={Icons.FiArrowLeft} className="w-4 h-4 mr-1" />
+              {t('Back to Service Details')}
+            </Link>
+          </div>
 
-        {renderServiceSummary()}
-
-        <div className={`rounded-lg shadow-lg p-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
-          <h1 className={`text-2xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Book This Service</h1>
+          {/* Service Summary */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('Service Summary')}</h2>
+            <div className="flex items-start space-x-4">
+              <img
+                src={service.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e'}
+                alt={service.title}
+                className="w-24 h-24 object-cover rounded-lg"
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">{service.title}</h3>
+                <p className="text-sm text-gray-600">{service.subtitle}</p>
+                <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                  {service.duration && (
+                    <span className="flex items-center">
+                      <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
+                      {service.duration}
+                    </span>
+                  )}
+                  <span className="font-semibold text-blue-600">
+                    {t('Starting from')} ${service.price}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Contact Information */}
-            <div>
-              <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Contact Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Name */}
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    {...register('name')}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                    placeholder="Enter your full name"
-                  />
-                  {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Booking Form */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Customer Information */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Customer Information')}</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Full Name')} *
+                      </label>
+                      <input
+                        type="text"
+                        {...register('customerName', { required: t('Name is required') })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={t('Enter your full name')}
+                      />
+                      {errors.customerName && (
+                        <p className="mt-1 text-sm text-red-600">{errors.customerName.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Email Address')} *
+                      </label>
+                      <input
+                        type="email"
+                        {...register('customerEmail', {
+                          required: t('Email is required'),
+                          pattern: {
+                            value: /^\S+@\S+$/i,
+                            message: t('Invalid email')
+                          }
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={t('Enter your email')}
+                      />
+                      {errors.customerEmail && (
+                        <p className="mt-1 text-sm text-red-600">{errors.customerEmail.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Phone Number')} *
+                      </label>
+                      <input
+                        type="tel"
+                        {...register('customerPhone', { required: t('Phone is required') })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder={t('Enter your phone number')}
+                      />
+                      {errors.customerPhone && (
+                        <p className="mt-1 text-sm text-red-600">{errors.customerPhone.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Service Date')} *
+                      </label>
+                      <input
+                        type="date"
+                        {...register('startDate', { required: t('Date is required') })}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      {errors.startDate && (
+                        <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Email */}
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Email Address <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    {...register('email')}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                    placeholder="Enter your email address"
-                  />
-                  {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+                {/* Number of People */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Number of People')}</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Adults')} (18+)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        {...register('adults', {
+                          required: true,
+                          min: 1,
+                          valueAsNumber: true
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Children')} (2-17)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        {...register('children', {
+                          min: 0,
+                          valueAsNumber: true
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-3 bg-blue-50 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      {t('Total People')}: <span className="font-medium">{watchedValues.totalTravelers || 1}</span>
+                    </p>
+                  </div>
                 </div>
 
-                {/* Phone */}
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Phone Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    {...register('phone')}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                    placeholder="Enter your phone number"
-                  />
-                  {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
-                </div>
+                {/* Service-Specific Fields for Car Rental */}
+                {service.category === 'car-rental' && (
+                  <div className="bg-white rounded-lg shadow-sm p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Trip Details')}</h3>
 
-                {/* Gender */}
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Gender <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    {...register('gender')}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('From')} *
+                        </label>
+                        <input
+                          type="text"
+                          {...register('departureLocation', { required: t('Pick-up location is required') })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={t('Enter pick-up location')}
+                        />
+                        {errors.departureLocation && (
+                          <p className="mt-1 text-sm text-red-600">{errors.departureLocation.message}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('To')} *
+                        </label>
+                        <input
+                          type="text"
+                          {...register('destinationLocation', { required: t('Drop-off location is required') })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={t('Enter drop-off location')}
+                        />
+                        {errors.destinationLocation && (
+                          <p className="mt-1 text-sm text-red-600">{errors.destinationLocation.message}</p>
+                        )}
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            {...register('returnTrip')}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">{t('Return Trip Required')}</span>
+                        </label>
+                      </div>
+
+                      {watchedValues.returnTrip && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('Return Date')} *
+                          </label>
+                          <input
+                            type="date"
+                            {...register('returnDate', { required: watchedValues.returnTrip ? t('Return date is required') : false })}
+                            min={watchedValues.startDate || new Date().toISOString().split('T')[0]}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                          {errors.returnDate && (
+                            <p className="mt-1 text-sm text-red-600">{errors.returnDate.message}</p>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('Let us know the details of your trip')}
+                        </label>
+                        <textarea
+                          {...register('specialRequests')}
+                          rows={4}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={t('Please provide details about your trip, special requirements, or any other information that would help us serve you better...')}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+
+                {/* Additional Information */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Additional Information')}</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Gender')}
+                      </label>
+                      <select
+                        {...register('gender')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="">{t('Select gender')}</option>
+                        <option value="male">{t('Male')}</option>
+                        <option value="female">{t('Female')}</option>
+                        <option value="other">{t('Other')}</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {t('Date of Birth')}
+                      </label>
+                      <input
+                        type="date"
+                        {...register('dateOfBirth')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('Address')} ({t('Optional')})
+                    </label>
+                    <input
+                      type="text"
+                      {...register('address')}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder={t('Enter your address')}
+                    />
+                  </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('Special Requests')}
+                        </label>
+                        <textarea
+                            {...register('specialRequests')}
+                            rows={4}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder={t('Any special requirements or requests...')}
+                        />
+                    </div>
+                </div>
+              </div>
+
+              {/* Booking Summary */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('Booking Summary')}</h3>
+
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('Service')}:</span>
+                      <span className="font-medium">{service.title}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('Base Price')}:</span>
+                      <span className="font-medium">${service.price}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('Number of People')}:</span>
+                      <span className="font-medium">{watchedValues.totalTravelers || 1}</span>
+                    </div>
+                    <hr className="border-gray-200" />
+                    <div className="flex justify-between text-lg font-semibold">
+                      <span>{t('Total Amount')}:</span>
+                      <span className="text-blue-600">${(service.price || 0) * (watchedValues.totalTravelers || 1)}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    <option value="">Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                  {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender.message}</p>}
+                    {isSubmitting ? t('Processing...') : t('Book Service')}
+                  </button>
+
+                  <p className="text-xs text-gray-500 mt-3 text-center">
+                    {t('By clicking Book Service, you agree to our Terms of Service and Privacy Policy')}
+                  </p>
                 </div>
               </div>
-            </div>
-
-            {/* Passenger Information */}
-            <div>
-              <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Passenger Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Adults <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    {...register('passengers.adults', { valueAsNumber: true })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Children
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    {...register('passengers.children', { valueAsNumber: true })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                  />
-                </div>
-              </div>
-              {errors.passengers && <p className="mt-1 text-sm text-red-600">Please specify valid passenger counts</p>}
-            </div>
-
-            {/* Service-specific fields */}
-            {service.category === 'tours' && (
-              <div>
-                <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Tour Details</h3>
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Departure Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    {...register('departureDate')}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                  />
-                  {errors.departureDate && <p className="mt-1 text-sm text-red-600">{errors.departureDate.message}</p>}
-                </div>
-              </div>
-            )}
-
-            {service.category === 'car-rental' && (
-              <div>
-                <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Trip Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                      From <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      {...register('from')}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                      placeholder="Departure location"
-                    />
-                    {errors.from && <p className="mt-1 text-sm text-red-600">{errors.from.message}</p>}
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                      To <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      {...register('to')}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                      placeholder="Destination"
-                    />
-                    {errors.to && <p className="mt-1 text-sm text-red-600">{errors.to.message}</p>}
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      {...register('returnTrip')}
-                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                    />
-                    <span className={`ml-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Return Trip</span>
-                  </label>
-                </div>
-
-                {watchReturnTrip && (
-                  <div className="mt-4">
-                    <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Return Date <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      {...register('returnDate')}
-                      min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                    />
-                    {errors.returnDate && <p className="mt-1 text-sm text-red-600">{errors.returnDate.message}</p>}
-                  </div>
-                )}
-
-                <div className="mt-4">
-                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Trip Details <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    {...register('tripDetails')}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                    placeholder="Describe your trip requirements..."
-                  />
-                  {errors.tripDetails && <p className="mt-1 text-sm text-red-600">{errors.tripDetails.message}</p>}
-                </div>
-              </div>
-            )}
-
-            {!['tours', 'car-rental'].includes(service.category) && (
-              <div>
-                <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Service Requirements</h3>
-                <div>
-                  <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Request Details <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    {...register('requestDetails')}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-dark-700 dark:text-white"
-                    placeholder="Please describe your service requirements in detail..."
-                  />
-                  {errors.requestDetails && <p className="mt-1 text-sm text-red-600">{errors.requestDetails.message}</p>}
-                </div>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <div className="pt-6 border-t border-gray-200 dark:border-dark-600">
-              <button
-                type="submit"
-                disabled={createBookingMutation.isPending}
-                className="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {createBookingMutation.isPending ? (
-                  <div className="flex items-center justify-center">
-                    <Icon icon={Icons.FiLoader} className="animate-spin h-5 w-5 mr-2" />
-                    Submitting Request...
-                  </div>
-                ) : (
-                  'Submit Booking Request'
-                )}
-              </button>
-              <p className={`mt-2 text-sm text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                We will contact you within 24 hours to confirm your booking and provide payment instructions.
-              </p>
             </div>
           </form>
         </div>

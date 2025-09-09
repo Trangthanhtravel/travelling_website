@@ -464,6 +464,27 @@ const vietnameseTranslations: Translations = {
   'e.g., Spouse, Parent': 'ví dụ: Vợ/Chồng, Cha/Mẹ',
   'Any special requirements, dietary restrictions, medical conditions, or other requests...': 'Bất kỳ yêu cầu đặc biệt, hạn chế về chế độ ăn uống, tình trạng y tế hoặc yêu cầu khác...',
   'By clicking Book Now, you agree to our Terms of Service and Privacy Policy': 'Bằng cách nhấp vào Đặt Ngay, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi',
+
+  // Service Booking Additional Translations
+  'Service Not Found': 'Không Tìm Thấy Dịch Vụ',
+  'The service you are looking for does not exist.': 'Dịch vụ bạn đang tìm kiếm không tồn tại.',
+  'Browse Services': 'Duyệt Dịch Vụ',
+  'Back to Service Details': 'Quay Lại Chi Tiết Dịch Vụ',
+  'Service Summary': 'Tóm Tắt Dịch Vụ',
+  'Total People': 'Tổng Số Người',
+  'Trip Details': 'Chi Tiết Chuyến Đi',
+  'Return Trip Required': 'Yêu Cầu Chuyến Về',
+  'Additional Information': 'Thông Tin Bổ Sung',
+  'Select gender': 'Chọn giới tính',
+  'Male': 'Nam',
+  'Female': 'Nữ',
+  'Date of Birth': 'Ngày Sinh',
+  'Enter your address': 'Nhập địa chỉ của bạn',
+  'Any special requirements or requests...': 'Bất kỳ yêu cầu đặc biệt hoặc yêu cầu nào...',
+  'Service': 'Dịch Vụ',
+  'By clicking Book Service, you agree to our Terms of Service and Privacy Policy': 'Bằng cách nhấp vào Đặt Dịch Vụ, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi',
+  'Enter pick-up location': 'Nhập địa điểm đón',
+  'Enter drop-off location': 'Nhập địa điểm trả',
 };
 
 interface TranslationContextType {

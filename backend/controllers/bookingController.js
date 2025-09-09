@@ -9,10 +9,13 @@ const createDirectBooking = async (req, res) => {
     console.log('Received booking data:', req.body);
 
     const {
-      // Updated to match frontend structure
+      // Updated to match frontend structure for both tours and services
       tourId,
+      serviceId,
       tourSlug,
+      serviceSlug,
       tourTitle,
+      serviceTitle,
       customerName,
       customerEmail,
       customerPhone,
@@ -26,11 +29,27 @@ const createDirectBooking = async (req, res) => {
       specialRequests,
       emergencyContactName,
       emergencyContactPhone,
-      emergencyContactRelationship
+      emergencyContactRelationship,
+      // New personal information fields
+      gender,
+      dateOfBirth,
+      address,
+      // Service-specific fields
+      departureLocation,
+      destinationLocation,
+      returnTrip,
+      returnDate
     } = req.body;
 
+    // Determine if this is a tour or service booking
+    const isServiceBooking = serviceId || serviceSlug;
+    const itemId = isServiceBooking ? serviceId : tourId;
+    const itemSlug = isServiceBooking ? serviceSlug : tourSlug;
+    const itemTitle = isServiceBooking ? serviceTitle : tourTitle;
+    const bookingType = isServiceBooking ? 'service' : 'tour';
+
     // Validate required fields
-    if (!tourId || !customerName || !customerEmail || !customerPhone || !startDate || !totalTravelers || !totalAmount) {
+    if (!itemId || !customerName || !customerEmail || !customerPhone || !startDate || !totalTravelers || !totalAmount) {
       return res.status(400).json({
         success: false,
         message: 'Missing required booking information'
@@ -58,12 +77,18 @@ const createDirectBooking = async (req, res) => {
       });
     }
 
-    // Get tour details using the tour ID
-    const tour = await Tour.findById(req.db, tourId);
-    if (!tour) {
+    // Get tour or service details
+    let item;
+    if (bookingType === 'tour') {
+      item = await Tour.findById(req.db, itemId);
+    } else {
+      item = await Service.findById(req.db, itemId);
+    }
+
+    if (!item) {
       return res.status(404).json({
         success: false,
-        message: 'Tour not found'
+        message: `${bookingType === 'tour' ? 'Tour' : 'Service'} not found`
       });
     }
 
@@ -72,8 +97,8 @@ const createDirectBooking = async (req, res) => {
 
     // Create booking object matching database schema
     const bookingData = {
-      type: 'tour',
-      item_id: tourId,
+      type: bookingType,
+      item_id: itemId,
       customer_name: customerName,
       customer_email: customerEmail,
       customer_phone: customerPhone,
@@ -85,13 +110,23 @@ const createDirectBooking = async (req, res) => {
       status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      // Additional fields for tracking
+      // Individual traveler counts
       adults: adults || 0,
       children: children || 0,
       infants: infants || 0,
+      // Personal information
+      gender: gender || null,
+      date_of_birth: dateOfBirth || null,
+      address: address || null,
+      // Emergency contact information
       emergency_contact_name: emergencyContactName || null,
       emergency_contact_phone: emergencyContactPhone || null,
       emergency_contact_relationship: emergencyContactRelationship || null,
+      // Service-specific fields
+      departure_location: departureLocation || null,
+      destination_location: destinationLocation || null,
+      return_trip: returnTrip || false,
+      return_date: returnDate || null,
       booking_number: bookingNumber
     };
 
@@ -103,15 +138,17 @@ const createDirectBooking = async (req, res) => {
       await Promise.all([
         emailService.sendAdminBookingNotification(req.db, {
           ...savedBooking,
-          tour_title: tour.title,
-          tour_slug: tourSlug
+          item_title: itemTitle,
+          item_slug: itemSlug,
+          booking_type: bookingType
         }),
         emailService.sendCustomerConfirmation(req.db, {
           ...savedBooking,
-          tour_title: tour.title,
-          tour_slug: tourSlug,
+          item_title: itemTitle,
+          item_slug: itemSlug,
           customer_name: customerName,
-          customer_email: customerEmail
+          customer_email: customerEmail,
+          booking_type: bookingType
         })
       ]);
     } catch (emailError) {
@@ -121,12 +158,13 @@ const createDirectBooking = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Booking request submitted successfully. We will contact you soon!',
+      message: `${bookingType === 'tour' ? 'Tour' : 'Service'} booking request submitted successfully. We will contact you soon!`,
       data: {
         bookingNumber: bookingNumber,
         bookingId: savedBooking.id,
         status: 'pending',
-        tourTitle: tour.title
+        itemTitle: itemTitle,
+        type: bookingType
       }
     });
   } catch (error) {
