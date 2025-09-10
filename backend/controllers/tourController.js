@@ -302,14 +302,16 @@ const updateTour = async (req, res) => {
       updateData.featured = updateData.featured === 'true' || updateData.featured === true;
     }
 
-    // Update tour properties
-    Object.assign(tour, updateData);
-
-    // Handle image upload
+    // Handle image upload FIRST - before updating other properties
     if (req.file) {
       const oldImage = tour.image;
-      await tour.updateImage(req.r2, req.file, oldImage);
+      const newImageUrl = await tour.updateImage(req.r2, req.file, oldImage);
+      // Update the updateData with the new image URL
+      updateData.image = newImageUrl;
     }
+
+    // Update tour properties (including the new image URL if uploaded)
+    Object.assign(tour, updateData);
 
     // Update in database - pass the updateData to the update method
     await tour.update(db, updateData);
