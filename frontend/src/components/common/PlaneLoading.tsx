@@ -14,7 +14,7 @@ const PlaneLoading: React.FC<PlaneLoadingProps> = ({ message = 'Loading...' }) =
 
         {/* Flying Plane */}
         <div className="absolute top-1/2 left-0 transform -translate-y-1/2 animate-plane-fly">
-          <svg className="w-16 h-16 text-white drop-shadow-lg transform rotate-90" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-16 h-16 text-gray-800 dark:text-white drop-shadow-lg transform rotate-90" fill="currentColor" viewBox="0 0 24 24">
             <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
           </svg>
 
@@ -26,19 +26,19 @@ const PlaneLoading: React.FC<PlaneLoadingProps> = ({ message = 'Loading...' }) =
 
       {/* Company Name */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-4 animate-fade-in">
+        <h1 className="text-4xl font-bold text-gray-800 dark:text-white drop-shadow-lg mb-4 animate-fade-in">
           Trang Thanh
         </h1>
-        <p className="text-white/80 text-lg drop-shadow-md animate-fade-in-delay">
+        <p className="text-gray-600 dark:text-white/80 text-lg drop-shadow-md animate-fade-in-delay">
           {message}
         </p>
       </div>
 
       {/* Flying dots indicator */}
       <div className="flex space-x-2 mt-8">
-        <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce-1"></div>
-        <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce-2"></div>
-        <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce-3"></div>
+        <div className="w-2 h-2 bg-gray-600/60 dark:bg-white/60 rounded-full animate-bounce-1"></div>
+        <div className="w-2 h-2 bg-gray-600/60 dark:bg-white/60 rounded-full animate-bounce-2"></div>
+        <div className="w-2 h-2 bg-gray-600/60 dark:bg-white/60 rounded-full animate-bounce-3"></div>
       </div>
     </div>
   );
