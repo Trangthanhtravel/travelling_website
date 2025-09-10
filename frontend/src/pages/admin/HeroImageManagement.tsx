@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useTranslation } from '../../contexts/TranslationContext';
 import { Icon, Icons } from '../../components/common/Icons';
+import BilingualInput from '../../components/common/BilingualInput';
 import toast from 'react-hot-toast';
 
 interface HeroImage {
   id: number;
   key: string;
   title: string;
+  title_vi?: string;
   content: string;
+  content_vi?: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -21,13 +25,14 @@ interface HeroImageData {
 
 const HeroImageManagement: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
   const [heroImages, setHeroImages] = useState<HeroImageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({
     imageUrl: '',
-    title: '',
-    subtitle: ''
+    title: { en: '', vi: '' },
+    subtitle: { en: '', vi: '' }
   });
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -105,10 +110,23 @@ const HeroImageManagement: React.FC = () => {
     setEditingIndex(index);
     setEditForm({
       imageUrl: heroData.image?.content || '',
-      title: heroData.title?.content || '',
-      subtitle: heroData.subtitle?.content || ''
+      title: {
+        en: heroData.title?.content || '',
+        vi: heroData.title?.content_vi || ''
+      },
+      subtitle: {
+        en: heroData.subtitle?.content || '',
+        vi: heroData.subtitle?.content_vi || ''
+      }
     });
     setSelectedFile(null);
+  };
+
+  const handleBilingualChange = (name: string, value: { en: string; vi: string }) => {
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSave = async () => {
@@ -126,32 +144,32 @@ const HeroImageManagement: React.FC = () => {
 
       // Update or create image URL
       if (heroData.image) {
-        await updateContent(heroData.image.id, imageUrl);
+        await updateContent(heroData.image.id, imageUrl, imageUrl);
       } else {
-        await createContent(`hero_image_${heroIndex}`, `Hero Image ${heroIndex}`, imageUrl);
+        await createContent(`hero_image_${heroIndex}`, `Hero Image ${heroIndex}`, imageUrl, imageUrl);
       }
 
       // Update or create title
       if (heroData.title) {
-        await updateContent(heroData.title.id, editForm.title);
+        await updateContent(heroData.title.id, editForm.title.en, editForm.title.vi);
       } else {
-        await createContent(`hero_title_${heroIndex}`, `Hero Title ${heroIndex}`, editForm.title);
+        await createContent(`hero_title_${heroIndex}`, `Hero Title ${heroIndex}`, editForm.title.en, editForm.title.vi);
       }
 
       // Update or create subtitle
       if (heroData.subtitle) {
-        await updateContent(heroData.subtitle.id, editForm.subtitle);
+        await updateContent(heroData.subtitle.id, editForm.subtitle.en, editForm.subtitle.vi);
       } else {
-        await createContent(`hero_subtitle_${heroIndex}`, `Hero Subtitle ${heroIndex}`, editForm.subtitle);
+        await createContent(`hero_subtitle_${heroIndex}`, `Hero Subtitle ${heroIndex}`, editForm.subtitle.en, editForm.subtitle.vi);
       }
 
       setEditingIndex(null);
       setSelectedFile(null);
-      toast.success('Hero image updated successfully');
+      toast.success(t('Hero image updated successfully'));
       fetchHeroImages();
     } catch (error) {
       console.error('Error saving hero image:', error);
-      toast.error('Error saving hero image. Please try again.');
+      toast.error(t('Error saving hero image. Please try again.'));
     }
   };
 
@@ -165,12 +183,12 @@ const HeroImageManagement: React.FC = () => {
         imageUrl = await uploadImage(selectedFile);
       }
 
-      await createContent(`hero_image_${nextIndex}`, `Hero Image ${nextIndex}`, imageUrl);
-      await createContent(`hero_title_${nextIndex}`, `Hero Title ${nextIndex}`, editForm.title);
-      await createContent(`hero_subtitle_${nextIndex}`, `Hero Subtitle ${nextIndex}`, editForm.subtitle);
+      await createContent(`hero_image_${nextIndex}`, `Hero Image ${nextIndex}`, imageUrl, imageUrl);
+      await createContent(`hero_title_${nextIndex}`, `Hero Title ${nextIndex}`, editForm.title.en, editForm.title.vi);
+      await createContent(`hero_subtitle_${nextIndex}`, `Hero Subtitle ${nextIndex}`, editForm.subtitle.en, editForm.subtitle.vi);
 
       setIsAddingNew(false);
-      setEditForm({ imageUrl: '', title: '', subtitle: '' });
+      setEditForm({ imageUrl: '', title: { en: '', vi: '' }, subtitle: { en: '', vi: '' } });
       setSelectedFile(null);
       toast.success('Hero image added successfully');
       fetchHeroImages();
@@ -197,14 +215,14 @@ const HeroImageManagement: React.FC = () => {
     }
   };
 
-  const updateContent = async (id: number, content: string) => {
+  const updateContent = async (id: number, content: string, content_vi: string) => {
     const response = await fetch(`${getApiUrl()}/admin/content/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
       },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({ content, content_vi })
     });
 
     if (!response.ok) {
@@ -212,14 +230,14 @@ const HeroImageManagement: React.FC = () => {
     }
   };
 
-  const createContent = async (key: string, title: string, content: string) => {
+  const createContent = async (key: string, title: string, content: string, content_vi: string) => {
     const response = await fetch(`${getApiUrl()}/admin/content`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
       },
-      body: JSON.stringify({ key, title, content, type: 'setting' })
+      body: JSON.stringify({ key, title, content, content_vi, type: 'setting' })
     });
 
     if (!response.ok) {
@@ -273,7 +291,7 @@ const HeroImageManagement: React.FC = () => {
           <button
             onClick={() => {
               setIsAddingNew(true);
-              setEditForm({ imageUrl: '', title: '', subtitle: '' });
+              setEditForm({ imageUrl: '', title: { en: '', vi: '' }, subtitle: { en: '', vi: '' } });
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
           >
@@ -316,12 +334,15 @@ const HeroImageManagement: React.FC = () => {
                   <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
                     Title
                   </label>
-                  <input
-                    type="text"
+                  <BilingualInput
+                    label=""
+                    name="title"
                     value={editForm.title}
-                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                    className={`w-full p-2 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
-                    placeholder="Hero title"
+                    onChange={handleBilingualChange}
+                    placeholder={{
+                      en: "Enter hero title in English",
+                      vi: "Nhập tiêu đề hero bằng tiếng Việt"
+                    }}
                   />
                 </div>
 
@@ -329,12 +350,15 @@ const HeroImageManagement: React.FC = () => {
                   <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
                     Subtitle
                   </label>
-                  <input
-                    type="text"
+                  <BilingualInput
+                    label=""
+                    name="subtitle"
                     value={editForm.subtitle}
-                    onChange={(e) => setEditForm({ ...editForm, subtitle: e.target.value })}
-                    className={`w-full p-2 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
-                    placeholder="Hero subtitle"
+                    onChange={handleBilingualChange}
+                    placeholder={{
+                      en: "Enter hero subtitle in English",
+                      vi: "Nhập phụ đề hero bằng tiếng Việt"
+                    }}
                   />
                 </div>
 
@@ -363,7 +387,7 @@ const HeroImageManagement: React.FC = () => {
                   <button
                     onClick={() => {
                       setIsAddingNew(false);
-                      setEditForm({ imageUrl: '', title: '', subtitle: '' });
+                      setEditForm({ imageUrl: '', title: { en: '', vi: '' }, subtitle: { en: '', vi: '' } });
                     }}
                     className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg flex items-center justify-center gap-2"
                   >
@@ -436,11 +460,15 @@ const HeroImageManagement: React.FC = () => {
                       <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
                         Title
                       </label>
-                      <input
-                        type="text"
+                      <BilingualInput
+                        label=""
+                        name="title"
                         value={editForm.title}
-                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        className={`w-full p-2 border rounded ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
+                        onChange={handleBilingualChange}
+                        placeholder={{
+                          en: "Enter hero title in English",
+                          vi: "Nhập tiêu đề hero bằng tiếng Việt"
+                        }}
                       />
                     </div>
 
@@ -448,11 +476,15 @@ const HeroImageManagement: React.FC = () => {
                       <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
                         Subtitle
                       </label>
-                      <input
-                        type="text"
+                      <BilingualInput
+                        label=""
+                        name="subtitle"
                         value={editForm.subtitle}
-                        onChange={(e) => setEditForm({ ...editForm, subtitle: e.target.value })}
-                        className={`w-full p-2 border rounded ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
+                        onChange={handleBilingualChange}
+                        placeholder={{
+                          en: "Enter hero subtitle in English",
+                          vi: "Nhập phụ đề hero bằng tiếng Việt"
+                        }}
                       />
                     </div>
 

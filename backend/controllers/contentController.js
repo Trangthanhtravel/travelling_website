@@ -4,7 +4,7 @@ const { r2Helpers } = require('../config/storage');
 // Get all content
 const getAllContent = async (req, res) => {
   try {
-    const { type, status = 'active' } = req.query;
+    const { type, status = 'active', language = 'en' } = req.query;
 
     let query = 'SELECT * FROM content WHERE status = ?';
     const params = [status];
@@ -19,9 +19,19 @@ const getAllContent = async (req, res) => {
     const result = await db.prepare(query).bind(...params).all();
     const content = result.results || [];
 
+    // Apply localization to content
+    const localizedContent = content.map(item => {
+      const contentInstance = new (require('../models/Content'))(item);
+      const localizedData = contentInstance.getLocalizedContent(language);
+      return {
+        ...item,
+        ...localizedData
+      };
+    });
+
     res.json({
       success: true,
-      data: content
+      data: localizedContent
     });
   } catch (error) {
     console.error('Get content error:', error);
@@ -36,6 +46,7 @@ const getAllContent = async (req, res) => {
 const getContentByKey = async (req, res) => {
   try {
     const { key } = req.params;
+    const { language = 'en' } = req.query;
 
     const result = await db.prepare(
       'SELECT * FROM content WHERE key = ? AND status = ?'
@@ -48,9 +59,16 @@ const getContentByKey = async (req, res) => {
       });
     }
 
+    // Apply localization
+    const contentInstance = new (require('../models/Content'))(result);
+    const localizedData = contentInstance.getLocalizedContent(language);
+
     res.json({
       success: true,
-      data: result
+      data: {
+        ...result,
+        ...localizedData
+      }
     });
   } catch (error) {
     console.error('Get content by key error:', error);
@@ -64,7 +82,7 @@ const getContentByKey = async (req, res) => {
 // Create content (admin only)
 const createContent = async (req, res) => {
   try {
-    const { key, title, content, type = 'setting' } = req.body;
+    const { key, title, content, type = 'setting', title_vi, content_vi } = req.body;
 
     if (!key || !title) {
       return res.status(400).json({
@@ -88,14 +106,14 @@ const createContent = async (req, res) => {
     const now = new Date().toISOString();
 
     const result = await db.prepare(`
-      INSERT INTO content (key, title, content, type, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, 'active', ?, ?)
-    `).bind(key, title, content, type, now, now).run();
+      INSERT INTO content (key, title, content, type, title_vi, content_vi, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?)
+    `).bind(key, title, content, type, title_vi, content_vi, now, now).run();
 
     res.status(201).json({
       success: true,
       message: 'Content created successfully',
-      data: { id: result.last_row_id }
+      data: { id: result.meta.last_row_id }
     });
   } catch (error) {
     console.error('Create content error:', error);
@@ -110,7 +128,7 @@ const createContent = async (req, res) => {
 const updateContent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, type, status } = req.body;
+    const { title, content, type, status, title_vi, content_vi } = req.body;
 
     const existing = await db.prepare(
       'SELECT * FROM content WHERE id = ?'
@@ -127,13 +145,15 @@ const updateContent = async (req, res) => {
 
     await db.prepare(`
       UPDATE content 
-      SET title = ?, content = ?, type = ?, status = ?, updated_at = ?
+      SET title = ?, content = ?, type = ?, status = ?, title_vi = ?, content_vi = ?, updated_at = ?
       WHERE id = ?
     `).bind(
       title || existing.title,
       content || existing.content,
       type || existing.type,
       status || existing.status,
+      title_vi || existing.title_vi,
+      content_vi || existing.content_vi,
       now,
       id
     ).run();

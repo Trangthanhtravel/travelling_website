@@ -11,6 +11,9 @@ class Content {
     this.type = data.type;
     this.language = data.language || 'en';
     this.status = data.status || 'active';
+    // Vietnamese fields
+    this.title_vi = data.title_vi;
+    this.content_vi = data.content_vi;
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }
@@ -24,7 +27,9 @@ class Content {
       content: this.content,
       type: this.type,
       language: this.language || 'en',
-      status: this.status || 'active'
+      status: this.status || 'active',
+      title_vi: this.title_vi,
+      content_vi: this.content_vi
     };
     
     const fields = Object.keys(contentData).join(', ');
@@ -117,6 +122,20 @@ class Content {
     }
     
     return await db.prepare('DELETE FROM content WHERE id = ?').bind(this.id).run();
+  }
+
+  // Get localized content based on language
+  getLocalizedContent(language = 'en') {
+    if (language === 'vi') {
+      return {
+        title: this.title_vi || this.title,
+        content: this.content_vi || this.content
+      };
+    }
+    return {
+      title: this.title,
+      content: this.content
+    };
   }
 }
 

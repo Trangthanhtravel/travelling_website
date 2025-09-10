@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Icon, Icons } from '../../components/common/Icons';
+import BilingualInput from '../../components/common/BilingualInput';
 
 interface ContentItem {
   id: number;
   key: string;
   title: string;
+  title_vi?: string;
   content: string;
+  content_vi?: string;
   type: string;
   status: string;
   created_at: string;
@@ -24,8 +27,8 @@ const ContentManagement: React.FC = () => {
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
-    title: '',
-    content: '',
+    title: { en: '', vi: '' },
+    content: { en: '', vi: '' },
     image: null as File | null
   });
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -47,12 +50,22 @@ const ContentManagement: React.FC = () => {
 
   // Update content mutation
   const updateContentMutation = useMutation({
-    mutationFn: async (data: { id: number; title: string; content: string; hasImageUpdate?: boolean; imageFile?: File }) => {
+    mutationFn: async (data: {
+      id: number;
+      title: string;
+      title_vi: string;
+      content: string;
+      content_vi: string;
+      hasImageUpdate?: boolean;
+      imageFile?: File
+    }) => {
       if (data.hasImageUpdate && data.imageFile) {
         // If we have an image update, use FormData to send both data and file
         const formData = new FormData();
         formData.append('title', data.title);
+        formData.append('title_vi', data.title_vi);
         formData.append('content', data.content);
+        formData.append('content_vi', data.content_vi);
         formData.append('image', data.imageFile);
 
         const response = await fetch(`${getApiUrl()}/admin/content/${data.id}`, {
@@ -74,7 +87,9 @@ const ContentManagement: React.FC = () => {
           },
           body: JSON.stringify({
             title: data.title,
-            content: data.content
+            title_vi: data.title_vi,
+            content: data.content,
+            content_vi: data.content_vi
           })
         });
         if (!response.ok) throw new Error('Failed to update content');
@@ -85,7 +100,7 @@ const ContentManagement: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-content'] });
       setIsEditModalOpen(false);
       setSelectedContent(null);
-      setEditForm({ title: '', content: '', image: null });
+      setEditForm({ title: { en: '', vi: '' }, content: { en: '', vi: '' }, image: null });
     }
   });
 
@@ -123,8 +138,14 @@ const ContentManagement: React.FC = () => {
   const handleEdit = (contentItem: ContentItem) => {
     setSelectedContent(contentItem);
     setEditForm({
-      title: contentItem.title,
-      content: contentItem.content,
+      title: {
+        en: contentItem.title || '',
+        vi: contentItem.title_vi || ''
+      },
+      content: {
+        en: contentItem.content || '',
+        vi: contentItem.content_vi || ''
+      },
       image: null
     });
     setIsEditModalOpen(true);
@@ -137,12 +158,21 @@ const ContentManagement: React.FC = () => {
 
       updateContentMutation.mutate({
         id: selectedContent.id,
-        title: editForm.title,
-        content: editForm.content,
+        title: editForm.title.en,
+        title_vi: editForm.title.vi,
+        content: editForm.content.en,
+        content_vi: editForm.content.vi,
         hasImageUpdate: isImageContent && hasNewImage,
         imageFile: hasNewImage ? editForm.image! : undefined
       });
     }
+  };
+
+  const handleBilingualChange = (name: string, value: { en: string; vi: string }) => {
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleImageUpload = (file: File) => {
@@ -268,24 +298,20 @@ const ContentManagement: React.FC = () => {
               </div>
 
               <div className="space-y-6">
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    isDarkMode ? 'text-dark-text-secondary' : 'text-gray-700'
-                  }`}>
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.title}
-                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 ${
-                      isDarkMode
-                        ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
-                        : 'bg-white border-gray-300 text-gray-900'
-                    }`}
-                  />
-                </div>
+                {/* Bilingual Title Input */}
+                <BilingualInput
+                  label="Title"
+                  name="title"
+                  value={editForm.title}
+                  onChange={handleBilingualChange}
+                  placeholder={{
+                    en: "Enter title in English",
+                    vi: "Nhập tiêu đề bằng tiếng Việt"
+                  }}
+                  required={true}
+                />
 
+                {/* Content Section */}
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${
                     isDarkMode ? 'text-dark-text-secondary' : 'text-gray-700'
@@ -295,6 +321,7 @@ const ContentManagement: React.FC = () => {
 
                   {isImageContent(selectedContent.key) ? (
                     <div className="space-y-4">
+                      {/* Image Upload Section */}
                       <div className="flex items-center space-x-4">
                         <input
                           type="file"
@@ -321,40 +348,63 @@ const ContentManagement: React.FC = () => {
                         </label>
                       </div>
 
-                      <input
-                        type="url"
+                      {/* Bilingual Image URL Input */}
+                      <BilingualInput
+                        label="Image URL"
+                        name="content"
                         value={editForm.content}
-                        onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-                        placeholder="Or enter image URL directly"
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 ${
-                          isDarkMode
-                            ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        onChange={handleBilingualChange}
+                        placeholder={{
+                          en: "Enter image URL in English",
+                          vi: "Nhập URL hình ảnh bằng tiếng Việt"
+                        }}
                       />
 
-                      {editForm.content && (
-                        <img
-                          src={editForm.content}
-                          alt="Preview"
-                          className="w-full h-auto max-h-96 object-contain rounded-lg border"
-                          onError={(e) => {
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
-                          }}
-                        />
+                      {/* Image Preview */}
+                      {(editForm.content.en || editForm.content.vi) && (
+                        <div className="space-y-2">
+                          {editForm.content.en && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-700 mb-1">English Image Preview:</p>
+                              <img
+                                src={editForm.content.en}
+                                alt="English Preview"
+                                className="w-full h-auto max-h-48 object-contain rounded-lg border"
+                                onError={(e) => {
+                                  e.currentTarget.src = 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                                }}
+                              />
+                            </div>
+                          )}
+                          {editForm.content.vi && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-700 mb-1">Vietnamese Image Preview:</p>
+                              <img
+                                src={editForm.content.vi}
+                                alt="Vietnamese Preview"
+                                className="w-full h-auto max-h-48 object-contain rounded-lg border"
+                                onError={(e) => {
+                                  e.currentTarget.src = 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                   ) : (
-                    <textarea
+                    /* Bilingual Text Content Input */
+                    <BilingualInput
+                      label="Content"
+                      name="content"
                       value={editForm.content}
-                      onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
+                      onChange={handleBilingualChange}
+                      type="textarea"
                       rows={12}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 ${
-                        isDarkMode
-                          ? 'bg-dark-700 border-dark-600 text-dark-text-primary'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                      placeholder="Enter content here..."
+                      placeholder={{
+                        en: "Enter content in English",
+                        vi: "Nhập nội dung bằng tiếng Việt"
+                      }}
                     />
                   )}
                 </div>

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useTranslation } from '../../contexts/TranslationContext';
 import { Icon, Icons } from '../../components/common/Icons';
+import BilingualInput from '../../components/common/BilingualInput';
 import toast from 'react-hot-toast';
 
 interface AboutContent {
   backgroundImage: string;
-  quote: string;
-  tagline: string;
-  title: string;
-  description: string;
+  quote: { en: string; vi: string };
+  tagline: { en: string; vi: string };
+  title: { en: string; vi: string };
+  description: { en: string; vi: string };
   youtubeId: string;
   statistics: {
     happyCustomers: string;
@@ -20,16 +22,17 @@ interface AboutContent {
 
 const AboutSectionManagement: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [aboutContent, setAboutContent] = useState<AboutContent>({
     backgroundImage: '',
-    quote: '',
-    tagline: '',
-    title: '',
-    description: '',
+    quote: { en: '', vi: '' },
+    tagline: { en: '', vi: '' },
+    title: { en: '', vi: '' },
+    description: { en: '', vi: '' },
     youtubeId: '',
     statistics: {
       happyCustomers: '',
@@ -61,10 +64,22 @@ const AboutSectionManagement: React.FC = () => {
 
         setAboutContent({
           backgroundImage: aboutData.find((item: any) => item.key === 'about_background_image')?.content || '',
-          quote: aboutData.find((item: any) => item.key === 'about_quote')?.content || '',
-          tagline: aboutData.find((item: any) => item.key === 'about_tagline')?.content || '',
-          title: aboutData.find((item: any) => item.key === 'about_title')?.content || '',
-          description: aboutData.find((item: any) => item.key === 'about_description')?.content || '',
+          quote: {
+            en: aboutData.find((item: any) => item.key === 'about_quote')?.content || '',
+            vi: aboutData.find((item: any) => item.key === 'about_quote')?.content_vi || ''
+          },
+          tagline: {
+            en: aboutData.find((item: any) => item.key === 'about_tagline')?.content || '',
+            vi: aboutData.find((item: any) => item.key === 'about_tagline')?.content_vi || ''
+          },
+          title: {
+            en: aboutData.find((item: any) => item.key === 'about_title')?.content || '',
+            vi: aboutData.find((item: any) => item.key === 'about_title')?.content_vi || ''
+          },
+          description: {
+            en: aboutData.find((item: any) => item.key === 'about_description')?.content || '',
+            vi: aboutData.find((item: any) => item.key === 'about_description')?.content_vi || ''
+          },
           youtubeId: aboutData.find((item: any) => item.key === 'about_youtube_id')?.content || '',
           statistics: {
             happyCustomers: aboutData.find((item: any) => item.key === 'stats_happy_customers')?.content || '',
@@ -76,7 +91,7 @@ const AboutSectionManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching about content:', error);
-      toast.error('Failed to fetch about content');
+      toast.error(t('Failed to fetch about content'));
     } finally {
       setLoading(false);
     }
@@ -120,10 +135,10 @@ const AboutSectionManagement: React.FC = () => {
 
       const contentItems = [
         { key: 'about_background_image', title: 'About Background Image', content: backgroundImageUrl },
-        { key: 'about_quote', title: 'About Quote', content: aboutContent.quote },
-        { key: 'about_tagline', title: 'About Tagline', content: aboutContent.tagline },
-        { key: 'about_title', title: 'About Title', content: aboutContent.title },
-        { key: 'about_description', title: 'About Description', content: aboutContent.description },
+        { key: 'about_quote', title: 'About Quote', content: aboutContent.quote.en, content_vi: aboutContent.quote.vi },
+        { key: 'about_tagline', title: 'About Tagline', content: aboutContent.tagline.en, content_vi: aboutContent.tagline.vi },
+        { key: 'about_title', title: 'About Title', content: aboutContent.title.en, content_vi: aboutContent.title.vi },
+        { key: 'about_description', title: 'About Description', content: aboutContent.description.en, content_vi: aboutContent.description.vi },
         { key: 'about_youtube_id', title: 'About YouTube ID', content: aboutContent.youtubeId },
         { key: 'stats_happy_customers', title: 'Happy Customers Stat', content: aboutContent.statistics.happyCustomers },
         { key: 'stats_number_of_trips', title: 'Number of Trips Stat', content: aboutContent.statistics.numberOfTrips },
@@ -205,6 +220,13 @@ const AboutSectionManagement: React.FC = () => {
     setAboutContent({ ...aboutContent, youtubeId: videoId });
   };
 
+  const handleBilingualChange = (name: string, value: { en: string; vi: string }) => {
+    setAboutContent(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   if (loading) {
     return (
       <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
@@ -278,60 +300,42 @@ const AboutSectionManagement: React.FC = () => {
               </div>
 
               {/* Quote */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                  Company Quote
-                </label>
-                <textarea
-                  value={aboutContent.quote}
-                  onChange={(e) => setAboutContent({ ...aboutContent, quote: e.target.value })}
-                  rows={4}
-                  className={`w-full p-3 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
-                  placeholder="Enter your company quote here..."
-                />
-              </div>
+              <BilingualInput
+                label="Company Quote"
+                name="quote"
+                value={aboutContent.quote}
+                onChange={handleBilingualChange}
+                placeholder={{ en: 'Enter your company quote here...', vi: 'Nhập câu trích dẫn công ty của bạn ở đây...' }}
+              />
 
               {/* Tagline */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                  Tagline
-                </label>
-                <input
-                  type="text"
-                  value={aboutContent.tagline}
-                  onChange={(e) => setAboutContent({ ...aboutContent, tagline: e.target.value })}
-                  className={`w-full p-3 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
-                  placeholder=""
-                />
-              </div>
+              <BilingualInput
+                label="Tagline"
+                name="tagline"
+                value={aboutContent.tagline}
+                onChange={handleBilingualChange}
+                placeholder={{ en: 'Enter your tagline here...', vi: 'Nhập slogan của bạn ở đây...' }}
+              />
 
               {/* Title */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                  Section Title
-                </label>
-                <input
-                  type="text"
-                  value={aboutContent.title}
-                  onChange={(e) => setAboutContent({ ...aboutContent, title: e.target.value })}
-                  className={`w-full p-3 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
-                  placeholder="About Our Journey"
-                />
-              </div>
+              <BilingualInput
+                label="Section Title"
+                name="title"
+                value={aboutContent.title}
+                onChange={handleBilingualChange}
+                placeholder={{ en: 'About Our Journey', vi: 'Về Hành Trình Của Chúng Tôi' }}
+              />
 
               {/* Description */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                  Description
-                </label>
-                <textarea
-                  value={aboutContent.description}
-                  onChange={(e) => setAboutContent({ ...aboutContent, description: e.target.value })}
-                  rows={3}
-                  className={`w-full p-3 border rounded-lg ${isDarkMode ? 'bg-dark-700 border-dark-600 text-dark-text-secondary' : 'bg-white border-gray-300 text-light-text-primary'}`}
-                  placeholder="Enter section description..."
-                />
-              </div>
+              <BilingualInput
+                label="Description"
+                name="description"
+                type="textarea"
+                value={aboutContent.description}
+                onChange={handleBilingualChange}
+                placeholder={{ en: 'Enter section description...', vi: 'Nhập mô tả phần này...' }}
+                rows={4}
+              />
 
               {/* YouTube URL/ID */}
               <div>
@@ -469,12 +473,12 @@ const AboutSectionManagement: React.FC = () => {
                   <div className="relative z-10 h-full flex items-center justify-center p-4">
                     <div className="text-center text-white">
                       <blockquote className="text-sm font-serif italic mb-2">
-                        "{aboutContent.quote || 'Your company quote will appear here...'}"
+                        "{aboutContent.quote.en || 'Your company quote will appear here...'}"
                       </blockquote>
                       <div className="flex items-center justify-center">
                         <div className="w-8 h-px bg-orange-500 mr-2"></div>
                         <p className="text-xs font-medium text-orange-500">
-                          {aboutContent.tagline || 'Your tagline'}
+                          {aboutContent.tagline.en || 'Your tagline'}
                         </p>
                         <div className="w-8 h-px bg-orange-500 ml-2"></div>
                       </div>
@@ -490,10 +494,10 @@ const AboutSectionManagement: React.FC = () => {
                 </h3>
                 <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-dark-700' : 'bg-gray-50'}`}>
                   <h4 className={`text-lg font-bold mb-2 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                    {aboutContent.title || 'Section Title'}
+                    {aboutContent.title.en || 'Section Title'}
                   </h4>
                   <p className={`text-sm ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-                    {aboutContent.description || 'Section description will appear here...'}
+                    {aboutContent.description.en || 'Section description will appear here...'}
                   </p>
                 </div>
               </div>

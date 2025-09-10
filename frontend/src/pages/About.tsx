@@ -26,9 +26,9 @@ const About: React.FC = () => {
 
   // Fetch editable About Us content
   const { data: aboutHistoryData, isLoading: historyLoading } = useQuery({
-    queryKey: ['about-us-history'],
+    queryKey: ['about-us-history', language], // Add language to query key
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_history`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_history?language=${language}`);
       if (!response.ok) throw new Error('Failed to fetch about us history');
       return response.json();
     },
@@ -36,9 +36,9 @@ const About: React.FC = () => {
   });
 
   const { data: aboutImageData } = useQuery({
-    queryKey: ['about-us-image'],
+    queryKey: ['about-us-image', language], // Add language to query key
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_image`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_image?language=${language}`);
       if (!response.ok) throw new Error('Failed to fetch about us image');
       return response.json();
     },
@@ -46,9 +46,9 @@ const About: React.FC = () => {
   });
 
   const { data: aboutVisionData } = useQuery({
-    queryKey: ['about-us-vision'],
+    queryKey: ['about-us-vision', language], // Add language to query key
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_vision`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_vision?language=${language}`);
       if (!response.ok) throw new Error('Failed to fetch about us vision');
       return response.json();
     },
@@ -56,9 +56,9 @@ const About: React.FC = () => {
   });
 
   const { data: aboutMissionData } = useQuery({
-    queryKey: ['about-us-mission'],
+    queryKey: ['about-us-mission', language], // Add language to query key
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_mission`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/content/about_us_mission?language=${language}`);
       if (!response.ok) throw new Error('Failed to fetch about us mission');
       return response.json();
     },
