@@ -225,19 +225,6 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
                   </select>
                 </div>
 
-                {/* Featured */}
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="featured"
-                    checked={formData.featured}
-                    onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-dark-600 rounded"
-                  />
-                  <label htmlFor="featured" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                    Featured Service
-                  </label>
-                </div>
               </div>
 
               {/* Right Column */}
