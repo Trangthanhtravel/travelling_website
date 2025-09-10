@@ -59,7 +59,7 @@ export const authAPI = {
 // Tours API (Public)
 export const toursAPI = {
     // Get all tours with filters and language support
-    getTours: async (filters?: TourFilters & { language?: string }): Promise<ApiResponse<PaginationResponse<Tour>>> => {
+    getTours: async (filters?: TourFilters & { language?: string }): Promise<PaginationResponse<Tour>> => {
         const params = new URLSearchParams();
 
         if (filters) {
@@ -76,7 +76,7 @@ export const toursAPI = {
             if (filters.language) params.append('language', filters.language); // Add language parameter
         }
 
-        const response: AxiosResponse<ApiResponse<PaginationResponse<Tour>>> = await api.get(`/tours?${params}`);
+        const response: AxiosResponse<PaginationResponse<Tour>> = await api.get(`/tours?${params}`);
         return response.data;
     },
 
