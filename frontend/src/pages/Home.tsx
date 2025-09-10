@@ -62,7 +62,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchHeroImages = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/content/hero-images?language=${language}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/content?type=setting&language=${language}`);
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data.length > 0) {
@@ -72,14 +72,19 @@ const Home: React.FC = () => {
 
             for (let i = 0; i < images.length; i++) {
               const imageItem = images[i];
-              const titleItem = data.data.find((item: any) => item.key === `hero_title_${i + 1}`);
-              const subtitleItem = data.data.find((item: any) => item.key === `hero_subtitle_${i + 1}`);
+              const index = imageItem.key.replace('hero_image_', '');
+              const titleItem = data.data.find((item: any) => item.key === `hero_title_${index}`);
+              const subtitleItem = data.data.find((item: any) => item.key === `hero_subtitle_${index}`);
+
+              // Use bilingual content properly
+              const title = language === 'vi' ? (titleItem?.content_vi || titleItem?.content) : titleItem?.content;
+              const subtitle = language === 'vi' ? (subtitleItem?.content_vi || subtitleItem?.content) : subtitleItem?.content;
 
               slides.push({
                 id: imageItem.id,
                 image: imageItem.content,
-                title: titleItem?.title || titleItem?.content || `Hero ${i + 1}`,
-                subtitle: subtitleItem?.title || subtitleItem?.content || '',
+                title: title || `Hero ${index}`,
+                subtitle: subtitle || '',
                 description: '',
               });
             }
@@ -167,14 +172,24 @@ const Home: React.FC = () => {
           const data = await response.json();
           const aboutData = data.data || [];
 
-          const backgroundImage = aboutData.find((item: any) => item.key === 'about_background_image')?.content || 'https://static.wixstatic.com/media/8fa70e_ca95c635557f41c7b98ac645bb27d085~mv2.jpg/v1/fill/w_675,h_312,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/This%20was%20indeed%20one-of-a-kind%20experience.jpg%201x,%20https://static.wixstatic.com/media/8fa70e_ca95c635557f41c7b98ac645bb27d085~mv2.jpg/v1/fill/w_1350,h_624,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/This%20was%20indeed%20one-of-a-kind%20experience.jpg%202x';
-          const quote = aboutData.find((item: any) => item.key === 'about_quote')?.content || aboutData.find((item: any) => item.key === 'about_quote')?.title || 'For over 15 years, Trang Thanh Travel has been a trusted companion, helping customers have smooth and memorable trips. From organizing tours, events, to renting private cars, making visas, or booking airline tickets, cruises, trains, hotels, we can take care of everything so that you have the most perfect experience.';
-          const tagline = aboutData.find((item: any) => item.key === 'about_tagline')?.content || aboutData.find((item: any) => item.key === 'about_tagline')?.title || '';
-          const title = aboutData.find((item: any) => item.key === 'about_title')?.content || aboutData.find((item: any) => item.key === 'about_title')?.title || 'About Our Journey';
-          const description = aboutData.find((item: any) => item.key === 'about_description')?.content || aboutData.find((item: any) => item.key === 'about_description')?.title || 'Discover how we create extraordinary travel experiences that connect you with the world\'s most beautiful destinations and cultures.';
+          const backgroundImage = aboutData.find((item: any) => item.key === 'about_background_image')?.content || 'https://static.wixstatic.com/media/8fa70e_ca95c635557f41c7b98ac645bb27d085~mv2.jpg';
+
+          // Use bilingual content properly for all text fields
+          const quoteItem = aboutData.find((item: any) => item.key === 'about_quote');
+          const quote = language === 'vi' ? (quoteItem?.content_vi || quoteItem?.content) : quoteItem?.content;
+
+          const taglineItem = aboutData.find((item: any) => item.key === 'about_tagline');
+          const tagline = language === 'vi' ? (taglineItem?.content_vi || taglineItem?.content) : taglineItem?.content;
+
+          const titleItem = aboutData.find((item: any) => item.key === 'about_title');
+          const title = language === 'vi' ? (titleItem?.content_vi || titleItem?.content) : titleItem?.content;
+
+          const descriptionItem = aboutData.find((item: any) => item.key === 'about_description');
+          const description = language === 'vi' ? (descriptionItem?.content_vi || descriptionItem?.content) : descriptionItem?.content;
+
           const youtubeId = aboutData.find((item: any) => item.key === 'about_youtube_id')?.content || '8VJpaYXrPPQ';
 
-          // Fetch statistics data with localized content
+          // Fetch statistics data
           const happyCustomers = parseInt(aboutData.find((item: any) => item.key === 'stats_happy_customers')?.content || '500');
           const numberOfTrips = parseInt(aboutData.find((item: any) => item.key === 'stats_number_of_trips')?.content || '1200');
           const yearsOfExperience = parseInt(aboutData.find((item: any) => item.key === 'stats_years_experience')?.content || '15');
@@ -182,10 +197,10 @@ const Home: React.FC = () => {
 
           setAboutContent({
             backgroundImage,
-            quote,
-            tagline,
-            title,
-            description,
+            quote: quote || 'For over 15 years, Trang Thanh Travel has been a trusted companion, helping customers have smooth and memorable trips.',
+            tagline: tagline || 'Your Trusted Travel Partner',
+            title: title || 'About Our Journey',
+            description: description || 'Discover how we create extraordinary travel experiences that connect you with the world\'s most beautiful destinations and cultures.',
             youtubeId,
           });
 
