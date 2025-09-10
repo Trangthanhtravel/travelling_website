@@ -311,8 +311,8 @@ const updateTour = async (req, res) => {
       await tour.updateImage(req.r2, req.file, oldImage);
     }
 
-    // Update in database
-    await tour.update(db);
+    // Update in database - pass the updateData to the update method
+    await tour.update(db, updateData);
 
     res.json({
       success: true,
