@@ -197,10 +197,10 @@ const Home: React.FC = () => {
 
           setAboutContent({
             backgroundImage,
-            quote: quote || 'For over 15 years, Trang Thanh Travel has been a trusted companion, helping customers have smooth and memorable trips.',
-            tagline: tagline || 'Your Trusted Travel Partner',
-            title: title || 'About Our Journey',
-            description: description || 'Discover how we create extraordinary travel experiences that connect you with the world\'s most beautiful destinations and cultures.',
+            quote: quote,
+            tagline: tagline,
+            title: title,
+            description: description,
             youtubeId,
           });
 
