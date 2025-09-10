@@ -203,7 +203,15 @@ const getTourBySlug = async (req, res) => {
 const createTour = async (req, res) => {
   try {
     const db = getDB();
-    const r2Bucket = process.env.R2_BUCKET;
+
+    // Check if R2 is properly configured
+    if (!req.r2) {
+      console.error('R2 bucket not configured. Check environment variables.');
+      return res.status(500).json({
+        success: false,
+        message: 'Image upload service not configured. Please contact administrator.'
+      });
+    }
 
     // Parse JSON fields from form data
     const tourData = { ...req.body };
@@ -231,7 +239,7 @@ const createTour = async (req, res) => {
 
     // Handle image upload
     if (req.file) {
-      await tour.updateImage(r2Bucket, req.file);
+      await tour.updateImage(req.r2, req.file);
     }
 
     // Save to database
@@ -255,8 +263,16 @@ const createTour = async (req, res) => {
 const updateTour = async (req, res) => {
   try {
     const db = getDB();
-    const r2Bucket = process.env.R2_BUCKET;
     const { id } = req.params;
+
+    // Check if R2 is properly configured
+    if (!req.r2) {
+      console.error('R2 bucket not configured. Check environment variables.');
+      return res.status(500).json({
+        success: false,
+        message: 'Image upload service not configured. Please contact administrator.'
+      });
+    }
 
     const tour = await Tour.findById(db, id);
     if (!tour) {
@@ -292,7 +308,7 @@ const updateTour = async (req, res) => {
     // Handle image upload
     if (req.file) {
       const oldImage = tour.image;
-      await tour.updateImage(r2Bucket, req.file, oldImage);
+      await tour.updateImage(req.r2, req.file, oldImage);
     }
 
     // Update in database
