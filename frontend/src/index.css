@@ -92,10 +92,10 @@
 /* Custom animations for elegant brand loading */
 @keyframes text-glow {
   0%, 100% {
-    filter: brightness(1) drop-shadow(0 0 8px rgba(245, 158, 11, 0.3));
+    filter: brightness(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
   }
   50% {
-    filter: brightness(1.1) drop-shadow(0 0 16px rgba(245, 158, 11, 0.5));
+    filter: brightness(1.1) drop-shadow(0 0 16px rgba(255, 255, 255, 0.5));
   }
 }
 
