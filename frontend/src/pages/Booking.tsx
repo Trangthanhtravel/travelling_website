@@ -22,12 +22,12 @@ const DirectBooking: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [pricing, setPricing] = useState<any>(null);
 
   const { data: response, isLoading: tourLoading } = useQuery({
-    queryKey: ['tour-booking', slug],
-    queryFn: () => toursAPI.getTourBySlug(slug!),
+    queryKey: ['tour-booking', slug, language], // Add language to query key
+    queryFn: () => toursAPI.getTourBySlug(slug!, language), // Pass language to API
     enabled: !!slug,
   });
 
