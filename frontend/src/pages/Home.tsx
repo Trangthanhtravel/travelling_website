@@ -349,10 +349,10 @@ const Home: React.FC = () => {
                   backgroundImage: `url('${aboutContent.backgroundImage}')`,
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-dark-900/80 via-dark-900/30 to-dark-900/50"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/60"></div>
                 <div className="relative z-10 h-full flex items-center justify-center p-8">
-                  <div className="text-center text-dark-text-secondary">
-                    <blockquote className="text-2xl md:text-3xl font-serif italic leading-relaxed mb-6 drop-shadow-lg">
+                  <div className="text-center text-white">
+                    <blockquote className="text-xl md:text-2xl font-serif leading-relaxed mb-6 drop-shadow-lg">
                       "{aboutContent.quote}"
                     </blockquote>
                     <div className="flex items-center justify-center">
@@ -365,11 +365,13 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right side - YouTube Video */}
+            {/* Right side - Content and YouTube Video */}
             <div className="space-y-6">
               <div className="text-center lg:text-left">
-                <h2 className={`text-4xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>{aboutContent.title}</h2>
-                <p className={`text-lg mb-6 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
+                <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
+                  {aboutContent.title}
+                </h2>
+                <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
                   {aboutContent.description}
                 </p>
               </div>
