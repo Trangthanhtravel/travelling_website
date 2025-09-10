@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Icon, Icons } from './Icons';
-import { useTheme } from '../../contexts/ThemeContext';
 
 interface BilingualInputProps {
   label: string;
@@ -30,7 +29,6 @@ const BilingualInput: React.FC<BilingualInputProps> = ({
   rows = 4
 }) => {
   const [activeTab, setActiveTab] = useState<'en' | 'vi'>('en');
-  const { isDarkMode } = useTheme();
 
   const handleInputChange = (lang: 'en' | 'vi', inputValue: string) => {
     onChange(name, {

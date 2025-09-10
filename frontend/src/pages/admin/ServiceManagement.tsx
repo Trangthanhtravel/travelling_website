@@ -3,8 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
 import ServiceModal from '../../components/admin/ServiceModal';
 import ServiceGalleryManager from '../../components/common/ServiceGalleryManager';
-import { useTranslation } from '../../contexts/TranslationContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import toast from 'react-hot-toast';
 
 interface Category {
@@ -46,8 +44,6 @@ interface Service {
 }
 
 const ServiceManagement: React.FC = () => {
-  const { t } = useTranslation();
-  const { isDarkMode } = useTheme();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
