@@ -111,8 +111,8 @@ class Category {
     });
 
     const result = await db.prepare(`
-      INSERT INTO categories (id, name, slug, description, type, icon, color, status, sort_order, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO categories (id, name, slug, description, type, icon, color, status, sort_order, created_at, updated_at, featured, name_vi, description_vi)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       category.id,
       category.name,
@@ -124,7 +124,10 @@ class Category {
       category.status,
       category.sort_order,
       category.created_at,
-      category.updated_at
+      category.updated_at,
+      category.featured ? 1 : 0,
+      category.name_vi,
+      category.description_vi
     ).run();
 
     if (!result.success) {
@@ -150,11 +153,17 @@ class Category {
     if (data.color !== undefined) this.color = data.color;
     if (data.status !== undefined) this.status = data.status;
     if (data.sort_order !== undefined) this.sort_order = data.sort_order;
+    if (data.featured !== undefined) this.featured = Boolean(data.featured);
+
+    // Update Vietnamese fields
+    if (data.name_vi !== undefined) this.name_vi = data.name_vi;
+    if (data.description_vi !== undefined) this.description_vi = data.description_vi;
+
     this.updated_at = now;
 
     const result = await db.prepare(`
       UPDATE categories 
-      SET name = ?, slug = ?, description = ?, type = ?, icon = ?, color = ?, status = ?, sort_order = ?, updated_at = ?
+      SET name = ?, slug = ?, description = ?, type = ?, icon = ?, color = ?, status = ?, sort_order = ?, updated_at = ?, featured = ?, name_vi = ?, description_vi = ?
       WHERE id = ?
     `).bind(
       this.name,
@@ -166,6 +175,9 @@ class Category {
       this.status,
       this.sort_order,
       this.updated_at,
+      this.featured ? 1 : 0,
+      this.name_vi,
+      this.description_vi,
       this.id
     ).run();
 
@@ -210,6 +222,9 @@ class Category {
       color: this.color,
       status: this.status,
       sort_order: this.sort_order,
+      featured: this.featured,
+      name_vi: this.name_vi,
+      description_vi: this.description_vi,
       created_at: this.created_at,
       updated_at: this.updated_at
     };

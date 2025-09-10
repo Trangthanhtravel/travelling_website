@@ -7,7 +7,7 @@ import { Icon, Icons } from '../components/common/Icons';
 
 const About: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation(); // Add language to destructuring
   const navigate = useNavigate();
   const servicesRef = useRef<HTMLDivElement>(null);
 
@@ -67,9 +67,9 @@ const About: React.FC = () => {
 
   // Fetch featured categories from database for the "What We Do" section
   const { data: featuredCategoriesData, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['featured-categories-about'],
+    queryKey: ['featured-categories-about', language], // Include language in query key
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories?featured=1&status=active`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/categories?featured=1&status=active&language=${language}`);
       if (!response.ok) throw new Error('Failed to fetch featured categories');
       return response.json();
     },
@@ -293,10 +293,10 @@ const About: React.FC = () => {
                       </div>
                       <div className="p-6">
                         <h3 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-                          {category.name}
+                          {language === 'vi' && category.name_vi ? category.name_vi : category.name}
                         </h3>
                         <p className={`text-sm mb-4 line-clamp-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-                          {category.description}
+                          {language === 'vi' && category.description_vi ? category.description_vi : category.description}
                         </p>
                         <button
                           onClick={() => {

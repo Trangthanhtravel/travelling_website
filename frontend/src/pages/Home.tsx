@@ -554,10 +554,10 @@ const Home: React.FC = () => {
                         </div>
                         <div className="p-6">
                           <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">
-                            {category.name}
+                            {language === 'vi' && category.name_vi ? category.name_vi : category.name}
                           </h3>
                           <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
-                            {category.description}
+                            {language === 'vi' && category.description_vi ? category.description_vi : category.description}
                           </p>
                           <button
                             onClick={() => {

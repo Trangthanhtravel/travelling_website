@@ -47,10 +47,35 @@ const getCategoryById = async (req, res) => {
 // Create new category (Admin only)
 const createCategory = async (req, res) => {
   try {
-    const { name, slug, description, type, icon, color, status, featured, sort_order } = req.body;
+    const {
+      name,
+      slug,
+      description,
+      type,
+      icon,
+      color,
+      status,
+      featured,
+      sort_order
+    } = req.body;
+
+    // Handle bilingual data structure
+    let categoryData = {
+      name: typeof name === 'object' ? name.en : name,
+      slug,
+      description: typeof description === 'object' ? description.en : description,
+      type,
+      icon,
+      color,
+      status: status || 'active',
+      featured: featured || false,
+      sort_order: sort_order || 0,
+      name_vi: typeof name === 'object' ? name.vi : '',
+      description_vi: typeof description === 'object' ? description.vi : ''
+    };
 
     // Validate required fields
-    if (!name || !slug || !type) {
+    if (!categoryData.name || !slug || !type) {
       return res.status(400).json({
         success: false,
         message: 'Name, slug, and type are required'
@@ -74,17 +99,7 @@ const createCategory = async (req, res) => {
       });
     }
 
-    const category = await Category.create({
-      name,
-      slug,
-      description,
-      type,
-      icon,
-      color,
-      status: status || 'active',
-      featured: featured || false,
-      sort_order: sort_order || 0
-    });
+    const category = await Category.create(categoryData);
 
     res.status(201).json({
       success: true,
@@ -101,12 +116,43 @@ const createCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, slug, description, type, icon, color, status, featured, sort_order } = req.body;
+    const {
+      name,
+      slug,
+      description,
+      type,
+      icon,
+      color,
+      status,
+      featured,
+      sort_order
+    } = req.body;
 
     const category = await Category.findById(id);
     if (!category) {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
+
+    // Handle bilingual data structure
+    let updateData = {};
+
+    if (name !== undefined) {
+      updateData.name = typeof name === 'object' ? name.en : name;
+      updateData.name_vi = typeof name === 'object' ? name.vi : '';
+    }
+
+    if (description !== undefined) {
+      updateData.description = typeof description === 'object' ? description.en : description;
+      updateData.description_vi = typeof description === 'object' ? description.vi : '';
+    }
+
+    if (slug !== undefined) updateData.slug = slug;
+    if (type !== undefined) updateData.type = type;
+    if (icon !== undefined) updateData.icon = icon;
+    if (color !== undefined) updateData.color = color;
+    if (status !== undefined) updateData.status = status;
+    if (featured !== undefined) updateData.featured = featured;
+    if (sort_order !== undefined) updateData.sort_order = sort_order;
 
     // Validate type if provided
     if (type && !['tour', 'service', 'both'].includes(type)) {
@@ -135,17 +181,7 @@ const updateCategory = async (req, res) => {
       }
     }
 
-    await category.update({
-      name,
-      slug,
-      description,
-      type,
-      icon,
-      color,
-      status,
-      featured,
-      sort_order
-    });
+    await category.update(updateData);
 
     res.json({
       success: true,

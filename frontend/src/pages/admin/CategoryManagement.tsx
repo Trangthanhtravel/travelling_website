@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Icon, Icons } from '../../components/common/Icons';
+import BilingualInput from '../../components/common/BilingualInput';
 import toast from 'react-hot-toast';
 
 interface Category {
@@ -15,14 +16,16 @@ interface Category {
   status: 'active' | 'inactive';
   featured: boolean;
   sort_order: number;
+  name_vi?: string;
+  description_vi?: string;
   created_at: string;
   updated_at: string;
 }
 
 interface CategoryFormData {
-  name: string;
+  name: { en: string; vi: string };
   slug: string;
-  description: string;
+  description: { en: string; vi: string };
   type: 'tour' | 'service' | 'both';
   icon: string;
   color: string;
@@ -41,9 +44,9 @@ const CategoryManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   const [formData, setFormData] = useState<CategoryFormData>({
-    name: '',
+    name: { en: '', vi: '' },
     slug: '',
-    description: '',
+    description: { en: '', vi: '' },
     type: 'service',
     icon: 'map-pin',
     color: '#3B82F6',
@@ -186,9 +189,9 @@ const CategoryManagement: React.FC = () => {
 
   const resetForm = () => {
     setFormData({
-      name: '',
+      name: { en: '', vi: '' },
       slug: '',
-      description: '',
+      description: { en: '', vi: '' },
       type: 'service',
       icon: 'map-pin',
       color: '#3B82F6',
@@ -202,9 +205,9 @@ const CategoryManagement: React.FC = () => {
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setFormData({
-      name: category.name,
+      name: { en: category.name, vi: category.name_vi || '' },
       slug: category.slug,
-      description: category.description,
+      description: { en: category.description, vi: category.description_vi || '' },
       type: category.type,
       icon: category.icon,
       color: category.color,
@@ -237,14 +240,6 @@ const CategoryManagement: React.FC = () => {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
-  };
-
-  const handleNameChange = (name: string) => {
-    setFormData(prev => ({
-      ...prev,
-      name,
-      slug: generateSlug(name)
-    }));
   };
 
   const iconOptions = [
@@ -486,60 +481,58 @@ const CategoryManagement: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                        Name *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => handleNameChange(e.target.value)}
-                        required
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? 'bg-dark-700 border-dark-600 text-dark-text-secondary'
-                            : 'bg-white border-light-300 text-light-text-primary'
-                        } focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-                        placeholder="Category name"
-                      />
-                    </div>
+                  {/* Name - Bilingual Input */}
+                  <BilingualInput
+                    label="Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={(name, value) => {
+                      setFormData(prev => ({ ...prev, name: value }));
+                      // Auto-generate slug from English name
+                      if (name === 'name' && value.en) {
+                        const slug = generateSlug(value.en);
+                        setFormData(prev => ({ ...prev, slug }));
+                      }
+                    }}
+                    placeholder={{
+                      en: "Category name in English",
+                      vi: "Tên danh mục bằng tiếng Việt"
+                    }}
+                    required
+                  />
 
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                        Slug *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.slug}
-                        onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                        required
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? 'bg-dark-700 border-dark-600 text-dark-text-secondary'
-                            : 'bg-white border-light-300 text-light-text-primary'
-                        } focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-                        placeholder="category-slug"
-                      />
-                    </div>
-                  </div>
-
+                  {/* Slug */}
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                      Description
+                      Slug *
                     </label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                      rows={3}
+                    <input
+                      type="text"
+                      value={formData.slug}
+                      onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                      required
                       className={`w-full px-3 py-2 border rounded-lg ${
                         isDarkMode
                           ? 'bg-dark-700 border-dark-600 text-dark-text-secondary'
                           : 'bg-white border-light-300 text-light-text-primary'
                       } focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-                      placeholder="Category description"
+                      placeholder="category-slug"
                     />
                   </div>
+
+                  {/* Description - Bilingual Input */}
+                  <BilingualInput
+                    label="Description"
+                    name="description"
+                    value={formData.description}
+                    onChange={(name, value) => setFormData(prev => ({ ...prev, description: value }))}
+                    type="textarea"
+                    placeholder={{
+                      en: "Category description in English",
+                      vi: "Mô tả danh mục bằng tiếng Việt"
+                    }}
+                    rows={3}
+                  />
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
