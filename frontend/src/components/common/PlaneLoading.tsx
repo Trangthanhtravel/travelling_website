@@ -26,10 +26,10 @@ const PlaneLoading: React.FC<PlaneLoadingProps> = ({ message = 'Loading...' }) =
 
       {/* Company Name */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-800 dark:text-white drop-shadow-lg mb-4 animate-fade-in">
+        <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4 animate-fade-in" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
           Trang Thanh
         </h1>
-        <p className="text-gray-600 dark:text-white/80 text-lg drop-shadow-md animate-fade-in-delay">
+        <p className="text-slate-700 dark:text-gray-200 text-lg mb-2 animate-fade-in-delay" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>
           {message}
         </p>
       </div>
