@@ -129,7 +129,7 @@ const ServiceDetail: React.FC = () => {
               <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {t('Service Details')}
               </h2>
-              <div className={`prose max-w-none ${isDarkMode ? 'prose-invert' : ''}`}>
+              <div className={`prose max-w-none ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {service.description ? (
                   <div dangerouslySetInnerHTML={{
                     __html: getLocalizedContent(service, 'description') || service.description

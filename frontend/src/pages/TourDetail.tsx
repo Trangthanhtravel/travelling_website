@@ -116,18 +116,6 @@ const TourDetail: React.FC = () => {
                   <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
                   {t('Max')} {tour?.max_participants || 'TBD'} {t('People')}
                 </div>
-                <div className="flex items-center">
-                  <Icon icon={Icons.FiStar} className="w-4 h-4 text-yellow-400 mr-1" />
-                  {tour?.ratings?.average?.toFixed(1) || '0.0'} ({tour?.ratings?.count || 0} {t('reviews')})
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  tour?.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
-                  tour?.difficulty === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
-                  tour?.difficulty === 'challenging' ? 'bg-orange-100 text-orange-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {tour?.difficulty ? t(tour.difficulty.charAt(0).toUpperCase() + tour.difficulty.slice(1)) : 'TBD'}
-                </span>
               </div>
             </div>
 
@@ -359,10 +347,6 @@ const TourDetail: React.FC = () => {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">{t('Group Size')}:</span>
                     <span className="font-medium">Max {tour?.max_participants || 'TBD'}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">{t('Minimum Age')}:</span>
-                    <span className="font-medium">{tour?.minAge || 0}+ {t('years')}</span>
                   </div>
                 </div>
 
