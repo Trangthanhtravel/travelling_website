@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
+import ServiceModal from '../../components/admin/ServiceModal';
 import ServiceGalleryManager from '../../components/common/ServiceGalleryManager';
+import { useTranslation } from '../../contexts/TranslationContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import toast from 'react-hot-toast';
 
 interface Category {
@@ -14,39 +17,43 @@ interface Category {
 }
 
 interface Service {
-    id: string;
-    title: string;
-    subtitle?: string;
-    description: string;
-    price: number;
-    duration?: string;
-    category_id?: string;
-    category?: Category;
-    service_type?: string;
-    image: string | null;
-    gallery?: string[];
-    included: string[];
-    excluded: string[];
-    itinerary?: string[];
-    location?: any;
-    featured: boolean;
-    status: 'active' | 'inactive';
-    // Vietnamese fields
-    title_vi?: string;
-    subtitle_vi?: string;
-    description_vi?: string;
-    duration_vi?: string;
-    included_vi?: string[];
-    excluded_vi?: string[];
-    created_at: string;
-    updated_at: string;
+  id: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  price: number;
+  duration?: string;
+  category_id?: string;
+  category?: Category;
+  service_type?: string;
+  image: string | null;
+  gallery?: string[];
+  included: string[];
+  excluded: string[];
+  itinerary?: string[];
+  location?: any;
+  featured: boolean;
+  status: 'active' | 'inactive';
+  // Vietnamese fields
+  title_vi?: string;
+  subtitle_vi?: string;
+  description_vi?: string;
+  duration_vi?: string;
+  included_vi?: string[];
+  excluded_vi?: string[];
+  created_at: string;
+  updated_at: string;
 }
 
 const ServiceManagement: React.FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingService, setEditingService] = useState<Service | null>(null);
+  const { t } = useTranslation();
+  const { isDarkMode } = useTheme();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [galleryService, setGalleryService] = useState<Service | null>(null);
   const queryClient = useQueryClient();
@@ -57,7 +64,7 @@ const ServiceManagement: React.FC = () => {
 
   // Fetch categories for filter and form
   const { data: categoriesData } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ['service-categories'],
     queryFn: async () => {
       const response = await fetch(`${getApiUrl()}/categories?type=service`, {
         headers: {
@@ -74,11 +81,12 @@ const ServiceManagement: React.FC = () => {
 
   // Fetch services
   const { data: servicesData, isLoading, error } = useQuery({
-    queryKey: ['admin-services', searchTerm, filterCategory],
+    queryKey: ['admin-services', searchTerm, filterCategory, filterStatus],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (filterCategory !== 'all') params.append('category', filterCategory);
+      if (filterStatus !== 'all') params.append('status', filterStatus);
 
       const response = await fetch(`${getApiUrl()}/services?${params}`, {
         headers: {
@@ -91,6 +99,124 @@ const ServiceManagement: React.FC = () => {
     },
   });
 
+  // Create service mutation
+  const createServiceMutation = useMutation({
+    mutationFn: async (serviceData: any) => {
+      const formData = new FormData();
+
+      // Add all service fields (English)
+      formData.append('title', serviceData.title.en);
+      formData.append('description', serviceData.description.en);
+      formData.append('price', serviceData.price.toString());
+      formData.append('category_id', serviceData.category_id);
+      formData.append('status', serviceData.status);
+      formData.append('featured', serviceData.featured.toString());
+
+      if (serviceData.duration?.en) formData.append('duration', serviceData.duration.en);
+      if (serviceData.subtitle?.en) formData.append('subtitle', serviceData.subtitle.en);
+
+      // Add Vietnamese fields
+      if (serviceData.title.vi) formData.append('title_vi', serviceData.title.vi);
+      if (serviceData.description.vi) formData.append('description_vi', serviceData.description.vi);
+      if (serviceData.duration?.vi) formData.append('duration_vi', serviceData.duration.vi);
+      if (serviceData.subtitle?.vi) formData.append('subtitle_vi', serviceData.subtitle.vi);
+
+      // Add included/excluded as JSON
+      formData.append('included', JSON.stringify(serviceData.included || []));
+      formData.append('excluded', JSON.stringify(serviceData.excluded || []));
+      if (serviceData.included_vi) formData.append('included_vi', JSON.stringify(serviceData.included_vi));
+      if (serviceData.excluded_vi) formData.append('excluded_vi', JSON.stringify(serviceData.excluded_vi));
+
+      // Add image if provided
+      if (serviceData.image) {
+        formData.append('image', serviceData.image);
+      }
+
+      const response = await fetch(`${getApiUrl()}/services/admin/services`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create service');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      toast.success('Service created successfully');
+      setIsCreateModalOpen(false);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to create service');
+    }
+  });
+
+  // Update service mutation
+  const updateServiceMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const formData = new FormData();
+
+      // Add all service fields (English)
+      formData.append('title', data.title.en);
+      formData.append('description', data.description.en);
+      formData.append('price', data.price.toString());
+      formData.append('category_id', data.category_id);
+      formData.append('status', data.status);
+      formData.append('featured', data.featured.toString());
+
+      if (data.duration?.en) formData.append('duration', data.duration.en);
+      if (data.subtitle?.en) formData.append('subtitle', data.subtitle.en);
+
+      // Add Vietnamese fields
+      if (data.title.vi) formData.append('title_vi', data.title.vi);
+      if (data.description.vi) formData.append('description_vi', data.description.vi);
+      if (data.duration?.vi) formData.append('duration_vi', data.duration.vi);
+      if (data.subtitle?.vi) formData.append('subtitle_vi', data.subtitle.vi);
+
+      // Add included/excluded as JSON
+      formData.append('included', JSON.stringify(data.included || []));
+      formData.append('excluded', JSON.stringify(data.excluded || []));
+      if (data.included_vi) formData.append('included_vi', JSON.stringify(data.included_vi));
+      if (data.excluded_vi) formData.append('excluded_vi', JSON.stringify(data.excluded_vi));
+
+      // Add new image if provided
+      if (data.image) {
+        formData.append('image', data.image);
+      }
+
+      const response = await fetch(`${getApiUrl()}/services/admin/services/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update service');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      queryClient.invalidateQueries({ queryKey: ['service'] });
+      toast.success('Service updated successfully');
+      setIsEditModalOpen(false);
+      setSelectedService(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update service');
+    }
+  });
+
   // Delete service mutation
   const deleteServiceMutation = useMutation({
     mutationFn: async (serviceId: string) => {
@@ -101,95 +227,52 @@ const ServiceManagement: React.FC = () => {
           'Content-Type': 'application/json'
         }
       });
-      if (!response.ok) throw new Error('Failed to delete service');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete service');
+      }
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate and refetch data immediately
       queryClient.invalidateQueries({ queryKey: ['admin-services'] });
       queryClient.invalidateQueries({ queryKey: ['services'] });
       toast.success('Service deleted successfully');
     },
-    onError: () => {
-      toast.error('Failed to delete service');
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to delete service');
     }
   });
 
-  // Toggle service status
-  const toggleStatusMutation = useMutation({
-    mutationFn: async ({ serviceId, status }: { serviceId: string; status: 'active' | 'inactive' }) => {
-      const response = await fetch(`${getApiUrl()}/services/admin/services/${serviceId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status })
-      });
-      if (!response.ok) throw new Error('Failed to update service status');
-      return response.json();
-    },
-    onMutate: async ({ serviceId, status }) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['admin-services'] });
+  const handleEditService = (service: Service) => {
+    setSelectedService(service);
+    setIsEditModalOpen(true);
+  };
 
-      // Snapshot the previous value
-      const previousServices = queryClient.getQueryData(['admin-services', searchTerm, filterCategory]);
-
-      // Optimistically update the cache
-      queryClient.setQueryData(['admin-services', searchTerm, filterCategory], (old: any) => {
-        if (!old?.data) return old;
-
-        return {
-          ...old,
-          data: old.data.map((service: Service) =>
-            service.id === serviceId ? { ...service, status } : service
-          )
-        };
-      });
-
-      return { previousServices };
-    },
-    onError: (err, variables, context) => {
-      // Rollback on error
-      if (context?.previousServices) {
-        queryClient.setQueryData(['admin-services', searchTerm, filterCategory], context.previousServices);
-      }
-      toast.error('Failed to update service status');
-    },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      queryClient.invalidateQueries({ queryKey: ['services'] });
-    },
-    onSuccess: () => {
-      toast.success('Service status updated successfully');
+  const handleDeleteService = (service: Service) => {
+    if (window.confirm(`Are you sure you want to delete "${service.title}"? This action cannot be undone.`)) {
+      deleteServiceMutation.mutate(service.id);
     }
-  });
+  };
+
+  const handleOpenGallery = (service: Service) => {
+    setGalleryService(service);
+    setIsGalleryModalOpen(true);
+  };
 
   const services: Service[] = servicesData?.data || [];
-
-  const handleEdit = (service: Service) => {
-    setEditingService(service);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = (serviceId: string) => {
-    if (window.confirm('Are you sure you want to delete this service?')) {
-      deleteServiceMutation.mutate(serviceId);
-    }
-  };
-
-  const handleStatusToggle = (serviceId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-    toggleStatusMutation.mutate({ serviceId, status: newStatus });
-  };
+  const filteredServices = services.filter((service: Service) => {
+    const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         service.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === 'all' || service.category_id === filterCategory;
+    const matchesStatus = filterStatus === 'all' || service.status === filterStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   // Create filter options from actual categories
   const filterOptions = [
     { value: 'all', label: 'All Categories' },
     ...categories.map((cat: Category) => ({
-      value: cat.slug,
+      value: cat.id,
       label: cat.name
     }))
   ];
@@ -210,47 +293,40 @@ const ServiceManagement: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Service Management</h2>
-          <p className="text-gray-600 dark:text-gray-400">Manage your travel services</p>
+          <p className="text-gray-600 dark:text-gray-400">Create and manage your travel services</p>
         </div>
         <button
-          onClick={() => {
-            setEditingService(null);
-            setIsModalOpen(true);
-          }}
-          className="mt-4 sm:mt-0 inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+          onClick={() => setIsCreateModalOpen(true)}
+          className="mt-4 sm:mt-0 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center"
         >
           <Icon icon={Icons.FiPlus} className="w-5 h-5 mr-2" />
-          Add Service
+          Create Service
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-dark-800 rounded-lg shadow-lg border dark:border-dark-700 p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Search Services
-            </label>
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm border dark:border-dark-700 p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Search */}
+          <div className="flex-1">
             <div className="relative">
-              <Icon icon={Icons.FiSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Icon icon={Icons.FiSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
+                placeholder="Search services..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name or description..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                className="pl-10 pr-4 py-2 w-full border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Filter by Category
-            </label>
+          {/* Category Filter */}
+          <div className="sm:w-48">
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               {filterOptions.map(option => (
                 <option key={option.value} value={option.value}>
@@ -259,31 +335,39 @@ const ServiceManagement: React.FC = () => {
               ))}
             </select>
           </div>
+
+          {/* Status Filter */}
+          <div className="sm:w-48">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Services List */}
-      <div className="bg-white dark:bg-dark-800 rounded-lg shadow-lg border dark:border-dark-700">
+      {/* Services Table */}
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm border dark:border-dark-700 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
-            <Icon icon={Icons.FiLoader} className="w-8 h-8 animate-spin text-primary-600 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">Loading services...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Loading services...</p>
           </div>
-        ) : services.length === 0 ? (
+        ) : filteredServices.length === 0 ? (
           <div className="p-8 text-center">
             <Icon icon={Icons.FiPackage} className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No services found</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">Get started by creating your first service</p>
-            <button
-              onClick={() => {
-                setEditingService(null);
-                setIsModalOpen(true);
-              }}
-              className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-            >
-              <Icon icon={Icons.FiPlus} className="w-5 h-5 mr-2" />
-              Add Service
-            </button>
+            <p className="text-gray-600 dark:text-gray-400">
+              {searchTerm || filterCategory !== 'all' || filterStatus !== 'all'
+                ? 'Try adjusting your search or filters'
+                : 'Get started by creating your first service'
+              }
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -303,37 +387,27 @@ const ServiceManagement: React.FC = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Created
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-dark-800 divide-y divide-gray-200 dark:divide-dark-600">
-                {services.map((service) => (
+                {filteredServices.map((service: Service) => (
                   <tr key={service.id} className="hover:bg-gray-50 dark:hover:bg-dark-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {service.image ? (
+                        <div className="h-12 w-12 flex-shrink-0">
                           <img
-                            src={service.image}
+                            className="h-12 w-12 rounded-lg object-cover"
+                            src={service.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}
                             alt={service.title}
-                            className="h-10 w-10 rounded-lg object-cover mr-3"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
                           />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center mr-3">
-                            <Icon icon={Icons.FiImage} className="w-5 h-5 text-gray-400" />
-                          </div>
-                        )}
-                        <div>
+                        </div>
+                        <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {service.title}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                          <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
                             {service.description}
                           </div>
                         </div>
@@ -344,44 +418,44 @@ const ServiceManagement: React.FC = () => {
                         {service.category?.name || 'No Category'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      ${service.price}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        ${service.price}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleStatusToggle(service.id, service.status)}
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors duration-200 ${
+                      <div className="flex flex-col space-y-1">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           service.status === 'active'
-                            ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/30'
-                            : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/30'
-                        }`}
-                      >
-                        {service.status}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(service.created_at).toLocaleDateString()}
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+                        }`}>
+                          {service.status}
+                        </span>
+                        {service.featured && (
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
+                            ⭐ Featured
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
+                      <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => handleEdit(service)}
-                          className="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
+                          onClick={() => handleEditService(service)}
+                          className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                         >
-                          <Icon icon={Icons.FiEdit} className="w-4 h-4" />
+                          <Icon icon={Icons.FiEdit3} className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(service.id)}
-                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                          onClick={() => handleDeleteService(service)}
+                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                         >
                           <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => {
-                            setGalleryService(service);
-                            setIsGalleryModalOpen(true);
-                          }}
-                          className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+                          onClick={() => handleOpenGallery(service)}
+                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           <Icon icon={Icons.FiImage} className="w-4 h-4" />
                         </button>
@@ -395,23 +469,31 @@ const ServiceManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Service Modal */}
-      {isModalOpen && (
+      {/* Create Service Modal */}
+      {isCreateModalOpen && (
         <ServiceModal
-          service={editingService}
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSubmit={(data) => createServiceMutation.mutate(data)}
+          isLoading={createServiceMutation.isPending}
+          title="Create New Service"
           categories={categories}
+        />
+      )}
+
+      {/* Edit Service Modal */}
+      {isEditModalOpen && selectedService && (
+        <ServiceModal
+          isOpen={isEditModalOpen}
           onClose={() => {
-            setIsModalOpen(false);
-            setEditingService(null);
+            setIsEditModalOpen(false);
+            setSelectedService(null);
           }}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-            // Also invalidate public service caches to update service cards and details
-            queryClient.invalidateQueries({ queryKey: ['services'] });
-            queryClient.invalidateQueries({ queryKey: ['service'] });
-            setIsModalOpen(false);
-            setEditingService(null);
-          }}
+          onSubmit={(data) => updateServiceMutation.mutate({ id: selectedService.id, data })}
+          isLoading={updateServiceMutation.isPending}
+          title="Edit Service"
+          initialData={selectedService}
+          categories={categories}
         />
       )}
 
@@ -424,455 +506,12 @@ const ServiceManagement: React.FC = () => {
             setGalleryService(null);
           }}
           onSuccess={() => {
-            // Invalidate all service-related caches to ensure gallery updates appear everywhere
             queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-            queryClient.invalidateQueries({ queryKey: ['services'] }); // Public services list
-            queryClient.invalidateQueries({ queryKey: ['service'] }); // Service detail pages
-
-            // Also invalidate specific service caches
-            if (galleryService?.id) {
-              queryClient.invalidateQueries({ queryKey: ['admin-service', galleryService.id] });
-              }
-
-            // Don't close the modal here - let it stay open for more uploads
+            queryClient.invalidateQueries({ queryKey: ['services'] });
+            queryClient.invalidateQueries({ queryKey: ['service'] });
           }}
         />
       )}
-    </div>
-  );
-};
-
-// Service Modal Component
-interface ServiceModalProps {
-  service: Service | null;
-  categories: Category[];
-  onClose: () => void;
-  onSuccess: () => void;
-}
-
-const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClose, onSuccess }) => {
-  const queryClient = useQueryClient(); // Add this line to get queryClient instance
-
-  const [formData, setFormData] = useState<{
-    title: string;
-    description: string;
-    category_id: string;
-    price: number;
-    itinerary: string[];
-    status: "active" | "inactive";
-    duration: string;
-    image: string | null;
-    // Vietnamese fields
-    title_vi?: string;
-    description_vi?: string;
-    duration_vi?: string;
-  }>({
-    title: service?.title || '',
-    description: service?.description || '',
-    category_id: service?.category_id || (categories.length > 0 ? categories[0].id : ''),
-    price: service?.price || 0,
-    itinerary: service?.itinerary || [''],
-    status: service?.status || 'active',
-    duration: service?.duration || '',
-    image: service?.image || null,
-    // Vietnamese fields
-    title_vi: service?.title_vi || '',
-    description_vi: service?.description_vi || '',
-    duration_vi: service?.duration_vi || '',
-  });
-
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploading] = useState(false);
-
-  const getApiUrl = () => {
-    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-  };
-
-  const mutation = useMutation({
-    mutationFn: async (data: any) => {
-      // Create FormData for the request
-      const formData = new FormData();
-
-      // Add service data (English)
-      formData.append('title', data.title);
-      formData.append('description', data.description);
-      formData.append('category_id', data.category_id);
-      formData.append('price', data.price.toString());
-      formData.append('duration', data.duration);
-      formData.append('status', data.status);
-      formData.append('itinerary', JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')));
-      formData.append('included', JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')));
-      formData.append('excluded', JSON.stringify([]));
-      formData.append('featured', 'false');
-
-      // Add Vietnamese data
-      if (data.title_vi) formData.append('title_vi', data.title_vi);
-      if (data.description_vi) formData.append('description_vi', data.description_vi);
-      if (data.duration_vi) formData.append('duration_vi', data.duration_vi);
-
-      // Add image file if selected
-      if (selectedFiles.length > 0) {
-        formData.append('image', selectedFiles[0]);
-      }
-
-      const url = service
-        ? `${getApiUrl()}/services/admin/services/${service.id}`
-        : `${getApiUrl()}/services/admin/services`;
-
-      const response = await fetch(url, {
-        method: service ? 'PUT' : 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-          // Don't set Content-Type for FormData - let browser set it with boundary
-        },
-        body: formData
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Service save error:', errorData);
-        throw new Error('Failed to save service');
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast.success(service ? 'Service updated successfully' : 'Service created successfully');
-
-      // Invalidate all service-related caches to ensure the new image appears everywhere
-      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      queryClient.invalidateQueries({ queryKey: ['services'] }); // Public services list
-      queryClient.invalidateQueries({ queryKey: ['service'] }); // Service detail pages
-
-      // If updating an existing service, also invalidate its specific cache
-      if (service?.id) {
-        queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
-      }
-
-      // Force a hard refresh of the updated service data
-      if (data?.data?.id) {
-        queryClient.invalidateQueries({ queryKey: ['admin-service', data.data.id] });
-        if (data.data.slug) {
-          queryClient.invalidateQueries({ queryKey: ['service', data.data.slug] });
-        }
-      }
-
-      onSuccess();
-    },
-    onError: (error) => {
-      console.error('Error saving service:', error);
-      toast.error(service ? 'Failed to update service' : 'Failed to create service');
-    }
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    mutation.mutate(formData);
-  };
-
-  const addFeature = () => {
-    setFormData(prev => ({
-      ...prev,
-      itinerary: [...prev.itinerary, '']
-    }));
-  };
-
-  const removeFeature = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      itinerary: prev.itinerary.filter((_, i) => i !== index)
-    }));
-  };
-
-  const updateFeature = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      itinerary: prev.itinerary.map((feature, i) => i === index ? value : feature)
-    }));
-  };
-
-  const removeImage = () => {
-    setFormData(prev => ({
-      ...prev,
-      image: null
-    }));
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75" onClick={onClose}></div>
-
-        <div className="inline-block w-full max-w-2xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-dark-800 shadow-xl rounded-2xl">
-          <div className="flex items-center justify-between p-6 border-b dark:border-dark-700">
-            <h3 className="text-xl font-medium text-gray-900 dark:text-white">
-              {service ? 'Edit Service' : 'Create Service'}
-            </h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-              <Icon icon={Icons.FiX} className="w-6 h-6" />
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {/* Service Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Service Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                placeholder="Enter service name"
-              />
-            </div>
-
-            {/* Service Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Description *
-              </label>
-              <textarea
-                required
-                rows={4}
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                placeholder="Enter service description"
-              />
-            </div>
-
-            {/* Category and Price Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Category *
-                </label>
-                <select
-                  required
-                  value={formData.category_id}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                >
-                  <option value="">Select a category</option>
-                  {categories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Price (USD) *
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-
-            {/* Duration and Status Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Duration
-                </label>
-                <input
-                  type="text"
-                  value={formData.duration || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                  placeholder="e.g., 2 hours, 1 day"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Status *
-                </label>
-                <select
-                  required
-                  value={formData.status}
-                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'active' | 'inactive' }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Current Image */}
-            {formData.image && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Current Image
-                </label>
-                <div className="flex items-center gap-2">
-                  <img
-                    src={formData.image}
-                    alt="Service"
-                    className="w-20 h-20 rounded-lg object-cover border border-gray-200 dark:border-dark-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                  >
-                    <Icon icon={Icons.FiX} className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Service Image */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Add/Update Service Image
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const files = Array.from(e.target.files || []);
-                  setSelectedFiles(files);
-                }}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Upload a new image (JPG, PNG, WebP - Max 5MB)
-              </p>
-              {selectedFiles.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Selected file: {selectedFiles.map(f => f.name).join(', ')}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Features */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Features/Included Services
-              </label>
-              {formData.itinerary.map((itinerary, index) => (
-                <div key={index} className="flex items-center gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={itinerary}
-                    onChange={(e) => updateFeature(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                    placeholder="Enter a feature or included service"
-                  />
-                  {formData.itinerary.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeFeature(index)}
-                      className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                    >
-                      <Icon icon={Icons.FiMinus} className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addFeature}
-                className="inline-flex items-center text-sm text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300"
-              >
-                <Icon icon={Icons.FiPlus} className="w-4 h-4 mr-1" />
-                Add Feature
-              </button>
-            </div>
-
-            {/* Vietnamese Section */}
-            <div className="border-t dark:border-dark-700 pt-6 mt-6">
-              <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <Icon icon={Icons.FiGlobe} className="w-5 h-5 mr-2" />
-                Vietnamese Content (Optional)
-              </h4>
-
-              {/* Vietnamese Service Name */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Tên Dịch Vụ (Vietnamese Service Name)
-                </label>
-                <input
-                  type="text"
-                  value={formData.title_vi || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title_vi: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                  placeholder="Nhập tên dịch vụ bằng tiếng Việt"
-                />
-              </div>
-
-              {/* Vietnamese Description */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Mô Tả (Vietnamese Description)
-                </label>
-                <textarea
-                  rows={4}
-                  value={formData.description_vi || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description_vi: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                  placeholder="Nhập mô tả dịch vụ bằng tiếng Việt"
-                />
-              </div>
-
-              {/* Vietnamese Duration */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Thời Gian (Vietnamese Duration)
-                </label>
-                <input
-                  type="text"
-                  value={formData.duration_vi || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, duration_vi: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
-                  placeholder="VD: 2 giờ, 1 ngày"
-                />
-              </div>
-            </div>
-
-            {/* Form Actions */}
-            <div className="flex items-center justify-end space-x-3 pt-6 border-t dark:border-dark-700">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={mutation.isPending || uploading}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {mutation.isPending || uploading ? (
-                  <div className="flex items-center">
-                    <Icon icon={Icons.FiLoader} className="animate-spin w-4 h-4 mr-2" />
-                    {uploading ? 'Uploading...' : (service ? 'Updating...' : 'Creating...')}
-                  </div>
-                ) : (
-                  service ? 'Update Service' : 'Create Service'
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
   );
 };
