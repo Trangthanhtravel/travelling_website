@@ -89,6 +89,58 @@
   }
 }
 
+/* Custom animations for plane loading */
+@keyframes plane-fly {
+  0% {
+    transform: translateX(-40px) translateY(0px) rotate(-5deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(120px) translateY(-8px) rotate(0deg);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(280px) translateY(4px) rotate(5deg);
+    opacity: 0;
+  }
+}
+
+@keyframes cloud-float {
+  0%, 100% {
+    transform: translateX(0px) translateY(0px);
+  }
+  50% {
+    transform: translateX(10px) translateY(-5px);
+  }
+}
+
+@keyframes cloud-float-delayed {
+  0%, 100% {
+    transform: translateX(0px) translateY(0px);
+  }
+  50% {
+    transform: translateX(-8px) translateY(3px);
+  }
+}
+
+/* Animation classes */
+.animate-plane-fly {
+  animation: plane-fly 3s ease-in-out infinite;
+}
+
+.animate-cloud-float {
+  animation: cloud-float 4s ease-in-out infinite;
+}
+
+.animate-cloud-float-delayed {
+  animation: cloud-float-delayed 5s ease-in-out infinite 1s;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
