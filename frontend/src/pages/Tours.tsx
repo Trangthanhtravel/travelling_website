@@ -312,7 +312,7 @@ const Tours: React.FC = () => {
 
                 <div className="flex items-center gap-4">
                   <span className={`text-sm ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                    {pagination.total || 0} {t('tours found')}
+                    {pagination?.total || 0} {t('tours found')}
                   </span>
                   
                   <select
