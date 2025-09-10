@@ -312,7 +312,7 @@ const Home: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
             <div className="animate-fade-in">
               <h1 className="text-5xl md:text-7xl font-bold font-serif mb-6 drop-shadow-lg">
-                {heroSlides[currentSlide]?.title || t('Welcome to')}
+                {heroSlides[currentSlide]?.title}
               </h1>
               <p className="text-xl md:text-2xl mb-4 text-light-300 drop-shadow-md">
                 {heroSlides[currentSlide]?.subtitle || ''}

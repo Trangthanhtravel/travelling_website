@@ -52,7 +52,6 @@ const vietnameseTranslations: Translations = {
   'Share': 'Chia Sẻ',
 
   // Home Page - Hero Section
-  'Welcome to': 'Chào Mừng Đến Với',
   'Discover Amazing Tours': 'Khám Phá Những Tour Tuyệt Vời',
   'Explore the world with our expert guides': 'Khám phá thế giới cùng hướng dẫn viên chuyên nghiệp',
   'Get started on your next adventure': 'Bắt đầu cuộc phiêu lưu tiếp theo của bạn',
