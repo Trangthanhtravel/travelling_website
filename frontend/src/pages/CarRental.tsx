@@ -7,7 +7,7 @@ import { useTranslation } from '../contexts/TranslationContext';
 
 const CarRental: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
+  const { t, getLocalizedContent } = useTranslation();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -202,21 +202,21 @@ const CarRental: React.FC = () => {
                 <div className="p-6 flex-1 flex flex-col">
                   <div className={`flex items-center text-sm mb-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
                     <Icon icon={Icons.FiTruck} className="w-4 h-4 mr-1" />
-                    <span>Car Rental</span>
+                    <span>{t('Car Rental')}</span>
                   </div>
                   <h3 className={`font-bold mb-2 group-hover:text-accent-orange transition-colors duration-200 ${
                     viewMode === 'grid' ? 'text-xl' : 'text-lg'
                   } ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-                    {car.title}
+                    {getLocalizedContent(car, 'title')}
                   </h3>
                   <p className={`text-sm mb-4 line-clamp-2 flex-grow ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
-                    {car.description}
+                    {getLocalizedContent(car, 'description')}
                   </p>
 
                   {car.duration && (
                     <div className={`flex items-center text-sm mb-4 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
                       <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
-                      <span>{car.duration}</span>
+                      <span>{getLocalizedContent(car, 'duration')}</span>
                     </div>
                   )}
 

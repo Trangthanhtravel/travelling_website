@@ -17,7 +17,7 @@ interface HeroSlide {
 
 const Home: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { t, language } = useTranslation(); // Add language to the destructuring
+  const { t, language, getLocalizedContent } = useTranslation(); // Add language to the destructuring
   const [currentSlide, setCurrentSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [heroLoading, setHeroLoading] = useState(true);
@@ -789,8 +789,8 @@ const Home: React.FC = () => {
                         </div>
                       </div>
                       <div className="p-6">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">{car.title}</h3>
-                        <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">{car.subtitle || car.description}</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">{getLocalizedContent(car, 'title')}</h3>
+                        <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">{getLocalizedContent(car, 'description')}</p>
                         <Link
                           to={`/services/${car.slug || car.id}`}
                           className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200 block text-center"

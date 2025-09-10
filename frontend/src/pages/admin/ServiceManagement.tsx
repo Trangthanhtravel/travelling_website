@@ -23,14 +23,21 @@ interface Service {
     category_id?: string;
     category?: Category;
     service_type?: string;
-    image: string | null; // Changed from images array to single image
-    gallery?: string[]; // Keep gallery as separate field for multiple images
+    image: string | null;
+    gallery?: string[];
     included: string[];
     excluded: string[];
     itinerary?: string[];
     location?: any;
     featured: boolean;
     status: 'active' | 'inactive';
+    // Vietnamese fields
+    title_vi?: string;
+    subtitle_vi?: string;
+    description_vi?: string;
+    duration_vi?: string;
+    included_vi?: string[];
+    excluded_vi?: string[];
     created_at: string;
     updated_at: string;
 }
@@ -455,6 +462,10 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
     status: "active" | "inactive";
     duration: string;
     image: string | null;
+    // Vietnamese fields
+    title_vi?: string;
+    description_vi?: string;
+    duration_vi?: string;
   }>({
     title: service?.title || '',
     description: service?.description || '',
@@ -463,7 +474,11 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
     itinerary: service?.itinerary || [''],
     status: service?.status || 'active',
     duration: service?.duration || '',
-    image: service?.image || null
+    image: service?.image || null,
+    // Vietnamese fields
+    title_vi: service?.title_vi || '',
+    description_vi: service?.description_vi || '',
+    duration_vi: service?.duration_vi || '',
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -478,7 +493,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
       // Create FormData for the request
       const formData = new FormData();
 
-      // Add service data
+      // Add service data (English)
       formData.append('title', data.title);
       formData.append('description', data.description);
       formData.append('category_id', data.category_id);
@@ -489,6 +504,11 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
       formData.append('included', JSON.stringify(data.itinerary.filter((item: string) => item.trim() !== '')));
       formData.append('excluded', JSON.stringify([]));
       formData.append('featured', 'false');
+
+      // Add Vietnamese data
+      if (data.title_vi) formData.append('title_vi', data.title_vi);
+      if (data.description_vi) formData.append('description_vi', data.description_vi);
+      if (data.duration_vi) formData.append('duration_vi', data.duration_vi);
 
       // Add image file if selected
       if (selectedFiles.length > 0) {
@@ -774,6 +794,56 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ service, categories, onClos
                 <Icon icon={Icons.FiPlus} className="w-4 h-4 mr-1" />
                 Add Feature
               </button>
+            </div>
+
+            {/* Vietnamese Section */}
+            <div className="border-t dark:border-dark-700 pt-6 mt-6">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <Icon icon={Icons.FiGlobe} className="w-5 h-5 mr-2" />
+                Vietnamese Content (Optional)
+              </h4>
+
+              {/* Vietnamese Service Name */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tên Dịch Vụ (Vietnamese Service Name)
+                </label>
+                <input
+                  type="text"
+                  value={formData.title_vi || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title_vi: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                  placeholder="Nhập tên dịch vụ bằng tiếng Việt"
+                />
+              </div>
+
+              {/* Vietnamese Description */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Mô Tả (Vietnamese Description)
+                </label>
+                <textarea
+                  rows={4}
+                  value={formData.description_vi || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description_vi: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                  placeholder="Nhập mô tả dịch vụ bằng tiếng Việt"
+                />
+              </div>
+
+              {/* Vietnamese Duration */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Thời Gian (Vietnamese Duration)
+                </label>
+                <input
+                  type="text"
+                  value={formData.duration_vi || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, duration_vi: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-dark-800 dark:text-white"
+                  placeholder="VD: 2 giờ, 1 ngày"
+                />
+              </div>
             </div>
 
             {/* Form Actions */}
