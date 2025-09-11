@@ -53,20 +53,18 @@ const Contact: React.FC = () => {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-          <div className="bg-accent-orange text-white py-16">
-              <div className="container mx-auto px-4">
-                  <div className="text-center">
-                      <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Get in Touch')}</h1>
-                      <p className="text-xl mb-8 opacity-90">
-                          {t('We are always ready to help you plan the perfect trip. Contact us today!')}
-                      </p>
-                  </div>
-              </div>
-          </div>
-
-
+        <div className="bg-accent-orange text-white py-16">
+            <div className="container mx-auto px-4">
+                <div className="text-center">
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Get in Touch')}</h1>
+                    <p className="text-xl mb-8 opacity-90">
+                        {t('We are always ready to help you plan the perfect trip. Contact us today!')}
+                    </p>
+                </div>
+            </div>
+        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Information */}
           <div>
