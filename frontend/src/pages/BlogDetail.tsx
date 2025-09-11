@@ -35,14 +35,14 @@ const BlogDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'} transition-colors duration-200`}>
         <div className="animate-pulse max-w-4xl mx-auto px-4 py-8">
-          <div className={`h-8 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded mb-4`}></div>
-          <div className={`h-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded w-1/3 mb-8`}></div>
-          <div className={`h-64 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded mb-8`}></div>
+          <div className={`h-8 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded mb-4`}></div>
+          <div className={`h-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded w-1/3 mb-8`}></div>
+          <div className={`h-64 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded mb-8`}></div>
           <div className="space-y-4">
             {[...Array(10)].map((_, i) => (
-              <div key={i} className={`h-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded`}></div>
+              <div key={i} className={`h-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded`}></div>
             ))}
           </div>
         </div>
@@ -52,17 +52,17 @@ const BlogDetail: React.FC = () => {
 
   if (error) {
     return (
-      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
+      <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'} flex items-center justify-center transition-colors duration-200`}>
         <div className="text-center">
-          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-light-text-primary'} mb-4`}>
             {t('Blog not found')}
           </h2>
-          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-light-text-muted'} mb-4`}>
             {t('The blog post you are looking for does not exist or has been removed.')}
           </p>
           <Link
             to="/blogs"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200"
           >
             {t('Back to Blogs')}
           </Link>
@@ -73,14 +73,14 @@ const BlogDetail: React.FC = () => {
 
   if (!blog) {
     return (
-      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
+      <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'} flex items-center justify-center transition-colors duration-200`}>
         <div className="text-center">
-          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-light-text-primary'} mb-4`}>
             {t('Blog not found')}
           </h2>
           <Link
             to="/blogs"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200"
           >
             {t('Back to Blogs')}
           </Link>
@@ -90,21 +90,21 @@ const BlogDetail: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'} transition-colors duration-200`}>
       {/* Breadcrumb */}
-      <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4`}>
+      <div className={`${isDarkMode ? 'bg-dark-800 border-dark-600' : 'bg-white border-gray-200'} border-b py-4 transition-colors duration-200`}>
         <div className="max-w-4xl mx-auto px-4">
           <nav className="flex items-center space-x-2 text-sm">
             <Link
               to="/"
-              className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+              className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-light-text-muted hover:text-light-text-primary'} transition-colors duration-200`}
             >
               {t('Home')}
             </Link>
             <Icon icon={Icons.FiChevronRight} className={`h-4 w-4 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
             <Link
               to="/blogs"
-              className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+              className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-light-text-muted hover:text-light-text-primary'} transition-colors duration-200`}
             >
               {t('Blogs')}
             </Link>
@@ -137,7 +137,7 @@ const BlogDetail: React.FC = () => {
                   return categoryArray.map((category: string, index: number) => (
                     <span
                       key={index}
-                      className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
+                      className="bg-primary-100 text-primary-800 text-sm px-3 py-1 rounded-full"
                     >
                       {category}
                     </span>
@@ -149,7 +149,7 @@ const BlogDetail: React.FC = () => {
                   return categories.map((category: string, index: number) => (
                     <span
                       key={index}
-                      className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
+                      className="bg-primary-100 text-primary-800 text-sm px-3 py-1 rounded-full"
                     >
                       {category}
                     </span>
@@ -160,12 +160,12 @@ const BlogDetail: React.FC = () => {
           )}
 
           {/* Title */}
-          <h1 className={`text-3xl md:text-4xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+          <h1 className={`text-3xl md:text-4xl font-bold ${isDarkMode ? 'text-white' : 'text-light-text-primary'} mb-4`}>
             {blog.title}
           </h1>
 
           {/* Meta Info */}
-          <div className={`flex flex-wrap items-center gap-6 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`}>
+          <div className={`flex flex-wrap items-center gap-6 text-sm ${isDarkMode ? 'text-gray-400' : 'text-light-text-muted'} mb-6`}>
             <div className="flex items-center">
               <Icon icon={Icons.FiUser} className="h-4 w-4 mr-2" />
               <span>{blog.authorProfile?.name || 'Anonymous'}</span>
@@ -188,7 +188,7 @@ const BlogDetail: React.FC = () => {
 
           {/* Excerpt */}
           {blog.excerpt && (
-            <p className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} leading-relaxed mb-6`}>
+            <p className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-light-text-muted'} leading-relaxed mb-6`}>
               {blog.excerpt}
             </p>
           )}
@@ -206,11 +206,11 @@ const BlogDetail: React.FC = () => {
         )}
 
         {/* Content */}
-        <div className={`prose prose-lg max-w-none ${
-            isDarkMode 
-            ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-gray-800' 
-            : 'prose-gray'
-        } mb-8`}>
+        <div className={`prose prose-lg max-w-none mb-8 ${
+          isDarkMode 
+            ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-primary-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-dark-800 prose-blockquote:border-primary-500 prose-blockquote:text-gray-300' 
+            : 'prose-gray prose-headings:text-light-text-primary prose-p:text-light-text-muted prose-a:text-primary-600 prose-strong:text-light-text-primary prose-blockquote:border-primary-500'
+        }`}>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw]}
@@ -227,10 +227,35 @@ const BlogDetail: React.FC = () => {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                  className={`${isDarkMode ? 'text-primary-400 hover:text-primary-300' : 'text-primary-600 hover:text-primary-700'} transition-colors duration-200`}
                 >
                   {children}
                 </a>
+              ),
+              h1: ({ children }) => (
+                <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-light-text-primary'} mt-8 mb-4`}>
+                  {children}
+                </h1>
+              ),
+              h2: ({ children }) => (
+                <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-light-text-primary'} mt-6 mb-3`}>
+                  {children}
+                </h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-light-text-primary'} mt-5 mb-2`}>
+                  {children}
+                </h3>
+              ),
+              p: ({ children }) => (
+                <p className={`${isDarkMode ? 'text-gray-300' : 'text-light-text-muted'} leading-relaxed mb-4`}>
+                  {children}
+                </p>
+              ),
+              blockquote: ({ children }) => (
+                <blockquote className={`border-l-4 ${isDarkMode ? 'border-primary-500 bg-dark-800' : 'border-primary-500 bg-gray-50'} pl-4 py-2 my-6 italic`}>
+                  {children}
+                </blockquote>
               ),
             }}
           >
@@ -248,7 +273,7 @@ const BlogDetail: React.FC = () => {
           }
         })() && (
           <div className="mb-8">
-            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-3`}>
+            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-light-text-primary'} mb-3`}>
               {t('Tags')}
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -258,7 +283,7 @@ const BlogDetail: React.FC = () => {
                   return Array.isArray(tags) ? tags.map((tag: string, index: number) => (
                     <span
                       key={index}
-                      className={`${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'} text-sm px-3 py-1 rounded-full`}
+                      className={`${isDarkMode ? 'bg-dark-700 text-gray-300' : 'bg-gray-100 text-gray-700'} text-sm px-3 py-1 rounded-full transition-colors duration-200`}
                     >
                       #{tag}
                     </span>
@@ -269,7 +294,7 @@ const BlogDetail: React.FC = () => {
                   return tags.map((tag: string, index: number) => (
                     <span
                       key={index}
-                      className={`${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'} text-sm px-3 py-1 rounded-full`}
+                      className={`${isDarkMode ? 'bg-dark-700 text-gray-300' : 'bg-gray-100 text-gray-700'} text-sm px-3 py-1 rounded-full transition-colors duration-200`}
                     >
                       #{tag}
                     </span>
@@ -290,7 +315,7 @@ const BlogDetail: React.FC = () => {
           }
         })() && (
           <div className="mb-8">
-            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-3`}>
+            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-light-text-primary'} mb-3`}>
               {t('Gallery')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -302,7 +327,7 @@ const BlogDetail: React.FC = () => {
                       key={index}
                       src={image}
                       alt={`Gallery ${index + 1}`}
-                      className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                      className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
                     />
                   )) : [];
                 } catch {
@@ -314,10 +339,10 @@ const BlogDetail: React.FC = () => {
         )}
 
         {/* Navigation */}
-        <div className={`flex justify-between items-center pt-8 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className={`flex justify-between items-center pt-8 border-t ${isDarkMode ? 'border-dark-600' : 'border-gray-200'} transition-colors duration-200`}>
           <Link
             to="/blogs"
-            className={`flex items-center ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+            className={`flex items-center ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-light-text-muted hover:text-light-text-primary'} transition-colors duration-200`}
           >
             <Icon icon={Icons.FiArrowLeft} className="h-4 w-4 mr-2" />
             {t('Back to Blogs')}
