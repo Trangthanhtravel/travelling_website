@@ -187,9 +187,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             console.log('📊 Element type:', htmlElement.getAttribute('type'));
             console.log('📊 Element value:', (htmlElement as HTMLTextAreaElement).value?.substring(0, 50));
             console.log('📊 Element placeholder:', (htmlElement as HTMLTextAreaElement).placeholder);
+            console.log('📊 Font family:', computedStyle.fontFamily);
+            console.log('📊 Font size:', computedStyle.fontSize);
+            console.log('📊 Text shadow:', computedStyle.textShadow);
+            console.log('📊 Z-index:', computedStyle.zIndex);
+            console.log('📊 Position:', computedStyle.position);
           }
 
-          // Force styles with maximum priority
+          // Force styles with maximum priority - more aggressive approach
           htmlElement.style.setProperty('color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
           htmlElement.style.setProperty('background-color', isDarkMode ? '#1F2937' : '#FFFFFF', 'important');
           htmlElement.style.setProperty('border-color', isDarkMode ? '#374151' : '#D1D5DB', 'important');
@@ -200,6 +205,52 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           htmlElement.style.setProperty('font-size', '14px', 'important');
           htmlElement.style.setProperty('line-height', '1.6', 'important');
           htmlElement.style.setProperty('caret-color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
+
+          // Force font properties
+          htmlElement.style.setProperty('font-family', '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', 'important');
+          htmlElement.style.setProperty('font-weight', 'normal', 'important');
+          htmlElement.style.setProperty('text-decoration', 'none', 'important');
+          htmlElement.style.setProperty('text-shadow', 'none', 'important');
+          htmlElement.style.setProperty('text-indent', '0', 'important');
+          htmlElement.style.setProperty('letter-spacing', 'normal', 'important');
+          htmlElement.style.setProperty('word-spacing', 'normal', 'important');
+
+          // Force positioning and z-index
+          htmlElement.style.setProperty('z-index', '1', 'important');
+          htmlElement.style.setProperty('position', 'relative', 'important');
+
+          // Remove any potential text selection styling
+          htmlElement.style.setProperty('user-select', 'text', 'important');
+          htmlElement.style.setProperty('-webkit-user-select', 'text', 'important');
+          htmlElement.style.setProperty('-moz-user-select', 'text', 'important');
+
+          // Force text rendering
+          htmlElement.style.setProperty('text-rendering', 'auto', 'important');
+          htmlElement.style.setProperty('-webkit-font-smoothing', 'auto', 'important');
+          htmlElement.style.setProperty('-moz-osx-font-smoothing', 'auto', 'important');
+
+          // Remove any transform that might hide text
+          htmlElement.style.setProperty('transform', 'none', 'important');
+          htmlElement.style.setProperty('filter', 'none', 'important');
+
+          // Ensure padding/margin don't hide text
+          htmlElement.style.setProperty('padding', '12px', 'important');
+          htmlElement.style.setProperty('margin', '0', 'important');
+
+          // Force focus to make text visible
+          if ((htmlElement as HTMLTextAreaElement).value && (htmlElement as HTMLTextAreaElement).value.length > 0) {
+            setTimeout(() => {
+              htmlElement.focus();
+              htmlElement.blur();
+              htmlElement.focus();
+              // Try to select and unselect to force text rendering
+              (htmlElement as HTMLTextAreaElement).setSelectionRange(0, 0);
+              setTimeout(() => {
+                const valueLength = (htmlElement as HTMLTextAreaElement).value.length;
+                (htmlElement as HTMLTextAreaElement).setSelectionRange(valueLength, valueLength);
+              }, 10);
+            }, 100);
+          }
 
           foundElements++;
         });
@@ -215,7 +266,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       console.log('✅ Applied text visibility styles to', foundElements, 'elements');
 
-      // Check if there are any hidden textareas or inputs
+      // Check if there are any overlaying elements that might hide the text
       const allTextInputs = document.querySelectorAll('textarea, input[type="text"]');
       console.log('🔍 Total text inputs found on page:', allTextInputs.length);
       allTextInputs.forEach((input, index) => {
