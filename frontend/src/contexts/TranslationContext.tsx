@@ -560,7 +560,19 @@ const vietnameseTranslations: Translations = {
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
 export const TranslationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<'en' | 'vi'>('en');
+  const [language, setLanguage] = useState<'en' | 'vi'>(() => {
+    // Check localStorage or default to Vietnamese
+    const saved = localStorage.getItem('language');
+    if (saved !== null && (saved === 'en' || saved === 'vi')) {
+      return saved as 'en' | 'vi';
+    }
+    return 'vi'; // Default to Vietnamese instead of English
+  });
+
+  // Save language preference to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
 
   const t = (key: string): string => {
     if (language === 'vi' && vietnameseTranslations[key]) {
