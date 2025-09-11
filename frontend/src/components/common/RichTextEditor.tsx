@@ -436,6 +436,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         
         .rich-text-editor .w-md-editor-text {
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        .rich-text-editor .w-md-editor-text .w-md-editor-text-input {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        .rich-text-editor .w-md-editor-text .w-md-editor-text-textarea {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
         
         .rich-text-editor .wmde-markdown {
@@ -450,6 +459,79 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         
         .rich-text-editor .w-md-editor-toolbar-divider {
           background-color: ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
+        }
+        
+        /* Fix toolbar button colors */
+        .rich-text-editor .w-md-editor-toolbar button {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        .rich-text-editor .w-md-editor-toolbar button:hover {
+          background-color: ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
+        }
+        
+        /* Fix preview text colors */
+        .rich-text-editor .wmde-markdown-var {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        /* Ensure all text in editor is visible */
+        .rich-text-editor .CodeMirror {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+        }
+        
+        .rich-text-editor .CodeMirror-cursor {
+          border-left: 1px solid ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        .rich-text-editor .CodeMirror-line {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        /* Fix placeholder text */
+        .rich-text-editor .w-md-editor-text-textarea::placeholder {
+          color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
+        }
+        
+        /* Fix selection colors */
+        .rich-text-editor .CodeMirror-selected {
+          background-color: ${isDarkMode ? '#374151' : '#DBEAFE'} !important;
+        }
+        
+        /* Fix markdown syntax highlighting */
+        .rich-text-editor .cm-header {
+          color: ${isDarkMode ? '#60A5FA' : '#2563EB'} !important;
+        }
+        
+        .rich-text-editor .cm-strong {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          font-weight: bold;
+        }
+        
+        .rich-text-editor .cm-em {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          font-style: italic;
+        }
+        
+        .rich-text-editor .cm-link {
+          color: ${isDarkMode ? '#60A5FA' : '#2563EB'} !important;
+        }
+        
+        .rich-text-editor .cm-url {
+          color: ${isDarkMode ? '#34D399' : '#059669'} !important;
+        }
+        
+        .rich-text-editor .cm-quote {
+          color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
+          font-style: italic;
+        }
+        
+        .rich-text-editor .cm-code {
+          color: ${isDarkMode ? '#FBBF24' : '#D97706'} !important;
+          background-color: ${isDarkMode ? '#374151' : '#F3F4F6'} !important;
+          padding: 2px 4px;
+          border-radius: 3px;
         }
       `}</style>
     </div>
