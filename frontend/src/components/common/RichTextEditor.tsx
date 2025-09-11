@@ -176,19 +176,59 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         '.w-md-editor textarea'
       ];
 
+      let foundElements = 0;
       selectors.forEach(selector => {
         const elements = document.querySelectorAll(selector);
         elements.forEach((element: Element) => {
           const htmlElement = element as HTMLElement;
+
+          // Debug: Log current computed styles before our changes
+          const computedStyle = window.getComputedStyle(htmlElement);
+          console.log('🔍 Element found:', selector);
+          console.log('📊 Before - Color:', computedStyle.color);
+          console.log('📊 Before - Background:', computedStyle.backgroundColor);
+          console.log('📊 Before - Opacity:', computedStyle.opacity);
+          console.log('📊 Before - Visibility:', computedStyle.visibility);
+          console.log('📊 Before - Display:', computedStyle.display);
+
           // Force styles with maximum priority
-          htmlElement.style.setProperty('color', isDarkMode ? '#FFFFFF !important' : '#000000 !important', 'important');
-          htmlElement.style.setProperty('background-color', isDarkMode ? '#1F2937 !important' : '#FFFFFF !important', 'important');
-          htmlElement.style.setProperty('border-color', isDarkMode ? '#374151 !important' : '#D1D5DB !important', 'important');
+          htmlElement.style.setProperty('color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
+          htmlElement.style.setProperty('background-color', isDarkMode ? '#1F2937' : '#FFFFFF', 'important');
+          htmlElement.style.setProperty('border-color', isDarkMode ? '#374151' : '#D1D5DB', 'important');
 
           // Additional properties to ensure visibility
           htmlElement.style.setProperty('opacity', '1', 'important');
           htmlElement.style.setProperty('visibility', 'visible', 'important');
           htmlElement.style.setProperty('display', 'block', 'important');
+
+          // Debug: Log computed styles after our changes
+          const newComputedStyle = window.getComputedStyle(htmlElement);
+          console.log('✅ After - Color:', newComputedStyle.color);
+          console.log('✅ After - Background:', newComputedStyle.backgroundColor);
+          console.log('✅ After - Opacity:', newComputedStyle.opacity);
+          console.log('✅ After - Visibility:', newComputedStyle.visibility);
+          console.log('✅ After - Display:', newComputedStyle.display);
+
+          // Log all CSS rules affecting this element
+          console.log('🎨 All CSS rules for this element:');
+          const allRules = document.styleSheets;
+          for (let i = 0; i < allRules.length; i++) {
+            try {
+              const sheet = allRules[i] as CSSStyleSheet;
+              if (sheet.cssRules) {
+                for (let j = 0; j < sheet.cssRules.length; j++) {
+                  const rule = sheet.cssRules[j] as CSSStyleRule;
+                  if (rule.selectorText && htmlElement.matches(rule.selectorText)) {
+                    console.log('🎯 Matching rule:', rule.selectorText, rule.style.color, rule.style.backgroundColor);
+                  }
+                }
+              }
+            } catch (e) {
+              // Cross-origin stylesheets might throw errors
+            }
+          }
+
+          foundElements++;
         });
       });
 
@@ -201,7 +241,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       });
 
       // Log for debugging
-      console.log('Applied text visibility styles to', document.querySelectorAll('.rich-text-editor textarea, .w-md-editor-text-textarea').length, 'elements');
+      console.log('Applied text visibility styles to', foundElements, 'elements');
+
+      // Additional debugging: Check if MDEditor specific classes exist
+      const mdEditorElements = document.querySelectorAll('[class*="md-editor"]');
+      console.log('🔧 Found MDEditor elements:', mdEditorElements.length);
+      mdEditorElements.forEach((el, index) => {
+        console.log(`🔧 MDEditor element ${index}:`, el.className);
+        const computedStyle = window.getComputedStyle(el as HTMLElement);
+        console.log(`🔧 MDEditor element ${index} color:`, computedStyle.color);
+        console.log(`🔧 MDEditor element ${index} background:`, computedStyle.backgroundColor);
+      });
     };
 
     // Apply immediately and with delays
