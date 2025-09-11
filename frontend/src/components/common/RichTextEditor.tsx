@@ -156,28 +156,68 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // Force text visibility after component mounts and theme changes
   React.useEffect(() => {
     const forceTextVisibility = () => {
-      const textareas = document.querySelectorAll('.rich-text-editor textarea, .rich-text-editor .w-md-editor-text-textarea');
-      textareas.forEach((textarea: Element) => {
-        const element = textarea as HTMLElement;
-        element.style.color = isDarkMode ? '#F9FAFB' : '#111827';
-        element.style.backgroundColor = isDarkMode ? '#1F2937' : '#FFFFFF';
+      // More aggressive targeting of all possible text elements
+      const textElements = document.querySelectorAll(`
+        .rich-text-editor textarea, 
+        .rich-text-editor .w-md-editor-text-textarea,
+        .rich-text-editor .w-md-editor-text-input,
+        .rich-text-editor .CodeMirror,
+        .rich-text-editor .CodeMirror-line,
+        .rich-text-editor .CodeMirror-scroll,
+        .rich-text-editor .CodeMirror-sizer,
+        .rich-text-editor .w-md-editor-text,
+        .rich-text-editor .wmde-markdown-var
+      `);
+
+      textElements.forEach((element: Element) => {
+        const htmlElement = element as HTMLElement;
+        htmlElement.style.setProperty('color', isDarkMode ? '#F9FAFB' : '#111827', 'important');
+        htmlElement.style.setProperty('background-color', isDarkMode ? '#1F2937' : '#FFFFFF', 'important');
       });
 
-      const codeMirrorElements = document.querySelectorAll('.rich-text-editor .CodeMirror, .rich-text-editor .CodeMirror-line');
-      codeMirrorElements.forEach((element: Element) => {
-        const htmlElement = element as HTMLElement;
-        htmlElement.style.color = isDarkMode ? '#F9FAFB' : '#111827';
-        htmlElement.style.backgroundColor = isDarkMode ? '#1F2937' : '#FFFFFF';
+      // Force caret/cursor visibility
+      const cursors = document.querySelectorAll('.rich-text-editor .CodeMirror-cursor');
+      cursors.forEach((cursor: Element) => {
+        const cursorElement = cursor as HTMLElement;
+        cursorElement.style.setProperty('border-left-color', isDarkMode ? '#F9FAFB' : '#111827', 'important');
+      });
+
+      // Force placeholder text visibility
+      const placeholders = document.querySelectorAll('.rich-text-editor textarea::placeholder');
+      placeholders.forEach((placeholder: Element) => {
+        const placeholderElement = placeholder as HTMLElement;
+        placeholderElement.style.setProperty('color', isDarkMode ? '#9CA3AF' : '#6B7280', 'important');
       });
     };
 
     // Apply styles immediately
     forceTextVisibility();
 
-    // Apply styles after a short delay to catch dynamically created elements
-    const timeout = setTimeout(forceTextVisibility, 100);
+    // Apply styles with multiple delays to catch all dynamically created elements
+    const timeouts = [50, 100, 200, 500, 1000];
+    const timeoutIds = timeouts.map(delay =>
+      setTimeout(forceTextVisibility, delay)
+    );
 
-    return () => clearTimeout(timeout);
+    // Set up a MutationObserver to watch for DOM changes
+    const observer = new MutationObserver(() => {
+      setTimeout(forceTextVisibility, 10);
+    });
+
+    const editorContainer = document.querySelector('.rich-text-editor');
+    if (editorContainer) {
+      observer.observe(editorContainer, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style']
+      });
+    }
+
+    return () => {
+      timeoutIds.forEach(clearTimeout);
+      observer.disconnect();
+    };
   }, [isDarkMode, value]);
 
   // Build commands array
@@ -600,6 +640,35 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         .rich-text-editor .w-md-editor-focus .w-md-editor-text-textarea,
         .rich-text-editor .w-md-editor-focus .w-md-editor-text-input {
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+
+        /* Additional comprehensive text visibility rules */
+        .rich-text-editor .w-md-editor-text-container,
+        .rich-text-editor .w-md-editor-text-container * {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+
+        /* Force visibility on all possible text elements */
+        .rich-text-editor div[data-color-mode] *,
+        .rich-text-editor .wmde-markdown *,
+        .rich-text-editor .w-md-editor-text *,
+        .rich-text-editor textarea,
+        .rich-text-editor input {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+
+        /* Ensure editor area background and borders are visible */
+        .rich-text-editor .w-md-editor-area {
+          border: 1px solid ${isDarkMode ? '#374151' : '#D1D5DB'} !important;
+          border-radius: 6px;
+          overflow: hidden;
+        }
+
+        /* Make sure content is readable when loaded from database */
+        .rich-text-editor .w-md-editor-text-area textarea {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+          caret-color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
       `}</style>
     </div>
