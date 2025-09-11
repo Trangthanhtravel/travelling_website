@@ -213,39 +213,76 @@ const BlogDetail: React.FC = () => {
         </div>
 
         {/* Tags */}
-        {blog.tags && JSON.parse(blog.tags).length > 0 && (
+        {blog.tags && (() => {
+          try {
+            const tags = typeof blog.tags === 'string' ? JSON.parse(blog.tags) : blog.tags;
+            return Array.isArray(tags) && tags.length > 0;
+          } catch {
+            return blog.tags && blog.tags.length > 0;
+          }
+        })() && (
           <div className="mb-8">
             <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-3`}>
               {t('Tags')}
             </h3>
             <div className="flex flex-wrap gap-2">
-              {JSON.parse(blog.tags).map((tag: string, index: number) => (
-                <span
-                  key={index}
-                  className={`${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'} text-sm px-3 py-1 rounded-full`}
-                >
-                  #{tag}
-                </span>
-              ))}
+              {(() => {
+                try {
+                  const tags = typeof blog.tags === 'string' ? JSON.parse(blog.tags) : blog.tags;
+                  return Array.isArray(tags) ? tags.map((tag: string, index: number) => (
+                    <span
+                      key={index}
+                      className={`${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'} text-sm px-3 py-1 rounded-full`}
+                    >
+                      #{tag}
+                    </span>
+                  )) : [];
+                } catch {
+                  // If JSON parsing fails, treat as comma-separated string
+                  const tags = blog.tags.split(',').map(t => t.trim()).filter(t => t);
+                  return tags.map((tag: string, index: number) => (
+                    <span
+                      key={index}
+                      className={`${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'} text-sm px-3 py-1 rounded-full`}
+                    >
+                      #{tag}
+                    </span>
+                  ));
+                }
+              })()}
             </div>
           </div>
         )}
 
         {/* Gallery */}
-        {blog.gallery && blog.gallery.length > 0 && (
+        {blog.gallery && (() => {
+          try {
+            const gallery = typeof blog.gallery === 'string' ? JSON.parse(blog.gallery) : blog.gallery;
+            return Array.isArray(gallery) && gallery.length > 0;
+          } catch {
+            return false;
+          }
+        })() && (
           <div className="mb-8">
             <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-3`}>
               {t('Gallery')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {blog.gallery.map((image: string, index: number) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Gallery ${index + 1}`}
-                  className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                />
-              ))}
+              {(() => {
+                try {
+                  const gallery = typeof blog.gallery === 'string' ? JSON.parse(blog.gallery) : blog.gallery;
+                  return Array.isArray(gallery) ? gallery.map((image: string, index: number) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`Gallery image ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                    />
+                  )) : [];
+                } catch {
+                  return [];
+                }
+              })()}
             </div>
           </div>
         )}

@@ -217,16 +217,39 @@ const Blogs: React.FC = () => {
 
                 <div className="p-6">
                   {/* Categories */}
-                  {blog.categories && JSON.parse(blog.categories).length > 0 && (
+                  {blog.categories && (() => {
+                    try {
+                      const categories = typeof blog.categories === 'string' ? JSON.parse(blog.categories) : blog.categories;
+                      return Array.isArray(categories) && categories.length > 0;
+                    } catch {
+                      return false;
+                    }
+                  })() && (
                     <div className="flex flex-wrap gap-2 mb-3">
-                      {JSON.parse(blog.categories).slice(0, 2).map((category: string, index: number) => (
-                        <span
-                          key={index}
-                          className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
-                        >
-                          {category}
-                        </span>
-                      ))}
+                      {(() => {
+                        try {
+                          const categories = typeof blog.categories === 'string' ? JSON.parse(blog.categories) : blog.categories;
+                          return Array.isArray(categories) ? categories.slice(0, 2).map((category: string, index: number) => (
+                            <span
+                              key={index}
+                              className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                            >
+                              {category}
+                            </span>
+                          )) : [];
+                        } catch {
+                          // If JSON parsing fails, treat as comma-separated string
+                          const categories = blog.categories.split(',').map(c => c.trim()).filter(c => c);
+                          return categories.slice(0, 2).map((category: string, index: number) => (
+                            <span
+                              key={index}
+                              className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                            >
+                              {category}
+                            </span>
+                          ));
+                        }
+                      })()}
                     </div>
                   )}
 
