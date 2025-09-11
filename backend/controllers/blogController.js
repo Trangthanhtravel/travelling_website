@@ -10,16 +10,25 @@ const getFeaturedBlogs = async (req, res) => {
 
     const { limit = 3, language = 'en' } = req.query;
 
-    const query = `
+    let query = `
       SELECT b.*, u.name as author_name, u.email as author_email
       FROM blogs b
       LEFT JOIN users u ON b.author = u.id
-      WHERE b.status = 'published' AND b.featured = 1 AND b.language = ?
-      ORDER BY b.created_at DESC
-      LIMIT ?
+      WHERE b.status = 'published' AND b.featured = 1
     `;
 
-    const result = await db.prepare(query).bind(language, parseInt(limit)).all();
+    // Modify language filtering to be more flexible
+    if (language === 'vi') {
+      // For Vietnamese, show blogs that have Vietnamese content OR have language = 'vi'
+      query += ` AND (b.language = 'vi' OR (b.title_vi IS NOT NULL AND b.title_vi != '') OR (b.content_vi IS NOT NULL AND b.content_vi != ''))`;
+    } else {
+      // For English, show blogs that don't have language = 'vi' OR have English content
+      query += ` AND (b.language != 'vi' OR b.language IS NULL OR b.language = 'en')`;
+    }
+
+    query += ` ORDER BY b.created_at DESC LIMIT ?`;
+
+    const result = await db.prepare(query).bind(parseInt(limit)).all();
 
     console.log('Featured blogs query result:', result); // Debug log
 
@@ -85,9 +94,14 @@ const getBlogs = async (req, res) => {
     const conditions = [];
     const params = [];
 
-    // Add language filter
-    conditions.push('b.language = ?');
-    params.push(language);
+    // Modify language filtering to be more flexible
+    if (language === 'vi') {
+      // For Vietnamese, show blogs that have Vietnamese content OR have language = 'vi'
+      conditions.push(`(b.language = 'vi' OR (b.title_vi IS NOT NULL AND b.title_vi != '') OR (b.content_vi IS NOT NULL AND b.content_vi != ''))`);
+    } else {
+      // For English, show blogs that don't have language = 'vi' OR have English content
+      conditions.push(`(b.language != 'vi' OR b.language IS NULL OR b.language = 'en')`);
+    }
 
     // Only show published blogs for non-admin users
     if (req.user?.role !== 'admin') {
@@ -208,14 +222,37 @@ const getBlogBySlug = async (req, res) => {
     const { slug } = req.params;
     const { language = 'en' } = req.query;
 
-    const query = `
+    // First try to find exact match with language
+    let query = `
       SELECT b.*, u.name as author_name, u.email as author_email
       FROM blogs b
       LEFT JOIN users u ON b.author = u.id
       WHERE b.slug = ? AND b.language = ? AND (b.status = 'published' OR ? = 'admin')
     `;
 
-    const result = await db.prepare(query).bind(slug, language, req.user?.role || '').first();
+    let result = await db.prepare(query).bind(slug, language, req.user?.role || '').first();
+
+    // If not found and language is Vietnamese, try to find blogs with Vietnamese content
+    if (!result && language === 'vi') {
+      query = `
+        SELECT b.*, u.name as author_name, u.email as author_email
+        FROM blogs b
+        LEFT JOIN users u ON b.author = u.id
+        WHERE b.slug = ? AND ((b.title_vi IS NOT NULL AND b.title_vi != '') OR (b.content_vi IS NOT NULL AND b.content_vi != '')) AND (b.status = 'published' OR ? = 'admin')
+      `;
+      result = await db.prepare(query).bind(slug, req.user?.role || '').first();
+    }
+
+    // If still not found, try to find any blog with this slug
+    if (!result) {
+      query = `
+        SELECT b.*, u.name as author_name, u.email as author_email
+        FROM blogs b
+        LEFT JOIN users u ON b.author = u.id
+        WHERE b.slug = ? AND (b.status = 'published' OR ? = 'admin')
+      `;
+      result = await db.prepare(query).bind(slug, req.user?.role || '').first();
+    }
 
     if (!result) {
       return res.status(404).json({ success: false, message: 'Blog not found' });

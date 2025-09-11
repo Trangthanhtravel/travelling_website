@@ -120,16 +120,42 @@ const BlogDetail: React.FC = () => {
         {/* Header */}
         <header className="mb-8">
           {/* Categories */}
-          {blog.categories && JSON.parse(blog.categories).length > 0 && (
+          {blog.categories && (
             <div className="flex flex-wrap gap-2 mb-4">
-              {JSON.parse(blog.categories).map((category: string, index: number) => (
-                <span
-                  key={index}
-                  className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
-                >
-                  {category}
-                </span>
-              ))}
+              {(() => {
+                try {
+                  // Try to parse as JSON first
+                  const categories = typeof blog.categories === 'string'
+                    ? (blog.categories.startsWith('[') || blog.categories.startsWith('{')
+                        ? JSON.parse(blog.categories)
+                        : blog.categories.split(',').map(cat => cat.trim()).filter(cat => cat)
+                      )
+                    : blog.categories;
+
+                  const categoryArray = Array.isArray(categories) ? categories : [categories];
+
+                  return categoryArray.map((category: string, index: number) => (
+                    <span
+                      key={index}
+                      className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
+                    >
+                      {category}
+                    </span>
+                  ));
+                } catch (error) {
+                  console.error('Error parsing categories:', error);
+                  // Fallback: treat as comma-separated string
+                  const categories = blog.categories.toString().split(',').map(cat => cat.trim()).filter(cat => cat);
+                  return categories.map((category: string, index: number) => (
+                    <span
+                      key={index}
+                      className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
+                    >
+                      {category}
+                    </span>
+                  ));
+                }
+              })()}
             </div>
           )}
 
