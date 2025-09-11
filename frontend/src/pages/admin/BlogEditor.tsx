@@ -415,16 +415,135 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                           ? 'bg-gray-700 border-gray-600'
                           : 'bg-gray-50 border-gray-300'
                       }`}>
-                        <div className={`prose max-w-none ${
+                        <div className={`prose prose-lg max-w-none ${
                           isDarkMode 
-                            ? 'prose-invert prose-headings:text-white prose-p:text-gray-300' 
-                            : 'prose-gray'
+                            ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-primary-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-gray-800 prose-blockquote:border-primary-500 prose-blockquote:text-gray-300' 
+                            : 'prose-gray prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary-600 prose-strong:text-gray-900 prose-blockquote:border-primary-500'
                         }`}>
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw]}
+                            components={{
+                              img: ({ src, alt }) => (
+                                <img
+                                  src={src}
+                                  alt={alt}
+                                  className="w-full rounded-lg shadow-md my-6"
+                                />
+                              ),
+                              a: ({ href, children }) => (
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`${isDarkMode ? 'text-primary-400 hover:text-primary-300' : 'text-primary-600 hover:text-primary-700'} transition-colors duration-200`}
+                                >
+                                  {children}
+                                </a>
+                              ),
+                              h1: ({ children }) => (
+                                <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-8 mb-4`}>
+                                  {children}
+                                </h1>
+                              ),
+                              h2: ({ children }) => (
+                                <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-6 mb-3`}>
+                                  {children}
+                                </h2>
+                              ),
+                              h3: ({ children }) => (
+                                <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-5 mb-2`}>
+                                  {children}
+                                </h3>
+                              ),
+                              h4: ({ children }) => (
+                                <h4 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-4 mb-2`}>
+                                  {children}
+                                </h4>
+                              ),
+                              h5: ({ children }) => (
+                                <h5 className={`text-base font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-3 mb-2`}>
+                                  {children}
+                                </h5>
+                              ),
+                              h6: ({ children }) => (
+                                <h6 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-3 mb-2`}>
+                                  {children}
+                                </h6>
+                              ),
+                              p: ({ children }) => (
+                                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'} leading-relaxed mb-4`}>
+                                  {children}
+                                </p>
+                              ),
+                              blockquote: ({ children }) => (
+                                <blockquote className={`border-l-4 ${isDarkMode ? 'border-primary-500 bg-gray-800' : 'border-primary-500 bg-gray-50'} pl-4 py-2 my-6 italic`}>
+                                  <div className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
+                                    {children}
+                                  </div>
+                                </blockquote>
+                              ),
+                              ul: ({ children }) => (
+                                <ul className={`list-disc list-inside mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  {children}
+                                </ul>
+                              ),
+                              ol: ({ children }) => (
+                                <ol className={`list-decimal list-inside mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  {children}
+                                </ol>
+                              ),
+                              li: ({ children }) => (
+                                <li className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  {children}
+                                </li>
+                              ),
+                              code: ({ inline, children, ...props }: any) => (
+                                inline ? (
+                                  <code className={`px-1 py-0.5 rounded text-sm ${isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'}`}>
+                                    {children}
+                                  </code>
+                                ) : (
+                                  <code className={`block p-4 rounded-lg text-sm ${isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'}`}>
+                                    {children}
+                                  </code>
+                                )
+                              ),
+                              pre: ({ children }) => (
+                                <pre className={`p-4 rounded-lg overflow-x-auto mb-4 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                  {children}
+                                </pre>
+                              ),
+                              table: ({ children }) => (
+                                <div className="overflow-x-auto mb-4">
+                                  <table className={`min-w-full border ${isDarkMode ? 'border-gray-700' : 'border-gray-300'}`}>
+                                    {children}
+                                  </table>
+                                </div>
+                              ),
+                              th: ({ children }) => (
+                                <th className={`border px-4 py-2 text-left font-semibold ${isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-gray-300 bg-gray-50 text-gray-900'}`}>
+                                  {children}
+                                </th>
+                              ),
+                              td: ({ children }) => (
+                                <td className={`border px-4 py-2 ${isDarkMode ? 'border-gray-700 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                                  {children}
+                                </td>
+                              ),
+                              strong: ({ children }) => (
+                                <strong className={isDarkMode ? 'text-white font-bold' : 'text-gray-900 font-bold'}>
+                                  {children}
+                                </strong>
+                              ),
+                              em: ({ children }) => (
+                                <em className={isDarkMode ? 'text-gray-300 italic' : 'text-gray-700 italic'}>
+                                  {children}
+                                </em>
+                              ),
+                            }}
                           >
-                            {getCurrentContent()}
+                            {getCurrentContent() || t('No content')}
                           </ReactMarkdown>
                         </div>
                       </div>
@@ -582,14 +701,133 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                 </p>
 
                 {/* Content Preview with Image Support */}
-                <div className={`prose max-w-none ${
+                <div className={`prose prose-lg max-w-none ${
                   isDarkMode 
-                    ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-img:rounded-lg' 
-                    : 'prose-gray prose-img:rounded-lg'
+                    ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-primary-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-gray-800 prose-blockquote:border-primary-500 prose-blockquote:text-gray-300' 
+                    : 'prose-gray prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary-600 prose-strong:text-gray-900 prose-blockquote:border-primary-500'
                 }`}>
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeRaw]}
+                    components={{
+                      img: ({ src, alt }) => (
+                        <img
+                          src={src}
+                          alt={alt}
+                          className="w-full rounded-lg shadow-md my-6"
+                        />
+                      ),
+                      a: ({ href, children }) => (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`${isDarkMode ? 'text-primary-400 hover:text-primary-300' : 'text-primary-600 hover:text-primary-700'} transition-colors duration-200`}
+                        >
+                          {children}
+                        </a>
+                      ),
+                      h1: ({ children }) => (
+                        <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-8 mb-4`}>
+                          {children}
+                        </h1>
+                      ),
+                      h2: ({ children }) => (
+                        <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-6 mb-3`}>
+                          {children}
+                        </h2>
+                      ),
+                      h3: ({ children }) => (
+                        <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-5 mb-2`}>
+                          {children}
+                        </h3>
+                      ),
+                      h4: ({ children }) => (
+                        <h4 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-4 mb-2`}>
+                          {children}
+                        </h4>
+                      ),
+                      h5: ({ children }) => (
+                        <h5 className={`text-base font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-3 mb-2`}>
+                          {children}
+                        </h5>
+                      ),
+                      h6: ({ children }) => (
+                        <h6 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mt-3 mb-2`}>
+                          {children}
+                        </h6>
+                      ),
+                      p: ({ children }) => (
+                        <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'} leading-relaxed mb-4`}>
+                          {children}
+                        </p>
+                      ),
+                      blockquote: ({ children }) => (
+                        <blockquote className={`border-l-4 ${isDarkMode ? 'border-primary-500 bg-gray-800' : 'border-primary-500 bg-gray-50'} pl-4 py-2 my-6 italic`}>
+                          <div className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
+                            {children}
+                          </div>
+                        </blockquote>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className={`list-disc list-inside mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {children}
+                        </ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className={`list-decimal list-inside mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {children}
+                        </ol>
+                      ),
+                      li: ({ children }) => (
+                        <li className={`mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {children}
+                        </li>
+                      ),
+                      code: ({ inline, children, ...props }: any) => (
+                        inline ? (
+                          <code className={`px-1 py-0.5 rounded text-sm ${isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'}`}>
+                            {children}
+                          </code>
+                        ) : (
+                          <code className={`block p-4 rounded-lg text-sm ${isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'}`}>
+                            {children}
+                          </code>
+                        )
+                      ),
+                      pre: ({ children }) => (
+                        <pre className={`p-4 rounded-lg overflow-x-auto mb-4 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                          {children}
+                        </pre>
+                      ),
+                      table: ({ children }) => (
+                        <div className="overflow-x-auto mb-4">
+                          <table className={`min-w-full border ${isDarkMode ? 'border-gray-700' : 'border-gray-300'}`}>
+                            {children}
+                          </table>
+                        </div>
+                      ),
+                      th: ({ children }) => (
+                        <th className={`border px-4 py-2 text-left font-semibold ${isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-gray-300 bg-gray-50 text-gray-900'}`}>
+                          {children}
+                        </th>
+                      ),
+                      td: ({ children }) => (
+                        <td className={`border px-4 py-2 ${isDarkMode ? 'border-gray-700 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                          {children}
+                        </td>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className={isDarkMode ? 'text-white font-bold' : 'text-gray-900 font-bold'}>
+                          {children}
+                        </strong>
+                      ),
+                      em: ({ children }) => (
+                        <em className={isDarkMode ? 'text-gray-300 italic' : 'text-gray-700 italic'}>
+                          {children}
+                        </em>
+                      ),
+                    }}
                   >
                     {getCurrentContent() || t('No content')}
                   </ReactMarkdown>
