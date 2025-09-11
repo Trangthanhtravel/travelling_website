@@ -153,72 +153,110 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onChange(val || '');
   };
 
-  // Force text visibility after component mounts and theme changes
+  // Force text visibility with more aggressive approach
   React.useEffect(() => {
     const forceTextVisibility = () => {
-      // More aggressive targeting of all possible text elements
-      const textElements = document.querySelectorAll(`
-        .rich-text-editor textarea, 
-        .rich-text-editor .w-md-editor-text-textarea,
-        .rich-text-editor .w-md-editor-text-input,
-        .rich-text-editor .CodeMirror,
-        .rich-text-editor .CodeMirror-line,
-        .rich-text-editor .CodeMirror-scroll,
-        .rich-text-editor .CodeMirror-sizer,
-        .rich-text-editor .w-md-editor-text,
-        .rich-text-editor .wmde-markdown-var
-      `);
+      // Target all possible text input elements with more specific selectors
+      const selectors = [
+        '.rich-text-editor textarea',
+        '.rich-text-editor .w-md-editor-text-textarea',
+        '.rich-text-editor .w-md-editor-text-input',
+        '.rich-text-editor .w-md-editor-text',
+        '.rich-text-editor .w-md-editor-text-container',
+        '.rich-text-editor .CodeMirror',
+        '.rich-text-editor .CodeMirror-scroll',
+        '.rich-text-editor .CodeMirror-sizer',
+        '.rich-text-editor .CodeMirror-lines',
+        '.rich-text-editor .CodeMirror-line',
+        '.rich-text-editor .CodeMirror-code',
+        '.rich-text-editor .wmde-markdown',
+        '.rich-text-editor .wmde-markdown-var',
+        '.w-md-editor-text-textarea',
+        'textarea[data-color-mode]',
+        '.w-md-editor textarea'
+      ];
 
-      textElements.forEach((element: Element) => {
-        const htmlElement = element as HTMLElement;
-        htmlElement.style.setProperty('color', isDarkMode ? '#F9FAFB' : '#111827', 'important');
-        htmlElement.style.setProperty('background-color', isDarkMode ? '#1F2937' : '#FFFFFF', 'important');
+      selectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement;
+          // Force styles with maximum priority
+          htmlElement.style.setProperty('color', isDarkMode ? '#FFFFFF !important' : '#000000 !important', 'important');
+          htmlElement.style.setProperty('background-color', isDarkMode ? '#1F2937 !important' : '#FFFFFF !important', 'important');
+          htmlElement.style.setProperty('border-color', isDarkMode ? '#374151 !important' : '#D1D5DB !important', 'important');
+
+          // Additional properties to ensure visibility
+          htmlElement.style.setProperty('opacity', '1', 'important');
+          htmlElement.style.setProperty('visibility', 'visible', 'important');
+          htmlElement.style.setProperty('display', 'block', 'important');
+        });
       });
 
-      // Force caret/cursor visibility
-      const cursors = document.querySelectorAll('.rich-text-editor .CodeMirror-cursor');
+      // Force cursor visibility
+      const cursors = document.querySelectorAll('.CodeMirror-cursor, .w-md-editor-text-textarea, textarea');
       cursors.forEach((cursor: Element) => {
         const cursorElement = cursor as HTMLElement;
-        cursorElement.style.setProperty('border-left-color', isDarkMode ? '#F9FAFB' : '#111827', 'important');
+        cursorElement.style.setProperty('caret-color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
+        cursorElement.style.setProperty('border-left-color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
       });
 
-      // Force placeholder text visibility
-      const placeholders = document.querySelectorAll('.rich-text-editor textarea::placeholder');
-      placeholders.forEach((placeholder: Element) => {
-        const placeholderElement = placeholder as HTMLElement;
-        placeholderElement.style.setProperty('color', isDarkMode ? '#9CA3AF' : '#6B7280', 'important');
-      });
+      // Log for debugging
+      console.log('Applied text visibility styles to', document.querySelectorAll('.rich-text-editor textarea, .w-md-editor-text-textarea').length, 'elements');
     };
 
-    // Apply styles immediately
+    // Apply immediately and with delays
     forceTextVisibility();
+    const timeouts = [10, 50, 100, 250, 500, 1000, 2000];
+    const timeoutIds = timeouts.map(delay => setTimeout(forceTextVisibility, delay));
 
-    // Apply styles with multiple delays to catch all dynamically created elements
-    const timeouts = [50, 100, 200, 500, 1000];
-    const timeoutIds = timeouts.map(delay =>
-      setTimeout(forceTextVisibility, delay)
-    );
-
-    // Set up a MutationObserver to watch for DOM changes
-    const observer = new MutationObserver(() => {
-      setTimeout(forceTextVisibility, 10);
+    // Watch for DOM changes more aggressively
+    const observer = new MutationObserver((mutations) => {
+      let shouldUpdate = false;
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+          shouldUpdate = true;
+        }
+      });
+      if (shouldUpdate) {
+        setTimeout(forceTextVisibility, 5);
+      }
     });
 
-    const editorContainer = document.querySelector('.rich-text-editor');
-    if (editorContainer) {
-      observer.observe(editorContainer, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class', 'style']
-      });
-    }
+    // Observe the entire document for changes
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'data-color-mode']
+    });
 
     return () => {
       timeoutIds.forEach(clearTimeout);
       observer.disconnect();
     };
   }, [isDarkMode, value]);
+
+  // Additional effect to handle focus events
+  React.useEffect(() => {
+    const handleFocus = () => {
+      setTimeout(() => {
+        const textareas = document.querySelectorAll('.rich-text-editor textarea, .w-md-editor-text-textarea');
+        textareas.forEach((textarea: Element) => {
+          const element = textarea as HTMLElement;
+          element.style.setProperty('color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
+          element.style.setProperty('background-color', isDarkMode ? '#1F2937' : '#FFFFFF', 'important');
+        });
+      }, 10);
+    };
+
+    document.addEventListener('focusin', handleFocus);
+    document.addEventListener('click', handleFocus);
+
+    return () => {
+      document.removeEventListener('focusin', handleFocus);
+      document.removeEventListener('click', handleFocus);
+    };
+  }, [isDarkMode]);
 
   // Build commands array
   const editorCommands = [
@@ -488,34 +526,125 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </p>
       </div>
 
-      {/* Custom styles */}
+      {/* Ultra-aggressive CSS to force text visibility */}
       <style>{`
-        /* Root editor container */
-        .rich-text-editor .w-md-editor {
+        /* Global overrides with maximum specificity */
+        .rich-text-editor * {
+          box-sizing: border-box !important;
+        }
+        
+        .rich-text-editor .w-md-editor,
+        .rich-text-editor .w-md-editor *,
+        .rich-text-editor .w-md-editor textarea,
+        .rich-text-editor .w-md-editor .w-md-editor-text,
+        .rich-text-editor .w-md-editor .w-md-editor-text-textarea,
+        .rich-text-editor .w-md-editor .w-md-editor-text-input,
+        .rich-text-editor .w-md-editor .CodeMirror,
+        .rich-text-editor .w-md-editor .CodeMirror *,
+        .rich-text-editor .w-md-editor .CodeMirror-scroll,
+        .rich-text-editor .w-md-editor .CodeMirror-sizer,
+        .rich-text-editor .w-md-editor .CodeMirror-lines,
+        .rich-text-editor .w-md-editor .CodeMirror-line,
+        .rich-text-editor .w-md-editor .CodeMirror-line span,
+        .rich-text-editor .w-md-editor .CodeMirror-code,
+        .rich-text-editor textarea,
+        textarea.w-md-editor-text-textarea,
+        .w-md-editor-text-textarea,
+        .w-md-editor textarea,
+        div[data-color-mode] textarea,
+        div[data-color-mode] .w-md-editor-text-textarea {
+          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+          border-color: ${isDarkMode ? '#374151' : '#D1D5DB'} !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          font-size: 14px !important;
+          line-height: 1.6 !important;
+          font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+          caret-color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+        }
+        
+        /* Specific targeting for the main editor area */
+        .rich-text-editor .w-md-editor .w-md-editor-text {
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
-        /* Main text area - most important for DB content visibility */
-        .rich-text-editor .w-md-editor-text-input,
-        .rich-text-editor .w-md-editor-text-textarea,
-        .rich-text-editor textarea.w-md-editor-text-textarea {
+        .rich-text-editor .w-md-editor .w-md-editor-text .w-md-editor-text-textarea {
+          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           border: 1px solid ${isDarkMode ? '#374151' : '#D1D5DB'} !important;
+          padding: 12px !important;
+          resize: none !important;
+          outline: none !important;
+          font-weight: normal !important;
+        }
+        
+        .rich-text-editor .w-md-editor .w-md-editor-text .w-md-editor-text-textarea:focus {
+          border-color: ${isDarkMode ? '#60A5FA' : '#3B82F6'} !important;
+          box-shadow: 0 0 0 1px ${isDarkMode ? '#60A5FA' : '#3B82F6'} !important;
+        }
+        
+        /* CodeMirror overrides */
+        .rich-text-editor .CodeMirror {
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
           font-size: 14px !important;
           line-height: 1.6 !important;
         }
         
-        /* Text container */
-        .rich-text-editor .w-md-editor-text {
+        .rich-text-editor .CodeMirror-scroll {
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+        }
+        
+        .rich-text-editor .CodeMirror-sizer,
+        .rich-text-editor .CodeMirror-lines,
+        .rich-text-editor .CodeMirror-code {
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+        }
+        
+        .rich-text-editor .CodeMirror-line,
+        .rich-text-editor .CodeMirror-line span {
+          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          background-color: transparent !important;
+        }
+        
+        .rich-text-editor .CodeMirror-cursor {
+          border-left: 1px solid ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          border-right: none !important;
+          width: 0 !important;
+        }
+        
+        .rich-text-editor .CodeMirror-selected {
+          background-color: ${isDarkMode ? '#374151' : '#DBEAFE'} !important;
+        }
+        
+        /* Placeholder text */
+        .rich-text-editor .w-md-editor-text-textarea::placeholder,
+        .rich-text-editor textarea::placeholder {
+          color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
+          opacity: 0.8 !important;
+        }
+        
+        /* Toolbar styling */
+        .rich-text-editor .w-md-editor .w-md-editor-toolbar {
+          background-color: ${isDarkMode ? '#374151' : '#F9FAFB'} !important;
+          border-bottom: 1px solid ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
+        }
+        
+        .rich-text-editor .w-md-editor .w-md-editor-toolbar button {
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
         
-        /* Nested text elements */
-        .rich-text-editor .w-md-editor-text .w-md-editor-text-input,
-        .rich-text-editor .w-md-editor-text .w-md-editor-text-textarea {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        .rich-text-editor .w-md-editor .w-md-editor-toolbar button:hover {
+          background-color: ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
+        }
+        
+        /* Editor container */
+        .rich-text-editor .w-md-editor {
+          border: 1px solid ${isDarkMode ? '#374151' : '#D1D5DB'} !important;
+          border-radius: 6px !important;
+          overflow: hidden !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
@@ -523,87 +652,48 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         .rich-text-editor .wmde-markdown {
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          padding: 12px !important;
         }
         
-        /* Toolbar */
-        .rich-text-editor .w-md-editor-toolbar {
-          background-color: ${isDarkMode ? '#374151' : '#F9FAFB'} !important;
-          border-bottom: 1px solid ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
-        }
-        
-        .rich-text-editor .w-md-editor-toolbar-divider {
-          background-color: ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
-        }
-        
-        /* Toolbar buttons */
-        .rich-text-editor .w-md-editor-toolbar button {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-        }
-        
-        .rich-text-editor .w-md-editor-toolbar button:hover {
-          background-color: ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
-        }
-        
-        /* CodeMirror specific targeting - this is crucial for DB content */
-        .rich-text-editor .CodeMirror,
-        .rich-text-editor .CodeMirror .CodeMirror-scroll,
-        .rich-text-editor .CodeMirror .CodeMirror-sizer {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        /* Force visibility on focus */
+        .rich-text-editor .w-md-editor-focus .w-md-editor-text-textarea,
+        .rich-text-editor .w-md-editor-focus textarea {
+          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
-        .rich-text-editor .CodeMirror-cursor {
-          border-left: 1px solid ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        /* Additional fallback selectors */
+        .rich-text-editor [data-color-mode="${isDarkMode ? 'dark' : 'light'}"] textarea,
+        .rich-text-editor [data-color-mode="${isDarkMode ? 'dark' : 'light'}"] .w-md-editor-text-textarea {
+          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
-        .rich-text-editor .CodeMirror-line,
-        .rich-text-editor .CodeMirror-line span {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        /* Make sure no element has transparent or same-as-background color */
+        .rich-text-editor * {
+          color: inherit !important;
         }
         
-        /* All text nodes in editor */
-        .rich-text-editor .w-md-editor-text * {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-        }
-        
-        /* Specific textarea targeting */
+        .rich-text-editor input,
         .rich-text-editor textarea {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
-        /* Input elements */
-        .rich-text-editor input[type="text"] {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
-        }
-        
-        /* Placeholder text */
-        .rich-text-editor .w-md-editor-text-textarea::placeholder,
-        .rich-text-editor textarea::placeholder {
-          color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
-          opacity: 0.7;
-        }
-        
-        /* Selection colors */
-        .rich-text-editor .CodeMirror-selected,
-        .rich-text-editor ::selection {
-          background-color: ${isDarkMode ? '#374151' : '#DBEAFE'} !important;
-        }
-        
-        /* Markdown syntax highlighting */
+        /* Markdown syntax highlighting with good contrast */
         .rich-text-editor .cm-header {
           color: ${isDarkMode ? '#60A5FA' : '#2563EB'} !important;
+          font-weight: bold !important;
         }
         
         .rich-text-editor .cm-strong {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-          font-weight: bold;
+          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          font-weight: bold !important;
         }
         
         .rich-text-editor .cm-em {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-          font-style: italic;
+          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          font-style: italic !important;
         }
         
         .rich-text-editor .cm-link {
@@ -616,59 +706,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         
         .rich-text-editor .cm-quote {
           color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
-          font-style: italic;
+          font-style: italic !important;
         }
         
         .rich-text-editor .cm-code {
           color: ${isDarkMode ? '#FBBF24' : '#D97706'} !important;
           background-color: ${isDarkMode ? '#374151' : '#F3F4F6'} !important;
-          padding: 2px 4px;
-          border-radius: 3px;
-        }
-        
-        /* Force text visibility for any remaining elements */
-        .rich-text-editor [data-color-mode="${isDarkMode ? 'dark' : 'light'}"] {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-        }
-        
-        /* MDEditor internal classes */
-        .rich-text-editor .wmde-markdown-var {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-        }
-        
-        /* Additional targeting for stubborn elements */
-        .rich-text-editor .w-md-editor-focus .w-md-editor-text-textarea,
-        .rich-text-editor .w-md-editor-focus .w-md-editor-text-input {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-        }
-
-        /* Additional comprehensive text visibility rules */
-        .rich-text-editor .w-md-editor-text-container,
-        .rich-text-editor .w-md-editor-text-container * {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-        }
-
-        /* Force visibility on all possible text elements */
-        .rich-text-editor div[data-color-mode] *,
-        .rich-text-editor .wmde-markdown *,
-        .rich-text-editor .w-md-editor-text *,
-        .rich-text-editor textarea,
-        .rich-text-editor input {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-        }
-
-        /* Ensure editor area background and borders are visible */
-        .rich-text-editor .w-md-editor-area {
-          border: 1px solid ${isDarkMode ? '#374151' : '#D1D5DB'} !important;
-          border-radius: 6px;
-          overflow: hidden;
-        }
-
-        /* Make sure content is readable when loaded from database */
-        .rich-text-editor .w-md-editor-text-area textarea {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
-          caret-color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          padding: 2px 4px !important;
+          border-radius: 3px !important;
         }
       `}</style>
     </div>
