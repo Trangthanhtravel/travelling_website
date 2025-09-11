@@ -378,22 +378,22 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
             Content Editor
           </span>
           {hasMarkdownSyntax(value) && (
-            <span className="text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 px-2 py-1 rounded">
+            <span className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-blue-900/20 text-blue-400' : 'bg-blue-100 text-blue-800'}`}>
               Markdown Detected
             </span>
           )}
           {enableImageUpload && (
-            <span className="text-xs bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 px-2 py-1 rounded">
+            <span className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-green-900/20 text-green-400' : 'bg-green-100 text-green-800'}`}>
               Image Upload Enabled
             </span>
           )}
           {isUploadingImage && (
-            <span className="text-xs bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400 px-2 py-1 rounded flex items-center">
-              <div className="animate-spin rounded-full h-3 w-3 border-b border-yellow-600 mr-1"></div>
+            <span className={`text-xs px-2 py-1 rounded flex items-center ${isDarkMode ? 'bg-yellow-900/20 text-yellow-400' : 'bg-yellow-100 text-yellow-800'}`}>
+              <div className={`animate-spin rounded-full h-3 w-3 border-b mr-1 ${isDarkMode ? 'border-yellow-400' : 'border-yellow-600'}`}></div>
               Uploading...
             </span>
           )}
@@ -406,7 +406,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             className={`px-3 py-1 text-xs rounded transition-colors ${
               mode === 'edit'
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                : `${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
             }`}
           >
             Edit
@@ -417,7 +417,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             className={`px-3 py-1 text-xs rounded transition-colors ${
               mode === 'live'
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                : `${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
             }`}
           >
             Live
@@ -428,7 +428,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             className={`px-3 py-1 text-xs rounded transition-colors ${
               mode === 'preview'
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                : `${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
             }`}
           >
             Preview
@@ -595,13 +595,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       </div>
 
       {/* Help text */}
-      <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+      <div className={`mt-2 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
         <p>
-          💡 <strong>Tips:</strong> Use the toolbar for formatting, or type markdown directly.
-          Supports **bold**, *italic*, [links](url), images, lists, and more!
+          💡 <strong className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>Tips:</strong> Use the toolbar for formatting, or type markdown directly.
+          Supports <strong className={isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}>**bold**</strong>, <em className={isDarkMode ? 'text-amber-400' : 'text-amber-600'}>*italic*</em>, <span className={isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}>[links](url)</span>, images, lists, and more!
           {enableImageUpload && (
             <span className="block mt-1">
-              📷 <strong>Images:</strong> Click the upload icon in the toolbar or drag & drop images directly into the editor.
+              📷 <strong className={isDarkMode ? 'text-green-400' : 'text-green-600'}>Images:</strong> Click the upload icon in the toolbar or drag & drop images directly into the editor.
             </span>
           )}
         </p>
