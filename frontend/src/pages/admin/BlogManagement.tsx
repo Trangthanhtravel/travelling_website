@@ -39,7 +39,8 @@ const BlogManagement: React.FC = () => {
   const [filterLanguage, setFilterLanguage] = useState<'all' | 'en' | 'vi'>('all');
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const { isDarkMode } = useTheme();
+  const [currentDisplayLanguage, setCurrentDisplayLanguage] = useState<'en' | 'vi' | 'both'>('both'); // Add display language toggle
+  const { theme } = useTheme();
   const { t, language } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -192,12 +193,12 @@ const BlogManagement: React.FC = () => {
   }
 
   return (
-    <div className={`p-6 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+    <div className={`p-6 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">{t('Blog Management')}</h1>
-          <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+          <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
             {t('Manage your blog posts and content')}
           </p>
         </div>
@@ -211,19 +212,19 @@ const BlogManagement: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4 mb-6`}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4 mb-6`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Search */}
           <div className="lg:col-span-2">
             <div className="relative">
-              <Icon icon={Icons.FiSearch} className={`absolute left-3 top-3 h-4 w-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+              <Icon icon={Icons.FiSearch} className={`absolute left-3 top-3 h-4 w-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
               <input
                 type="text"
                 placeholder={t('Search blogs...')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    isDarkMode 
+                  theme === 'dark' 
                     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                     : 'bg-white border-gray-300 text-gray-900'
                 }`}
@@ -236,7 +237,7 @@ const BlogManagement: React.FC = () => {
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as any)}
             className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDarkMode 
+              theme === 'dark' 
                 ? 'bg-gray-700 border-gray-600 text-white' 
                 : 'bg-white border-gray-300 text-gray-900'
             }`}
@@ -252,7 +253,7 @@ const BlogManagement: React.FC = () => {
             value={filterFeatured}
             onChange={(e) => setFilterFeatured(e.target.value as any)}
             className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDarkMode
+              theme === 'dark'
                 ? 'bg-gray-700 border-gray-600 text-white' 
                 : 'bg-white border-gray-300 text-gray-900'
             }`}
@@ -267,7 +268,7 @@ const BlogManagement: React.FC = () => {
             value={filterLanguage}
             onChange={(e) => setFilterLanguage(e.target.value as any)}
             className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDarkMode 
+              theme === 'dark' 
                 ? 'bg-gray-700 border-gray-600 text-white' 
                 : 'bg-white border-gray-300 text-gray-900'
             }`}
@@ -275,6 +276,22 @@ const BlogManagement: React.FC = () => {
             <option value="all">{t('All Languages')}</option>
             <option value="en">{t('English')}</option>
             <option value="vi">{t('Vietnamese')}</option>
+          </select>
+
+          {/* Display Language Toggle */}
+          <select
+            value={currentDisplayLanguage}
+            onChange={(e) => setCurrentDisplayLanguage(e.target.value as 'en' | 'vi' | 'both')}
+            className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              theme === 'dark' 
+                ? 'bg-gray-700 border-gray-600 text-white' 
+                : 'bg-white border-gray-300 text-gray-900'
+            }`}
+            title={t('Choose which language content to display in the table')}
+          >
+            <option value="both">{t('Show Both Languages')}</option>
+            <option value="en">{t('Show English Only')}</option>
+            <option value="vi">{t('Show Vietnamese Only')}</option>
           </select>
         </div>
       </div>
@@ -288,10 +305,10 @@ const BlogManagement: React.FC = () => {
 
       {/* Blogs Table */}
       {!isLoading && (
-        <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow overflow-hidden`}>
+        <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow overflow-hidden`}>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+              <thead className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('Blog')}
@@ -316,9 +333,9 @@ const BlogManagement: React.FC = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
+              <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
                 {blogs.map((blog: Blog) => (
-                  <tr key={blog.id} className={`${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition-colors`}>
+                  <tr key={blog.id} className={`${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition-colors`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         {blog.featured_image && (
@@ -328,17 +345,47 @@ const BlogManagement: React.FC = () => {
                             className="h-10 w-10 rounded-lg object-cover mr-3"
                           />
                         )}
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center">
-                            <div className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                              {blog.title}
+                            <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                              {/* Enhanced bilingual title display */}
+                              {currentDisplayLanguage === 'both' ? (
+                                <div className="space-y-1">
+                                  <div className="flex items-center">
+                                    <span className="text-xs bg-blue-100 text-blue-800 px-1 rounded mr-2">EN</span>
+                                    <span>{blog.title}</span>
+                                  </div>
+                                  {blog.title_vi && (
+                                    <div className="flex items-center">
+                                      <span className="text-xs bg-red-100 text-red-800 px-1 rounded mr-2">VI</span>
+                                      <span>{blog.title_vi}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : currentDisplayLanguage === 'vi' && blog.title_vi ? (
+                                blog.title_vi
+                              ) : (
+                                blog.title
+                              )}
                             </div>
                             {blog.featured && (
                               <Icon icon={Icons.FiStar} className="h-4 w-4 text-yellow-400 ml-2" />
                             )}
                           </div>
-                          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} truncate max-w-xs`}>
-                            {blog.excerpt}
+                          <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} truncate max-w-xs mt-1`}>
+                            {/* Enhanced bilingual excerpt display */}
+                            {currentDisplayLanguage === 'both' ? (
+                              <div className="space-y-1">
+                                <div className="truncate">{blog.excerpt}</div>
+                                {blog.excerpt_vi && (
+                                  <div className="truncate text-xs">{blog.excerpt_vi}</div>
+                                )}
+                              </div>
+                            ) : currentDisplayLanguage === 'vi' && blog.excerpt_vi ? (
+                              blog.excerpt_vi
+                            ) : (
+                              blog.excerpt
+                            )}
                           </div>
                         </div>
                       </div>
@@ -357,7 +404,7 @@ const BlogManagement: React.FC = () => {
                         value={blog.status}
                         onChange={(e) => handleStatusChange(blog, e.target.value)}
                         className={`text-xs font-semibold rounded-full px-2 py-1 border-0 ${getStatusBadge(blog.status)} ${
-                            isDarkMode ? 'bg-opacity-20' : ''
+                          theme === 'dark' ? 'bg-opacity-20' : ''
                         }`}
                         disabled={updateStatusMutation.isPending}
                       >
@@ -385,7 +432,7 @@ const BlogManagement: React.FC = () => {
                         <button
                           onClick={() => handleToggleFeatured(blog)}
                           className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                            blog.featured ? 'text-yellow-600' : isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                            blog.featured ? 'text-yellow-600' : theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                           }`}
                           title={blog.featured ? t('Remove from featured') : t('Add to featured')}
                           disabled={toggleFeaturedMutation.isPending}
@@ -394,7 +441,7 @@ const BlogManagement: React.FC = () => {
                         </button>
                         <button
                           onClick={() => handleEdit(blog)}
-                          className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
+                          className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
                           title={t('Edit blog')}
                         >
                           <Icon icon={Icons.FiEdit2} className="h-4 w-4" />
@@ -418,11 +465,11 @@ const BlogManagement: React.FC = () => {
           {/* Empty State */}
           {blogs.length === 0 && (
             <div className="text-center py-12">
-              <Icon icon={Icons.FiFileText} className={`h-12 w-12 mx-auto ${isDarkMode ? 'text-gray-600' : 'text-gray-400'} mb-4`} />
-              <h3 className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
+              <Icon icon={Icons.FiFileText} className={`h-12 w-12 mx-auto ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'} mb-4`} />
+              <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-2`}>
                 {t('No blogs found')}
               </h3>
-              <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mb-4`}>
+              <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} mb-4`}>
                 {t('Get started by creating your first blog post.')}
               </p>
               <button
