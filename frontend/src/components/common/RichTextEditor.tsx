@@ -153,6 +153,33 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onChange(val || '');
   };
 
+  // Force text visibility after component mounts and theme changes
+  React.useEffect(() => {
+    const forceTextVisibility = () => {
+      const textareas = document.querySelectorAll('.rich-text-editor textarea, .rich-text-editor .w-md-editor-text-textarea');
+      textareas.forEach((textarea: Element) => {
+        const element = textarea as HTMLElement;
+        element.style.color = isDarkMode ? '#F9FAFB' : '#111827';
+        element.style.backgroundColor = isDarkMode ? '#1F2937' : '#FFFFFF';
+      });
+
+      const codeMirrorElements = document.querySelectorAll('.rich-text-editor .CodeMirror, .rich-text-editor .CodeMirror-line');
+      codeMirrorElements.forEach((element: Element) => {
+        const htmlElement = element as HTMLElement;
+        htmlElement.style.color = isDarkMode ? '#F9FAFB' : '#111827';
+        htmlElement.style.backgroundColor = isDarkMode ? '#1F2937' : '#FFFFFF';
+      });
+    };
+
+    // Apply styles immediately
+    forceTextVisibility();
+
+    // Apply styles after a short delay to catch dynamically created elements
+    const timeout = setTimeout(forceTextVisibility, 100);
+
+    return () => clearTimeout(timeout);
+  }, [isDarkMode, value]);
+
   // Build commands array
   const editorCommands = [
     // Basic formatting
@@ -423,35 +450,42 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       {/* Custom styles */}
       <style>{`
+        /* Root editor container */
         .rich-text-editor .w-md-editor {
-          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'};
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
+        /* Main text area - most important for DB content visibility */
         .rich-text-editor .w-md-editor-text-input,
-        .rich-text-editor .w-md-editor-text-textarea {
+        .rich-text-editor .w-md-editor-text-textarea,
+        .rich-text-editor textarea.w-md-editor-text-textarea {
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           border: 1px solid ${isDarkMode ? '#374151' : '#D1D5DB'} !important;
+          font-size: 14px !important;
+          line-height: 1.6 !important;
         }
         
+        /* Text container */
         .rich-text-editor .w-md-editor-text {
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
         
-        .rich-text-editor .w-md-editor-text .w-md-editor-text-input {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-        }
-        
+        /* Nested text elements */
+        .rich-text-editor .w-md-editor-text .w-md-editor-text-input,
         .rich-text-editor .w-md-editor-text .w-md-editor-text-textarea {
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
+        /* Preview area */
         .rich-text-editor .wmde-markdown {
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
         
+        /* Toolbar */
         .rich-text-editor .w-md-editor-toolbar {
           background-color: ${isDarkMode ? '#374151' : '#F9FAFB'} !important;
           border-bottom: 1px solid ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
@@ -461,7 +495,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           background-color: ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
         }
         
-        /* Fix toolbar button colors */
+        /* Toolbar buttons */
         .rich-text-editor .w-md-editor-toolbar button {
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
@@ -470,13 +504,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           background-color: ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
         }
         
-        /* Fix preview text colors */
-        .rich-text-editor .wmde-markdown-var {
-          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
-        }
-        
-        /* Ensure all text in editor is visible */
-        .rich-text-editor .CodeMirror {
+        /* CodeMirror specific targeting - this is crucial for DB content */
+        .rich-text-editor .CodeMirror,
+        .rich-text-editor .CodeMirror .CodeMirror-scroll,
+        .rich-text-editor .CodeMirror .CodeMirror-sizer {
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
@@ -485,21 +516,42 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           border-left: 1px solid ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
         
-        .rich-text-editor .CodeMirror-line {
+        .rich-text-editor .CodeMirror-line,
+        .rich-text-editor .CodeMirror-line span {
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
         
-        /* Fix placeholder text */
-        .rich-text-editor .w-md-editor-text-textarea::placeholder {
-          color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
+        /* All text nodes in editor */
+        .rich-text-editor .w-md-editor-text * {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
         
-        /* Fix selection colors */
-        .rich-text-editor .CodeMirror-selected {
+        /* Specific textarea targeting */
+        .rich-text-editor textarea {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+        }
+        
+        /* Input elements */
+        .rich-text-editor input[type="text"] {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+          background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+        }
+        
+        /* Placeholder text */
+        .rich-text-editor .w-md-editor-text-textarea::placeholder,
+        .rich-text-editor textarea::placeholder {
+          color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
+          opacity: 0.7;
+        }
+        
+        /* Selection colors */
+        .rich-text-editor .CodeMirror-selected,
+        .rich-text-editor ::selection {
           background-color: ${isDarkMode ? '#374151' : '#DBEAFE'} !important;
         }
         
-        /* Fix markdown syntax highlighting */
+        /* Markdown syntax highlighting */
         .rich-text-editor .cm-header {
           color: ${isDarkMode ? '#60A5FA' : '#2563EB'} !important;
         }
@@ -532,6 +584,22 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           background-color: ${isDarkMode ? '#374151' : '#F3F4F6'} !important;
           padding: 2px 4px;
           border-radius: 3px;
+        }
+        
+        /* Force text visibility for any remaining elements */
+        .rich-text-editor [data-color-mode="${isDarkMode ? 'dark' : 'light'}"] {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        /* MDEditor internal classes */
+        .rich-text-editor .wmde-markdown-var {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        /* Additional targeting for stubborn elements */
+        .rich-text-editor .w-md-editor-focus .w-md-editor-text-textarea,
+        .rich-text-editor .w-md-editor-focus .w-md-editor-text-input {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
       `}</style>
     </div>
