@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import { Icon, Icons } from '../components/common/Icons';
 import AnimatedCounter from '../components/common/AnimatedCounter';
-import PlaneLoading from '../components/common/PlaneLoading';
+import LottieLoading from '../components/common/LottieLoading';
 import { useQuery } from '@tanstack/react-query';
 import { toursAPI, servicesAPI } from '../utils/api';
 
@@ -280,7 +280,7 @@ const Home: React.FC = () => {
       <section className="relative h-screen overflow-hidden">
         {heroLoading ? (
           <div className={`absolute inset-0 flex items-center justify-center ${isDarkMode ? 'bg-dark-900' : 'bg-gray-100'}`}>
-            <PlaneLoading message={t('Preparing your journey...')} />
+            <LottieLoading message={t('Preparing your journey...')} />
           </div>
         ) : (
           <div className="absolute inset-0">
