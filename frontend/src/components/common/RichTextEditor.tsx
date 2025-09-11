@@ -634,7 +634,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         .w-md-editor textarea,
         div[data-color-mode] textarea,
         div[data-color-mode] .w-md-editor-text-textarea {
-          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
           border-color: ${isDarkMode ? '#374151' : '#D1D5DB'} !important;
           opacity: 1 !important;
@@ -642,7 +642,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           font-size: 14px !important;
           line-height: 1.6 !important;
           font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-          caret-color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          caret-color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
         
         /* Specific targeting for the main editor area */
@@ -651,7 +651,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         }
         
         .rich-text-editor .w-md-editor .w-md-editor-text .w-md-editor-text-textarea {
-          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
           border: 1px solid ${isDarkMode ? '#374151' : '#D1D5DB'} !important;
           padding: 12px !important;
@@ -668,7 +668,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         /* CodeMirror overrides */
         .rich-text-editor .CodeMirror {
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
-          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
           font-size: 14px !important;
           line-height: 1.6 !important;
@@ -686,12 +686,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         
         .rich-text-editor .CodeMirror-line,
         .rich-text-editor .CodeMirror-line span {
-          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           background-color: transparent !important;
         }
         
         .rich-text-editor .CodeMirror-cursor {
-          border-left: 1px solid ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          border-left: 1px solid ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           border-right: none !important;
           width: 0 !important;
         }
@@ -739,14 +739,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         /* Force visibility on focus */
         .rich-text-editor .w-md-editor-focus .w-md-editor-text-textarea,
         .rich-text-editor .w-md-editor-focus textarea {
-          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
         /* Additional fallback selectors */
         .rich-text-editor [data-color-mode="${isDarkMode ? 'dark' : 'light'}"] textarea,
         .rich-text-editor [data-color-mode="${isDarkMode ? 'dark' : 'light'}"] .w-md-editor-text-textarea {
-          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
@@ -757,44 +757,286 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         
         .rich-text-editor input,
         .rich-text-editor textarea {
-          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
-        /* Markdown syntax highlighting with good contrast */
+        /* ===== ENHANCED MARKDOWN SYNTAX HIGHLIGHTING ===== */
+        
+        /* Headers - Different colors for different levels */
+        .rich-text-editor .cm-header-1,
+        .rich-text-editor .token-header-1,
         .rich-text-editor .cm-header {
-          color: ${isDarkMode ? '#60A5FA' : '#2563EB'} !important;
+          color: ${isDarkMode ? '#A78BFA' : '#7C3AED'} !important;
+          font-weight: bold !important;
+          font-size: 1.2em !important;
+        }
+        
+        .rich-text-editor .cm-header-2,
+        .rich-text-editor .token-header-2 {
+          color: ${isDarkMode ? '#818CF8' : '#6366F1'} !important;
+          font-weight: bold !important;
+          font-size: 1.1em !important;
+        }
+        
+        .rich-text-editor .cm-header-3,
+        .rich-text-editor .token-header-3 {
+          color: ${isDarkMode ? '#60A5FA' : '#3B82F6'} !important;
           font-weight: bold !important;
         }
         
-        .rich-text-editor .cm-strong {
-          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+        .rich-text-editor .cm-header-4,
+        .rich-text-editor .cm-header-5,
+        .rich-text-editor .cm-header-6,
+        .rich-text-editor .token-header-4,
+        .rich-text-editor .token-header-5,
+        .rich-text-editor .token-header-6 {
+          color: ${isDarkMode ? '#34D399' : '#059669'} !important;
+          font-weight: semibold !important;
+        }
+        
+        /* Bold and Italic text */
+        .rich-text-editor .cm-strong,
+        .rich-text-editor .token-bold {
+          color: ${isDarkMode ? '#FDE047' : '#CA8A04'} !important;
           font-weight: bold !important;
         }
         
-        .rich-text-editor .cm-em {
-          color: ${isDarkMode ? '#FFFFFF' : '#000000'} !important;
+        .rich-text-editor .cm-em,
+        .rich-text-editor .token-italic {
+          color: ${isDarkMode ? '#FBBF24' : '#D97706'} !important;
           font-style: italic !important;
         }
         
-        .rich-text-editor .cm-link {
-          color: ${isDarkMode ? '#60A5FA' : '#2563EB'} !important;
+        /* Links */
+        .rich-text-editor .cm-link,
+        .rich-text-editor .token-url,
+        .rich-text-editor .cm-url {
+          color: ${isDarkMode ? '#22D3EE' : '#0891B2'} !important;
+          text-decoration: underline !important;
         }
         
-        .rich-text-editor .cm-url {
+        .rich-text-editor .cm-link-text {
+          color: ${isDarkMode ? '#67E8F9' : '#0E7490'} !important;
+        }
+        
+        /* Code - Inline and blocks */
+        .rich-text-editor .cm-code,
+        .rich-text-editor .token-code {
+          color: ${isDarkMode ? '#F472B6' : '#BE185D'} !important;
+          background-color: ${isDarkMode ? '#374151' : '#F3F4F6'} !important;
+          padding: 2px 4px !important;
+          border-radius: 3px !important;
+          font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+        }
+        
+        .rich-text-editor .cm-code-block,
+        .rich-text-editor .token-code-block {
+          color: ${isDarkMode ? '#E879F9' : '#A21CAF'} !important;
+          background-color: ${isDarkMode ? '#374151' : '#F9FAFB'} !important;
+          padding: 8px 12px !important;
+          border-radius: 6px !important;
+          border-left: 4px solid ${isDarkMode ? '#8B5CF6' : '#7C3AED'} !important;
+        }
+        
+        /* Quotes and blockquotes */
+        .rich-text-editor .cm-quote,
+        .rich-text-editor .token-blockquote {
+          color: ${isDarkMode ? '#A3A3A3' : '#6B7280'} !important;
+          font-style: italic !important;
+          border-left: 4px solid ${isDarkMode ? '#6B7280' : '#D1D5DB'} !important;
+          padding-left: 12px !important;
+          margin-left: 4px !important;
+        }
+        
+        /* Lists */
+        .rich-text-editor .cm-variable-2,
+        .rich-text-editor .cm-list,
+        .rich-text-editor .token-list-item {
+          color: ${isDarkMode ? '#FB7185' : '#E11D48'} !important;
+        }
+        
+        .rich-text-editor .cm-list-item {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        /* Images */
+        .rich-text-editor .cm-image,
+        .rich-text-editor .token-image {
+          color: ${isDarkMode ? '#A78BFA' : '#7C3AED'} !important;
+        }
+        
+        /* Special markdown characters and formatting */
+        .rich-text-editor .cm-formatting,
+        .rich-text-editor .cm-formatting-header,
+        .rich-text-editor .cm-formatting-strong,
+        .rich-text-editor .cm-formatting-em,
+        .rich-text-editor .cm-formatting-quote,
+        .rich-text-editor .cm-formatting-code {
+          color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
+          opacity: 0.7 !important;
+        }
+        
+        /* Tables */
+        .rich-text-editor .cm-table,
+        .rich-text-editor .token-table {
           color: ${isDarkMode ? '#34D399' : '#059669'} !important;
         }
         
-        .rich-text-editor .cm-quote {
+        .rich-text-editor .cm-table-header {
+          color: ${isDarkMode ? '#10B981' : '#047857'} !important;
+          font-weight: bold !important;
+        }
+        
+        /* Horizontal rules */
+        .rich-text-editor .cm-hr {
+          color: ${isDarkMode ? '#6B7280' : '#9CA3AF'} !important;
+          border-top: 2px solid ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
+        }
+        
+        /* Strikethrough */
+        .rich-text-editor .cm-strikethrough,
+        .rich-text-editor .token-strikethrough {
+          color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
+          text-decoration: line-through !important;
+        }
+        
+        /* Math expressions (if supported) */
+        .rich-text-editor .cm-math {
+          color: ${isDarkMode ? '#FBBF24' : '#D97706'} !important;
+          background-color: ${isDarkMode ? '#374151' : '#FEF3C7'} !important;
+          border-radius: 3px !important;
+          padding: 1px 3px !important;
+        }
+        
+        /* Tags and mentions */
+        .rich-text-editor .cm-tag {
+          color: ${isDarkMode ? '#FB7185' : '#E11D48'} !important;
+          background-color: ${isDarkMode ? '#374151' : '#FEE2E2'} !important;
+          border-radius: 3px !important;
+          padding: 1px 3px !important;
+        }
+        
+        /* Line numbers (if enabled) */
+        .rich-text-editor .CodeMirror-linenumber {
+          color: ${isDarkMode ? '#6B7280' : '#9CA3AF'} !important;
+          background-color: ${isDarkMode ? '#374151' : '#F9FAFB'} !important;
+        }
+        
+        /* Search highlighting */
+        .rich-text-editor .CodeMirror-search-match {
+          background-color: ${isDarkMode ? '#FBBF24' : '#FEF3C7'} !important;
+          color: ${isDarkMode ? '#111827' : '#92400E'} !important;
+        }
+        
+        /* Fold markers */
+        .rich-text-editor .CodeMirror-foldmarker {
+          color: ${isDarkMode ? '#60A5FA' : '#3B82F6'} !important;
+          background-color: ${isDarkMode ? '#374151' : '#DBEAFE'} !important;
+        }
+        
+        /* Brackets and parentheses */
+        .rich-text-editor .cm-bracket {
+          color: ${isDarkMode ? '#A3A3A3' : '#6B7280'} !important;
+        }
+        
+        /* Matching brackets */
+        .rich-text-editor .CodeMirror-matchingtag {
+          background-color: ${isDarkMode ? '#374151' : '#E5E7EB'} !important;
+        }
+        
+        .rich-text-editor .CodeMirror-matchingbracket {
+          color: ${isDarkMode ? '#22D3EE' : '#0891B2'} !important;
+          background-color: ${isDarkMode ? '#374151' : '#F0F9FF'} !important;
+        }
+        
+        /* Error highlighting */
+        .rich-text-editor .cm-error {
+          color: ${isDarkMode ? '#F87171' : '#DC2626'} !important;
+          background-color: ${isDarkMode ? '#451319' : '#FEE2E2'} !important;
+        }
+        
+        /* Comments (for code blocks) */
+        .rich-text-editor .cm-comment {
           color: ${isDarkMode ? '#9CA3AF' : '#6B7280'} !important;
           font-style: italic !important;
         }
         
-        .rich-text-editor .cm-code {
+        /* Keywords (for code blocks) */
+        .rich-text-editor .cm-keyword {
+          color: ${isDarkMode ? '#A78BFA' : '#7C3AED'} !important;
+          font-weight: bold !important;
+        }
+        
+        /* Variables (for code blocks) */
+        .rich-text-editor .cm-variable {
+          color: ${isDarkMode ? '#34D399' : '#059669'} !important;
+        }
+        
+        /* Numbers */
+        .rich-text-editor .cm-number {
           color: ${isDarkMode ? '#FBBF24' : '#D97706'} !important;
+        }
+        
+        /* Strings */
+        .rich-text-editor .cm-string {
+          color: ${isDarkMode ? '#22D3EE' : '#0891B2'} !important;
+        }
+        
+        /* Operators */
+        .rich-text-editor .cm-operator {
+          color: ${isDarkMode ? '#F472B6' : '#BE185D'} !important;
+        }
+        
+        /* Enhanced live preview styling */
+        .rich-text-editor .wmde-markdown h1,
+        .rich-text-editor .wmde-markdown h2,
+        .rich-text-editor .wmde-markdown h3,
+        .rich-text-editor .wmde-markdown h4,
+        .rich-text-editor .wmde-markdown h5,
+        .rich-text-editor .wmde-markdown h6 {
+          color: ${isDarkMode ? '#A78BFA' : '#7C3AED'} !important;
+        }
+        
+        .rich-text-editor .wmde-markdown p {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        .rich-text-editor .wmde-markdown a {
+          color: ${isDarkMode ? '#22D3EE' : '#0891B2'} !important;
+        }
+        
+        .rich-text-editor .wmde-markdown code {
+          color: ${isDarkMode ? '#F472B6' : '#BE185D'} !important;
           background-color: ${isDarkMode ? '#374151' : '#F3F4F6'} !important;
-          padding: 2px 4px !important;
-          border-radius: 3px !important;
+        }
+        
+        .rich-text-editor .wmde-markdown pre {
+          background-color: ${isDarkMode ? '#374151' : '#F9FAFB'} !important;
+          border: 1px solid ${isDarkMode ? '#4B5563' : '#E5E7EB'} !important;
+        }
+        
+        .rich-text-editor .wmde-markdown blockquote {
+          border-left: 4px solid ${isDarkMode ? '#6B7280' : '#D1D5DB'} !important;
+          color: ${isDarkMode ? '#A3A3A3' : '#6B7280'} !important;
+          background-color: ${isDarkMode ? '#374151' : '#F9FAFB'} !important;
+        }
+        
+        .rich-text-editor .wmde-markdown ul,
+        .rich-text-editor .wmde-markdown ol {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        .rich-text-editor .wmde-markdown li {
+          color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
+        }
+        
+        .rich-text-editor .wmde-markdown strong {
+          color: ${isDarkMode ? '#FDE047' : '#CA8A04'} !important;
+        }
+        
+        .rich-text-editor .wmde-markdown em {
+          color: ${isDarkMode ? '#FBBF24' : '#D97706'} !important;
         }
       `}</style>
     </div>
