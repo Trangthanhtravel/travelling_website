@@ -155,22 +155,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   // Force text visibility with more aggressive approach
   React.useEffect(() => {
+    let isApplyingStyles = false; // Prevent infinite loops
+
     const forceTextVisibility = () => {
+      if (isApplyingStyles) return;
+      isApplyingStyles = true;
+
       // Target all possible text input elements with more specific selectors
       const selectors = [
         '.rich-text-editor textarea',
         '.rich-text-editor .w-md-editor-text-textarea',
         '.rich-text-editor .w-md-editor-text-input',
-        '.rich-text-editor .w-md-editor-text',
-        '.rich-text-editor .w-md-editor-text-container',
-        '.rich-text-editor .CodeMirror',
-        '.rich-text-editor .CodeMirror-scroll',
-        '.rich-text-editor .CodeMirror-sizer',
-        '.rich-text-editor .CodeMirror-lines',
-        '.rich-text-editor .CodeMirror-line',
-        '.rich-text-editor .CodeMirror-code',
-        '.rich-text-editor .wmde-markdown',
-        '.rich-text-editor .wmde-markdown-var',
         '.w-md-editor-text-textarea',
         'textarea[data-color-mode]',
         '.w-md-editor textarea'
@@ -182,14 +177,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         elements.forEach((element: Element) => {
           const htmlElement = element as HTMLElement;
 
-          // Debug: Log current computed styles before our changes
-          const computedStyle = window.getComputedStyle(htmlElement);
-          console.log('🔍 Element found:', selector);
-          console.log('📊 Before - Color:', computedStyle.color);
-          console.log('📊 Before - Background:', computedStyle.backgroundColor);
-          console.log('📊 Before - Opacity:', computedStyle.opacity);
-          console.log('📊 Before - Visibility:', computedStyle.visibility);
-          console.log('📊 Before - Display:', computedStyle.display);
+          // Debug: Log current computed styles before our changes (only once)
+          if (foundElements === 0) {
+            const computedStyle = window.getComputedStyle(htmlElement);
+            console.log('🔍 Main textarea element found:', selector);
+            console.log('📊 Before - Color:', computedStyle.color);
+            console.log('📊 Before - Background:', computedStyle.backgroundColor);
+            console.log('📊 Element tag:', htmlElement.tagName);
+            console.log('📊 Element type:', htmlElement.getAttribute('type'));
+            console.log('📊 Element value:', (htmlElement as HTMLTextAreaElement).value?.substring(0, 50));
+            console.log('📊 Element placeholder:', (htmlElement as HTMLTextAreaElement).placeholder);
+          }
 
           // Force styles with maximum priority
           htmlElement.style.setProperty('color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
@@ -199,34 +197,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           // Additional properties to ensure visibility
           htmlElement.style.setProperty('opacity', '1', 'important');
           htmlElement.style.setProperty('visibility', 'visible', 'important');
-          htmlElement.style.setProperty('display', 'block', 'important');
-
-          // Debug: Log computed styles after our changes
-          const newComputedStyle = window.getComputedStyle(htmlElement);
-          console.log('✅ After - Color:', newComputedStyle.color);
-          console.log('✅ After - Background:', newComputedStyle.backgroundColor);
-          console.log('✅ After - Opacity:', newComputedStyle.opacity);
-          console.log('✅ After - Visibility:', newComputedStyle.visibility);
-          console.log('✅ After - Display:', newComputedStyle.display);
-
-          // Log all CSS rules affecting this element
-          console.log('🎨 All CSS rules for this element:');
-          const allRules = document.styleSheets;
-          for (let i = 0; i < allRules.length; i++) {
-            try {
-              const sheet = allRules[i] as CSSStyleSheet;
-              if (sheet.cssRules) {
-                for (let j = 0; j < sheet.cssRules.length; j++) {
-                  const rule = sheet.cssRules[j] as CSSStyleRule;
-                  if (rule.selectorText && htmlElement.matches(rule.selectorText)) {
-                    console.log('🎯 Matching rule:', rule.selectorText, rule.style.color, rule.style.backgroundColor);
-                  }
-                }
-              }
-            } catch (e) {
-              // Cross-origin stylesheets might throw errors
-            }
-          }
+          htmlElement.style.setProperty('font-size', '14px', 'important');
+          htmlElement.style.setProperty('line-height', '1.6', 'important');
+          htmlElement.style.setProperty('caret-color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
 
           foundElements++;
         });
@@ -240,45 +213,52 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         cursorElement.style.setProperty('border-left-color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
       });
 
-      // Log for debugging
-      console.log('Applied text visibility styles to', foundElements, 'elements');
+      console.log('✅ Applied text visibility styles to', foundElements, 'elements');
 
-      // Additional debugging: Check if MDEditor specific classes exist
-      const mdEditorElements = document.querySelectorAll('[class*="md-editor"]');
-      console.log('🔧 Found MDEditor elements:', mdEditorElements.length);
-      mdEditorElements.forEach((el, index) => {
-        console.log(`🔧 MDEditor element ${index}:`, el.className);
-        const computedStyle = window.getComputedStyle(el as HTMLElement);
-        console.log(`🔧 MDEditor element ${index} color:`, computedStyle.color);
-        console.log(`🔧 MDEditor element ${index} background:`, computedStyle.backgroundColor);
+      // Check if there are any hidden textareas or inputs
+      const allTextInputs = document.querySelectorAll('textarea, input[type="text"]');
+      console.log('🔍 Total text inputs found on page:', allTextInputs.length);
+      allTextInputs.forEach((input, index) => {
+        const computedStyle = window.getComputedStyle(input as HTMLElement);
+        if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden' || computedStyle.opacity === '0') {
+          console.log(`🚨 Hidden input ${index}:`, input, computedStyle.display, computedStyle.visibility, computedStyle.opacity);
+        }
       });
+
+      setTimeout(() => {
+        isApplyingStyles = false;
+      }, 100);
     };
 
     // Apply immediately and with delays
     forceTextVisibility();
-    const timeouts = [10, 50, 100, 250, 500, 1000, 2000];
+    const timeouts = [100, 500, 1000];
     const timeoutIds = timeouts.map(delay => setTimeout(forceTextVisibility, delay));
 
-    // Watch for DOM changes more aggressively
+    // Reduced MutationObserver scope to prevent infinite loops
     const observer = new MutationObserver((mutations) => {
+      if (isApplyingStyles) return;
+
       let shouldUpdate = false;
       mutations.forEach((mutation) => {
-        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          // Only trigger on new elements being added
           shouldUpdate = true;
         }
       });
+
       if (shouldUpdate) {
-        setTimeout(forceTextVisibility, 5);
+        setTimeout(forceTextVisibility, 50);
       }
     });
 
-    // Observe the entire document for changes
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style', 'data-color-mode']
-    });
+    const editorContainer = document.querySelector('.rich-text-editor');
+    if (editorContainer) {
+      observer.observe(editorContainer, {
+        childList: true,
+        subtree: true
+      });
+    }
 
     return () => {
       timeoutIds.forEach(clearTimeout);
