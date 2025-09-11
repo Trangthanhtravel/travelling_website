@@ -600,6 +600,70 @@ const updateBlogStatus = async (req, res) => {
   }
 };
 
+// Upload featured image to R2
+const uploadFeaturedImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image file provided' });
+    }
+
+    const { getR2Bucket } = require('../config/storage');
+    const { uploadImage } = require('../config/storage').r2Helpers;
+
+    const r2Bucket = getR2Bucket();
+    if (!r2Bucket) {
+      return res.status(500).json({ success: false, message: 'Storage not available' });
+    }
+
+    // Upload to R2 in blogs/featured folder
+    const imageUrl = await uploadImage(r2Bucket, req.file, 'blogs/featured');
+
+    res.json({
+      success: true,
+      data: { imageUrl },
+      message: 'Featured image uploaded successfully'
+    });
+  } catch (error) {
+    console.error('Featured image upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to upload featured image'
+    });
+  }
+};
+
+// Upload content image to R2
+const uploadContentImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image file provided' });
+    }
+
+    const { getR2Bucket } = require('../config/storage');
+    const { uploadImage } = require('../config/storage').r2Helpers;
+
+    const r2Bucket = getR2Bucket();
+    if (!r2Bucket) {
+      return res.status(500).json({ success: false, message: 'Storage not available' });
+    }
+
+    // Upload to R2 in blogs/content folder
+    const imageUrl = await uploadImage(r2Bucket, req.file, 'blogs/content');
+
+    res.json({
+      success: true,
+      data: { imageUrl },
+      message: 'Content image uploaded successfully'
+    });
+  } catch (error) {
+    console.error('Content image upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to upload content image'
+    });
+  }
+};
+
 module.exports = {
   getFeaturedBlogs,
   getBlogs,
@@ -608,5 +672,7 @@ module.exports = {
   createBlog,
   updateBlog,
   deleteBlog,
-  updateBlogStatus
+  updateBlogStatus,
+  uploadFeaturedImage,
+  uploadContentImage
 };

@@ -1,5 +1,74 @@
 const { v4: uuidv4 } = require('uuid');
 
+// Initialize R2 bucket connection
+let r2Bucket = null;
+
+// Initialize R2 bucket
+const initR2 = () => {
+  try {
+    if (!process.env.CLOUDFLARE_ACCOUNT_ID || !process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY || !process.env.R2_BUCKET_NAME) {
+      console.warn('R2 configuration incomplete');
+      return null;
+    }
+
+    const { S3Client } = require('@aws-sdk/client-s3');
+
+    const s3Client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+      },
+    });
+
+    // Create R2 bucket interface
+    r2Bucket = {
+      put: async (key, body, options = {}) => {
+        const { PutObjectCommand } = require('@aws-sdk/client-s3');
+        const command = new PutObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key: key,
+          Body: body,
+          ContentType: options.httpMetadata?.contentType,
+          CacheControl: options.httpMetadata?.cacheControl,
+        });
+        return await s3Client.send(command);
+      },
+      delete: async (key) => {
+        const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
+        const command = new DeleteObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key: key,
+        });
+        return await s3Client.send(command);
+      },
+      head: async (key) => {
+        const { HeadObjectCommand } = require('@aws-sdk/client-s3');
+        const command = new HeadObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key: key,
+        });
+        return await s3Client.send(command);
+      }
+    };
+
+    console.log('R2 bucket initialized successfully');
+    return r2Bucket;
+  } catch (error) {
+    console.error('Failed to initialize R2:', error);
+    return null;
+  }
+};
+
+// Get R2 bucket instance
+const getR2Bucket = () => {
+  if (!r2Bucket) {
+    r2Bucket = initR2();
+  }
+  return r2Bucket;
+};
+
 // R2 Storage helper functions for Cloudflare R2
 const r2Helpers = {
   // Upload image to R2
@@ -133,4 +202,4 @@ const r2Helpers = {
   }
 };
 
-module.exports = { r2Helpers };
+module.exports = { r2Helpers, getR2Bucket, initR2 };

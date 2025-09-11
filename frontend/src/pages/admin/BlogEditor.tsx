@@ -4,6 +4,7 @@ import { Icon, Icons } from '../../components/common/Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTranslation } from '../../contexts/TranslationContext';
 import RichTextEditor from '../../components/common/RichTextEditor';
+import ImageUpload from '../../components/admin/ImageUpload';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -142,6 +143,11 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
     }
 
     setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  // Handle featured image upload
+  const handleFeaturedImageUploaded = (imageUrl: string) => {
+    setFormData(prev => ({ ...prev, featured_image: imageUrl }));
   };
 
   // Handle form field changes
@@ -388,7 +394,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                     />
                   </div>
 
-                  {/* Content */}
+                  {/* Content with Image Upload */}
                   <div>
                     <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                       {t('Content')} *
@@ -399,7 +405,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                           value={currentLanguage === 'en' ? formData.content : formData.content_vi}
                           onChange={(value) => handleFieldChange(currentLanguage === 'en' ? 'content' : 'content_vi', value)}
                           placeholder={t('Write your blog content here...')}
-                          height={384} // Use height prop instead of className
+                          height={384}
+                          enableImageUpload={true}
                         />
                       </div>
                     ) : (
@@ -474,7 +481,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                     </div>
                   </div>
 
-                  {/* Featured */}
+                  {/* Featured checkbox */}
                   <div className="mt-4">
                     <label className="flex items-center">
                       <input
@@ -489,21 +496,16 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                     </label>
                   </div>
 
-                  {/* Featured Image */}
+                  {/* Featured Image Upload */}
                   <div className="mt-4">
                     <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                      {t('Featured Image URL')}
+                      {t('Featured Image')}
                     </label>
-                    <input
-                      type="url"
-                      value={formData.featured_image}
-                      onChange={(e) => handleFieldChange('featured_image', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
-                      placeholder={t('https://example.com/image.jpg')}
+                    <ImageUpload
+                      onImageUploaded={handleFeaturedImageUploaded}
+                      currentImage={formData.featured_image}
+                      uploadType="featured"
+                      className="w-full"
                     />
                   </div>
 
@@ -579,11 +581,11 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                   {currentLanguage === 'en' ? formData.excerpt : formData.excerpt_vi || t('No excerpt')}
                 </p>
 
-                {/* Content Preview */}
+                {/* Content Preview with Image Support */}
                 <div className={`prose max-w-none ${
                   isDarkMode 
-                    ? 'prose-invert prose-headings:text-white prose-p:text-gray-300' 
-                    : 'prose-gray'
+                    ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-img:rounded-lg' 
+                    : 'prose-gray prose-img:rounded-lg'
                 }`}>
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
@@ -593,23 +595,37 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                   </ReactMarkdown>
                 </div>
               </div>
+
+              {/* Image Guidelines */}
+              <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4`}>
+                <h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
+                  📷 {t('Image Guidelines')}
+                </h3>
+                <ul className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} space-y-1`}>
+                  <li>• {t('Featured image: Recommended 1200x630px for best social media sharing')}</li>
+                  <li>• {t('Content images: Will be automatically optimized and stored in R2')}</li>
+                  <li>• {t('Supported formats: JPEG, PNG, WebP (max 5MB each)')}</li>
+                  <li>• {t('Images in content support markdown: ![alt text](url)')}</li>
+                </ul>
+              </div>
             </div>
           </div>
         )}
 
         {activeTab === 'seo' && (
           <div className="p-6">
-            <div className="max-w-2xl">
+            {/* SEO Tab Content */}
+            <div className="max-w-4xl mx-auto space-y-6">
               <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-6`}>
                 <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
                   {t('SEO Settings')} ({currentLanguage === 'en' ? 'English' : 'Tiếng Việt'})
                 </h2>
 
                 <div className="space-y-4">
-                  {/* SEO Title */}
+                  {/* SEO Meta Title */}
                   <div>
                     <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                      {t('SEO Title')}
+                      {t('Meta Title')}
                     </label>
                     <input
                       type="text"
@@ -620,14 +636,18 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                           ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                           : 'bg-white border-gray-300 text-gray-900'
                       }`}
-                      placeholder={t('SEO optimized title for search engines')}
+                      placeholder={t('SEO optimized title (recommended: 50-60 characters)')}
+                      maxLength={60}
                     />
+                    <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {(currentLanguage === 'en' ? formData.seo_meta_title : formData.seo_meta_title_vi).length}/60 {t('characters')}
+                    </p>
                   </div>
 
-                  {/* SEO Description */}
+                  {/* SEO Meta Description */}
                   <div>
                     <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                      {t('SEO Description')}
+                      {t('Meta Description')}
                     </label>
                     <textarea
                       value={currentLanguage === 'en' ? formData.seo_meta_description : formData.seo_meta_description_vi}
@@ -638,8 +658,12 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                           ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                           : 'bg-white border-gray-300 text-gray-900'
                       }`}
-                      placeholder={t('Brief description for search engine results')}
+                      placeholder={t('Brief description for search engines (recommended: 150-160 characters)')}
+                      maxLength={160}
                     />
+                    <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {(currentLanguage === 'en' ? formData.seo_meta_description : formData.seo_meta_description_vi).length}/160 {t('characters')}
+                    </p>
                   </div>
 
                   {/* SEO Keywords (only for English) */}
@@ -657,10 +681,28 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                             : 'bg-white border-gray-300 text-gray-900'
                         }`}
-                        placeholder={t('travel, adventure, vietnam, food (comma separated)')}
+                        placeholder={t('travel, vietnam, culture, adventure (comma separated)')}
                       />
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* SEO Preview */}
+              <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-6`}>
+                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+                  {t('Search Engine Preview')}
+                </h3>
+                <div className="border rounded-lg p-4">
+                  <div className="text-blue-600 hover:underline cursor-pointer text-lg">
+                    {(currentLanguage === 'en' ? formData.seo_meta_title : formData.seo_meta_title_vi) || (currentLanguage === 'en' ? formData.title : formData.title_vi) || t('Your blog title')}
+                  </div>
+                  <div className="text-green-700 text-sm mt-1">
+                    {window.location.origin}/blog/{formData.slug || 'your-blog-slug'}
+                  </div>
+                  <div className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    {(currentLanguage === 'en' ? formData.seo_meta_description : formData.seo_meta_description_vi) || (currentLanguage === 'en' ? formData.excerpt : formData.excerpt_vi) || t('Your blog description will appear here...')}
+                  </div>
                 </div>
               </div>
             </div>
