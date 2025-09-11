@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../components/common/Icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
+import LottieLoading from '../components/common/LottieLoading';
 
 const Services: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -242,17 +243,8 @@ const Services: React.FC = () => {
 
         {/* Services Grid/List */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className={`rounded-lg shadow-lg overflow-hidden ${isDarkMode ? 'bg-dark-800' : 'bg-white'}`}>
-                <div className={`h-48 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} animate-pulse`}></div>
-                <div className="p-6">
-                  <div className={`h-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded mb-2 animate-pulse`}></div>
-                  <div className={`h-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded w-2/3 mb-4 animate-pulse`}></div>
-                  <div className={`h-8 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'} rounded animate-pulse`}></div>
-                </div>
-              </div>
-            ))}
+          <div className="flex justify-center items-center min-h-[400px]">
+            <LottieLoading message={t('Loading our services...')} />
           </div>
         ) : services.length === 0 ? (
           <div className="text-center py-12">

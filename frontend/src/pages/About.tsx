@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import { Icon, Icons } from '../components/common/Icons';
+import LottieLoading from '../components/common/LottieLoading';
 
 const About: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -78,7 +79,7 @@ const About: React.FC = () => {
 
   const featuredCategories = featuredCategoriesData?.data || [];
   const aboutHistory = aboutHistoryData?.data?.content || '';
-  const aboutImage = aboutImageData?.data?.content || 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+  const aboutImage = aboutImageData?.data?.content || '';
   const aboutVision = aboutVisionData?.data?.content || '';
   const aboutMission = aboutMissionData?.data?.content || '';
 
@@ -133,12 +134,8 @@ const About: React.FC = () => {
             {/* Left side - Text Content */}
             <div className="space-y-6">
               {historyLoading ? (
-                <div className="animate-pulse space-y-4">
-                  <div className={`h-4 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
-                  <div className={`h-4 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
-                  <div className={`h-4 rounded w-3/4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
-                  <div className={`h-4 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
-                  <div className={`h-4 rounded w-5/6 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-300'}`}></div>
+                <div className="flex justify-center items-center min-h-[200px]">
+                  <LottieLoading message={t('Loading our story...')} />
                 </div>
               ) : (
                 <div className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>

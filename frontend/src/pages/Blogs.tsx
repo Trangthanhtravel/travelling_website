@@ -6,6 +6,7 @@ import { BlogFilters } from '../types';
 import { blogAPI } from '../utils/api';
 import { useTranslation } from '../contexts/TranslationContext';
 import { useTheme } from '../contexts/ThemeContext';
+import LottieLoading from '../components/common/LottieLoading';
 
 const Blogs: React.FC = () => {
   const { t, language } = useTranslation();
@@ -172,20 +173,8 @@ const Blogs: React.FC = () => {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className={`${isDarkMode ? 'bg-dark-800' : 'bg-white'} rounded-lg shadow-md overflow-hidden animate-pulse border ${isDarkMode ? 'border-dark-600' : 'border-gray-200'}`}>
-                <div className={`h-48 ${isDarkMode ? 'bg-dark-600' : 'bg-gray-300'}`}></div>
-                <div className="p-6">
-                  <div className={`h-4 ${isDarkMode ? 'bg-dark-600' : 'bg-gray-300'} rounded mb-2`}></div>
-                  <div className={`h-4 ${isDarkMode ? 'bg-dark-600' : 'bg-gray-300'} rounded mb-4 w-3/4`}></div>
-                  <div className={`h-3 ${isDarkMode ? 'bg-dark-600' : 'bg-gray-300'} rounded mb-2`}></div>
-                  <div className={`h-3 ${isDarkMode ? 'bg-dark-600' : 'bg-gray-300'} rounded w-1/2`}></div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="flex justify-center items-center min-h-[400px]">
+          <LottieLoading message={t('Loading travel stories...')} />
         </div>
       )}
 

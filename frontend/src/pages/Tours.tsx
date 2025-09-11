@@ -6,6 +6,7 @@ import { useTranslation } from '../contexts/TranslationContext';
 import { toursAPI } from '../utils/api';
 import { Tour, TourFilters } from '../types';
 import { Icon, Icons } from '../components/common/Icons';
+import LottieLoading from '../components/common/LottieLoading';
 
 const Tours: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -332,17 +333,8 @@ const Tours: React.FC = () => {
 
             {/* Loading State */}
             {isLoading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, index) => (
-                  <div key={index} className={`rounded-xl shadow-lg animate-pulse ${isDarkMode ? 'bg-dark-800' : 'bg-light-50'}`}>
-                    <div className={`h-48 rounded-t-xl ${isDarkMode ? 'bg-dark-700' : 'bg-light-200'}`}></div>
-                    <div className="p-6">
-                      <div className={`h-4 rounded mb-2 ${isDarkMode ? 'bg-dark-700' : 'bg-light-200'}`}></div>
-                      <div className={`h-6 rounded mb-4 ${isDarkMode ? 'bg-dark-700' : 'bg-light-200'}`}></div>
-                      <div className={`h-4 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-light-200'}`}></div>
-                    </div>
-                  </div>
-                ))}
+              <div className="flex justify-center items-center min-h-[400px]">
+                <LottieLoading message={t('Loading amazing tours...')} />
               </div>
             )}
 
