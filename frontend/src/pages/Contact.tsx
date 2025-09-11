@@ -55,11 +55,11 @@ const Contact: React.FC = () => {
     <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
+        <div className="bg-accent-orange text-center mb-16">
+          <h1 className={`text-4xl md:text-5xl font-bold mb-6 text-light-text-primary`}>
             {t('Get in Touch')}
           </h1>
-          <p className={`text-xl max-w-3xl mx-auto ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
+          <p className={`text-xl max-w-3xl mx-auto text-light-text-muted`}>
             {t('We are always ready to help you plan the perfect trip. Contact us today!')}
           </p>
         </div>
