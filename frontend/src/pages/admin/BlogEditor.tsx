@@ -278,7 +278,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                   : `${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}`
               }`}
             >
-              <Icon icon={Icons.FiEye} className="h-4 w-4 mr-2" />
+              <Icon icon={Icons.FiEye} className="h-4 w-4" />
               {isPreviewMode ? t('Edit') : t('Preview')}
             </button>
 
