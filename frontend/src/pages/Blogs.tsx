@@ -227,7 +227,7 @@ const Blogs: React.FC = () => {
 
                       {/* Read more button */}
                       <Link
-                        to={`/blogs/${blog.slug}`}
+                        to={`/blog/${blog.slug}`}
                         className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
                       >
                         {t('Read More')}
