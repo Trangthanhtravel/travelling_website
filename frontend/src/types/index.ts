@@ -210,4 +210,5 @@ export interface BlogFilters {
     limit?: number;
     sortBy?: 'created_at' | 'published_at' | 'views' | 'title';
     sortOrder?: 'asc' | 'desc';
+    language?: 'en' | 'vi'; // Add language property
 }

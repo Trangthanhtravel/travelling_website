@@ -8,23 +8,29 @@ const getFeaturedBlogs = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Database not available' });
     }
 
-    const { limit = 3 } = req.query;
+    const { limit = 3, language = 'en' } = req.query;
 
     const query = `
       SELECT b.*, u.name as author_name, u.email as author_email
       FROM blogs b
       LEFT JOIN users u ON b.author = u.id
-      WHERE b.status = 'published' AND b.featured = 1
+      WHERE b.status = 'published' AND b.featured = 1 AND b.language = ?
       ORDER BY b.created_at DESC
       LIMIT ?
     `;
 
-    const result = await db.prepare(query).bind(parseInt(limit)).all();
+    const result = await db.prepare(query).bind(language, parseInt(limit)).all();
 
     console.log('Featured blogs query result:', result); // Debug log
 
     const blogs = result.results?.map(blog => ({
       ...blog,
+      // Return bilingual fields based on language
+      title: language === 'vi' && blog.title_vi ? blog.title_vi : blog.title,
+      content: language === 'vi' && blog.content_vi ? blog.content_vi : blog.content,
+      excerpt: language === 'vi' && blog.excerpt_vi ? blog.excerpt_vi : blog.excerpt,
+      seo_meta_title: language === 'vi' && blog.seo_meta_title_vi ? blog.seo_meta_title_vi : blog.seo_meta_title,
+      seo_meta_description: language === 'vi' && blog.seo_meta_description_vi ? blog.seo_meta_description_vi : blog.seo_meta_description,
       categories: blog.categories ? (typeof blog.categories === 'string' ? blog.categories : JSON.stringify(blog.categories)) : '',
       tags: blog.tags ? (typeof blog.tags === 'string' ? blog.tags : JSON.stringify(blog.tags)) : '',
       gallery: blog.gallery ? JSON.parse(blog.gallery) : [],
@@ -66,7 +72,8 @@ const getBlogs = async (req, res) => {
       limit = 12,
       sortBy = 'created_at',
       sortOrder = 'desc',
-      featured
+      featured,
+      language = 'en'
     } = req.query;
 
     let query = `
@@ -77,6 +84,10 @@ const getBlogs = async (req, res) => {
 
     const conditions = [];
     const params = [];
+
+    // Add language filter
+    conditions.push('b.language = ?');
+    params.push(language);
 
     // Only show published blogs for non-admin users
     if (req.user?.role !== 'admin') {
@@ -98,9 +109,16 @@ const getBlogs = async (req, res) => {
     }
 
     if (search) {
-      conditions.push('(b.title LIKE ? OR b.excerpt LIKE ? OR b.content LIKE ?)');
-      const searchTerm = `%${search}%`;
-      params.push(searchTerm, searchTerm, searchTerm);
+      // Search in both English and Vietnamese fields
+      if (language === 'vi') {
+        conditions.push('(b.title_vi LIKE ? OR b.excerpt_vi LIKE ? OR b.content_vi LIKE ? OR b.title LIKE ? OR b.excerpt LIKE ? OR b.content LIKE ?)');
+        const searchTerm = `%${search}%`;
+        params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+      } else {
+        conditions.push('(b.title LIKE ? OR b.excerpt LIKE ? OR b.content LIKE ?)');
+        const searchTerm = `%${search}%`;
+        params.push(searchTerm, searchTerm, searchTerm);
+      }
     }
 
     if (category) {
@@ -143,9 +161,15 @@ const getBlogs = async (req, res) => {
     const countResult = await db.prepare(countQuery).bind(...countParams).first();
     const total = countResult?.total || 0;
 
-    // Process results
+    // Process results with bilingual support
     const blogs = result.results?.map(blog => ({
       ...blog,
+      // Return bilingual fields based on language
+      title: language === 'vi' && blog.title_vi ? blog.title_vi : blog.title,
+      content: language === 'vi' && blog.content_vi ? blog.content_vi : blog.content,
+      excerpt: language === 'vi' && blog.excerpt_vi ? blog.excerpt_vi : blog.excerpt,
+      seo_meta_title: language === 'vi' && blog.seo_meta_title_vi ? blog.seo_meta_title_vi : blog.seo_meta_title,
+      seo_meta_description: language === 'vi' && blog.seo_meta_description_vi ? blog.seo_meta_description_vi : blog.seo_meta_description,
       categories: blog.categories ? (typeof blog.categories === 'string' ? blog.categories : JSON.stringify(blog.categories)) : '',
       tags: blog.tags ? (typeof blog.tags === 'string' ? blog.tags : JSON.stringify(blog.tags)) : '',
       gallery: blog.gallery ? JSON.parse(blog.gallery) : [],
@@ -182,15 +206,16 @@ const getBlogBySlug = async (req, res) => {
     }
 
     const { slug } = req.params;
+    const { language = 'en' } = req.query;
 
     const query = `
       SELECT b.*, u.name as author_name, u.email as author_email
       FROM blogs b
       LEFT JOIN users u ON b.author = u.id
-      WHERE b.slug = ? AND (b.status = 'published' OR ? = 'admin')
+      WHERE b.slug = ? AND b.language = ? AND (b.status = 'published' OR ? = 'admin')
     `;
 
-    const result = await db.prepare(query).bind(slug, req.user?.role || '').first();
+    const result = await db.prepare(query).bind(slug, language, req.user?.role || '').first();
 
     if (!result) {
       return res.status(404).json({ success: false, message: 'Blog not found' });
@@ -204,6 +229,12 @@ const getBlogBySlug = async (req, res) => {
 
     const blog = {
       ...result,
+      // Return bilingual fields based on language
+      title: language === 'vi' && result.title_vi ? result.title_vi : result.title,
+      content: language === 'vi' && result.content_vi ? result.content_vi : result.content,
+      excerpt: language === 'vi' && result.excerpt_vi ? result.excerpt_vi : result.excerpt,
+      seo_meta_title: language === 'vi' && result.seo_meta_title_vi ? result.seo_meta_title_vi : result.seo_meta_title,
+      seo_meta_description: language === 'vi' && result.seo_meta_description_vi ? result.seo_meta_description_vi : result.seo_meta_description,
       categories: result.categories ? (typeof result.categories === 'string' ? result.categories : JSON.stringify(result.categories)) : '',
       tags: result.tags ? (typeof result.tags === 'string' ? result.tags : JSON.stringify(result.tags)) : '',
       gallery: result.gallery ? JSON.parse(result.gallery) : [],
@@ -221,7 +252,7 @@ const getBlogBySlug = async (req, res) => {
   }
 };
 
-// Get single blog by ID (for admin)
+// Get single blog by ID (for admin) - with bilingual support
 const getBlogById = async (req, res) => {
   try {
     const db = getDB();
@@ -263,7 +294,7 @@ const getBlogById = async (req, res) => {
   }
 };
 
-// Create new blog
+// Create new blog with bilingual support
 const createBlog = async (req, res) => {
   try {
     const db = getDB();
@@ -273,9 +304,12 @@ const createBlog = async (req, res) => {
 
     const {
       title,
+      title_vi,
       slug,
       content,
+      content_vi,
       excerpt,
+      excerpt_vi,
       featuredImage,
       gallery = [],
       categories = [],
@@ -283,7 +317,9 @@ const createBlog = async (req, res) => {
       status = 'draft',
       featured = false,
       language = 'en',
-      seoData = {}
+      seoData = {},
+      seo_meta_title_vi,
+      seo_meta_description_vi
     } = req.body;
 
     // Validate required fields
@@ -294,10 +330,10 @@ const createBlog = async (req, res) => {
       });
     }
 
-    // Check if slug already exists
-    const existingBlog = await db.prepare('SELECT id FROM blogs WHERE slug = ?').bind(slug).first();
+    // Check if slug already exists for this language
+    const existingBlog = await db.prepare('SELECT id FROM blogs WHERE slug = ? AND language = ?').bind(slug, language).first();
     if (existingBlog) {
-      return res.status(400).json({ success: false, message: 'Slug already exists' });
+      return res.status(400).json({ success: false, message: 'Slug already exists for this language' });
     }
 
     // Calculate reading time (rough estimate: 200 words per minute)
@@ -309,18 +345,22 @@ const createBlog = async (req, res) => {
 
     const query = `
       INSERT INTO blogs (
-        id, title, slug, content, excerpt, featured_image, gallery,
-        author_id, status, featured, categories, tags, language,
-        seo_data, reading_time, published_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, title, title_vi, slug, content, content_vi, excerpt, excerpt_vi, 
+        featured_image, gallery, author, status, featured, categories, tags, 
+        language, seo_meta_title, seo_meta_description, seo_meta_title_vi, 
+        seo_meta_description_vi, reading_time, published_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `;
 
     await db.prepare(query).bind(
       blogId,
       title,
+      title_vi || null,
       slug,
       content,
+      content_vi || null,
       excerpt,
+      excerpt_vi || null,
       featuredImage || null,
       JSON.stringify(gallery),
       req.user.id,
@@ -329,7 +369,10 @@ const createBlog = async (req, res) => {
       JSON.stringify(categories),
       JSON.stringify(tags),
       language,
-      JSON.stringify(seoData),
+      seoData.title || null,
+      seoData.description || null,
+      seo_meta_title_vi || null,
+      seo_meta_description_vi || null,
       readingTime,
       publishedAt
     ).run();
@@ -345,7 +388,7 @@ const createBlog = async (req, res) => {
   }
 };
 
-// Update blog
+// Update blog with bilingual support
 const updateBlog = async (req, res) => {
   try {
     const db = getDB();
@@ -356,9 +399,12 @@ const updateBlog = async (req, res) => {
     const { id } = req.params;
     const {
       title,
+      title_vi,
       slug,
       content,
+      content_vi,
       excerpt,
+      excerpt_vi,
       featuredImage,
       gallery = [],
       categories = [],
@@ -366,7 +412,9 @@ const updateBlog = async (req, res) => {
       status,
       featured,
       language,
-      seoData = {}
+      seoData = {},
+      seo_meta_title_vi,
+      seo_meta_description_vi
     } = req.body;
 
     // Check if blog exists
@@ -375,11 +423,11 @@ const updateBlog = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Blog not found' });
     }
 
-    // Check if slug is taken by another blog
+    // Check if slug is taken by another blog in the same language
     if (slug && slug !== existingBlog.slug) {
-      const slugExists = await db.prepare('SELECT id FROM blogs WHERE slug = ? AND id != ?').bind(slug, id).first();
+      const slugExists = await db.prepare('SELECT id FROM blogs WHERE slug = ? AND language = ? AND id != ?').bind(slug, language || existingBlog.language, id).first();
       if (slugExists) {
-        return res.status(400).json({ success: false, message: 'Slug already exists' });
+        return res.status(400).json({ success: false, message: 'Slug already exists for this language' });
       }
     }
 
@@ -399,9 +447,12 @@ const updateBlog = async (req, res) => {
     const query = `
       UPDATE blogs SET
         title = COALESCE(?, title),
+        title_vi = COALESCE(?, title_vi),
         slug = COALESCE(?, slug),
         content = COALESCE(?, content),
+        content_vi = COALESCE(?, content_vi),
         excerpt = COALESCE(?, excerpt),
+        excerpt_vi = COALESCE(?, excerpt_vi),
         featured_image = COALESCE(?, featured_image),
         gallery = COALESCE(?, gallery),
         status = COALESCE(?, status),
@@ -409,7 +460,10 @@ const updateBlog = async (req, res) => {
         categories = COALESCE(?, categories),
         tags = COALESCE(?, tags),
         language = COALESCE(?, language),
-        seo_data = COALESCE(?, seo_data),
+        seo_meta_title = COALESCE(?, seo_meta_title),
+        seo_meta_description = COALESCE(?, seo_meta_description),
+        seo_meta_title_vi = COALESCE(?, seo_meta_title_vi),
+        seo_meta_description_vi = COALESCE(?, seo_meta_description_vi),
         reading_time = ?,
         published_at = COALESCE(?, published_at),
         updated_at = CURRENT_TIMESTAMP
@@ -418,9 +472,12 @@ const updateBlog = async (req, res) => {
 
     await db.prepare(query).bind(
       title || null,
+      title_vi || null,
       slug || null,
       content || null,
+      content_vi || null,
       excerpt || null,
+      excerpt_vi || null,
       featuredImage || null,
       gallery ? JSON.stringify(gallery) : null,
       status || null,
@@ -428,7 +485,10 @@ const updateBlog = async (req, res) => {
       categories ? JSON.stringify(categories) : null,
       tags ? JSON.stringify(tags) : null,
       language || null,
-      seoData ? JSON.stringify(seoData) : null,
+      seoData.title || null,
+      seoData.description || null,
+      seo_meta_title_vi || null,
+      seo_meta_description_vi || null,
       readingTime,
       publishedAt,
       id

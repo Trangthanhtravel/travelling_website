@@ -231,8 +231,20 @@ export const blogAPI = {
         return api.get(`/blogs?${params.toString()}`);
     },
 
-    getBlogBySlug: (slug: string): Promise<AxiosResponse<any>> =>
-        api.get(`/blogs/slug/${slug}`),
+    getBlogBySlug: (slug: string, options: { language?: string } = {}): Promise<AxiosResponse<any>> => {
+        const params = new URLSearchParams();
+        if (options.language) {
+            params.append('language', options.language);
+        }
+        return api.get(`/blogs/slug/${slug}?${params.toString()}`);
+    },
+
+    getFeaturedBlogs: (options: { limit?: number; language?: string } = {}): Promise<AxiosResponse<any>> => {
+        const params = new URLSearchParams();
+        if (options.limit) params.append('limit', options.limit.toString());
+        if (options.language) params.append('language', options.language);
+        return api.get(`/blogs/featured?${params.toString()}`);
+    },
 
     // Admin only
     getBlogById: (id: string): Promise<AxiosResponse<any>> =>
@@ -253,11 +265,14 @@ export const blogAPI = {
 
 // Content API (Public) - keeping for backward compatibility but updating to use blog API
 export const contentAPI = {
-    getBlogs: (): Promise<AxiosResponse<any>> =>
-        blogAPI.getBlogs(),
+    getBlogs: (options: { language?: string } = {}): Promise<AxiosResponse<any>> =>
+        blogAPI.getBlogs(options),
 
-    getBlogBySlug: (slug: string): Promise<AxiosResponse<any>> =>
-        blogAPI.getBlogBySlug(slug),
+    getBlogBySlug: (slug: string, options: { language?: string } = {}): Promise<AxiosResponse<any>> =>
+        blogAPI.getBlogBySlug(slug, options),
+
+    getFeaturedBlogs: (options: { limit?: number; language?: string } = {}): Promise<AxiosResponse<any>> =>
+        blogAPI.getFeaturedBlogs(options),
 
     // Admin only
     createBlog: (blogData: any): Promise<AxiosResponse<any>> =>

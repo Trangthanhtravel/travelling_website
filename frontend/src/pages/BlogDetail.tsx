@@ -6,14 +6,18 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Icon, Icons } from '../components/common/Icons';
 import { blogAPI } from '../utils/api';
+import { useTranslation } from '../contexts/TranslationContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const BlogDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { t, language } = useTranslation();
+  const { isDarkMode } = useTheme();
 
   const { data: blogResponse, isLoading, error } = useQuery({
-    queryKey: ['blog', slug],
+    queryKey: ['blog', slug, language],
     queryFn: async () => {
-      const response = await blogAPI.getBlogBySlug(slug!);
+      const response = await blogAPI.getBlogBySlug(slug!, { language });
       return response.data;
     },
     enabled: !!slug,
@@ -22,7 +26,7 @@ const BlogDetail: React.FC = () => {
   const blog = blogResponse?.data?.blog;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -31,14 +35,14 @@ const BlogDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-dark-900">
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <div className="animate-pulse max-w-4xl mx-auto px-4 py-8">
-          <div className="h-8 bg-gray-300 dark:bg-dark-700 rounded mb-4"></div>
-          <div className="h-4 bg-gray-300 dark:bg-dark-700 rounded w-1/3 mb-8"></div>
-          <div className="h-64 bg-gray-300 dark:bg-dark-700 rounded mb-8"></div>
+          <div className={`h-8 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded mb-4`}></div>
+          <div className={`h-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded w-1/3 mb-8`}></div>
+          <div className={`h-64 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded mb-8`}></div>
           <div className="space-y-4">
             {[...Array(10)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-300 dark:bg-dark-700 rounded"></div>
+              <div key={i} className={`h-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded`}></div>
             ))}
           </div>
         </div>
@@ -48,18 +52,19 @@ const BlogDetail: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center">
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Blog Not Found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Sorry, we couldn't find the blog you're looking for.
+          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+            {t('Blog not found')}
+          </h2>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
+            {t('The blog post you are looking for does not exist or has been removed.')}
           </p>
           <Link
             to="/blogs"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <Icon icon={Icons.FiArrowLeft} className="h-4 w-4" />
-            Back to Blogs
+            {t('Back to Blogs')}
           </Link>
         </div>
       </div>
@@ -68,18 +73,16 @@ const BlogDetail: React.FC = () => {
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center">
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Blog Not Found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            The blog you're looking for doesn't exist or has been removed.
-          </p>
+          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+            {t('Blog not found')}
+          </h2>
           <Link
             to="/blogs"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <Icon icon={Icons.FiArrowLeft} className="h-4 w-4" />
-            Back to Blogs
+            {t('Back to Blogs')}
           </Link>
         </div>
       </div>
@@ -87,50 +90,79 @@ const BlogDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-900">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Breadcrumb */}
-      <div className="bg-white dark:bg-dark-800 border-b border-gray-200 dark:border-dark-700">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <nav className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <Link to="/" className="hover:text-blue-600 dark:hover:text-blue-400">
-              Home
+      <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4`}>
+        <div className="max-w-4xl mx-auto px-4">
+          <nav className="flex items-center space-x-2 text-sm">
+            <Link
+              to="/"
+              className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+            >
+              {t('Home')}
             </Link>
-            <Icon icon={Icons.FiChevronRight} className="h-4 w-4" />
-            <Link to="/blogs" className="hover:text-blue-600 dark:hover:text-blue-400">
-              Blogs
+            <Icon icon={Icons.FiChevronRight} className={`h-4 w-4 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
+            <Link
+              to="/blogs"
+              className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+            >
+              {t('Blogs')}
             </Link>
-            <Icon icon={Icons.FiChevronRight} className="h-4 w-4" />
-            <span className="text-gray-900 dark:text-white">{blog.title}</span>
+            <Icon icon={Icons.FiChevronRight} className={`h-4 w-4 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
+            <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} truncate`}>
+              {blog.title}
+            </span>
           </nav>
         </div>
       </div>
 
-      {/* Blog Content */}
       <article className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          {/* Categories */}
+          {blog.categories && JSON.parse(blog.categories).length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {JSON.parse(blog.categories).map((category: string, index: number) => (
+                <span
+                  key={index}
+                  className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Title */}
+          <h1 className={`text-3xl md:text-4xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
             {blog.title}
           </h1>
 
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
-            <span>By {blog.author_name || 'Admin'}</span>
-            <span>•</span>
-            <time>{formatDate(blog.created_at)}</time>
-            <span>•</span>
-            <span>{blog.views || 0} views</span>
-            {blog.featured && (
-              <>
-                <span>•</span>
-                <span className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400 px-2 py-1 rounded text-xs font-medium">
-                  Featured
-                </span>
-              </>
+          {/* Meta Info */}
+          <div className={`flex flex-wrap items-center gap-6 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`}>
+            <div className="flex items-center">
+              <Icon icon={Icons.FiUser} className="h-4 w-4 mr-2" />
+              <span>{blog.authorProfile?.name || 'Anonymous'}</span>
+            </div>
+            <div className="flex items-center">
+              <Icon icon={Icons.FiCalendar} className="h-4 w-4 mr-2" />
+              <span>{formatDate(blog.published_at || blog.created_at)}</span>
+            </div>
+            <div className="flex items-center">
+              <Icon icon={Icons.FiEye} className="h-4 w-4 mr-2" />
+              <span>{blog.views || 0} {t('views')}</span>
+            </div>
+            {blog.reading_time && (
+              <div className="flex items-center">
+                <Icon icon={Icons.FiClock} className="h-4 w-4 mr-2" />
+                <span>{blog.reading_time} {t('min read')}</span>
+              </div>
             )}
           </div>
 
+          {/* Excerpt */}
           {blog.excerpt && (
-            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+            <p className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} leading-relaxed mb-6`}>
               {blog.excerpt}
             </p>
           )}
@@ -147,160 +179,94 @@ const BlogDetail: React.FC = () => {
           </div>
         )}
 
-        {/* Blog Content with Markdown Support */}
-        <div className="prose prose-lg max-w-none dark:prose-invert">
+        {/* Content */}
+        <div className={`prose prose-lg max-w-none ${
+            isDarkMode 
+            ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-gray-800' 
+            : 'prose-gray'
+        } mb-8`}>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw]}
             components={{
-              // Custom components for better styling
-              h1: ({ children }) => (
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-4 first:mt-0">{children}</h1>
-              ),
-              h2: ({ children }) => (
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-6 mb-3">{children}</h2>
-              ),
-              h3: ({ children }) => (
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-4 mb-2">{children}</h3>
-              ),
-              h4: ({ children }) => (
-                <h4 className="text-lg font-bold text-gray-900 dark:text-white mt-3 mb-2">{children}</h4>
-              ),
-              h5: ({ children }) => (
-                <h5 className="text-base font-bold text-gray-900 dark:text-white mt-2 mb-1">{children}</h5>
-              ),
-              h6: ({ children }) => (
-                <h6 className="text-sm font-bold text-gray-900 dark:text-white mt-2 mb-1">{children}</h6>
-              ),
-              p: ({ children }) => (
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{children}</p>
-              ),
-              a: ({ href, children }) => (
-                <a
-                  href={href}
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline decoration-2 underline-offset-2"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {children}
-                </a>
-              ),
               img: ({ src, alt }) => (
                 <img
                   src={src}
                   alt={alt}
-                  className="w-full rounded-lg shadow-lg my-6 max-w-full h-auto"
-                  loading="lazy"
+                  className="w-full rounded-lg shadow-md my-6"
                 />
               ),
-              blockquote: ({ children }) => (
-                <blockquote className="border-l-4 border-blue-500 pl-6 py-2 italic text-gray-700 dark:text-gray-400 my-6 bg-gray-50 dark:bg-gray-800/50 rounded-r-lg">
+              a: ({ href, children }) => (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                >
                   {children}
-                </blockquote>
-              ),
-              code: ({ children, className }) => {
-                const isInline = !className;
-                if (isInline) {
-                  return (
-                    <code className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-sm font-mono">
-                      {children}
-                    </code>
-                  );
-                }
-                return <code className={className}>{children}</code>;
-              },
-              pre: ({ children }) => (
-                <pre className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 p-4 rounded-lg overflow-x-auto my-6 border border-gray-200 dark:border-gray-700">
-                  {children}
-                </pre>
-              ),
-              ul: ({ children }) => (
-                <ul className="list-disc list-inside mb-4 text-gray-700 dark:text-gray-300 space-y-2">
-                  {children}
-                </ul>
-              ),
-              ol: ({ children }) => (
-                <ol className="list-decimal list-inside mb-4 text-gray-700 dark:text-gray-300 space-y-2">
-                  {children}
-                </ol>
-              ),
-              li: ({ children }) => (
-                <li className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {children}
-                </li>
-              ),
-              table: ({ children }) => (
-                <div className="overflow-x-auto my-6">
-                  <table className="min-w-full border border-gray-200 dark:border-gray-700 rounded-lg">
-                    {children}
-                  </table>
-                </div>
-              ),
-              thead: ({ children }) => (
-                <thead className="bg-gray-50 dark:bg-gray-800">
-                  {children}
-                </thead>
-              ),
-              tbody: ({ children }) => (
-                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                  {children}
-                </tbody>
-              ),
-              th: ({ children }) => (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {children}
-                </th>
-              ),
-              td: ({ children }) => (
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                  {children}
-                </td>
-              ),
-              hr: () => (
-                <hr className="my-8 border-gray-200 dark:border-gray-700" />
-              ),
-              strong: ({ children }) => (
-                <strong className="font-bold text-gray-900 dark:text-white">
-                  {children}
-                </strong>
-              ),
-              em: ({ children }) => (
-                <em className="italic text-gray-700 dark:text-gray-300">
-                  {children}
-                </em>
+                </a>
               ),
             }}
           >
-            {blog.content || 'No content available.'}
+            {blog.content}
           </ReactMarkdown>
         </div>
 
         {/* Tags */}
-        {blog.tags && (
-          <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Tags:</h3>
+        {blog.tags && JSON.parse(blog.tags).length > 0 && (
+          <div className="mb-8">
+            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-3`}>
+              {t('Tags')}
+            </h3>
             <div className="flex flex-wrap gap-2">
-              {blog.tags.split(',').map((tag: string, index: number) => (
+              {JSON.parse(blog.tags).map((tag: string, index: number) => (
                 <span
                   key={index}
-                  className="inline-block bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 px-3 py-1 rounded-full text-sm"
+                  className={`${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'} text-sm px-3 py-1 rounded-full`}
                 >
-                  {tag.trim()}
+                  #{tag}
                 </span>
               ))}
             </div>
           </div>
         )}
 
+        {/* Gallery */}
+        {blog.gallery && blog.gallery.length > 0 && (
+          <div className="mb-8">
+            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-3`}>
+              {t('Gallery')}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {blog.gallery.map((image: string, index: number) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Gallery image ${index + 1}`}
+                  className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Navigation */}
-        <div className="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div className={`flex justify-between items-center pt-8 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           <Link
             to="/blogs"
-            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+            className={`flex items-center ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
           >
-            <Icon icon={Icons.FiArrowLeft} className="h-4 w-4" />
-            Back to all blogs
+            <Icon icon={Icons.FiArrowLeft} className="h-4 w-4 mr-2" />
+            {t('Back to Blogs')}
           </Link>
+
+          {/* Share buttons could be added here */}
+          <div className="flex items-center space-x-2">
+            <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              {t('Share')}:
+            </span>
+            {/* Add share buttons as needed */}
+          </div>
         </div>
       </article>
     </div>

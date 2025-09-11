@@ -220,11 +220,11 @@ const Home: React.FC = () => {
     fetchAboutContent();
   }, [language]); // Add language dependency
 
-  // Fetch featured blogs from backend
+  // Fetch featured blogs from backend with language support
   const { data: featuredBlogsData, isLoading: blogsLoading } = useQuery({
-    queryKey: ['featured-blogs'],
+    queryKey: ['featured-blogs', language], // Add language to query key
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/blogs/featured?limit=3`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/featured?limit=3&language=${language}`);
       if (!response.ok) throw new Error('Failed to fetch featured blogs');
       return response.json();
     },

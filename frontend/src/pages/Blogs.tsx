@@ -5,26 +5,38 @@ import { Icon, Icons } from '../components/common/Icons';
 import { BlogFilters } from '../types';
 import { blogAPI } from '../utils/api';
 import { useTranslation } from '../contexts/TranslationContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Blogs: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const { isDarkMode } = useTheme();
 
   const [filters, setFilters] = useState<BlogFilters>({
     page: 1,
     limit: 12,
     sortBy: 'created_at',
-    sortOrder: 'desc'
+    sortOrder: 'desc',
+    language: language // Add language to filters
   });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
 
-  // Fetch blogs using real API
+  // Update filters when language changes
+  React.useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      language: language,
+      page: 1 // Reset to first page when language changes
+    }));
+  }, [language]);
+
+  // Fetch blogs using real API with language support
   const { data: blogsResponse, isLoading, error, refetch } = useQuery({
-    queryKey: ['blogs', filters],
+    queryKey: ['blogs', filters, language],
     queryFn: async () => {
-      const response = await blogAPI.getBlogs(filters);
+      const response = await blogAPI.getBlogs({ ...filters, language });
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -61,17 +73,21 @@ const Blogs: React.FC = () => {
       page: 1,
       limit: 12,
       sortBy: 'created_at',
-      sortOrder: 'desc'
+      sortOrder: 'desc',
+      language: language
     });
   };
 
-
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('Error Loading Blogs')}</h2>
-          <p className="text-gray-600 mb-4">{t('Sorry, we couldn\'t load the blogs. Please try again.')}</p>
+          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+            {t('Error Loading Blogs')}
+          </h2>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
+            {t('Sorry, we couldn\'t load the blogs. Please try again.')}
+          </p>
           <button
             onClick={() => refetch()}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -84,7 +100,7 @@ const Blogs: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
         <div className="container mx-auto px-4">
@@ -98,7 +114,7 @@ const Blogs: React.FC = () => {
       </div>
 
       {/* Filters Section */}
-      <div className="bg-white border-b border-gray-200 py-6">
+      <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-6`}>
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-6 items-center">
             {/* Search */}
@@ -109,9 +125,13 @@ const Blogs: React.FC = () => {
                   placeholder={t('Search blogs...')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full pl-10 pr-4 py-2 border ${
+                    isDarkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 />
-                <Icon icon={Icons.FiSearch} className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <Icon icon={Icons.FiSearch} className={`absolute left-3 top-2.5 h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`} />
               </div>
             </form>
 
@@ -125,7 +145,11 @@ const Blogs: React.FC = () => {
                 ];
                 setFilters(prev => ({ ...prev, sortBy, sortOrder, page: 1 }));
               }}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`px-4 py-2 border ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
             >
               <option value="created_at-desc">{t('Latest First')}</option>
               <option value="created_at-asc">{t('Oldest First')}</option>
@@ -151,12 +175,13 @@ const Blogs: React.FC = () => {
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
+              <div key={index} className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md overflow-hidden animate-pulse`}>
                 <div className="h-48 bg-gray-300"></div>
                 <div className="p-6">
                   <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-6 bg-gray-300 rounded mb-4"></div>
-                  <div className="h-20 bg-gray-300 rounded"></div>
+                  <div className="h-4 bg-gray-300 rounded mb-4 w-3/4"></div>
+                  <div className="h-3 bg-gray-300 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-300 rounded w-1/2"></div>
                 </div>
               </div>
             ))}
@@ -164,121 +189,148 @@ const Blogs: React.FC = () => {
         </div>
       )}
 
-      {/* Blogs Grid */}
-      {!isLoading && (
+      {/* Blog Grid */}
+      {!isLoading && blogs.length > 0 && (
         <div className="container mx-auto px-4 py-12">
-          {blogs.length === 0 ? (
-            <div className="text-center py-12">
-              <Icon icon={Icons.FiSearch} className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('No blogs found')}</h3>
-              <p className="text-gray-600">{t('Try adjusting your search or filters')}</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {blogs.map((blog: any) => (
-                  <article key={blog.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                    {blog.featured_image && (
-                      <div className="h-48 overflow-hidden">
-                        <img
-                          src={blog.featured_image}
-                          alt={blog.title}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogs.map((blog: any) => (
+              <Link
+                key={blog.id}
+                to={`/blog/${blog.slug}`}
+                className={`${isDarkMode ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'} rounded-lg shadow-md overflow-hidden transition-all duration-200 hover:shadow-lg group`}
+              >
+                {/* Featured Image */}
+                {blog.featured_image && (
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={blog.featured_image}
+                      alt={blog.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
+                    {blog.featured && (
+                      <div className="absolute top-3 left-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+                        {t('Featured')}
                       </div>
                     )}
+                  </div>
+                )}
 
-                    <div className="p-6">
-                      {/* Categories */}
-                      {blog.categories && (
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {(typeof blog.categories === 'string' ? blog.categories.split(',') : blog.categories)
-                            .slice(0, 2)
-                            .map((category: string, index: number) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
-                              >
-                                {category.trim()}
-                              </span>
-                            ))}
-                        </div>
-                      )}
-
-                      {/* Title */}
-                      <h2 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
-                        {blog.title}
-                      </h2>
-
-                      {/* Excerpt */}
-                      {blog.excerpt && (
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                          {blog.excerpt}
-                        </p>
-                      )}
-
-                      {/* Meta info */}
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                        <span>{t('Published on')}: {new Date(blog.created_at).toLocaleDateString()}</span>
-                        {blog.read_time && (
-                          <span>{blog.read_time} {t('minutes')} {t('Read Time')}</span>
-                        )}
-                      </div>
-
-                      {/* Read more button */}
-                      <Link
-                        to={`/blog/${blog.slug}`}
-                        className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        {t('Read More')}
-                        <Icon icon={Icons.FiArrowRight} className="ml-1 h-4 w-4" />
-                      </Link>
-                    </div>
-                  </article>
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {pagination && pagination.totalPages > 1 && (
-                <div className="flex justify-center mt-12">
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handlePageChange(pagination.currentPage - 1)}
-                      disabled={pagination.currentPage <= 1}
-                      className="px-3 py-2 rounded-md bg-white border border-gray-300 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {t('Previous')}
-                    </button>
-
-                    {[...Array(pagination.totalPages)].map((_, index) => {
-                      const page = index + 1;
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`px-3 py-2 rounded-md text-sm font-medium ${
-                            page === pagination.currentPage
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white border border-gray-300 text-gray-500 hover:bg-gray-50'
-                          }`}
+                <div className="p-6">
+                  {/* Categories */}
+                  {blog.categories && JSON.parse(blog.categories).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {JSON.parse(blog.categories).slice(0, 2).map((category: string, index: number) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
                         >
-                          {page}
-                        </button>
-                      );
-                    })}
+                          {category}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
-                    <button
-                      onClick={() => handlePageChange(pagination.currentPage + 1)}
-                      disabled={pagination.currentPage >= pagination.totalPages}
-                      className="px-3 py-2 rounded-md bg-white border border-gray-300 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {t('Next')}
-                    </button>
+                  {/* Title */}
+                  <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2 group-hover:text-blue-600 transition-colors`}>
+                    {blog.title}
+                  </h3>
+
+                  {/* Excerpt */}
+                  <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4 line-clamp-3`}>
+                    {blog.excerpt}
+                  </p>
+
+                  {/* Meta Info */}
+                  <div className={`flex items-center justify-between text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <span>
+                      {blog.authorProfile?.name || 'Anonymous'}
+                    </span>
+                    <div className="flex items-center space-x-4">
+                      <span className="flex items-center">
+                        <Icon icon={Icons.FiEye} className="h-4 w-4 mr-1" />
+                        {blog.views || 0}
+                      </span>
+                      <span>
+                        {new Date(blog.published_at || blog.created_at).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              )}
-            </>
+              </Link>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className="flex justify-center mt-12">
+              <div className="flex items-center space-x-2">
+                {/* Previous Button */}
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={!pagination.hasPrev}
+                  className={`px-4 py-2 rounded-lg ${
+                    pagination.hasPrev 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : `${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-400'} cursor-not-allowed`
+                  } transition-colors`}
+                >
+                  {t('Previous')}
+                </button>
+
+                {/* Page Numbers */}
+                {[...Array(Math.min(5, pagination.totalPages))].map((_, index) => {
+                  const pageNum = Math.max(1, pagination.currentPage - 2) + index;
+                  if (pageNum > pagination.totalPages) return null;
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`px-4 py-2 rounded-lg ${
+                        pageNum === pagination.currentPage
+                          ? 'bg-blue-600 text-white'
+                          : `${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
+                      } transition-colors`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                {/* Next Button */}
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={!pagination.hasNext}
+                  className={`px-4 py-2 rounded-lg ${
+                    pagination.hasNext 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : `${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-400'} cursor-not-allowed`
+                  } transition-colors`}
+                >
+                  {t('Next')}
+                </button>
+              </div>
+            </div>
           )}
+        </div>
+      )}
+
+      {/* No Results */}
+      {!isLoading && blogs.length === 0 && (
+        <div className="container mx-auto px-4 py-12 text-center">
+          <div className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            <Icon icon={Icons.FiFileText} className="h-16 w-16 mx-auto mb-4 opacity-50" />
+            <h3 className="text-xl font-semibold mb-2">{t('No blogs found')}</h3>
+            <p className="mb-4">{t('Try adjusting your search or filters to find what you\'re looking for.')}</p>
+            {(searchTerm || selectedCategory || selectedTag) && (
+              <button
+                onClick={clearFilters}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                {t('Clear Filters')}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
