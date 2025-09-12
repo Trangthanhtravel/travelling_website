@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm, FieldError } from 'react-hook-form';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Icon, Icons } from '../common/Icons';
-import { ContactInfo, ContactFormData } from '../../types/contact';
+import { ContactFormData } from '../../types/contact';
 import toast from 'react-hot-toast';
 
 interface ContactManagementProps {
@@ -13,7 +13,6 @@ const ContactManagement: React.FC<ContactManagementProps> = ({ onClose }) => {
   const { isDarkMode } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
 
   const {
     register,
@@ -39,14 +38,13 @@ const ContactManagement: React.FC<ContactManagementProps> = ({ onClose }) => {
   });
 
   // Fetch existing contact info
-  const fetchContactInfo = async () => {
+  const fetchContactInfo = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/contact');
       if (!response.ok) throw new Error('Failed to fetch contact info');
 
       const data = await response.json();
-      setContactInfo(data);
 
       // Populate form with existing data
       setValue('email', data.email || '');
@@ -66,11 +64,11 @@ const ContactManagement: React.FC<ContactManagementProps> = ({ onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setValue]);
 
   useEffect(() => {
     fetchContactInfo();
-  }, []);
+  }, [fetchContactInfo]);
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSaving(true);
@@ -96,8 +94,6 @@ const ContactManagement: React.FC<ContactManagementProps> = ({ onClose }) => {
         throw new Error(errorData.error || 'Failed to update contact info');
       }
 
-      const result = await response.json();
-      setContactInfo(result.contactInfo);
       toast.success('Contact information updated successfully!');
 
       if (onClose) {
