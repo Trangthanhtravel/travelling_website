@@ -74,7 +74,7 @@ const ContactManagement: React.FC<ContactManagementProps> = ({ onClose }) => {
   const onSubmit = async (data: ContactFormData) => {
     setIsSaving(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('adminToken');
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${apiUrl}/contact`, {
         method: 'PUT',
