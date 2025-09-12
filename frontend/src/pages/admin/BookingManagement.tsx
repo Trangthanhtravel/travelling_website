@@ -60,7 +60,7 @@ const BookingManagement: React.FC = () => {
       const response = await fetch(`${getApiUrl()}/admin/bookings/${bookingId}/status`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ status })
@@ -83,7 +83,7 @@ const BookingManagement: React.FC = () => {
       const response = await fetch(`${getApiUrl()}/admin/bookings/${bookingId}/notes`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ message })

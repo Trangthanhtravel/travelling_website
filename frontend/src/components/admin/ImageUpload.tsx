@@ -52,7 +52,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/${endpoint}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
         },
         body: formData,
       });

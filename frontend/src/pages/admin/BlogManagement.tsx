@@ -56,7 +56,7 @@ const BlogManagement: React.FC = () => {
 
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs?${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -71,7 +71,7 @@ const BlogManagement: React.FC = () => {
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/${blogId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
         }
       });
       if (!response.ok) throw new Error('Failed to delete blog');
@@ -92,7 +92,7 @@ const BlogManagement: React.FC = () => {
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/${blogId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ featured })
@@ -119,7 +119,7 @@ const BlogManagement: React.FC = () => {
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/${blogId}/status`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ status })
