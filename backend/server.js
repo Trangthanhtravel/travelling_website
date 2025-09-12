@@ -15,6 +15,7 @@ const adminRoutes = require('./routes/admin');
 const categoryRoutes = require('./routes/categories');
 const socialLinksRoutes = require('./routes/socialLinks');
 const emailSettingsRoutes = require('./routes/emailSettings');
+const contactRoutes = require('./routes/contact');
 
 const app = express();
 
@@ -201,6 +202,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/social-links', socialLinksRoutes);
 app.use('/api/email-settings', emailSettingsRoutes);
+app.use('/api/contact', contactRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

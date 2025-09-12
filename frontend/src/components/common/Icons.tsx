@@ -124,6 +124,7 @@ import {
     FiShield,
     FiAward,
     FiPrinter,
+    FiMap,
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 
@@ -267,6 +268,7 @@ export const Icons = {
     FiShield,
     FiAward,
     FiPrinter,
+    FiMap,
 };
 
 export default Icons;

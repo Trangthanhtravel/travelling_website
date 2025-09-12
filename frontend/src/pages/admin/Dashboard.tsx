@@ -12,6 +12,7 @@ import AboutSectionManagement from './AboutSectionManagement';
 import SocialLinksManagement from './SocialLinksManagement';
 import EmailSettingsManagement from './EmailSettingsManagement';
 import ContentManagement from './ContentManagement';
+import ContactInformationManagement from './ContactInformationManagement';
 
 interface DashboardStats {
   totalBookings: number;
@@ -189,6 +190,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'about-section', name: 'About Section', icon: Icons.FiInfo },
     { id: 'social-links', name: 'Social Links', icon: Icons.FiMessageCircle },
     { id: 'email-settings', name: 'Email Settings', icon: Icons.FiMail },
+    { id: 'contact-information', name: 'Contact Information', icon: Icons.FiPhone },
   ];
 
   // Check scroll buttons state
@@ -254,6 +256,8 @@ const AdminDashboard: React.FC = () => {
         return <SocialLinksManagement />;
       case 'email-settings':
         return <EmailSettingsManagement />;
+      case 'contact-information':
+        return <ContactInformationManagement />;
       case 'dashboard':
       default:
         return <DashboardOverview onQuickAction={setActiveTab} />;

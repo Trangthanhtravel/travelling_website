@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTranslation } from '../../contexts/TranslationContext';
 import { Icon, Icons } from '../common/Icons';
+import { useContactInfo } from '../../hooks/useContactInfo';
 
 const Footer: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { t } = useTranslation();
+  const { contactInfo } = useContactInfo();
 
   return (
     <footer className={`${isDarkMode ? 'bg-dark-900' : 'bg-light-text-secondary'} ${isDarkMode ? 'text-dark-text-primary' : 'text-light-50'}`}>
@@ -27,19 +29,19 @@ const Footer: React.FC = () => {
             <div className={`space-y-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>
               <div className="flex items-center">
                 <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-2" />
-                <span>{t('193 Co Bac, Cau Ong Lanh Ward, Ho Chi Minh City, Vietnam')}</span>
+                <span>{contactInfo?.address || t('193 Co Bac, Cau Ong Lanh Ward, Ho Chi Minh City, Vietnam')}</span>
               </div>
               <div className="flex items-center">
                 <Icon icon={Icons.FiPhone} className="w-4 h-4 mr-2" />
-                <span>{t('(+84) 28 38 388 007')}</span>
+                <span>{contactInfo?.phone || t('(+84) 28 38 388 007')}</span>
               </div>
                 <div className="flex items-center">
                     <Icon icon={Icons.FiPrinter} className="w-4 h-4 mr-2" />
-                    <span>{t('(+84) 28 38 388 007')}</span>
+                    <span>{contactInfo?.phone || t('(+84) 28 38 388 007')}</span>
                 </div>
               <div className="flex items-center">
                 <Icon icon={Icons.FiMail} className="w-4 h-4 mr-2" />
-                <span>goodtrip@trangthanhtravel.com.vn</span>
+                <span>{contactInfo?.email || 'goodtrip@trangthanhtravel.com.vn'}</span>
               </div>
             </div>
           </div>

@@ -5,12 +5,14 @@ import * as yup from 'yup';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import { Icon, Icons } from '../components/common/Icons';
+import { useContactInfo } from '../hooks/useContactInfo';
 import toast from 'react-hot-toast';
 
 const Contact: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { contactInfo, isLoading, error } = useContactInfo();
 
   const schema = yup.object({
     name: yup.string().required(t('Name is required')),
@@ -51,6 +53,56 @@ const Contact: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
+        <div className="bg-accent-orange text-white py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Contact Us')}</h1>
+              <p className="text-xl mb-8 opacity-90">
+                {t('Have a question or ready to book your next adventure? Contact us now to start planning your perfect trip. Our team of travel experts is here to help with any inquiries you may have')}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-orange"></div>
+            <span className={`ml-3 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+              Loading contact information...
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
+        <div className="bg-accent-orange text-white py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Contact Us')}</h1>
+              <p className="text-xl mb-8 opacity-90">
+                {t('Have a question or ready to book your next adventure? Contact us now to start planning your perfect trip. Our team of travel experts is here to help with any inquiries you may have')}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-dark-800' : 'bg-white'} shadow-lg text-center`}>
+            <Icon icon={Icons.FiAlertCircle} className="w-8 h-8 mx-auto mb-4 text-red-500" />
+            <p className={`${isDarkMode ? 'text-dark-text-primary' : 'text-gray-700'}`}>
+              {error}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-dark-900' : 'bg-light-100'}`}>
         {/* Header */}
@@ -81,8 +133,7 @@ const Contact: React.FC = () => {
                   </h3>
                 </div>
                 <p className={`${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  123 Đường Du Lịch, Quận 1<br />
-                  Thành phố Hồ Chí Minh, Việt Nam
+                  {contactInfo?.address || '123 Đường Du Lịch, Quận 1, Thành phố Hồ Chí Minh, Việt Nam'}
                 </p>
               </div>
 
@@ -94,8 +145,7 @@ const Contact: React.FC = () => {
                   </h3>
                 </div>
                 <p className={`${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  +84 123 456 789<br />
-                  +84 987 654 321
+                  {contactInfo?.phone || '+84 123 456 789'}
                 </p>
               </div>
 
@@ -107,8 +157,7 @@ const Contact: React.FC = () => {
                   </h3>
                 </div>
                 <p className={`${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  info@travelworld.vn<br />
-                  booking@travelworld.vn
+                  {contactInfo?.email || 'info@travelworld.vn'}
                 </p>
               </div>
 
@@ -120,12 +169,46 @@ const Contact: React.FC = () => {
                   </h3>
                 </div>
                 <div className={`${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  <p>{t('Monday - Friday')}: 8:00 - 18:00</p>
-                  <p>{t('Saturday')}: 8:00 - 17:00</p>
-                  <p>{t('Sunday')}: {t('Closed')}</p>
+                  {contactInfo?.business_hours ? (
+                    Object.entries(contactInfo.business_hours).map(([day, hours]) => (
+                      <p key={day}>
+                        {t(day.charAt(0).toUpperCase() + day.slice(1))}: {hours}
+                      </p>
+                    ))
+                  ) : (
+                    <>
+                      <p>{t('Monday - Friday')}: 8:00 - 18:00</p>
+                      <p>{t('Saturday')}: 8:00 - 17:00</p>
+                      <p>{t('Sunday')}: {t('Closed')}</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Google Map */}
+            {contactInfo?.google_map_link && (
+              <div className={`mt-8 p-6 rounded-lg ${isDarkMode ? 'bg-dark-800' : 'bg-white'} shadow-lg`}>
+                <div className="flex items-center mb-4">
+                  <Icon icon={Icons.FiMap} className={`w-6 h-6 mr-3 ${isDarkMode ? 'text-accent-orange' : 'text-accent-orange'}`} />
+                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
+                    {t('Find Us on Map')}
+                  </h3>
+                </div>
+                <div className="w-full h-64 rounded-lg overflow-hidden">
+                  <iframe
+                    src={contactInfo.google_map_link}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Office Location"
+                  ></iframe>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Contact Form */}
