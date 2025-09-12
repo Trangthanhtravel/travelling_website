@@ -1,12 +1,13 @@
-const db = require('../config/database');
+const { getDB } = require('../config/database');
 
 class Contact {
   static async getContactInfo() {
     try {
-      const stmt = db.prepare(`
-        SELECT * FROM contact_info ORDER BY id DESC LIMIT 1
-      `);
-      return stmt.get();
+
+      const db = getDB();
+      const stmt = db.prepare(`SELECT * FROM contact_info ORDER BY id DESC LIMIT 1`);
+      const result = await stmt.bind().first();
+      return result;
     } catch (error) {
       console.error('Error getting contact info:', error);
       throw error;
@@ -15,6 +16,8 @@ class Contact {
 
   static async updateContactInfo(contactData) {
     try {
+
+      const db = getDB();
       const { email, phone, address, businessHours, googleMapLink } = contactData;
 
       // Check if contact info exists
@@ -27,14 +30,14 @@ class Contact {
           SET email = ?, phone = ?, address = ?, business_hours = ?, google_map_link = ?, updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
         `);
-        return stmt.run(email, phone, address, businessHours, googleMapLink, existing.id);
+        return await stmt.bind(email, phone, address, businessHours, googleMapLink, existing.id).run();
       } else {
         // Create new record
         const stmt = db.prepare(`
           INSERT INTO contact_info (email, phone, address, business_hours, google_map_link, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         `);
-        return stmt.run(email, phone, address, businessHours, googleMapLink);
+        return await stmt.bind(email, phone, address, businessHours, googleMapLink).run();
       }
     } catch (error) {
       console.error('Error updating contact info:', error);
@@ -61,6 +64,7 @@ class Contact {
           }),
           googleMapLink: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4326!2d106.6297!3d10.8231!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDQ5JzIzLjIiTiAxMDbCsDM3JzQ2LjkiRQ!5e0!3m2!1sen!2s!4v1609459200000!5m2!1sen!2s'
         };
+        console.log('Initializing default contact info');
         await this.updateContactInfo(defaultData);
       }
     } catch (error) {
