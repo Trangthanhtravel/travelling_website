@@ -41,7 +41,8 @@ const ContactManagement: React.FC<ContactManagementProps> = ({ onClose }) => {
   const fetchContactInfo = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/contact');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/contact`);
       if (!response.ok) throw new Error('Failed to fetch contact info');
 
       const data = await response.json();
@@ -74,7 +75,8 @@ const ContactManagement: React.FC<ContactManagementProps> = ({ onClose }) => {
     setIsSaving(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/contact', {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/contact`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -11,7 +11,8 @@ export const useContactInfo = () => {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('/api/contact');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/contact`);
       if (!response.ok) {
         throw new Error('Failed to fetch contact information');
       }
