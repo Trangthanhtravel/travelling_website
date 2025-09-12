@@ -76,9 +76,9 @@ const CarRental: React.FC = () => {
       <div className="bg-accent-orange text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Car Rental Services')}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Private Car Rental')}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              {t('Premium vehicle fleet for your travel needs')}
+              {t('Experience the ultimate in convenience and comfort with our private car rental service. Whether you\'re traveling for business or pleasure, our meticulously maintained fleet offers a wide selection of vehicles to suit your every need, from standard to luxury.')}
             </p>
           </div>
         </div>

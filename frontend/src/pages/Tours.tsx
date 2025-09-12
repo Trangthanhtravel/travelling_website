@@ -182,9 +182,9 @@ const Tours: React.FC = () => {
       <div className="bg-accent-orange text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Discover Amazing Tours')}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('All tours from Trang Thanh Travel')}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              {t('Explore our curated collection of unforgettable travel experiences around the world')}
+              {t('Discover our wide selection of tours, from domestic and international tours to tailored inbound tours for international tourists visiting Vietnam.')}
             </p>
           </div>
         </div>

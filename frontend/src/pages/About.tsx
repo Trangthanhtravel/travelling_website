@@ -174,7 +174,7 @@ const About: React.FC = () => {
       <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-800' : 'bg-gray-100'}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className={`text-4xl font-bold mb-16 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-            {t('Our Vision')} & {t('Our Mission')}
+            {t('Vision')} & {t('Mission')}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -184,7 +184,7 @@ const About: React.FC = () => {
                 <Icon icon={Icons.FiEye} className="w-8 h-8 text-white" />
               </div>
               <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-                {t('Our Vision')}
+                {t('Vision')}
               </h3>
               <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
                 {aboutVision}
@@ -197,7 +197,7 @@ const About: React.FC = () => {
                 <Icon icon={Icons.FiTarget} className="w-8 h-8 text-white" />
               </div>
               <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-                {t('Our Mission')}
+                {t('Mission')}
               </h3>
               <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
                 {aboutMission}
@@ -208,7 +208,7 @@ const About: React.FC = () => {
           {/* Values */}
           <div className="mt-16">
             <h3 className={`text-2xl font-bold mb-8 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
-              {t('Our Values')}
+              {t('Core Values')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className={`p-6 rounded-xl ${isDarkMode ? 'bg-dark-900 border border-dark-700' : 'bg-white shadow-md'}`}>

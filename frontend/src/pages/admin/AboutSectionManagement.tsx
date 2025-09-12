@@ -392,7 +392,7 @@ const AboutSectionManagement: React.FC = () => {
                   </div>
                   <div>
                     <label className={`block text-xs mb-1 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
-                      Years of Experience
+                        Experience in the industry
                     </label>
                     <input
                       type="number"
@@ -407,7 +407,7 @@ const AboutSectionManagement: React.FC = () => {
                   </div>
                   <div>
                     <label className={`block text-xs mb-1 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
-                      Google Review (1-5)
+                        Rating on Google (1-5)
                     </label>
                     <input
                       type="number"
@@ -546,7 +546,7 @@ const AboutSectionManagement: React.FC = () => {
                       {aboutContent.statistics.numberOfTrips || '0'}+
                     </div>
                     <div className={`text-xs ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
-                      Successful Trips
+                        Successful Journey
                     </div>
                   </div>
                   <div className={`p-3 rounded ${isDarkMode ? 'bg-dark-700' : 'bg-gray-50'}`}>

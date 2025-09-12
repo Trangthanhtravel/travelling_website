@@ -435,7 +435,7 @@ const Home: React.FC = () => {
                   />
                 </div>
                 <p className={`text-lg font-medium ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  {t('Successful Trips')}
+                  {t('Successful Journey')}
                 </p>
               </div>
             </div>
@@ -455,7 +455,7 @@ const Home: React.FC = () => {
                   />
                 </div>
                 <p className={`text-lg font-medium ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  {t('Years of Experience')}
+                  {t('Experience in the industry')}
                 </p>
               </div>
             </div>
@@ -475,7 +475,7 @@ const Home: React.FC = () => {
                   />
                 </div>
                 <p className={`text-lg font-medium ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  {t('Google Review')}
+                  {t('Rating on Google')}
                 </p>
                 <div className="flex justify-center mt-2">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -496,7 +496,7 @@ const Home: React.FC = () => {
       <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-light-50' : 'bg-light-200'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-light-text-primary mb-4">{t('Our Services')}</h2>
+            <h2 className="text-4xl font-bold text-light-text-primary mb-4">{t('Explore our services')}</h2>
             <p className="text-xl text-light-text-muted max-w-2xl mx-auto">
               {t('Comprehensive travel solutions to make your journey seamless and memorable')}
             </p>
@@ -644,7 +644,7 @@ const Home: React.FC = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{t('Featured Tours')}</h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              {t('Explore our curated collection of unforgettable travel experiences around the world')}
+              {t('Explore our best-selling tours')}
             </p>
           </div>
 
@@ -768,7 +768,7 @@ const Home: React.FC = () => {
       <section className="py-20 bg-gray-50 dark:bg-white transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-900 mb-4">{t('Car Rental')}</h2>
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-900 mb-4">{t('Private Car Rental')}</h2>
             <p className="text-xl text-gray-600 dark:text-gray-600 max-w-2xl mx-auto">
               {t('Choose from our premium vehicle fleet')}
             </p>
@@ -862,7 +862,7 @@ const Home: React.FC = () => {
               {t('Latest News')}
             </h2>
             <p className="text-xl text-light-text-muted max-w-2xl mx-auto">
-              {t('Detailed insights and stories from our travel experts')}
+              {t('Looking for travel ideas, local tips, or the latest on tourism in Vietnam? You’re in the right place. We share stories, updates, and inspiration to help you best plan your trip.')}
             </p>
           </div>
 
@@ -924,9 +924,9 @@ const Home: React.FC = () => {
       {/* CTA Section */}
       <section className="py-20 bg-primary-600 dark:bg-primary-800 transition-colors duration-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">{t('Ready for your next adventure?')}</h2>
+          <h2 className="text-4xl font-bold text-white mb-6">{t('Have a question or ready to book your next adventure?')}</h2>
           <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-            {t('Join thousands of travelers who have discovered amazing destinations with us. Start planning your perfect trip today.')}
+            {t('Contact us now to start planning your perfect trip. Our team of travel experts is here to help with any inquiries you may have.')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

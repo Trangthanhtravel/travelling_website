@@ -22,20 +22,24 @@ const Footer: React.FC = () => {
               />
             </div>
             <p className={`mb-6 max-w-md ${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>
-              {t('Your trusted travel partner for unforgettable adventures. We create personalized experiences that connect you with the world\'s most beautiful destinations.')}
+              {t('TRANG THANH TRAVEL')}
             </p>
             <div className={`space-y-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>
               <div className="flex items-center">
                 <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-2" />
-                <span>123 Đường Du Lịch, Thành phố Hồ Chí Minh, Việt Nam</span>
+                <span>{t('193 Co Bac, Cau Ong Lanh Ward, Ho Chi Minh City, Vietnam')}</span>
               </div>
               <div className="flex items-center">
                 <Icon icon={Icons.FiPhone} className="w-4 h-4 mr-2" />
-                <span>+84-123-456-789</span>
+                <span>{t('(+84) 28 38 388 007')}</span>
               </div>
+                <div className="flex items-center">
+                    <Icon icon={Icons.FiPrinter} className="w-4 h-4 mr-2" />
+                    <span>{t('(+84) 28 38 388 007')}</span>
+                </div>
               <div className="flex items-center">
                 <Icon icon={Icons.FiMail} className="w-4 h-4 mr-2" />
-                <span>info@travelworld.com</span>
+                <span>goodtrip@trangthanhtravel.com.vn</span>
               </div>
             </div>
           </div>
@@ -56,7 +60,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link to="/blogs" className={`transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-200 hover:text-light-50'}`}>
-                  {t('Blogs')}
+                  {t('News')}
                 </Link>
               </li>
               <li>
@@ -77,7 +81,7 @@ const Footer: React.FC = () => {
             <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-50'}`}>{t('Our Services')}</h3>
             <ul className="space-y-2">
               <li>
-                <span className={`${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>{t('Car Rental')}</span>
+                <span className={`${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>{t('Private Car Rental')}</span>
               </li>
               <li>
                 <span className={`${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>{t('Hotel Booking')}</span>

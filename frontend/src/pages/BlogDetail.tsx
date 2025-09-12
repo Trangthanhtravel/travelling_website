@@ -106,7 +106,7 @@ const BlogDetail: React.FC = () => {
               to="/blogs"
               className={`${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-light-text-muted hover:text-light-text-primary'} transition-colors duration-200`}
             >
-              {t('Blogs')}
+              {t('News')}
             </Link>
             <Icon icon={Icons.FiChevronRight} className={`h-4 w-4 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
             <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} truncate`}>

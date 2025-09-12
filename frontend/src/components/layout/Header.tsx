@@ -33,9 +33,9 @@ const Header: React.FC = () => {
     const navigation = [
         { name: t('Home'), href: '/' },
         { name: t('Tours'), href: '/tours' },
-        { name: t('Car Rental'), href: '/car-rental' },
-        { name: t('Services'), href: '/services' },
-        { name: t('Blogs'), href: '/blogs' },
+        { name: t('Private Car Rental'), href: '/car-rental' },
+        { name: t('Other travel services'), href: '/services' },
+        { name: t('News'), href: '/blogs' },
         { name: t('Contact'), href: '/contact' },
         { name: t('About Us'), href: '/about' },
     ];

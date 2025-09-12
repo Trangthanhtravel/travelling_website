@@ -123,6 +123,7 @@ import {
     FiTarget,
     FiShield,
     FiAward,
+    FiPrinter,
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 
@@ -265,6 +266,7 @@ export const Icons = {
     FiTarget,
     FiShield,
     FiAward,
+    FiPrinter,
 };
 
 export default Icons;

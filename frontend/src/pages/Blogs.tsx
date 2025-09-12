@@ -108,7 +108,7 @@ const Blogs: React.FC = () => {
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Travel Blog')}</h1>
             <p className="text-xl mb-8 opacity-90">
-              {t('Discover amazing destinations and travel tips from our experts')}
+              {t('Looking for travel ideas, local tips, or the latest on tourism in Vietnam? You’re in the right place. We share stories, updates, and inspiration to help you best plan your trip')}
             </p>
           </div>
         </div>

@@ -57,9 +57,9 @@ const Contact: React.FC = () => {
         <div className="bg-accent-orange text-white py-16">
             <div className="container mx-auto px-4">
                 <div className="text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Get in Touch')}</h1>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('Contact Us')}</h1>
                     <p className="text-xl mb-8 opacity-90">
-                        {t('We are always ready to help you plan the perfect trip. Contact us today!')}
+                        {t('Have a question or ready to book your next adventure? Contact us now to start planning your perfect trip. Our team of travel experts is here to help with any inquiries you may have')}
                     </p>
                 </div>
             </div>
