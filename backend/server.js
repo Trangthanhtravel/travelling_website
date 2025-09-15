@@ -28,24 +28,48 @@ app.use(helmet());
 // CORS configuration for multiple origins
 const allowedOrigins = [
   'http://localhost:3000',
+  'https://localhost:3000',
   'https://www.phongphan.me',
+  'https://phongphan.me',
   process.env.FRONTEND_URL
 ].filter(Boolean); // Remove any undefined values
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps, curl requests, or same-origin requests)
     if (!origin) return callback(null, true);
 
+    // Check if the origin is in our allowed list
     if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+
+    // Allow any HTTPS origin for production deployment flexibility
+    if (origin.startsWith('https://')) {
+      // You can add additional domain validation here if needed
+      // For now, we'll allow all HTTPS origins to fix the device compatibility issue
+      return callback(null, true);
+    }
+
+    // Allow localhost with any port for development
+    if (origin.match(/^https?:\/\/localhost(:\d+)?$/)) {
+      return callback(null, true);
+    }
+
+    // Allow 127.0.0.1 with any port for development
+    if (origin.match(/^https?:\/\/127\.0\.0\.1(:\d+)?$/)) {
+      return callback(null, true);
+    }
+
+    // Log blocked origin for debugging
+    console.warn(`CORS blocked origin: ${origin}`);
+    callback(null, false); // Don't throw error, just deny
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  preflightContinue: false,
+  optionsSuccessStatus: 200
 }));
 
 // Rate limiting
