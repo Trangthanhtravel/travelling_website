@@ -5,6 +5,8 @@ import { useTranslation } from '../../contexts/TranslationContext';
 import { Icon, Icons } from '../common/Icons';
 import { useContactInfo } from '../../hooks/useContactInfo';
 
+const currentYear = new Date().getFullYear();
+
 const Footer: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { t } = useTranslation();
@@ -104,46 +106,8 @@ const Footer: React.FC = () => {
         {/* Social Media Links */}
         <div className="mt-8 pt-8 border-t border-gray-700">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex space-x-6 mb-4 md:mb-0">
-              <a
-                href="https://facebook.com/trangthanhtravelcompany"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-200 hover:text-light-50'}`}
-                aria-label="Follow us on Facebook"
-              >
-                <Icon icon={Icons.FiFacebook} className="w-6 h-6" />
-              </a>
-              <a
-                href="https://instagram.com/trangthanhtravelcompany"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-200 hover:text-light-50'}`}
-                aria-label="Follow us on Instagram"
-              >
-                <Icon icon={Icons.FiInstagram} className="w-6 h-6" />
-              </a>
-              <a
-                href="https://twitter.com/trangthanhtravelcompany"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-200 hover:text-light-50'}`}
-                aria-label="Follow us on Twitter"
-              >
-                <Icon icon={Icons.FiTwitter} className="w-6 h-6" />
-              </a>
-              <a
-                href="https://youtube.com/@trangthanhtravelcompany"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`transition-colors ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-light-200 hover:text-light-50'}`}
-                aria-label="Subscribe to our YouTube channel"
-              >
-                <Icon icon={Icons.FiYoutube} className="w-6 h-6" />
-              </a>
-            </div>
             <div className={`text-sm ${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>
-              © 2025 Travel World. {t('All rights reserved')}.
+              © {currentYear} Trang Thanh Travel. {t('All rights reserved')}.
             </div>
           </div>
         </div>
