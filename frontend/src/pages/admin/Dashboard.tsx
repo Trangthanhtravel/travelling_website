@@ -273,14 +273,6 @@ const AdminDashboard: React.FC = () => {
         {/* Top Header */}
         <header className="bg-white dark:bg-dark-800 shadow-sm border-b dark:border-dark-700 px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {tabs.find(tab => tab.id === activeTab)?.name || 'Dashboard'}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Manage your travel business
-              </p>
-            </div>
 
             {/* Optional: Add user menu or other header actions here */}
             <div className="flex items-center space-x-3">
