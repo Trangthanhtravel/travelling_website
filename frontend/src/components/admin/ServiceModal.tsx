@@ -35,6 +35,8 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
     image: undefined as File | undefined
   });
 
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   // Populate form data when editing
   useEffect(() => {
     if (initialData) {
@@ -94,6 +96,20 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+
+      // Create preview URL for the new image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -108,6 +124,13 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
 
     onSubmit(processedData);
   };
+
+  // Reset image preview when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setImagePreview(null);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -272,38 +295,74 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
                   }}
                 />
 
-                {/* Service Image */}
+                {/* Image Upload with Preview */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Service Image
                   </label>
+
+                  {/* Current Image Preview (when editing) */}
+                  {initialData?.image && !imagePreview && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Current Image:</p>
+                      <div className="relative">
+                        <img
+                          src={initialData.image}
+                          alt="Current service image"
+                          className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                          }}
+                        />
+                        <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                          Current
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* New Image Preview */}
+                  {imagePreview && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">New Image Preview:</p>
+                      <div className="relative">
+                        <img
+                          src={imagePreview}
+                          alt="New service image preview"
+                          className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm"
+                        />
+                        <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                          New
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview(null);
+                            setFormData({ ...formData, image: undefined });
+                            // Reset file input
+                            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                            if (fileInput) fileInput.value = '';
+                          }}
+                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                          title="Remove new image"
+                        >
+                          <Icon icon={Icons.FiX} className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* File Input */}
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      setFormData(prev => ({ ...prev, image: file }));
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-dark-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                    onChange={handleFileChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-dark-700 text-gray-900 dark:text-white file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900/20 dark:file:text-blue-300"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Upload a new image (JPG, PNG, WebP - Max 5MB)
+                    Upload a high-quality image for your service. Max 5MB. Supported formats: JPG, PNG, WebP.
                   </p>
                 </div>
-
-                {/* Current Image Preview */}
-                {initialData?.image && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Current Image
-                    </label>
-                    <img
-                      src={initialData.image}
-                      alt="Current service"
-                      className="w-32 h-32 rounded-lg object-cover border border-gray-200 dark:border-dark-600"
-                    />
-                  </div>
-                )}
               </div>
             </div>
 

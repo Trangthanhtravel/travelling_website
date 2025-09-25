@@ -35,6 +35,7 @@ const TourModal: React.FC<TourModalProps> = ({
     featured: false,
     image: undefined as File | undefined
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Populate form data when editing
   useEffect(() => {
@@ -120,8 +121,22 @@ const TourModal: React.FC<TourModalProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       setFormData({ ...formData, image: file });
+
+      // Create preview URL for the new image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
+
+  // Reset image preview when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setImagePreview(null);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -303,46 +318,83 @@ const TourModal: React.FC<TourModalProps> = ({
               </div>
             </div>
 
-            {/* Image Upload */}
+            {/* Image Upload with Preview */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Tour Image
               </label>
+
+              {/* Current Image Preview (when editing) */}
+              {initialData?.image && !imagePreview && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Current Image:</p>
+                  <div className="relative">
+                    <img
+                      src={initialData.image}
+                      alt="Current tour image"
+                      className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                      }}
+                    />
+                    <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                      Current
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* New Image Preview */}
+              {imagePreview && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">New Image Preview:</p>
+                  <div className="relative">
+                    <img
+                      src={imagePreview}
+                      alt="New tour image preview"
+                      className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm"
+                    />
+                    <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                      New
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImagePreview(null);
+                        setFormData({ ...formData, image: undefined });
+                        // Reset file input
+                        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                        if (fileInput) fileInput.value = '';
+                      }}
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                      title="Remove new image"
+                    >
+                      <Icon icon={Icons.FiX} className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* File Input */}
               <input
                 type="file"
                 onChange={handleFileChange}
                 accept="image/*"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900/20 dark:file:text-blue-300"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Upload a high-quality image for your tour. Max 5MB.
+                Upload a high-quality image for your tour. Max 5MB. Supported formats: JPG, PNG, WebP.
               </p>
-              {initialData?.image && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Current image: Already uploaded
-                  </p>
-                </div>
-              )}
             </div>
 
-            {/* Form Actions */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-600">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
+            {/* Submit Button */}
+            <div className="flex justify-end">
               <button
                 type="submit"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center"
                 disabled={isLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
               >
-                {isLoading && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                )}
+                {isLoading && <Icon icon={Icons.FiLoader} className="w-4 h-4 mr-2 animate-spin" />}
                 {initialData ? 'Update Tour' : 'Create Tour'}
               </button>
             </div>
@@ -354,3 +406,4 @@ const TourModal: React.FC<TourModalProps> = ({
 };
 
 export default TourModal;
+
