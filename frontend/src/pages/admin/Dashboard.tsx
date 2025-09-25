@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
 import TourManagement from './TourManagement';
@@ -173,9 +173,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onQuickAction }) 
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const tabs = [
     { id: 'dashboard', name: 'Dashboard', icon: Icons.FiHome },
@@ -192,45 +190,6 @@ const AdminDashboard: React.FC = () => {
     { id: 'email-settings', name: 'Email Settings', icon: Icons.FiMail },
     { id: 'contact-information', name: 'Contact Information', icon: Icons.FiPhone },
   ];
-
-  // Check scroll buttons state
-  const checkScrollButtons = () => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      setCanScrollLeft(container.scrollLeft > 0);
-      setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth);
-    }
-  };
-
-  // Scroll left
-  const scrollLeft = () => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.scrollBy({ left: -200, behavior: 'smooth' });
-    }
-  };
-
-  // Scroll right
-  const scrollRight = () => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.scrollBy({ left: 200, behavior: 'smooth' });
-    }
-  };
-
-  // Check scroll state on mount and when tabs change
-  useEffect(() => {
-    checkScrollButtons();
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', checkScrollButtons);
-      window.addEventListener('resize', checkScrollButtons);
-      return () => {
-        container.removeEventListener('scroll', checkScrollButtons);
-        window.removeEventListener('resize', checkScrollButtons);
-      };
-    }
-  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -265,64 +224,81 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage your travel business</p>
+    <div className="flex min-h-screen bg-gray-50 dark:bg-dark-900 transition-colors duration-200">
+      {/* Left Sidebar */}
+      <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white dark:bg-dark-800 shadow-lg border-r dark:border-dark-700 transition-all duration-300 flex-shrink-0`}>
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-4 border-b dark:border-dark-700">
+          {!sidebarCollapsed && (
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Admin Panel</h2>
+          )}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors duration-200"
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <Icon
+              icon={sidebarCollapsed ? Icons.FiChevronRight : Icons.FiChevronLeft}
+              className="w-5 h-5 text-gray-600 dark:text-gray-400"
+            />
+          </button>
         </div>
 
-        <div className="mb-8">
-          <div className="border-b border-gray-200 dark:border-dark-600">
-            <div className="relative">
-              {/* Left scroll button */}
-              {canScrollLeft && (
-                <button
-                  onClick={scrollLeft}
-                  className="absolute left-0 top-0 bottom-0 z-10 bg-gradient-to-r from-gray-50 to-transparent dark:from-dark-900 dark:to-transparent w-12 flex items-center justify-start pl-2 hover:from-gray-100 dark:hover:from-dark-800"
-                >
-                  <Icon icon={Icons.FiChevronLeft} className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </button>
-              )}
-
-              {/* Right scroll button */}
-              {canScrollRight && (
-                <button
-                  onClick={scrollRight}
-                  className="absolute right-0 top-0 bottom-0 z-10 bg-gradient-to-l from-gray-50 to-transparent dark:from-dark-900 dark:to-transparent w-12 flex items-center justify-end pr-2 hover:from-gray-100 dark:hover:from-dark-800"
-                >
-                  <Icon icon={Icons.FiChevronRight} className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </button>
-              )}
-
-              {/* Tab navigation */}
-              <nav
-                ref={scrollContainerRef}
-                className="flex overflow-x-auto scrollbar-hide"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        {/* Navigation Menu */}
+        <nav className="p-4">
+          <div className="space-y-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-start'} p-3 rounded-lg font-medium text-sm transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-700 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+                title={sidebarCollapsed ? tab.name : undefined}
               >
-                <div className="flex space-x-8 min-w-max px-12">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
-                        activeTab === tab.id
-                          ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-dark-500'
-                      }`}
-                    >
-                      <Icon icon={tab.icon} className="w-5 h-5 mr-2" />
-                      {tab.name}
-                    </button>
-                  ))}
-                </div>
-              </nav>
+                <Icon icon={tab.icon} className={`w-5 h-5 ${sidebarCollapsed ? '' : 'mr-3'} flex-shrink-0`} />
+                {!sidebarCollapsed && (
+                  <span className="truncate">{tab.name}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Header */}
+        <header className="bg-white dark:bg-dark-800 shadow-sm border-b dark:border-dark-700 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {tabs.find(tab => tab.id === activeTab)?.name || 'Dashboard'}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Manage your travel business
+              </p>
+            </div>
+
+            {/* Optional: Add user menu or other header actions here */}
+            <div className="flex items-center space-x-3">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Admin User</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
+              </div>
+              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                <Icon icon={Icons.FiUser} className="w-4 h-4 text-white" />
+              </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        {renderContent()}
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto p-6">
+          {renderContent()}
+        </main>
       </div>
     </div>
   );
