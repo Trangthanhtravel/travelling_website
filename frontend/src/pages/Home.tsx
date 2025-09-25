@@ -478,13 +478,39 @@ const Home: React.FC = () => {
                   {t('Rating on Google')}
                 </p>
                 <div className="flex justify-center mt-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Icon
-                      key={star}
-                      icon={Icons.FiStar}
-                      className={`w-4 h-4 ${star <= Math.floor(statisticsContent.googleReview) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-                    />
-                  ))}
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const rating = statisticsContent.googleReview;
+                    const filled = star <= rating;
+                    const partialFill = star === Math.ceil(rating) && rating % 1 !== 0;
+                    const fillPercentage = partialFill ? ((rating % 1) * 100) : 0;
+
+                    return (
+                      <div key={star} className="relative w-4 h-4">
+                        {/* Background star (empty) */}
+                        <Icon
+                          icon={Icons.FiStar}
+                          className="w-4 h-4 text-gray-300 absolute"
+                        />
+                        {/* Filled star or partial fill */}
+                        {filled ? (
+                          <Icon
+                            icon={Icons.FiStar}
+                            className="w-4 h-4 text-yellow-400 fill-current absolute"
+                          />
+                        ) : partialFill ? (
+                          <div
+                            className="absolute overflow-hidden"
+                            style={{ width: `${fillPercentage}%` }}
+                          >
+                            <Icon
+                              icon={Icons.FiStar}
+                              className="w-4 h-4 text-yellow-400 fill-current"
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
