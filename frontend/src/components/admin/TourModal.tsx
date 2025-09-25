@@ -331,7 +331,7 @@ const TourModal: React.FC<TourModalProps> = ({
                   <div className="relative">
                     <img
                       src={initialData.image}
-                      alt="Current tour image"
+                      alt="Current tour"
                       className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm"
                       onError={(e) => {
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
@@ -351,7 +351,7 @@ const TourModal: React.FC<TourModalProps> = ({
                   <div className="relative">
                     <img
                       src={imagePreview}
-                      alt="New tour image preview"
+                      alt="New tour preview"
                       className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm"
                     />
                     <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">

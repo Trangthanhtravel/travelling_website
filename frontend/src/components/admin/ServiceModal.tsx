@@ -308,7 +308,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
                       <div className="relative">
                         <img
                           src={initialData.image}
-                          alt="Current service image"
+                          alt="Current"
                           className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm"
                           onError={(e) => {
                             e.currentTarget.src = 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
@@ -328,7 +328,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
                       <div className="relative">
                         <img
                           src={imagePreview}
-                          alt="New service image preview"
+                          alt="New service preview"
                           className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm"
                         />
                         <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
