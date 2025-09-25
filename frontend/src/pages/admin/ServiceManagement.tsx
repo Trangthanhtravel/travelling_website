@@ -347,7 +347,7 @@ const ServiceManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Services Table */}
+      {/* Services Grid */}
       <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm border dark:border-dark-700 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
@@ -366,101 +366,106 @@ const ServiceManagement: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-600">
-              <thead className="bg-gray-50 dark:bg-dark-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Service
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-dark-800 divide-y divide-gray-200 dark:divide-dark-600">
-                {filteredServices.map((service: Service) => (
-                  <tr key={service.id} className="hover:bg-gray-50 dark:hover:bg-dark-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-12 w-12 flex-shrink-0">
-                          <img
-                            className="h-12 w-12 rounded-lg object-cover"
-                            src={service.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}
-                            alt={service.title}
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {service.title}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                            {service.description}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300">
-                        {service.category?.name || 'No Category'}
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredServices.map((service: Service) => (
+                <div key={service.id} className="bg-white dark:bg-dark-700 rounded-lg border dark:border-dark-600 shadow-sm hover:shadow-md transition-shadow duration-200">
+                  {/* Service Image */}
+                  <div className="relative h-48 overflow-hidden rounded-t-lg">
+                    <img
+                      className="w-full h-full object-cover"
+                      src={service.image || 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
+                      alt={service.title}
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                      }}
+                    />
+                    {/* Status and Featured badges */}
+                    <div className="absolute top-3 left-3 flex flex-col gap-1">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        service.status === 'active'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+                      }`}>
+                        {service.status}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        ${service.price}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col space-y-1">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          service.status === 'active'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
-                            : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-                        }`}>
-                          {service.status}
+                      {service.featured && (
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
+                          ⭐ Featured
                         </span>
-                        {service.featured && (
-                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
-                            ⭐ Featured
-                          </span>
-                        )}
+                      )}
+                    </div>
+                    {/* Price */}
+                    <div className="absolute top-3 right-3 bg-white dark:bg-dark-800 rounded-lg px-2 py-1">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">
+                        ${service.price}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Service Details */}
+                  <div className="p-4">
+                    {/* Title and Category */}
+                    <div className="mb-3">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate" title={service.title}>
+                        {service.title}
+                      </h3>
+                      <div className="flex items-center mt-1">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300" title={service.category?.name || 'No Category'}>
+                          <Icon icon={Icons.FiTag} className="w-3 h-3 mr-1" />
+                          <span className="truncate max-w-20">{service.category?.name || 'No Category'}</span>
+                        </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleEditService(service)}
-                          className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-                        >
-                          <Icon icon={Icons.FiEdit3} className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteService(service)}
-                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                        >
-                          <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleOpenGallery(service)}
-                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                        >
-                          <Icon icon={Icons.FiImage} className="w-4 h-4" />
-                        </button>
+                    </div>
+
+                    {/* Subtitle */}
+                    {service.subtitle && (
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 truncate" title={service.subtitle}>
+                        {service.subtitle}
+                      </p>
+                    )}
+
+                    {/* Description */}
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2" title={service.description}>
+                      {service.description}
+                    </p>
+
+                    {/* Duration if available */}
+                    {service.duration && (
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
+                        <span className="truncate" title={service.duration}>{service.duration}</span>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end space-x-2 pt-3 border-t dark:border-dark-600">
+                      <button
+                        onClick={() => handleEditService(service)}
+                        className="p-2 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors duration-200"
+                        title="Edit service"
+                      >
+                        <Icon icon={Icons.FiEdit3} className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleOpenGallery(service)}
+                        className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors duration-200"
+                        title="Manage gallery"
+                      >
+                        <Icon icon={Icons.FiImage} className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteService(service)}
+                        className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"
+                        title="Delete service"
+                      >
+                        <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -285,7 +285,7 @@ const TourManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Tours Table */}
+      {/* Tours Grid */}
       <div className="bg-white dark:bg-dark-800 rounded-lg shadow-sm border dark:border-dark-700 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
@@ -304,108 +304,101 @@ const TourManagement: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-600">
-              <thead className="bg-gray-50 dark:bg-dark-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Tour
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Duration
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-dark-800 divide-y divide-gray-200 dark:divide-dark-600">
-                {filteredTours.map((tour: Tour) => (
-                  <tr key={tour.id} className="hover:bg-gray-50 dark:hover:bg-dark-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-12 w-12 flex-shrink-0">
-                          <img
-                            className="h-12 w-12 rounded-lg object-cover"
-                            src={tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}
-                            alt={tour.title}
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {tour.title}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                            {tour.description}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{tour.location}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        ${tour.price}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{tour.duration}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        Max {tour.max_participants} people
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col space-y-1">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          tour.status === 'active'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
-                            : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-                        }`}>
-                          {tour.status}
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredTours.map((tour: Tour) => (
+                <div key={tour.id} className="bg-white dark:bg-dark-700 rounded-lg border dark:border-dark-600 shadow-sm hover:shadow-md transition-shadow duration-200">
+                  {/* Tour Image */}
+                  <div className="relative h-48 overflow-hidden rounded-t-lg">
+                    <img
+                      className="w-full h-full object-cover"
+                      src={tour.image || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
+                      alt={tour.title}
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                      }}
+                    />
+                    {/* Status and Featured badges */}
+                    <div className="absolute top-3 left-3 flex flex-col gap-1">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        tour.status === 'active'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+                      }`}>
+                        {tour.status}
+                      </span>
+                      {tour.featured && (
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
+                          ⭐ Featured
                         </span>
-                        {tour.featured && (
-                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
-                            ⭐ Featured
-                          </span>
-                        )}
+                      )}
+                    </div>
+                    {/* Price */}
+                    <div className="absolute top-3 right-3 bg-white dark:bg-dark-800 rounded-lg px-2 py-1">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">
+                        ${tour.price}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Tour Details */}
+                  <div className="p-4">
+                    {/* Title and Location */}
+                    <div className="mb-3">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate" title={tour.title}>
+                        {tour.title}
+                      </h3>
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1 flex-shrink-0" />
+                        <span className="truncate" title={tour.location}>{tour.location}</span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleEditTour(tour)}
-                          className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-                        >
-                          <Icon icon={Icons.FiEdit3} className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTour(tour)}
-                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                        >
-                          <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleOpenGallery(tour)}
-                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                        >
-                          <Icon icon={Icons.FiImage} className="w-4 h-4" />
-                        </button>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2" title={tour.description}>
+                      {tour.description}
+                    </p>
+
+                    {/* Duration and Participants */}
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      <div className="flex items-center">
+                        <Icon icon={Icons.FiClock} className="w-4 h-4 mr-1" />
+                        <span className="truncate" title={tour.duration}>{tour.duration}</span>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <div className="flex items-center">
+                        <Icon icon={Icons.FiUsers} className="w-4 h-4 mr-1" />
+                        <span>Max {tour.max_participants}</span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end space-x-2 pt-3 border-t dark:border-dark-600">
+                      <button
+                        onClick={() => handleEditTour(tour)}
+                        className="p-2 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors duration-200"
+                        title="Edit tour"
+                      >
+                        <Icon icon={Icons.FiEdit3} className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleOpenGallery(tour)}
+                        className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors duration-200"
+                        title="Manage gallery"
+                      >
+                        <Icon icon={Icons.FiImage} className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTour(tour)}
+                        className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"
+                        title="Delete tour"
+                      >
+                        <Icon icon={Icons.FiTrash2} className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
