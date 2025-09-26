@@ -372,16 +372,18 @@ const Home: React.FC = () => {
                 </p>
               </div>
 
-              {/* YouTube Video Embed */}
-              <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden shadow-lg">
-                <iframe
-                  className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${aboutContent.youtubeId}?controls=1&modestbranding=1&rel=0`}
-                  title="About Our Travel Company"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              </div>
+              {/* YouTube Video Embed - Only show if youtubeId exists */}
+              {aboutContent.youtubeId && (
+                <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden shadow-lg">
+                  <iframe
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${aboutContent.youtubeId}?controls=1&modestbranding=1&rel=0`}
+                    title="About Our Travel Company"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              )}
             </div>
           </div>
         </div>
