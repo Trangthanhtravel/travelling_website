@@ -121,17 +121,18 @@ const getServices = async (req, res) => {
 
     const result = await db.prepare(query).bind(...params).all();
 
-    // Get total count for pagination
+    // Get total count for pagination - use params without LIMIT and OFFSET
     let countQuery = `
       SELECT COUNT(*) as total 
       FROM services s
       LEFT JOIN categories c ON s.category_id = c.id
     `;
+    const countParams = params.slice(0, -2); // Remove LIMIT and OFFSET params
     if (conditions.length > 0) {
       countQuery += ' WHERE ' + conditions.join(' AND ');
     }
 
-    const countResult = await db.prepare(countQuery).bind(...params.slice(0, -2)).first();
+    const countResult = await db.prepare(countQuery).bind(...countParams).first();
     const total = countResult?.total || 0;
 
     // Process results and include category information
