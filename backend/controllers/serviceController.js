@@ -158,7 +158,7 @@ const getServices = async (req, res) => {
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / parseInt(limit)),
-        totalItems: total,
+        total: total,
         hasNext: parseInt(page) < Math.ceil(total / parseInt(limit)),
         hasPrev: parseInt(page) > 1
       }
