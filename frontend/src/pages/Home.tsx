@@ -356,11 +356,6 @@ const Home: React.FC = () => {
                     <blockquote className="text-xl md:text-2xl font-serif leading-relaxed mb-6 drop-shadow-lg">
                       "{aboutContent.quote}"
                     </blockquote>
-                    <div className="flex items-center justify-center">
-                      <div className="w-12 h-px bg-accent-orange mr-4"></div>
-                      <p className="text-lg font-medium drop-shadow-md text-accent-orange">{aboutContent.tagline}</p>
-                      <div className="w-12 h-px bg-accent-orange ml-4"></div>
-                    </div>
                   </div>
                 </div>
               </div>
