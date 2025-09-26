@@ -188,7 +188,7 @@ const Home: React.FC = () => {
           const descriptionItem = aboutData.find((item: any) => item.key === 'about_description');
           const description = language === 'vi' ? (descriptionItem?.content_vi || descriptionItem?.content) : descriptionItem?.content;
 
-          const youtubeId = aboutData.find((item: any) => item.key === 'about_youtube_id')?.content || '8VJpaYXrPPQ';
+          const youtubeId = aboutData.find((item: any) => item.key === 'about_youtube_id')?.content;
 
           // Fetch statistics data
           const happyCustomers = parseInt(aboutData.find((item: any) => item.key === 'stats_happy_customers')?.content || '500');
