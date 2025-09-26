@@ -135,7 +135,7 @@ const getServices = async (req, res) => {
     const total = countResult?.total || 0;
 
     // Process results and include category information
-    const services = result.results?.map(service => ({
+    const services = result?.map(service => ({
       ...service,
       images: service.images ? JSON.parse(service.images) : [],
       gallery: service.gallery ? JSON.parse(service.gallery) : [],
@@ -388,7 +388,7 @@ const getUserServiceBookings = async (req, res) => {
 
     const result = await db.prepare(query).bind(req.user.id).all();
 
-    const bookings = result.results?.map(booking => ({
+    const bookings = result?.map(booking => ({
       ...booking,
       booking_form: booking.booking_form ? JSON.parse(booking.booking_form) : {},
       notes: booking.notes ? JSON.parse(booking.notes) : [],
@@ -445,7 +445,7 @@ const getAllServiceBookings = async (req, res) => {
 
     const result = await db.prepare(query).bind(...params).all();
 
-    const bookings = result.results?.map(booking => ({
+    const bookings = result?.map(booking => ({
       ...booking,
       booking_form: booking.booking_form ? JSON.parse(booking.booking_form) : {},
       notes: booking.notes ? JSON.parse(booking.notes) : [],
