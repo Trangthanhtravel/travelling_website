@@ -28,7 +28,7 @@ const Home: React.FC = () => {
     tagline: '',
     title: '',
     description: '',
-    youtubeId: '8VJpaYXrPPQ',
+    youtubeId: '',
   });
   const [statisticsContent, setStatisticsContent] = useState({
     happyCustomers: 500,
