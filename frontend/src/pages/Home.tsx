@@ -514,11 +514,11 @@ const Home: React.FC = () => {
       </section>
 
       {/* Core Services Section */}
-      <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-light-50' : 'bg-light-200'}`}>
+      <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-800' : 'bg-light-200'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-light-text-primary mb-4">{t('Explore our services')}</h2>
-            <p className="text-xl text-light-text-muted max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-light-text-primary dark:text-white mb-4">{t('Explore our services')}</h2>
+            <p className="text-xl text-light-text-muted text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               {t('Comprehensive travel solutions to make your journey seamless and memorable')}
             </p>
           </div>
@@ -660,7 +660,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Featured Tours Section */}
-      <section className="py-20 bg-white dark:bg-dark-800 transition-colors duration-200">
+      <section className="py-20 bg-white dark:bg-dark-900 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{t('Featured Tours')}</h2>
@@ -786,11 +786,11 @@ const Home: React.FC = () => {
       </section>
 
       {/* Car Rentals Section */}
-      <section className="py-20 bg-gray-50 dark:bg-white transition-colors duration-200">
+      <section className="py-20 bg-gray-50 dark:bg-dark-800 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-900 mb-4">{t('Private Car Rental')}</h2>
-            <p className="text-xl text-gray-600 dark:text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{t('Private Car Rental')}</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               {t('Choose from our premium vehicle fleet')}
             </p>
           </div>
