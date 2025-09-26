@@ -392,7 +392,7 @@ const Home: React.FC = () => {
       {/* Statistics Section */}
       <section
         ref={statisticsRef}
-        className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-white'}`}
+        className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-[#daedff]'}`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -662,7 +662,8 @@ const Home: React.FC = () => {
       </section>
 
       {/* Featured Tours Section */}
-      <section className="py-20 bg-white dark:bg-dark-900 transition-colors duration-200">
+      <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-[#daedff]'}`}>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{t('Featured Tours')}</h2>
@@ -878,7 +879,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Featured Blogs Section */}
-      <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-light-50'}`}>
+      <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-900' : 'bg-[#daedff]'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-light-text-primary dark:text-white">
