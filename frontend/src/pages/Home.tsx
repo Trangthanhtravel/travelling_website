@@ -399,7 +399,7 @@ const Home: React.FC = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Happy Customers */}
             <div className="text-center group">
-              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} hover:shadow-xl`}>
+              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'hover:bg-dark-700' : 'bg-[#daedff] hover:bg-light-100'} hover:shadow-xl`}>
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon icon={Icons.FiUsers} className="w-8 h-8 text-white" />
                 </div>
@@ -419,7 +419,7 @@ const Home: React.FC = () => {
 
             {/* Number of Trips */}
             <div className="text-center group">
-              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} hover:shadow-xl`}>
+              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'hover:bg-dark-700' : 'bg-[#daedff] hover:bg-light-100'} hover:shadow-xl`}>
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon icon={Icons.FiMapPin} className="w-8 h-8 text-white" />
                 </div>
@@ -439,7 +439,7 @@ const Home: React.FC = () => {
 
             {/* Years of Experience */}
             <div className="text-center group">
-              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? ' hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} hover:shadow-xl`}>
+              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? ' hover:bg-dark-700' : 'bg-[#daedff] hover:bg-light-100'} hover:shadow-xl`}>
                 <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon icon={Icons.FiCalendar} className="w-8 h-8 text-white" />
                 </div>
@@ -459,7 +459,7 @@ const Home: React.FC = () => {
 
             {/* Google Review */}
             <div className="text-center group">
-              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'hover:bg-dark-700' : 'bg-light-50 hover:bg-light-100'} hover:shadow-xl`}>
+              <div className={`p-8 rounded-2xl transition-all duration-300 group-hover:scale-105 ${isDarkMode ? 'hover:bg-dark-700' : 'bg-[#daedff] hover:bg-light-100'} hover:shadow-xl`}>
                 <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon icon={Icons.FiStar} className="w-8 h-8 text-white" />
                 </div>
