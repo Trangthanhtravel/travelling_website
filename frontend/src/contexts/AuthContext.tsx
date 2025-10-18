@@ -10,7 +10,7 @@ interface AuthState {
 }
 
 interface AuthAction {
-  type: 'LOGIN_START' | 'LOGIN_SUCCESS' | 'LOGIN_FAILURE' | 'LOGOUT' | 'SET_LOADING';
+  type: 'LOGIN_START' | 'LOGIN_SUCCESS' | 'LOGIN_FAILURE' | 'LOGOUT' | 'SET_LOADING' | 'RESTORE_SESSION';
   payload?: any;
 }
 
@@ -18,7 +18,7 @@ const initialState: AuthState = {
   admin: null,
   token: localStorage.getItem('adminToken'),
   isLoading: true,
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem('adminToken'),
 };
 
 const AuthContext = createContext<{
@@ -66,6 +66,14 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         ...state,
         isLoading: action.payload,
       };
+    case 'RESTORE_SESSION':
+      return {
+        ...state,
+        admin: action.payload.user,
+        token: action.payload.token,
+        isLoading: false,
+        isAuthenticated: true,
+      };
     default:
       return state;
   }
@@ -76,24 +84,46 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
+    const storedUser = localStorage.getItem('adminUser');
+
     if (token) {
-      // Verify token is still valid using the admin profile endpoint
+      // First, restore from localStorage immediately to prevent flash
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          dispatch({
+            type: 'RESTORE_SESSION',
+            payload: { user, token },
+          });
+        } catch (e) {
+          console.error('Error parsing stored user:', e);
+        }
+      }
+
+      // Then verify token is still valid in the background
       adminAPI_functions.getProfile()
         .then(response => {
+          const user = response.data.data;
+          // Update localStorage with fresh user data
+          localStorage.setItem('adminUser', JSON.stringify(user));
           dispatch({
             type: 'LOGIN_SUCCESS',
-            payload: {
-              user: response.data.data,
-              token,
-            },
+            payload: { user, token },
           });
         })
-        .catch(() => {
-          localStorage.removeItem('adminToken');
-          dispatch({ type: 'LOGIN_FAILURE' });
-        })
-        .finally(() => {
-          dispatch({ type: 'SET_LOADING', payload: false });
+        .catch((error) => {
+          // Only logout if it's a 401/403 error (invalid token)
+          // Don't logout on network errors or server errors
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            console.log('Token is invalid, logging out');
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            dispatch({ type: 'LOGIN_FAILURE' });
+          } else {
+            // Keep the session on network/server errors
+            console.log('Network/server error, keeping session:', error.message);
+            dispatch({ type: 'SET_LOADING', payload: false });
+          }
         });
     } else {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -112,7 +142,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       console.log('🔍 Frontend - Extracted:', { token: !!token, user: !!user });
 
+      // Store both token and user data
       localStorage.setItem('adminToken', token);
+      localStorage.setItem('adminUser', JSON.stringify(user));
+
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: { user, token },
@@ -126,6 +159,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
     dispatch({ type: 'LOGOUT' });
   };
 

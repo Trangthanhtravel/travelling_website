@@ -73,6 +73,41 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+// Get admin profile
+const getProfile = async (req, res) => {
+  try {
+    // req.user is set by the adminAuth middleware
+    const userId = req.user.userId;
+
+    // Get user from database
+    const user = await User.findById(userId, req.db);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Return user profile without password
+    res.json({
+      success: true,
+      data: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching profile'
+    });
+  }
+};
+
 // Get all users (admin only)
 const getAllUsers = async (req, res) => {
   try {
@@ -347,6 +382,7 @@ const uploadImages = async (req, res) => {
 module.exports = {
   upload,
   getDashboardStats,
+  getProfile,
   getAllUsers,
   updateUserRole,
   uploadImage,

@@ -3,6 +3,7 @@ const router = express.Router();
 const { adminAuth } = require('../middleware/auth');
 const {
   getDashboardStats,
+  getProfile,
   getAllUsers,
   updateUserRole,
   upload,
@@ -26,6 +27,9 @@ const {
 
 // Dashboard routes
 router.get('/dashboard', adminAuth, getDashboardStats);
+
+// Profile route (for token verification on page refresh)
+router.get('/profile', adminAuth, getProfile);
 
 // User management routes
 router.get('/users', adminAuth, getAllUsers);

@@ -42,9 +42,12 @@ adminAPI.interceptors.request.use(
 adminAPI.interceptors.response.use(
     (response) => response,
     (error) => {
+        // Don't automatically redirect or remove token here
+        // Let the AuthContext handle authentication errors
+        // This prevents auto-logout when opening multiple tabs
         if (error.response?.status === 401) {
-            localStorage.removeItem('adminToken');
-            window.location.href = '/admin/login';
+            // Only log the error, don't automatically logout
+            console.log('Unauthorized request, but keeping session');
         }
         return Promise.reject(error);
     }
