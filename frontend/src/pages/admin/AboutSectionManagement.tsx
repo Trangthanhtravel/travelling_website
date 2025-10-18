@@ -134,65 +134,90 @@ const AboutSectionManagement: React.FC = () => {
       }
 
       const contentItems = [
-        { key: 'about_background_image', title: 'About Background Image', content: backgroundImageUrl },
+        { key: 'about_background_image', title: 'About Background Image', content: backgroundImageUrl, content_vi: backgroundImageUrl },
         { key: 'about_quote', title: 'About Quote', content: aboutContent.quote.en, content_vi: aboutContent.quote.vi },
         { key: 'about_tagline', title: 'About Tagline', content: aboutContent.tagline.en, content_vi: aboutContent.tagline.vi },
         { key: 'about_title', title: 'About Title', content: aboutContent.title.en, content_vi: aboutContent.title.vi },
         { key: 'about_description', title: 'About Description', content: aboutContent.description.en, content_vi: aboutContent.description.vi },
-        { key: 'about_youtube_id', title: 'About YouTube ID', content: aboutContent.youtubeId },
-        { key: 'stats_happy_customers', title: 'Happy Customers Stat', content: aboutContent.statistics.happyCustomers },
-        { key: 'stats_number_of_trips', title: 'Number of Trips Stat', content: aboutContent.statistics.numberOfTrips },
-        { key: 'stats_years_experience', title: 'Years Experience Stat', content: aboutContent.statistics.yearsOfExperience },
-        { key: 'stats_google_review', title: 'Google Review Stat', content: aboutContent.statistics.googleReview }
+        { key: 'about_youtube_id', title: 'About YouTube ID', content: aboutContent.youtubeId, content_vi: aboutContent.youtubeId },
+        { key: 'stats_happy_customers', title: 'Happy Customers Stat', content: aboutContent.statistics.happyCustomers, content_vi: aboutContent.statistics.happyCustomers },
+        { key: 'stats_number_of_trips', title: 'Number of Trips Stat', content: aboutContent.statistics.numberOfTrips, content_vi: aboutContent.statistics.numberOfTrips },
+        { key: 'stats_years_experience', title: 'Years Experience Stat', content: aboutContent.statistics.yearsOfExperience, content_vi: aboutContent.statistics.yearsOfExperience },
+        { key: 'stats_google_review', title: 'Google Review Stat', content: aboutContent.statistics.googleReview, content_vi: aboutContent.statistics.googleReview }
       ];
 
+      // Fetch all content once before the loop
+      const response = await fetch(`${getApiUrl()}/admin/content?type=setting`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch existing content');
+      }
+
+      const data = await response.json();
+      const existingContent = data.data || [];
+
+      // Process each content item
       for (const item of contentItems) {
-        // First try to get existing content
-        const response = await fetch(`${getApiUrl()}/admin/content`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        const existingItem = existingContent.find((content: any) => content.key === item.key);
+
+        if (existingItem) {
+          // Update existing content with all fields
+          const updateResponse = await fetch(`${getApiUrl()}/admin/content/${existingItem.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify({
+              title: item.title,
+              content: item.content,
+              content_vi: item.content_vi,
+              type: 'setting',
+              status: 'active'
+            })
+          });
+
+          if (!updateResponse.ok) {
+            const errorData = await updateResponse.json();
+            console.error(`Failed to update ${item.key}:`, errorData);
+            throw new Error(`Failed to update ${item.title}`);
           }
-        });
+        } else {
+          // Create new content
+          const createResponse = await fetch(`${getApiUrl()}/admin/content`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            },
+            body: JSON.stringify({
+              key: item.key,
+              title: item.title,
+              content: item.content,
+              content_vi: item.content_vi,
+              type: 'setting',
+              status: 'active'
+            })
+          });
 
-        if (response.ok) {
-          const data = await response.json();
-          const existingItem = data.data.find((content: any) => content.key === item.key);
-
-          if (existingItem) {
-            // Update existing content
-            await fetch(`${getApiUrl()}/admin/content/${existingItem.id}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-              },
-              body: JSON.stringify({ content: item.content })
-            });
-          } else {
-            // Create new content
-            await fetch(`${getApiUrl()}/admin/content`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-              },
-              body: JSON.stringify({
-                key: item.key,
-                title: item.title,
-                content: item.content,
-                type: 'setting'
-              })
-            });
+          if (!createResponse.ok) {
+            const errorData = await createResponse.json();
+            console.error(`Failed to create ${item.key}:`, errorData);
+            throw new Error(`Failed to create ${item.title}`);
           }
         }
       }
 
       setSelectedFile(null);
       toast.success('About section updated successfully');
-      fetchAboutContent();
+      await fetchAboutContent(); // Wait for refresh to complete
     } catch (error) {
       console.error('Error saving about content:', error);
-      toast.error('Error saving about content. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Error saving about content. Please try again.');
     } finally {
       setSaving(false);
     }
