@@ -341,11 +341,11 @@ const Home: React.FC = () => {
       {/* About Us Section */}
       <section className={`py-20 transition-colors duration-200 ${isDarkMode ? 'bg-dark-800' : 'bg-light-50'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Left side - Company Quote with Nature Background */}
-            <div className="relative">
+            <div className="relative flex items-end">
               <div
-                className="relative h-64 md:h-80 rounded-2xl overflow-hidden bg-cover bg-center shadow-2xl"
+                className="relative h-64 md:h-80 w-full rounded-2xl overflow-hidden bg-cover bg-center shadow-2xl"
                 style={{
                   backgroundImage: `url('${aboutContent.backgroundImage}')`,
                 }}
@@ -362,15 +362,21 @@ const Home: React.FC = () => {
             </div>
 
             {/* Right side - Content and YouTube Video */}
-            <div className="space-y-6">
-              <div className="text-center lg:text-left">
-                <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
-                  {aboutContent.title}
-                </h2>
-                <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
-                  {aboutContent.description}
-                </p>
-              </div>
+            <div className="space-y-6 flex flex-col justify-end">
+              {(aboutContent.title || aboutContent.description) && (
+                <div className="text-center lg:text-left">
+                  {aboutContent.title && (
+                    <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${isDarkMode ? 'text-dark-text-secondary' : 'text-light-text-primary'}`}>
+                      {aboutContent.title}
+                    </h2>
+                  )}
+                  {aboutContent.description && (
+                    <p className={`text-lg leading-relaxed ${isDarkMode ? 'text-dark-text-muted' : 'text-light-text-muted'}`}>
+                      {aboutContent.description}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* YouTube Video Embed - Only show if youtubeId exists */}
               {aboutContent.youtubeId && (
