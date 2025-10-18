@@ -50,9 +50,7 @@ class Booking {
     this.confirmed_at = data.confirmed_at;
     
     // Timestamps
-        gender, date_of_birth, address,
     this.created_at = data.created_at || new Date().toISOString();
-        departure_location, destination_location, return_trip, return_date,
     this.updated_at = data.updated_at || new Date().toISOString();
   }
 
@@ -61,20 +59,22 @@ class Booking {
     const db = getDB();
     const sql = `
       INSERT INTO bookings (
-      this.gender, this.date_of_birth, this.address,
         type, item_id, customer_name, customer_email, customer_phone,
-      this.departure_location, this.destination_location, this.return_trip, this.return_date,
         start_date, total_travelers, adults, children, infants,
+        gender, date_of_birth, address,
         emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+        departure_location, destination_location, return_trip, return_date,
         special_requests, total_amount, currency, booking_number,
         status, contacted_at, confirmed_at, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const params = [
       this.type, this.item_id, this.customer_name, this.customer_email, this.customer_phone,
       this.start_date, this.total_travelers, this.adults, this.children, this.infants,
+      this.gender, this.date_of_birth, this.address,
       this.emergency_contact_name, this.emergency_contact_phone, this.emergency_contact_relationship,
+      this.departure_location, this.destination_location, this.return_trip, this.return_date,
       this.special_requests, this.total_amount, this.currency, this.booking_number,
       this.status, this.contacted_at, this.confirmed_at, this.created_at, this.updated_at
     ];
