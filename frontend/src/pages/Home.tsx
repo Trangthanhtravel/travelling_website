@@ -345,7 +345,7 @@ const Home: React.FC = () => {
             {/* Left side - Company Quote with Nature Background */}
             <div className="relative">
               <div
-                className="relative h-96 rounded-2xl overflow-hidden bg-cover bg-center shadow-2xl"
+                className="relative h-64 md:h-80 rounded-2xl overflow-hidden bg-cover bg-center shadow-2xl"
                 style={{
                   backgroundImage: `url('${aboutContent.backgroundImage}')`,
                 }}
