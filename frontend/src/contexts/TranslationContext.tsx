@@ -499,7 +499,7 @@ const vietnameseTranslations: Translations = {
 
   // Footer Content
   'All rights reserved': 'Tất cả quyền được bảo lưu',
-  'Cookie Policy': 'Chính Sách Cookie',
+  'Booking Policy': 'Chính Sách đặt chỗ và thanh toán',
   'Quick Links': 'Liên Kết Nhanh',
   'Useful Links': 'Liên Kết Hữu Ích',
   'Help': 'Trợ Giúp',
