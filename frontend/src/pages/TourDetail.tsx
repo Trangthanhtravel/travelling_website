@@ -279,7 +279,7 @@ const TourDetail: React.FC = () => {
                     {t('Included')}
                   </h3>
                   <ul className="space-y-2">
-                    {tour?.included?.map((included, index) => (
+                    {tour?.included.map((included, index) => (
                       <li key={index} className="flex items-start">
                         <Icon icon={Icons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                         <span className="text-gray-600 text-sm">{included}</span>
@@ -295,7 +295,7 @@ const TourDetail: React.FC = () => {
                     {t('Not Included')}
                   </h3>
                   <ul className="space-y-2">
-                    {tour?.excluded?.map((excluded, index) => (
+                    {tour?.excluded.map((excluded, index) => (
                       <li key={index} className="flex items-start">
                         <Icon icon={Icons.FiX} className="w-4 h-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
                         <span className="text-gray-600 text-sm">{excluded}</span>
