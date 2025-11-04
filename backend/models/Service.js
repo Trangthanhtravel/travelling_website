@@ -1,11 +1,10 @@
-const { v4: uuidv4 } = require('uuid');
-const { dbHelpers } = require('../config/database');
 const { r2Helpers } = require('../config/storage');
 
 class Service {
   constructor(data) {
-    this.id = data.id || uuidv4();
+    this.id = data.id; // Only set if provided (from database)
     this.title = data.title;
+    this.slug = data.slug;
     this.subtitle = data.subtitle;
     this.description = data.description;
     this.price = data.price;
@@ -30,32 +29,62 @@ class Service {
     this.updated_at = data.updated_at;
   }
 
+  // Generate slug from title
+  generateSlug() {
+    if (!this.slug && this.title) {
+      this.slug = this.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim('-');
+    }
+  }
+
   // Save service to database
   async save(db) {
-    const serviceData = {
-      id: this.id,
-      title: this.title,
-      subtitle: this.subtitle,
-      description: this.description,
-      price: this.price,
-      duration: this.duration,
-      included: JSON.stringify(this.included),
-      excluded: JSON.stringify(this.excluded),
-      category_id: this.category_id,
-      service_type: this.service_type,
-      image: this.image,
-      gallery: JSON.stringify(this.gallery),
-      status: this.status,
-      // Vietnamese fields
-      title_vi: this.title_vi,
-      subtitle_vi: this.subtitle_vi,
-      description_vi: this.description_vi,
-      duration_vi: this.duration_vi,
-      included_vi: JSON.stringify(this.included_vi),
-      excluded_vi: JSON.stringify(this.excluded_vi)
-    };
-    
-    return await dbHelpers.insert(db, 'services', serviceData);
+    this.generateSlug();
+
+    // Build the INSERT query manually to match the database schema
+    const sql = `
+      INSERT INTO services (
+        title, slug, subtitle, description, price, duration,
+        included, excluded, category_id, service_type, image, gallery,
+        status, title_vi, subtitle_vi, description_vi, duration_vi,
+        included_vi, excluded_vi, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+    `;
+
+    const params = [
+      this.title,
+      this.slug,
+      this.subtitle,
+      this.description,
+      this.price,
+      this.duration,
+      JSON.stringify(this.included),
+      JSON.stringify(this.excluded),
+      this.category_id,
+      this.service_type,
+      this.image,
+      JSON.stringify(this.gallery),
+      this.status,
+      this.title_vi,
+      this.subtitle_vi,
+      this.description_vi,
+      this.duration_vi,
+      JSON.stringify(this.included_vi),
+      JSON.stringify(this.excluded_vi)
+    ];
+
+    const result = await db.prepare(sql).bind(...params).run();
+
+    // Get the auto-generated ID
+    if (result.success && result.meta?.last_row_id) {
+      this.id = result.meta.last_row_id;
+    }
+
+    return result;
   }
 
   // Update service image using R2 (single image)
