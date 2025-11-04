@@ -7,6 +7,7 @@ import AnimatedCounter from '../components/common/AnimatedCounter';
 import LottieLoading from '../components/common/LottieLoading';
 import { useQuery } from '@tanstack/react-query';
 import { toursAPI, servicesAPI } from '../utils/api';
+import { formatCurrency } from '../utils/currency';
 
 interface HeroSlide {
   id: number;
@@ -705,7 +706,7 @@ const Home: React.FC = () => {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                         <div className="absolute top-4 right-4 bg-white dark:bg-dark-800 rounded-full px-3 py-1 text-sm font-medium text-primary-600 dark:text-primary-400">
-                          ${tour.price}
+                          {formatCurrency(tour.price)}
                         </div>
                         {tour.featured && (
                           <div className="absolute top-4 left-4 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
@@ -833,7 +834,7 @@ const Home: React.FC = () => {
                           }}
                         />
                         <div className="absolute top-4 right-4 bg-white dark:bg-gray-100 text-gray-900 dark:text-gray-900 px-3 py-1 rounded-full text-sm font-medium border border-gray-200 dark:border-gray-300">
-                          ${car.price}/{car.duration || 'day'}
+                          {formatCurrency(car.price)}/{car.duration || 'day'}
                         </div>
                       </div>
                       <div className="p-6">

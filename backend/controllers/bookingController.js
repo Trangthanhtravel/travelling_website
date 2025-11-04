@@ -106,7 +106,7 @@ const createDirectBooking = async (req, res) => {
       total_travelers: totalTravelers,
       special_requests: specialRequests || null,
       total_amount: totalAmount,
-      currency: currency || 'USD',
+      currency: currency || 'VND',
       status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

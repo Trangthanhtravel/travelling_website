@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../components/common/Icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
+import { formatCurrency } from '../utils/currency';
 
 const CarRental: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -190,7 +191,7 @@ const CarRental: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   <div className="absolute top-4 right-4 bg-accent-orange text-white rounded-full px-3 py-1 text-sm font-medium">
-                    ${car.price}/{car.duration || 'day'}
+                    {formatCurrency(car.price)}/{car.duration || 'day'}
                   </div>
                   {car.featured && (
                     <div className="absolute top-4 left-4 bg-warning text-white px-2 py-1 rounded text-xs font-medium">

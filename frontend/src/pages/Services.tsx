@@ -5,6 +5,7 @@ import { Icon, Icons } from '../components/common/Icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import LottieLoading from '../components/common/LottieLoading';
+import { formatCurrency } from '../utils/currency';
 
 const Services: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -274,7 +275,7 @@ const Services: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                   {service.price && (
                     <div className="absolute top-4 right-4 bg-accent-orange text-white px-3 py-1 rounded-full text-sm font-medium">
-                      ${service.price}
+                      {formatCurrency(service.price)}
                     </div>
                   )}
                 </div>
@@ -350,7 +351,7 @@ const Services: React.FC = () => {
                       {service.price && (
                         <div className="text-right">
                           <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                            ${service.price}
+                            {formatCurrency(service.price)}
                           </span>
                           <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                             {t('per service')}

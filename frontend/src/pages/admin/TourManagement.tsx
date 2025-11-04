@@ -4,6 +4,7 @@ import { Icon, Icons } from '../../components/common/Icons';
 import TourModal from '../../components/admin/TourModal';
 import GalleryManager from '../../components/common/GalleryManager';
 import toast from 'react-hot-toast';
+import { formatCurrency } from '../../utils/currency';
 
 // Tour types (updated to include Vietnamese fields)
 interface Tour {
@@ -336,7 +337,7 @@ const TourManagement: React.FC = () => {
                     {/* Price */}
                     <div className="absolute top-3 right-3 bg-white dark:bg-dark-800 rounded-lg px-2 py-1">
                       <span className="text-sm font-bold text-gray-900 dark:text-white">
-                        ${tour.price}
+                        {formatCurrency(tour.price)}
                       </span>
                     </div>
                   </div>

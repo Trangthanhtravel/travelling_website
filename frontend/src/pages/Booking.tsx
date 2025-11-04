@@ -7,6 +7,7 @@ import { BookingForm } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import toast from 'react-hot-toast';
+import { formatCurrency } from '../utils/currency';
 
 // Extended booking form for direct bookings
 interface DirectBookingForm extends Omit<BookingForm, 'tourId' | 'travelers'> {
@@ -95,7 +96,7 @@ const DirectBooking: React.FC = () => {
         basePrice,
         totalTravelers: watchedValues.totalTravelers,
         totalAmount,
-        currency: tourData?.pricing?.currency || 'USD',
+        currency: tourData?.pricing?.currency || 'VND',
       });
     }
   }, [tourData, watchedValues.totalTravelers]);
@@ -117,7 +118,7 @@ const DirectBooking: React.FC = () => {
         infants: data.numberOfTravelers.infants,
         totalTravelers: data.totalTravelers,
         totalAmount: pricing?.totalAmount || 0,
-        currency: pricing?.currency || 'USD',
+        currency: pricing?.currency || 'VND',
         specialRequests: data.specialRequests,
         emergencyContactName: data.emergencyContact.name,
         emergencyContactPhone: data.emergencyContact.phone,
@@ -189,7 +190,7 @@ const DirectBooking: React.FC = () => {
                       </span>
                     )}
                     <span className="font-semibold text-blue-600">
-                      {t('Starting from')} ${tourData.price}
+                      {t('Starting from')} {formatCurrency(tourData.price)}
                     </span>
                     {tourData.location && (
                       <span className="flex items-center">
@@ -216,7 +217,7 @@ const DirectBooking: React.FC = () => {
                 </div>
                 <div>
                   <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('Price per Person')}:</span>
-                  <span className={`ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>${tourData.price}</span>
+                  <span className={`ml-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{formatCurrency(tourData.price)}</span>
                 </div>
                 <div>
                   <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t('Category')}:</span>
@@ -470,7 +471,7 @@ const DirectBooking: React.FC = () => {
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('Base Price')}:</span>
-                      <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>${pricing?.basePrice || tourData.price}</span>
+                      <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{formatCurrency(pricing?.basePrice) || formatCurrency(tourData.price)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('Number of Travelers')}:</span>
@@ -479,7 +480,7 @@ const DirectBooking: React.FC = () => {
                     <hr className={`${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`} />
                     <div className="flex justify-between text-lg font-semibold">
                       <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{t('Total Amount')}:</span>
-                      <span className="text-blue-600">${pricing?.totalAmount || tourData.price}</span>
+                      <span className="text-blue-600">{formatCurrency(pricing?.totalAmount) || formatCurrency(tourData.price)}</span>
                     </div>
                   </div>
 

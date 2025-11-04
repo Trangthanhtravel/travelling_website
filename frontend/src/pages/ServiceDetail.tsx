@@ -5,6 +5,7 @@ import { Icon, Icons } from '../components/common/Icons';
 import { servicesAPI } from '../utils/api';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
+import { formatCurrency } from '../utils/currency';
 
 const ServiceDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -114,7 +115,7 @@ const ServiceDetail: React.FC = () => {
                 {service.price && (
                   <div className="flex items-center">
                     <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      ${service.price}
+                      {formatCurrency(service.price)}
                     </span>
                     <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} ml-1`}>
                       {t('per service')}
@@ -190,7 +191,7 @@ const ServiceDetail: React.FC = () => {
                 {service.price && (
                   <div className="flex items-baseline">
                     <span className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      ${service.price}
+                      {formatCurrency(service.price)}
                     </span>
                     <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} ml-2`}>
                       {t('per service')}

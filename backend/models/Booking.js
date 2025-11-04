@@ -39,7 +39,7 @@ class Booking {
 
     // Pricing
     this.total_amount = data.total_amount;
-    this.currency = data.currency || 'USD';
+    this.currency = data.currency || 'VND';
     
     // Booking tracking
     this.booking_number = data.booking_number;

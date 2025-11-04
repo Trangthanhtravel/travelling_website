@@ -5,6 +5,7 @@ import { useTranslation } from '../contexts/TranslationContext'; // Add translat
 import { toursAPI } from '../utils/api';
 import { Icon, Icons } from '../components/common/Icons';
 import PhotoGallery from '../components/common/PhotoGallery';
+import { formatCurrency } from '../utils/currency';
 
 const TourDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -348,7 +349,7 @@ const TourDetail: React.FC = () => {
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="text-center mb-6">
                   <div className="text-3xl font-bold text-primary-600">
-                    ${tour?.pricing?.basePrice || tour?.price || 0}
+                    {formatCurrency(tour?.pricing?.basePrice || tour?.price || 0)}
                   </div>
                   <div className="text-sm text-gray-500">
                     {tour?.pricing?.priceType === 'per_person' ? t('per person') : t('per group')}

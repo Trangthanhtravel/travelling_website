@@ -7,6 +7,7 @@ import { toursAPI } from '../utils/api';
 import { Tour, TourFilters } from '../types';
 import { Icon, Icons } from '../components/common/Icons';
 import LottieLoading from '../components/common/LottieLoading';
+import { formatCurrency } from '../utils/currency';
 
 const Tours: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -155,7 +156,7 @@ const Tours: React.FC = () => {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                ${tour.price}
+                {formatCurrency(tour.price)}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 {t('per person')}

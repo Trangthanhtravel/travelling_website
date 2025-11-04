@@ -7,6 +7,7 @@ import { servicesAPI, bookingsAPI } from '../utils/api';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import toast from 'react-hot-toast';
+import { formatCurrency } from '../utils/currency';
 
 // Service booking form interface aligned with backend
 interface ServiceBookingFormData {
@@ -90,7 +91,7 @@ const ServiceBooking: React.FC = () => {
         infants: 0,
         totalTravelers: formData.totalTravelers,
         totalAmount: (service.price || 0) * formData.totalTravelers,
-        currency: 'USD',
+        currency: 'VND',
         specialRequests: formData.specialRequests || '',
         // Additional personal information
         gender: formData.gender,
@@ -432,7 +433,7 @@ const ServiceBooking: React.FC = () => {
                       {t('Price per person')}
                     </span>
                     <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      ${service.price}
+                      {formatCurrency(service.price)}
                     </span>
                   </div>
                 )}
