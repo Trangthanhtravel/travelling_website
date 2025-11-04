@@ -154,15 +154,15 @@ const Tours: React.FC = () => {
                 <span className="text-sm">{tour.max_participants}</span>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {formatCurrency(tour.price)}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {t('per person')}
-              </div>
-            </div>
           </div>
+            <div className="text-right">
+                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                    {formatCurrency(tour.price)}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {t('per person')}
+                </div>
+            </div>
 
           <div className="flex space-x-2">
             <Link
