@@ -399,7 +399,11 @@ class Tour {
       gallery: typeof this.gallery === 'string' ? JSON.parse(this.gallery) : this.gallery,
       itinerary: typeof this.itinerary === 'string' ? JSON.parse(this.itinerary) : this.itinerary,
       included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
-      excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded
+      excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded,
+      // Parse Vietnamese fields as well
+      itinerary_vi: typeof this.itinerary_vi === 'string' ? JSON.parse(this.itinerary_vi) : this.itinerary_vi,
+      included_vi: typeof this.included_vi === 'string' ? JSON.parse(this.included_vi) : this.included_vi,
+      excluded_vi: typeof this.excluded_vi === 'string' ? JSON.parse(this.excluded_vi) : this.excluded_vi
     };
   }
 
