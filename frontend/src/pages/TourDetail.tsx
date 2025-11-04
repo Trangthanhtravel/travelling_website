@@ -279,14 +279,23 @@ const TourDetail: React.FC = () => {
                     {t('Included')}
                   </h3>
                   <ul className="space-y-2">
-                    {tour?.included.map((included, index) => (
-                      <li key={index} className="flex items-start">
-                        <Icon icon={Icons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-600 text-sm">{included}</span>
-                      </li>
-                    )) || (
-                      <li className="text-gray-500">{t('Inclusions information coming soon...')}</li>
-                    )}
+                    {(() => {
+                      // Parse included if it's a string, or use as-is if it's an array
+                      const includedArray = tour?.included
+                        ? (typeof tour.included === 'string' ? JSON.parse(tour.included) : tour.included)
+                        : [];
+
+                      return Array.isArray(includedArray) && includedArray.length > 0 ? (
+                        includedArray.map((included, index) => (
+                          <li key={index} className="flex items-start">
+                            <Icon icon={Icons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                            <span className="text-gray-600 text-sm">{included}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-gray-500">{t('Inclusions information coming soon...')}</li>
+                      );
+                    })()}
                   </ul>
                 </div>
                 <div>
@@ -295,14 +304,23 @@ const TourDetail: React.FC = () => {
                     {t('Not Included')}
                   </h3>
                   <ul className="space-y-2">
-                    {tour?.excluded.map((excluded, index) => (
-                      <li key={index} className="flex items-start">
-                        <Icon icon={Icons.FiX} className="w-4 h-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-600 text-sm">{excluded}</span>
-                      </li>
-                    )) || (
-                      <li className="text-gray-500">{t('Exclusions information coming soon...')}</li>
-                    )}
+                    {(() => {
+                      // Parse excluded if it's a string, or use as-is if it's an array
+                      const excludedArray = tour?.excluded
+                        ? (typeof tour.excluded === 'string' ? JSON.parse(tour.excluded) : tour.excluded)
+                        : [];
+
+                      return Array.isArray(excludedArray) && excludedArray.length > 0 ? (
+                        excludedArray.map((excluded, index) => (
+                          <li key={index} className="flex items-start">
+                            <Icon icon={Icons.FiX} className="w-4 h-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+                            <span className="text-gray-600 text-sm">{excluded}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-gray-500">{t('Exclusions information coming soon...')}</li>
+                      );
+                    })()}
                   </ul>
                 </div>
               </div>
