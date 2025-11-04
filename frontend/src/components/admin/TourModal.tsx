@@ -267,7 +267,8 @@ const TourModal: React.FC<TourModalProps> = ({
               name="included"
               value={formData.included}
               onChange={handleBilingualChange}
-              type="array"
+              type="textarea"
+              rows={4}
               placeholder={{
                 en: "Enter what's included (one per line)",
                 vi: "Nhập những gì được bao gồm (mỗi dòng một mục)"
@@ -280,7 +281,8 @@ const TourModal: React.FC<TourModalProps> = ({
               name="excluded"
               value={formData.excluded}
               onChange={handleBilingualChange}
-              type="array"
+              type="textarea"
+              rows={4}
               placeholder={{
                 en: "Enter what's excluded (one per line)",
                 vi: "Nhập những gì không được bao gồm (mỗi dòng một mục)"

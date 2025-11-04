@@ -279,10 +279,10 @@ const TourDetail: React.FC = () => {
                     {t('Included')}
                   </h3>
                   <ul className="space-y-2">
-                    {tour?.inclusions?.map((inclusion, index) => (
+                    {tour?.included?.map((included, index) => (
                       <li key={index} className="flex items-start">
                         <Icon icon={Icons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-600 text-sm">{inclusion}</span>
+                        <span className="text-gray-600 text-sm">{included}</span>
                       </li>
                     )) || (
                       <li className="text-gray-500">{t('Inclusions information coming soon...')}</li>
@@ -295,10 +295,10 @@ const TourDetail: React.FC = () => {
                     {t('Not Included')}
                   </h3>
                   <ul className="space-y-2">
-                    {tour?.exclusions?.map((exclusion, index) => (
+                    {tour?.excluded?.map((excluded, index) => (
                       <li key={index} className="flex items-start">
                         <Icon icon={Icons.FiX} className="w-4 h-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-600 text-sm">{exclusion}</span>
+                        <span className="text-gray-600 text-sm">{excluded}</span>
                       </li>
                     )) || (
                       <li className="text-gray-500">{t('Exclusions information coming soon...')}</li>
