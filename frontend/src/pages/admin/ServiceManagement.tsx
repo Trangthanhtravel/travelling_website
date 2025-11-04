@@ -399,7 +399,7 @@ const ServiceManagement: React.FC = () => {
                     {/* Price */}
                     <div className="absolute top-3 right-3 bg-white dark:bg-dark-800 rounded-lg px-2 py-1">
                       <span className="text-sm font-bold text-gray-900 dark:text-white">
-                        ${formatCurrency(service.price)}
+                        {formatCurrency(service.price)}
                       </span>
                     </div>
                   </div>
