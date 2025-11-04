@@ -135,11 +135,11 @@ const Tours: React.FC = () => {
           )}
         </div>
 
-        <div className="p-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+        <div className="p-6 flex flex-col">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 h-14">
             {title}
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3 h-16">
             {description}
           </p>
 
@@ -155,7 +155,7 @@ const Tours: React.FC = () => {
               </div>
             </div>
           </div>
-            <div className="text-right">
+            <div className="text-right mb-4">
                 <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
                     {formatCurrency(tour.price)}
                 </div>
@@ -164,7 +164,7 @@ const Tours: React.FC = () => {
                 </div>
             </div>
 
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 mt-auto">
             <Link
               to={`/tours/${tour.slug}`}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200 text-sm font-medium"
