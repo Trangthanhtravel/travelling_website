@@ -22,17 +22,6 @@ const TourDetail: React.FC = () => {
   // Extract the actual tour data from the API response with proper typing
   const tour: any = response?.data || null;
 
-  // Debug logging
-  React.useEffect(() => {
-    if (tour) {
-      console.log('Tour data received:', tour);
-      console.log('Included type:', typeof tour.included);
-      console.log('Included value:', tour.included);
-      console.log('Excluded type:', typeof tour.excluded);
-      console.log('Excluded value:', tour.excluded);
-    }
-  }, [tour]);
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -291,39 +280,21 @@ const TourDetail: React.FC = () => {
                   </h3>
                   <ul className="space-y-2">
                     {(() => {
-                      try {
                         // Parse included if it's a string, or use as-is if it's an array
-                        let includedArray = [];
-
-                        if (!tour?.included) {
-                          includedArray = [];
-                        } else if (typeof tour.included === 'string') {
-                          try {
-                            includedArray = JSON.parse(tour.included);
-                          } catch (e) {
-                            console.error('Failed to parse included:', e, tour.included);
-                            includedArray = [];
-                          }
-                        } else if (Array.isArray(tour.included)) {
-                          includedArray = tour.included;
-                        }
-
-                        console.log('Parsed includedArray:', includedArray);
+                        const includedArray = tour?.included
+                            ? (typeof tour.included === 'string' ? JSON.parse(tour.included) : tour.included)
+                            : [];
 
                         return Array.isArray(includedArray) && includedArray.length > 0 ? (
-                          includedArray.map((included, index) => (
-                            <li key={index} className="flex items-start">
-                              <Icon icon={Icons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                              <span className="text-gray-600 text-sm">{included}</span>
-                            </li>
-                          ))
+                            includedArray.map((included, index) => (
+                                <li key={index} className="flex items-start">
+                                    <Icon icon={Icons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                                    <span className="text-gray-600 text-sm">{included}</span>
+                                </li>
+                            ))
                         ) : (
-                          <li className="text-gray-500">{t('Inclusions information coming soon...')}</li>
+                            <li className="text-gray-500">{t('Inclusions information coming soon...')}</li>
                         );
-                      } catch (error) {
-                        console.error('Error rendering included items:', error);
-                        return <li className="text-gray-500">{t('Inclusions information coming soon...')}</li>;
-                      }
                     })()}
                   </ul>
                 </div>
@@ -334,39 +305,21 @@ const TourDetail: React.FC = () => {
                   </h3>
                   <ul className="space-y-2">
                     {(() => {
-                      try {
                         // Parse excluded if it's a string, or use as-is if it's an array
-                        let excludedArray = [];
-
-                        if (!tour?.excluded) {
-                          excludedArray = [];
-                        } else if (typeof tour.excluded === 'string') {
-                          try {
-                            excludedArray = JSON.parse(tour.excluded);
-                          } catch (e) {
-                            console.error('Failed to parse excluded:', e, tour.excluded);
-                            excludedArray = [];
-                          }
-                        } else if (Array.isArray(tour.excluded)) {
-                          excludedArray = tour.excluded;
-                        }
-
-                        console.log('Parsed excludedArray:', excludedArray);
+                        const excludedArray = tour?.excluded
+                            ? (typeof tour.excluded === 'string' ? JSON.parse(tour.excluded) : tour.excluded)
+                            : [];
 
                         return Array.isArray(excludedArray) && excludedArray.length > 0 ? (
-                          excludedArray.map((excluded, index) => (
-                            <li key={index} className="flex items-start">
-                              <Icon icon={Icons.FiX} className="w-4 h-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
-                              <span className="text-gray-600 text-sm">{excluded}</span>
-                            </li>
-                          ))
+                            excludedArray.map((excluded, index) => (
+                                <li key={index} className="flex items-start">
+                                    <Icon icon={Icons.FiX} className="w-4 h-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+                                    <span className="text-gray-600 text-sm">{excluded}</span>
+                                </li>
+                            ))
                         ) : (
-                          <li className="text-gray-500">{t('Exclusions information coming soon...')}</li>
+                            <li className="text-gray-500">{t('Exclusions information coming soon...')}</li>
                         );
-                      } catch (error) {
-                        console.error('Error rendering excluded items:', error);
-                        return <li className="text-gray-500">{t('Exclusions information coming soon...')}</li>;
-                      }
                     })()}
                   </ul>
                 </div>
