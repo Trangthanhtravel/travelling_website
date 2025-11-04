@@ -40,6 +40,12 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
   // Populate form data when editing
   useEffect(() => {
     if (initialData) {
+      console.log('ServiceModal initialData:', initialData);
+      console.log('initialData.included:', initialData.included, 'Type:', typeof initialData.included);
+      console.log('initialData.excluded:', initialData.excluded, 'Type:', typeof initialData.excluded);
+      console.log('initialData.included_vi:', initialData.included_vi, 'Type:', typeof initialData.included_vi);
+      console.log('initialData.excluded_vi:', initialData.excluded_vi, 'Type:', typeof initialData.excluded_vi);
+
       setFormData({
         title: {
           en: initialData.title || '',
@@ -58,12 +64,36 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
           vi: initialData.duration_vi || ''
         },
         included: {
-          en: Array.isArray(initialData.included) ? initialData.included.join('\n') : '',
-          vi: Array.isArray(initialData.included_vi) ? initialData.included_vi.join('\n') : ''
+          en: (() => {
+            let data = initialData.included;
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch (e) { data = []; }
+            }
+            return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
+          })(),
+          vi: (() => {
+            let data = initialData.included_vi;
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch (e) { data = []; }
+            }
+            return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
+          })()
         },
         excluded: {
-          en: Array.isArray(initialData.excluded) ? initialData.excluded.join('\n') : '',
-          vi: Array.isArray(initialData.excluded_vi) ? initialData.excluded_vi.join('\n') : ''
+          en: (() => {
+            let data = initialData.excluded;
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch (e) { data = []; }
+            }
+            return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
+          })(),
+          vi: (() => {
+            let data = initialData.excluded_vi;
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch (e) { data = []; }
+            }
+            return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
+          })()
         },
         price: initialData.price || 0,
         category_id: initialData.category_id || '',

@@ -142,6 +142,8 @@ const getServices = async (req, res) => {
       gallery: service.gallery ? JSON.parse(service.gallery) : [],
       included: service.included ? JSON.parse(service.included) : [],
       excluded: service.excluded ? JSON.parse(service.excluded) : [],
+      included_vi: service.included_vi ? JSON.parse(service.included_vi) : [],
+      excluded_vi: service.excluded_vi ? JSON.parse(service.excluded_vi) : [],
       location: service.location ? JSON.parse(service.location) : null,
       category: service.category_id ? {
         id: service.category_id,

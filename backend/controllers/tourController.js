@@ -107,19 +107,29 @@ const getTours = async (req, res) => {
       result = await Tour.findAll(db, options);
     }
 
-    // Apply localization to the results
-    const localizedTours = result.data.map(tour => {
+    // For admin users, return all fields without localization
+    // For public users, apply localization
+    const isAdmin = req.user && req.user.role === 'admin';
+
+    const tours = result.data.map(tour => {
       const tourJson = tour.toJSON();
-      const localizedContent = tour.getLocalizedContent(language);
-      return {
-        ...tourJson,
-        ...localizedContent
-      };
+
+      if (isAdmin) {
+        // Return all fields for admin
+        return tourJson;
+      } else {
+        // Apply localization for public users
+        const localizedContent = tour.getLocalizedContent(language);
+        return {
+          ...tourJson,
+          ...localizedContent
+        };
+      }
     });
 
     res.json({
       success: true,
-      data: localizedTours,
+      data: tours,
       pagination: result.pagination
     });
   } catch (error) {
