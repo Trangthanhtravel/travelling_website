@@ -205,12 +205,12 @@ const CarRental: React.FC = () => {
                     <Icon icon={Icons.FiTruck} className="w-4 h-4 mr-1" />
                     <span>{t('Car Rental')}</span>
                   </div>
-                  <h3 className={`font-bold mb-2 group-hover:text-accent-orange transition-colors duration-200 ${
-                    viewMode === 'grid' ? 'text-xl' : 'text-lg'
+                  <h3 className={`font-bold mb-2 group-hover:text-accent-orange transition-colors duration-200 line-clamp-2 ${
+                    viewMode === 'grid' ? 'text-xl h-14' : 'text-lg'
                   } ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-900'}`}>
                     {getLocalizedContent(car, 'title')}
                   </h3>
-                  <p className={`text-sm mb-4 line-clamp-2 flex-grow ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
+                  <p className={`text-sm mb-4 line-clamp-2 ${viewMode === 'grid' ? 'h-10' : ''} ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
                     {getLocalizedContent(car, 'description')}
                   </p>
 
@@ -224,7 +224,7 @@ const CarRental: React.FC = () => {
                   {/* View Details Button */}
                   <Link
                     to={`/services/${car.slug}`}
-                    className="w-full bg-accent-orange hover:bg-accent-orange-hover text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center"
+                    className="w-full bg-accent-orange hover:bg-accent-orange-hover text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center mt-auto"
                   >
                     {t('View Details')}
                   </Link>

@@ -279,7 +279,7 @@ const Services: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex flex-col">
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       isDarkMode ? 'bg-dark-700 text-dark-text-muted' : 'bg-gray-100 text-gray-600'
@@ -287,14 +287,14 @@ const Services: React.FC = () => {
                       {getLocalizedContent(service.category, 'name') || service.category?.name || t('Service')}
                     </span>
                   </div>
-                  <h3 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-xl font-bold mb-2 line-clamp-2 h-14 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     {getLocalizedContent(service, 'title') || service.title}
                   </h3>
-                  <p className={`text-sm mb-4 line-clamp-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p className={`text-sm mb-4 line-clamp-2 h-10 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     {getLocalizedContent(service, 'subtitle') || service.subtitle ||
                      getLocalizedContent(service, 'description') || service.description}
                   </p>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 mt-auto">
                     <Link
                       to={`/services/${service.slug}`}
                       className="w-full bg-accent-orange hover:bg-accent-orange-dark text-white py-2 px-4 rounded-lg text-center text-sm font-medium transition-colors duration-200"
