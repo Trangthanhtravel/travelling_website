@@ -714,15 +714,15 @@ const Home: React.FC = () => {
                           </div>
                         )}
                       </div>
-                      <div className="p-6">
+                      <div className="p-6 flex flex-col">
                         <div className="flex items-center text-sm text-gray-500 dark:text-gray-500 mb-2">
                           <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-1" />
                           <span>{tour.location}</span>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2 line-clamp-2 h-14 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
                           {tour.title}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">
+                        <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2 h-10">
                           {tour.description}
                         </p>
                         <div className="flex items-center justify-between mb-4">
@@ -737,7 +737,7 @@ const Home: React.FC = () => {
                         </div>
                         <Link
                           to={`/tours/${tour.slug || tour.id}`}
-                          className="inline-flex items-center justify-center w-full bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                          className="inline-flex items-center justify-center w-full bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 mt-auto"
                         >
                           {t('View Details')}
                           <Icon icon={Icons.FiArrowRight} className="w-4 h-4 ml-2" />
@@ -837,12 +837,12 @@ const Home: React.FC = () => {
                           {formatCurrency(car.price)}/{car.duration || 'day'}
                         </div>
                       </div>
-                      <div className="p-6">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2">{getLocalizedContent(car, 'title')}</h3>
-                        <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2">{getLocalizedContent(car, 'description')}</p>
+                      <div className="p-6 flex flex-col">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-900 mb-2 line-clamp-2 h-14">{getLocalizedContent(car, 'title')}</h3>
+                        <p className="text-gray-600 dark:text-gray-600 text-sm mb-4 line-clamp-2 h-10">{getLocalizedContent(car, 'description')}</p>
                         <Link
                           to={`/services/${car.slug || car.id}`}
-                          className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200 block text-center"
+                          className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition-colors duration-200 block text-center mt-auto"
                         >
                           {t('View Details')}
                         </Link>
