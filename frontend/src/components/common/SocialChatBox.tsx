@@ -131,10 +131,18 @@ const SocialChatBox: React.FC = () => {
                                 style={{ borderRadius: '50%', aspectRatio: '1/1' }}
                                 aria-label={`Contact via ${link.platform}`}
                             >
-                                <Icon
-                                    icon={getPlatformIcon(link.platform)}
-                                    className="w-5 h-5 flex-shrink-0"
-                                />
+                                {link.platform === 'zalo' ? (
+                                    <img
+                                        src="/Zalo_icon.png"
+                                        alt="Zalo"
+                                        className="w-5 h-5 flex-shrink-0"
+                                    />
+                                ) : (
+                                    <Icon
+                                        icon={getPlatformIcon(link.platform)}
+                                        className="w-5 h-5 flex-shrink-0"
+                                    />
+                                )}
                             </button>
                         </div>
                     ))}
