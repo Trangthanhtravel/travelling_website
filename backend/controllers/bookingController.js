@@ -280,7 +280,7 @@ const updateBookingStatus = async (req, res) => {
           INSERT INTO booking_notes (booking_id, content, created_by, created_at)
           VALUES (?, ?, ?, datetime('now'))
         `;
-        await req.db.prepare(noteQuery).run(id, notes, req.user.id);
+        await req.db.prepare(noteQuery).bind(id, notes, req.user.id).run();
       } catch (noteError) {
         console.error('Error adding note:', noteError);
       }
@@ -321,7 +321,8 @@ const getBookingById = async (req, res) => {
       WHERE bn.booking_id = ?
       ORDER BY bn.created_at DESC
     `;
-    const notes = await req.db.prepare(notesQuery).all(id);
+    const notesResult = await req.db.prepare(notesQuery).bind(id).all();
+    const notes = notesResult.results || [];
 
     const bookingData = booking.toJSON();
     bookingData.notes = notes;
@@ -366,7 +367,7 @@ const addBookingNote = async (req, res) => {
       INSERT INTO booking_notes (booking_id, content, created_by, created_at)
       VALUES (?, ?, ?, datetime('now'))
     `;
-    const result = await req.db.prepare(noteQuery).run(id, content.trim(), req.user.id);
+    const result = await req.db.prepare(noteQuery).bind(id, content.trim(), req.user.id).run();
 
     // Get the created note with user name
     const getNoteQuery = `
@@ -375,7 +376,7 @@ const addBookingNote = async (req, res) => {
       LEFT JOIN users u ON bn.created_by = u.id
       WHERE bn.id = ?
     `;
-    const note = await req.db.prepare(getNoteQuery).get(result.lastInsertRowid);
+    const note = await req.db.prepare(getNoteQuery).bind(result.lastInsertRowid).first();
 
     res.status(201).json({
       success: true,

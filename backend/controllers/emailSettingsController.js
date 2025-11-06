@@ -51,7 +51,7 @@ const updateEmailSettings = async (req, res) => {
           datetime('now')
         )
       `;
-      await req.db.prepare(updateQuery).run(key, value, key, key);
+      await req.db.prepare(updateQuery).bind(key, value, key, key).run();
     }
 
     // Get updated settings
