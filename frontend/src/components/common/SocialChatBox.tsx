@@ -127,16 +127,12 @@ const SocialChatBox: React.FC = () => {
                             {/* Social Icon Button */}
                             <button
                                 onClick={() => handleSocialClick(link)}
-                                className={`min-w-[48px] min-h-[48px] w-12 h-12 rounded-full ${getPlatformColor(link.platform)} text-white shadow-lg transition-all duration-200 hover:scale-110 flex items-center justify-center border-0 flex-shrink-0`}
+                                className={`min-w-[48px] min-h-[48px] w-12 h-12 rounded-full ${getPlatformColor(link.platform)} ${link.platform === 'zalo' ? 'bg-white hover:bg-gray-100' : 'text-white'} shadow-lg transition-all duration-200 hover:scale-110 flex items-center justify-center border-0 flex-shrink-0`}
                                 style={{ borderRadius: '50%', aspectRatio: '1/1' }}
                                 aria-label={`Contact via ${link.platform}`}
                             >
                                 {link.platform === 'zalo' ? (
-                                    <img
-                                        src="/Zalo_icon.png"
-                                        alt="Zalo"
-                                        className="w-5 h-5 flex-shrink-0"
-                                    />
+                                    <span className="text-blue-500 font-bold text-xs">Zalo</span>
                                 ) : (
                                     <Icon
                                         icon={getPlatformIcon(link.platform)}
