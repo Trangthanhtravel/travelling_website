@@ -135,24 +135,49 @@ const createDirectBooking = async (req, res) => {
 
     // Send email notifications
     try {
-      await Promise.all([
-        emailService.sendAdminBookingNotification(req.db, {
-          ...savedBooking,
-          item_title: itemTitle,
-          item_slug: itemSlug,
-          booking_type: bookingType
-        }),
-        emailService.sendCustomerConfirmation(req.db, {
-          ...savedBooking,
-          item_title: itemTitle,
-          item_slug: itemSlug,
-          customer_name: customerName,
-          customer_email: customerEmail,
-          booking_type: bookingType
-        })
-      ]);
+      console.log('Preparing to send email notifications...');
+      console.log('Email environment variables check:', {
+        EMAIL_HOST: process.env.EMAIL_HOST ? 'Set' : 'Not set',
+        EMAIL_PORT: process.env.EMAIL_PORT ? 'Set' : 'Not set',
+        EMAIL_USER: process.env.EMAIL_USER ? 'Set' : 'Not set',
+        EMAIL_PASS: process.env.EMAIL_PASS ? 'Set' : 'Not set'
+      });
+
+      const bookingForEmail = {
+        bookingNumber: bookingNumber,
+        type: bookingType,
+        startDate: startDate,
+        totalTravelers: totalTravelers,
+        totalAmount: totalAmount,
+        currency: currency || 'VND',
+        specialRequests: specialRequests || 'None'
+      };
+
+      const customerInfo = {
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone
+      };
+
+      const itemInfo = {
+        title: itemTitle,
+        id: itemId,
+        slug: itemSlug
+      };
+
+      console.log('Sending admin notification...');
+      await emailService.sendAdminBookingNotification(req.db, bookingForEmail, customerInfo, itemInfo);
+      console.log('Admin notification sent');
+
+      console.log('Sending customer confirmation...');
+      await emailService.sendCustomerConfirmation(req.db, bookingForEmail, customerInfo, itemInfo);
+      console.log('Customer confirmation sent');
+
+      console.log('All email notifications sent successfully');
     } catch (emailError) {
       console.error('Email notification error:', emailError);
+      console.error('Email error message:', emailError.message);
+      console.error('Email error stack:', emailError.stack);
       // Don't fail the booking if email fails
     }
 

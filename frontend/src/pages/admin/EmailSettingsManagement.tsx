@@ -132,7 +132,7 @@ const EmailSettingsManagement: React.FC = () => {
                   ? 'bg-dark-700 border-dark-600 text-dark-text-primary placeholder-dark-text-muted' 
                   : 'bg-white border-gray-300 text-gray-900'
               }`}
-              placeholder="info@company.com"
+              placeholder="Enter the receiver emmail"
               required
             />
             <p className={`text-xs mt-1 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
@@ -153,7 +153,7 @@ const EmailSettingsManagement: React.FC = () => {
                   ? 'bg-dark-700 border-dark-600 text-dark-text-primary placeholder-dark-text-muted' 
                   : 'bg-white border-gray-300 text-gray-900'
               }`}
-              placeholder="Travel Company"
+              placeholder="Enter company name"
               required
             />
           </div>
@@ -171,7 +171,7 @@ const EmailSettingsManagement: React.FC = () => {
                   ? 'bg-dark-700 border-dark-600 text-dark-text-primary placeholder-dark-text-muted' 
                   : 'bg-white border-gray-300 text-gray-900'
               }`}
-              placeholder="Travel Company Team"
+              placeholder="Enter name of the sender"
             />
             <p className={`text-xs mt-1 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
               Name displayed in the "From" field of emails

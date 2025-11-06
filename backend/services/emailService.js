@@ -78,7 +78,13 @@ class EmailService {
   // Send booking notification to admin/company
   async sendAdminBookingNotification(db, booking, customerInfo, tourOrService) {
     try {
+      console.log('[EmailService] Starting admin booking notification...');
+      console.log('[EmailService] Booking:', booking);
+      console.log('[EmailService] Customer:', customerInfo);
+      console.log('[EmailService] Item:', tourOrService);
+
       const settings = await this.getEmailSettings(db);
+      console.log('[EmailService] Email settings:', settings);
 
       // Check if admin notifications are enabled
       if (settings.booking_notification_enabled !== 'true') {
@@ -86,7 +92,9 @@ class EmailService {
         return;
       }
 
+      console.log('[EmailService] Creating email transporter...');
       const transporter = this.createTransporter();
+      console.log('[EmailService] Transporter created');
 
       // Prepare template variables
       const variables = {
@@ -179,23 +187,39 @@ class EmailService {
         </div>
       `;
 
-      await transporter.sendMail({
+      const mailOptions = {
         from: `"${settings.email_from_name}" <${process.env.EMAIL_USER}>`,
         to: settings.company_email,
         subject: subject,
         html: emailTemplate
+      };
+
+      console.log('[EmailService] Sending admin email with options:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
       });
 
-      console.log('Admin booking notification sent successfully');
+      await transporter.sendMail(mailOptions);
+
+      console.log('[EmailService] Admin booking notification sent successfully');
     } catch (error) {
       console.error('Error sending admin booking notification:', error);
+      console.error('Error details:', error.message, error.stack);
+      throw error; // Re-throw to let the caller know it failed
     }
   }
 
   // Send confirmation email to customer
   async sendCustomerConfirmation(db, booking, customerInfo, tourOrService) {
     try {
+      console.log('[EmailService] Starting customer confirmation...');
+      console.log('[EmailService] Booking:', booking);
+      console.log('[EmailService] Customer:', customerInfo);
+      console.log('[EmailService] Item:', tourOrService);
+
       const settings = await this.getEmailSettings(db);
+      console.log('[EmailService] Email settings:', settings);
 
       // Check if customer confirmations are enabled
       if (settings.customer_confirmation_enabled !== 'true') {
@@ -203,7 +227,9 @@ class EmailService {
         return;
       }
 
+      console.log('[EmailService] Creating email transporter...');
       const transporter = this.createTransporter();
+      console.log('[EmailService] Transporter created');
 
       // Prepare template variables
       const variables = {
@@ -285,16 +311,26 @@ class EmailService {
         </div>
       `;
 
-      await transporter.sendMail({
+      const mailOptions = {
         from: `"${settings.email_from_name}" <${process.env.EMAIL_USER}>`,
         to: customerInfo.email,
         subject: subject,
         html: emailTemplate
+      };
+
+      console.log('[EmailService] Sending customer email with options:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
       });
 
-      console.log('Customer confirmation email sent successfully');
+      await transporter.sendMail(mailOptions);
+
+      console.log('[EmailService] Customer confirmation email sent successfully');
     } catch (error) {
       console.error('Error sending customer confirmation email:', error);
+      console.error('Error details:', error.message, error.stack);
+      throw error; // Re-throw to let the caller know it failed
     }
   }
 
