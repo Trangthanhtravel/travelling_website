@@ -314,7 +314,7 @@ export const emailSettingsAPI = {
         adminAPI.get('/email-settings'),
 
     updateEmailSettings: (settings: any): Promise<AxiosResponse<ApiResponse<any>>> =>
-        adminAPI.put('/email-settings', settings),
+        adminAPI.put('/email-settings', { settings }),
 
     testEmailConfiguration: (testData: any): Promise<AxiosResponse<ApiResponse<any>>> =>
         adminAPI.post('/email-settings/test', testData),
