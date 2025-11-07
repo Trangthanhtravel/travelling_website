@@ -25,12 +25,12 @@ class EmailService {
   async getEmailSettings(db) {
     try {
       const query = 'SELECT setting_key, setting_value FROM email_settings';
-      const result = await db.prepare(query).all();
+      const result = await db.prepare(query).bind().all();
 
       const settings = {};
 
       // D1 returns results in a 'results' array
-      if (result.results && result.results.length > 0) {
+      if (result && result.results && result.results.length > 0) {
         result.results.forEach(row => {
           settings[row.setting_key] = row.setting_value;
         });
@@ -45,7 +45,9 @@ class EmailService {
           booking_notification_enabled: 'true',
           customer_confirmation_enabled: 'true',
           admin_notification_subject: 'New Booking Received - {booking_number}',
-          customer_confirmation_subject: 'Booking Confirmation - {booking_number}'
+          customer_confirmation_subject: 'Booking Confirmation - {booking_number}',
+          admin_email_body: '',
+          customer_email_body: ''
         };
       }
 
@@ -60,7 +62,9 @@ class EmailService {
         booking_notification_enabled: 'true',
         customer_confirmation_enabled: 'true',
         admin_notification_subject: 'New Booking Received - {booking_number}',
-        customer_confirmation_subject: 'Booking Confirmation - {booking_number}'
+        customer_confirmation_subject: 'Booking Confirmation - {booking_number}',
+        admin_email_body: '',
+        customer_email_body: ''
       };
     }
   }

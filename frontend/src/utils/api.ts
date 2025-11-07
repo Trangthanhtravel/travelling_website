@@ -321,6 +321,9 @@ export const emailSettingsAPI = {
 
     getEmailStats: (): Promise<AxiosResponse<ApiResponse<any>>> =>
         adminAPI.get('/email-settings/stats'),
+
+    getEmailPreview: (type: 'admin' | 'customer', customBody?: string): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.get(`/email-settings/preview?type=${type}${customBody ? `&customBody=${encodeURIComponent(customBody)}` : ''}`),
 };
 
 // Admin API

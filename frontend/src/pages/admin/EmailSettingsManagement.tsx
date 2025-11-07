@@ -11,6 +11,8 @@ interface EmailSettings {
   customer_confirmation_enabled: string;
   admin_notification_subject: string;
   customer_confirmation_subject: string;
+  admin_email_body?: string;
+  customer_email_body?: string;
 }
 
 const EmailSettingsManagement: React.FC = () => {
@@ -22,13 +24,23 @@ const EmailSettingsManagement: React.FC = () => {
     booking_notification_enabled: 'true',
     customer_confirmation_enabled: 'true',
     admin_notification_subject: 'New Booking Received - {booking_number}',
-    customer_confirmation_subject: 'Booking Confirmation - {booking_number}'
+    customer_confirmation_subject: 'Booking Confirmation - {booking_number}',
+    admin_email_body: '',
+    customer_email_body: ''
   });
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testEmail, setTestEmail] = useState('');
+
+  // Preview states
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewType, setPreviewType] = useState<'admin' | 'customer'>('customer');
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [previewSubject, setPreviewSubject] = useState('');
+
 
   useEffect(() => {
     fetchEmailSettings();
@@ -96,6 +108,36 @@ const EmailSettingsManagement: React.FC = () => {
       }
     } finally {
       setTesting(false);
+    }
+  };
+
+  const fetchEmailPreview = async (type: 'admin' | 'customer') => {
+    setPreviewLoading(true);
+    setPreviewType(type);
+    setShowPreview(true);
+    try {
+      const customBody = type === 'admin' ? settings.admin_email_body : settings.customer_email_body;
+      const response = await emailSettingsAPI.getEmailPreview(type, customBody);
+      setPreviewHtml(response.data.data.html);
+      setPreviewSubject(response.data.data.subject);
+    } catch (error: any) {
+      console.error('Error fetching email preview:', error);
+      toast.error('Failed to load email preview');
+      setShowPreview(false);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleCustomBodyChange = (type: 'admin' | 'customer', value: string) => {
+    if (type === 'admin') {
+      handleInputChange('admin_email_body', value);
+    } else {
+      handleInputChange('customer_email_body', value);
+    }
+    // Refresh preview if it's open
+    if (showPreview && previewType === type) {
+      fetchEmailPreview(type);
     }
   };
 
@@ -257,8 +299,119 @@ const EmailSettingsManagement: React.FC = () => {
               Available variables: {'{booking_number}'}, {'{customer_name}'}, {'{item_title}'}
             </p>
           </div>
+
+          <div className="border-t pt-4 mt-4">
+            <h3 className={`text-md font-semibold mb-3 ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>
+              Custom Email Body (Optional)
+            </h3>
+            <p className={`text-xs mb-3 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
+              Add custom introductory text for your emails. Leave empty to use the default message. You can use the same variables as in subjects.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-700'}`}>
+                  Admin Notification Custom Message
+                </label>
+                <textarea
+                  value={settings.admin_email_body || ''}
+                  onChange={(e) => handleCustomBodyChange('admin', e.target.value)}
+                  rows={3}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                    isDarkMode 
+                      ? 'bg-dark-700 border-dark-600 text-dark-text-primary placeholder-dark-text-muted' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                  placeholder="E.g., URGENT: New booking from {customer_name} for {item_title}. Please review and contact the customer at {customer_email} within 24 hours."
+                />
+                <div className="flex justify-between items-center mt-2">
+                  <p className={`text-xs ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
+                    This replaces the default admin notification intro text
+                  </p>
+                  <button
+                    onClick={() => fetchEmailPreview('admin')}
+                    className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  >
+                    Preview Admin Email
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-dark-text-secondary' : 'text-gray-700'}`}>
+                  Customer Confirmation Custom Message
+                </label>
+                <textarea
+                  value={settings.customer_email_body || ''}
+                  onChange={(e) => handleCustomBodyChange('customer', e.target.value)}
+                  rows={3}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-accent-orange ${
+                    isDarkMode 
+                      ? 'bg-dark-700 border-dark-600 text-dark-text-primary placeholder-dark-text-muted' 
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
+                  placeholder="E.g., Dear {customer_name}, thank you for booking {item_title}! We're thrilled to help you create unforgettable memories. Your booking {booking_number} is being processed."
+                />
+                <div className="flex justify-between items-center mt-2">
+                  <p className={`text-xs ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-500'}`}>
+                    This replaces the default customer confirmation intro text
+                  </p>
+                  <button
+                    onClick={() => fetchEmailPreview('customer')}
+                    className="text-sm px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  >
+                    Preview Customer Email
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Email Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden ${isDarkMode ? 'bg-dark-800' : 'bg-white'}`}>
+            <div className={`p-4 border-b flex justify-between items-center ${isDarkMode ? 'border-dark-600' : 'border-gray-200'}`}>
+              <div>
+                <h2 className={`text-xl font-bold ${isDarkMode ? 'text-dark-text-primary' : 'text-gray-900'}`}>
+                  Email Preview - {previewType === 'admin' ? 'Admin Notification' : 'Customer Confirmation'}
+                </h2>
+                <p className={`text-sm mt-1 ${isDarkMode ? 'text-dark-text-muted' : 'text-gray-600'}`}>
+                  Subject: {previewSubject}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowPreview(false)}
+                className={`text-2xl ${isDarkMode ? 'text-dark-text-muted hover:text-dark-text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                ×
+              </button>
+            </div>
+            <div className="overflow-y-auto max-h-[calc(90vh-100px)] p-6">
+              {previewLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-orange"></div>
+                </div>
+              ) : (
+                <div
+                  className={`border rounded-lg p-4 ${isDarkMode ? 'border-dark-600 bg-dark-700' : 'border-gray-200 bg-gray-50'}`}
+                  dangerouslySetInnerHTML={{ __html: previewHtml }}
+                />
+              )}
+            </div>
+            <div className={`p-4 border-t flex justify-end ${isDarkMode ? 'border-dark-600' : 'border-gray-200'}`}>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Test Email */}
       <div className={`rounded-lg shadow-md p-6 mb-6 ${isDarkMode ? 'bg-dark-800' : 'bg-white'}`}>

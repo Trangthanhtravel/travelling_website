@@ -171,9 +171,224 @@ const getEmailStats = async (req, res) => {
   }
 };
 
+// Get email preview
+const getEmailPreview = async (req, res) => {
+  try {
+    const { type, customBody } = req.query;
+    const settings = await emailService.getEmailSettings(req.db);
+
+    // Sample data for preview
+    const sampleBooking = {
+      bookingNumber: 'BK-2024-00123',
+      type: 'tour',
+      startDate: '2024-12-25',
+      totalTravelers: 2,
+      totalAmount: '1,500',
+      currency: 'USD',
+      specialRequests: 'Vegetarian meals preferred'
+    };
+
+    const sampleCustomer = {
+      name: 'John Doe',
+      email: 'customer@example.com',
+      phone: '+1 (555) 123-4567'
+    };
+
+    const sampleTour = {
+      title: 'Amazing Vietnam Adventure Tour'
+    };
+
+    const variables = {
+      booking_number: sampleBooking.bookingNumber,
+      customer_name: sampleCustomer.name,
+      customer_email: sampleCustomer.email,
+      customer_phone: sampleCustomer.phone,
+      item_title: sampleTour.title,
+      item_type: sampleBooking.type,
+      start_date: sampleBooking.startDate,
+      total_travelers: sampleBooking.totalTravelers,
+      total_amount: sampleBooking.totalAmount,
+      currency: sampleBooking.currency,
+      special_requests: sampleBooking.specialRequests,
+      company_name: settings.company_name
+    };
+
+    let emailHtml = '';
+    let subject = '';
+
+    if (type === 'admin') {
+      subject = emailService.replaceTemplateVariables(settings.admin_notification_subject, variables);
+
+      const customContent = customBody && customBody.trim()
+        ? emailService.replaceTemplateVariables(customBody, variables)
+        : '';
+
+      emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+            New Booking Received - ${sampleTour.title}
+          </h2>
+          
+          ${customContent ? `<div style="background-color: #fffbeb; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            ${customContent}
+          </div>` : '<p>A new booking has been submitted through the website and requires your attention.</p>'}
+          
+          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">Customer Information:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 120px;">Name:</td>
+                <td style="padding: 8px 0;">${sampleCustomer.name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Email:</td>
+                <td style="padding: 8px 0;"><a href="mailto:${sampleCustomer.email}">${sampleCustomer.email}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Phone:</td>
+                <td style="padding: 8px 0;"><a href="tel:${sampleCustomer.phone}">${sampleCustomer.phone}</a></td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">Booking Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 140px;">Booking Number:</td>
+                <td style="padding: 8px 0; font-family: monospace; background: #e0e7ff; padding: 4px 8px; border-radius: 4px;">${sampleBooking.bookingNumber}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Tour:</td>
+                <td style="padding: 8px 0;">${sampleTour.title}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Start Date:</td>
+                <td style="padding: 8px 0;">${new Date(sampleBooking.startDate).toLocaleDateString()}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Travelers:</td>
+                <td style="padding: 8px 0;">${sampleBooking.totalTravelers} person(s)</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Total Amount:</td>
+                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${sampleBooking.currency} ${sampleBooking.totalAmount}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Special Requests:</td>
+                <td style="padding: 8px 0; background: #fef3c7; padding: 8px; border-radius: 4px;">${sampleBooking.specialRequests}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #dc2626; font-weight: bold;">Action Required:</p>
+            <p style="margin: 5px 0 0 0;">Please contact the customer within 24 hours to confirm this booking and provide payment instructions.</p>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          <p style="color: #6b7280; font-size: 14px;">
+            This is an automated notification from ${settings.company_name} booking system.
+          </p>
+        </div>
+      `;
+    } else if (type === 'customer') {
+      subject = emailService.replaceTemplateVariables(settings.customer_confirmation_subject, variables);
+
+      const customContent = customBody && customBody.trim()
+        ? emailService.replaceTemplateVariables(customBody, variables)
+        : '';
+
+      emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+            Booking Request Received - ${sampleTour.title}
+          </h2>
+          
+          <p>Dear <strong>${sampleCustomer.name}</strong>,</p>
+          
+          ${customContent ? `<div style="background-color: #fffbeb; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            ${customContent}
+          </div>` : `<p>Thank you for choosing ${settings.company_name}! We have successfully received your booking request and are excited to help you create an amazing travel experience.</p>`}
+          
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">Your Booking Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 140px;">Booking Number:</td>
+                <td style="padding: 8px 0; font-family: monospace; background: #e0e7ff; padding: 4px 8px; border-radius: 4px;">${sampleBooking.bookingNumber}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Tour:</td>
+                <td style="padding: 8px 0;">${sampleTour.title}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Start Date:</td>
+                <td style="padding: 8px 0;">${new Date(sampleBooking.startDate).toLocaleDateString()}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Travelers:</td>
+                <td style="padding: 8px 0;">${sampleBooking.totalTravelers} person(s)</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Total Amount:</td>
+                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${sampleBooking.currency} ${sampleBooking.totalAmount}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0;">
+            <h4 style="margin: 0 0 10px 0; color: #15803d;">What happens next?</h4>
+            <ul style="margin: 0; padding-left: 20px; color: #166534;">
+              <li>Our team will review your booking request</li>
+              <li>We'll contact you within 24 hours to confirm availability</li>
+              <li>You'll receive payment instructions once confirmed</li>
+              <li>Final booking confirmation after payment</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; color: #92400e;"><strong>Important:</strong> Please keep this booking number for your records. You'll need it for all communications regarding your booking.</p>
+          </div>
+          
+          <p>If you have any questions or need to make changes to your booking, please don't hesitate to contact us.</p>
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          
+          <div style="text-align: center; color: #6b7280;">
+            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+            <p style="margin: 5px 0;">Thank you for choosing us for your travel needs!</p>
+            <p style="margin: 0; font-size: 14px;">This is an automated confirmation email.</p>
+          </div>
+        </div>
+      `;
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email type. Must be "admin" or "customer"'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        subject,
+        html: emailHtml
+      }
+    });
+  } catch (error) {
+    console.error('Get email preview error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error generating email preview'
+    });
+  }
+};
+
 module.exports = {
   getEmailSettings,
   updateEmailSettings,
   testEmailConfiguration,
-  getEmailStats
+  getEmailStats,
+  getEmailPreview
 };

@@ -9,6 +9,9 @@ router.use(adminAuth);
 // Get email settings
 router.get('/', emailSettingsController.getEmailSettings);
 
+// Get email preview
+router.get('/preview', emailSettingsController.getEmailPreview);
+
 // Update email settings
 router.put('/', emailSettingsController.updateEmailSettings);
 
