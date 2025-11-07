@@ -1,3 +1,4 @@
+const currency= require('../utils/currency');
 const emailService = require('../services/emailService');
 
 // Get all email settings
@@ -272,7 +273,7 @@ const getEmailPreview = async (req, res) => {
               </tr>
               <tr>
                 <td style="padding: 8px 0; font-weight: bold;">Total Amount:</td>
-                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${sampleBooking.currency} ${sampleBooking.totalAmount}</td>
+                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${currency.formatCurrency(sampleBooking.totalAmount)}</td>
               </tr>
               <tr>
                 <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">Special Requests:</td>
@@ -332,7 +333,7 @@ const getEmailPreview = async (req, res) => {
               </tr>
               <tr>
                 <td style="padding: 8px 0; font-weight: bold;">Total Amount:</td>
-                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${sampleBooking.currency} ${sampleBooking.totalAmount}</td>
+                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${currency.formatCurrency(sampleBooking.totalAmount)}</td>
               </tr>
             </table>
           </div>

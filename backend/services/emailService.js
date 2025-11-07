@@ -1,3 +1,4 @@
+const currency= require('../utils/currency');
 const nodemailer = require('nodemailer');
 
 class EmailService {
@@ -168,7 +169,7 @@ class EmailService {
               </tr>
               <tr>
                 <td style="padding: 8px 0; font-weight: bold;">Total Amount:</td>
-                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${booking.currency} ${booking.totalAmount}</td>
+                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${currency.formatCurrency(booking.totalAmount)}</td>
               </tr>
               ${booking.specialRequests ? `
               <tr>
@@ -284,7 +285,7 @@ class EmailService {
               </tr>
               <tr>
                 <td style="padding: 8px 0; font-weight: bold;">Total Amount:</td>
-                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${booking.currency} ${booking.totalAmount}</td>
+                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${currency.formatCurrency(booking.totalAmount)}</td>
               </tr>
             </table>
           </div>
