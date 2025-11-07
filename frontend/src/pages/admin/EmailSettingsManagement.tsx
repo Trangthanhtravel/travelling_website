@@ -396,7 +396,7 @@ const EmailSettingsManagement: React.FC = () => {
                 </div>
               ) : (
                 <div
-                  className={`border rounded-lg p-4 ${isDarkMode ? 'border-dark-600 bg-dark-700' : 'border-gray-200 bg-gray-50'}`}
+                  className={`border rounded-lg p-4 border-gray-200 bg-gray-50`}
                   dangerouslySetInnerHTML={{ __html: previewHtml }}
                 />
               )}
