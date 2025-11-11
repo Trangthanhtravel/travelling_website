@@ -123,6 +123,7 @@ const DirectBooking: React.FC = () => {
         emergencyContactName: data.emergencyContact.name,
         emergencyContactPhone: data.emergencyContact.phone,
         emergencyContactRelationship: data.emergencyContact.relationship,
+        language: language, // Pass current language for email
       };
 
       await createBookingMutation.mutateAsync(bookingData);

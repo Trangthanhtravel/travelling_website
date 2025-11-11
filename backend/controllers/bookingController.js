@@ -38,7 +38,9 @@ const createDirectBooking = async (req, res) => {
       departureLocation,
       destinationLocation,
       returnTrip,
-      returnDate
+      returnDate,
+      // Language preference for emails
+      language
     } = req.body;
 
     // Determine if this is a tour or service booking
@@ -166,11 +168,11 @@ const createDirectBooking = async (req, res) => {
       };
 
       console.log('Sending admin notification...');
-      await emailService.sendAdminBookingNotification(req.db, bookingForEmail, customerInfo, itemInfo);
+      await emailService.sendAdminBookingNotification(req.db, bookingForEmail, customerInfo, itemInfo, language || 'en');
       console.log('Admin notification sent');
 
       console.log('Sending customer confirmation...');
-      await emailService.sendCustomerConfirmation(req.db, bookingForEmail, customerInfo, itemInfo);
+      await emailService.sendCustomerConfirmation(req.db, bookingForEmail, customerInfo, itemInfo, language || 'en');
       console.log('Customer confirmation sent');
 
       console.log('All email notifications sent successfully');

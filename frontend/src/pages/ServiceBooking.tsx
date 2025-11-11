@@ -102,6 +102,7 @@ const ServiceBooking: React.FC = () => {
         destinationLocation: formData.destinationLocation,
         returnTrip: formData.returnTrip,
         returnDate: formData.returnDate,
+        language: language, // Pass current language for email
       };
 
       return bookingsAPI.createDirectBooking(bookingPayload);
