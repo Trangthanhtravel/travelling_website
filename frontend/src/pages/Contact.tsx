@@ -40,7 +40,13 @@ const Contact: React.FC = () => {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/contact/submit`, {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const endpoint = `${apiUrl}/api/contact/submit`;
+
+      console.log('Submitting contact form to:', endpoint);
+      console.log('Form data:', { ...data, language });
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,10 +57,19 @@ const Contact: React.FC = () => {
         }),
       });
 
-      const result = await response.json();
+      console.log('Response status:', response.status);
+
+      let result;
+      try {
+        result = await response.json();
+        console.log('Response data:', result);
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Invalid response from server');
+      }
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to send message');
+        throw new Error(result.error || result.message || 'Failed to send message');
       }
 
       toast.success(result.message || t('Message sent successfully!') + ' ' + t('We\'ll get back to you soon.'));

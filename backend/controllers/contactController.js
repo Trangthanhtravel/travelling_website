@@ -101,8 +101,13 @@ const contactController = {
         subject: contactData.subject
       });
 
-      // Get database from environment
-      const db = req.app.locals.db;
+      // Get database from request (set by middleware in server.js)
+      const db = req.db;
+
+      if (!db) {
+        console.error('[ContactController] Database connection not available');
+        return res.status(500).json({ error: 'Database connection error' });
+      }
 
       // Send emails
       try {
