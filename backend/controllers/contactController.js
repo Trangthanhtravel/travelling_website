@@ -1,4 +1,5 @@
 const Contact = require('../models/Contact');
+const emailService = require('../services/emailService');
 
 const contactController = {
   // Get contact information
@@ -63,6 +64,71 @@ const contactController = {
     } catch (error) {
       console.error('Error updating contact info:', error);
       res.status(500).json({ error: 'Failed to update contact information' });
+    }
+  },
+
+  // Submit contact form
+  submitContactForm: async (req, res) => {
+    try {
+      const { name, email, subject, message, language = 'en' } = req.body;
+
+      // Validate required fields
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ error: 'All fields are required' });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
+
+      // Validate message length
+      if (message.length < 10) {
+        return res.status(400).json({ error: 'Message must be at least 10 characters' });
+      }
+
+      const contactData = {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        subject: subject.trim(),
+        message: message.trim()
+      };
+
+      console.log('[ContactController] Processing contact form submission:', {
+        name: contactData.name,
+        email: contactData.email,
+        subject: contactData.subject
+      });
+
+      // Get database from environment
+      const db = req.app.locals.db;
+
+      // Send emails
+      try {
+        // Send notification to admin
+        await emailService.sendContactNotificationToAdmin(db, contactData, language);
+        console.log('[ContactController] Admin notification sent');
+
+        // Send confirmation to customer
+        await emailService.sendContactConfirmationToCustomer(db, contactData, language);
+        console.log('[ContactController] Customer confirmation sent');
+
+        res.json({
+          success: true,
+          message: 'Your message has been sent successfully! We\'ll get back to you soon.'
+        });
+      } catch (emailError) {
+        console.error('[ContactController] Error sending emails:', emailError);
+        // Still return success to user, but log the error
+        res.json({
+          success: true,
+          message: 'Your message has been received. We\'ll get back to you soon.'
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      res.status(500).json({ error: 'Failed to send message. Please try again later.' });
     }
   }
 };

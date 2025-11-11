@@ -366,10 +366,155 @@ const getEmailPreview = async (req, res) => {
           </div>
         </div>
       `;
+    } else if (type === 'contact-admin') {
+      // Get contact email translations
+      const ct = emailService.getContactEmailTranslations(language);
+
+      const sampleContact = {
+        name: language === 'vi' ? 'Nguyễn Văn A' : 'John Doe',
+        email: 'customer@example.com',
+        subject: language === 'vi' ? 'Yêu cầu thông tin về tour' : 'Inquiry about tour packages',
+        message: language === 'vi'
+          ? 'Tôi muốn biết thêm thông tin về các tour du lịch đến Đà Nẵng. Bạn có thể gửi cho tôi bảng giá và lịch trình chi tiết không?'
+          : 'I would like to know more about your tour packages to Da Nang. Could you please send me the pricing and detailed itinerary?'
+      };
+
+      const contactVars = {
+        customer_name: sampleContact.name,
+        customer_email: sampleContact.email,
+        subject: sampleContact.subject,
+        message: sampleContact.message,
+        company_name: settings.company_name
+      };
+
+      subject = emailService.replaceTemplateVariables(
+        settings.contact_notification_subject || 'New Contact Form Submission - {subject}',
+        contactVars
+      );
+
+      emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+            ${ct.newContactMessage}
+          </h2>
+          
+          <p>${ct.newMessageReceived}</p>
+          
+          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">${ct.senderInformation}</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 120px;">${ct.name}:</td>
+                <td style="padding: 8px 0;">${sampleContact.name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">${ct.email}:</td>
+                <td style="padding: 8px 0;"><a href="mailto:${sampleContact.email}">${sampleContact.email}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">${ct.subject}:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #2563eb;">${sampleContact.subject}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">${ct.messageContent}</h3>
+            <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
+              <p style="margin: 0; white-space: pre-wrap; color: #1f2937;">${sampleContact.message}</p>
+            </div>
+          </div>
+          
+          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #dc2626; font-weight: bold;">${ct.actionRequired}</p>
+            <p style="margin: 5px 0 0 0;">${ct.pleaseRespond}</p>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          <p style="color: #6b7280; font-size: 14px;">
+            ${ct.automatedNotification} ${settings.company_name} ${ct.contactSystem}
+          </p>
+        </div>
+      `;
+    } else if (type === 'contact-customer') {
+      // Get contact email translations
+      const ct = emailService.getContactEmailTranslations(language);
+
+      const sampleContact = {
+        name: language === 'vi' ? 'Nguyễn Văn A' : 'John Doe',
+        email: 'customer@example.com',
+        subject: language === 'vi' ? 'Yêu cầu thông tin về tour' : 'Inquiry about tour packages',
+        message: language === 'vi'
+          ? 'Tôi muốn biết thêm thông tin về các tour du lịch đến Đà Nẵng. Bạn có thể gửi cho tôi bảng giá và lịch trình chi tiết không?'
+          : 'I would like to know more about your tour packages to Da Nang. Could you please send me the pricing and detailed itinerary?'
+      };
+
+      const contactVars = {
+        customer_name: sampleContact.name,
+        subject: sampleContact.subject,
+        company_name: settings.company_name
+      };
+
+      subject = emailService.replaceTemplateVariables(
+        settings.contact_confirmation_subject || 'We Received Your Message - {subject}',
+        contactVars
+      );
+
+      emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+            ${ct.messageReceived}
+          </h2>
+          
+          <p>${ct.dear} <strong>${sampleContact.name}</strong>,</p>
+          
+          <p>${ct.thankYouForContacting} ${settings.company_name}! ${ct.weHaveReceivedYourMessage}</p>
+          
+          <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #15803d; font-weight: bold;">${ct.messageConfirmed}</p>
+          </div>
+          
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">${ct.yourMessage}</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 100px;">${ct.subject}:</td>
+                <td style="padding: 8px 0; color: #2563eb; font-weight: bold;">${sampleContact.subject}</td>
+              </tr>
+            </table>
+            <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 10px; border-left: 4px solid #2563eb;">
+              <p style="margin: 0; white-space: pre-wrap; color: #6b7280;">${sampleContact.message}</p>
+            </div>
+          </div>
+          
+          <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+            <h4 style="margin: 0 0 10px 0; color: #1e40af;">${ct.whatHappensNext}</h4>
+            <ul style="margin: 0; padding-left: 20px; color: #1e40af;">
+              <li>${ct.teamWillReview}</li>
+              <li>${ct.contactWithin24Hours}</li>
+              <li>${ct.checkSpamFolder}</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; color: #92400e;"><strong>${ct.important}:</strong> ${ct.keepThisEmail}</p>
+          </div>
+          
+          <p>${ct.urgentMatters}</p>
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          
+          <div style="text-align: center; color: #6b7280;">
+            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+            <p style="margin: 5px 0;">${ct.thankYouForReachingOut}</p>
+            <p style="margin: 0; font-size: 14px;">${ct.automatedConfirmation}</p>
+          </div>
+        </div>
+      `;
     } else {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email type. Must be "admin" or "customer"'
+        message: 'Invalid email type. Must be "admin", "customer", "contact-admin", or "contact-customer"'
       });
     }
 

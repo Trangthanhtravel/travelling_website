@@ -529,6 +529,267 @@ class EmailService {
       console.error('Error sending booking status update email:', error);
     }
   }
+
+  // Send contact form notification to admin
+  async sendContactNotificationToAdmin(db, contactData, language = 'en') {
+    try {
+      console.log('[EmailService] Starting contact notification to admin...');
+
+      const settings = await this.getEmailSettings(db);
+      console.log('[EmailService] Email settings:', settings);
+
+      // Check if contact notifications are enabled
+      if (settings.contact_notification_enabled !== 'true') {
+        console.log('Contact notifications are disabled');
+        return;
+      }
+
+      const transporter = this.createTransporter();
+      const t = this.getContactEmailTranslations(language);
+
+      const variables = {
+        customer_name: contactData.name,
+        customer_email: contactData.email,
+        subject: contactData.subject,
+        message: contactData.message,
+        company_name: settings.company_name
+      };
+
+      const subject = this.replaceTemplateVariables(
+        settings.contact_notification_subject || 'New Contact Form Submission - {subject}',
+        variables
+      );
+
+      const emailTemplate = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+            ${t.newContactMessage}
+          </h2>
+          
+          <p>${t.newMessageReceived}</p>
+          
+          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">${t.senderInformation}</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 120px;">${t.name}:</td>
+                <td style="padding: 8px 0;">${contactData.name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">${t.email}:</td>
+                <td style="padding: 8px 0;"><a href="mailto:${contactData.email}">${contactData.email}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">${t.subject}:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #2563eb;">${contactData.subject}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">${t.messageContent}</h3>
+            <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
+              <p style="margin: 0; white-space: pre-wrap; color: #1f2937;">${contactData.message}</p>
+            </div>
+          </div>
+          
+          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #dc2626; font-weight: bold;">${t.actionRequired}</p>
+            <p style="margin: 5px 0 0 0;">${t.pleaseRespond}</p>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          <p style="color: #6b7280; font-size: 14px;">
+            ${t.automatedNotification} ${settings.company_name} ${t.contactSystem}
+          </p>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: `"${settings.email_from_name}" <${process.env.EMAIL_USER}>`,
+        to: settings.company_email,
+        replyTo: contactData.email,
+        subject: subject,
+        html: emailTemplate
+      };
+
+      console.log('[EmailService] Sending contact notification to admin:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
+      });
+
+      await transporter.sendMail(mailOptions);
+      console.log('[EmailService] Contact notification sent to admin successfully');
+    } catch (error) {
+      console.error('Error sending contact notification to admin:', error);
+      throw error;
+    }
+  }
+
+  // Send contact confirmation to customer
+  async sendContactConfirmationToCustomer(db, contactData, language = 'en') {
+    try {
+      console.log('[EmailService] Starting contact confirmation to customer...');
+
+      const settings = await this.getEmailSettings(db);
+      console.log('[EmailService] Email settings:', settings);
+
+      // Check if contact confirmations are enabled
+      if (settings.contact_confirmation_enabled !== 'true') {
+        console.log('Contact confirmations are disabled');
+        return;
+      }
+
+      const transporter = this.createTransporter();
+      const t = this.getContactEmailTranslations(language);
+
+      const variables = {
+        customer_name: contactData.name,
+        subject: contactData.subject,
+        company_name: settings.company_name
+      };
+
+      const subject = this.replaceTemplateVariables(
+        settings.contact_confirmation_subject || 'We Received Your Message - {subject}',
+        variables
+      );
+
+      const emailTemplate = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+            ${t.messageReceived}
+          </h2>
+          
+          <p>${t.dear} <strong>${contactData.name}</strong>,</p>
+          
+          <p>${t.thankYouForContacting} ${settings.company_name}! ${t.weHaveReceivedYourMessage}</p>
+          
+          <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #15803d; font-weight: bold;">${t.messageConfirmed}</p>
+          </div>
+          
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">${t.yourMessage}</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 100px;">${t.subject}:</td>
+                <td style="padding: 8px 0; color: #2563eb; font-weight: bold;">${contactData.subject}</td>
+              </tr>
+            </table>
+            <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 10px; border-left: 4px solid #2563eb;">
+              <p style="margin: 0; white-space: pre-wrap; color: #6b7280;">${contactData.message}</p>
+            </div>
+          </div>
+          
+          <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+            <h4 style="margin: 0 0 10px 0; color: #1e40af;">${t.whatHappensNext}</h4>
+            <ul style="margin: 0; padding-left: 20px; color: #1e40af;">
+              <li>${t.teamWillReview}</li>
+              <li>${t.contactWithin24Hours}</li>
+              <li>${t.checkSpamFolder}</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; color: #92400e;"><strong>${t.important}:</strong> ${t.keepThisEmail}</p>
+          </div>
+          
+          <p>${t.urgentMatters}</p>
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          
+          <div style="text-align: center; color: #6b7280;">
+            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+            <p style="margin: 5px 0;">${t.thankYouForReachingOut}</p>
+            <p style="margin: 0; font-size: 14px;">${t.automatedConfirmation}</p>
+          </div>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: `"${settings.email_from_name}" <${process.env.EMAIL_USER}>`,
+        to: contactData.email,
+        subject: subject,
+        html: emailTemplate
+      };
+
+      console.log('[EmailService] Sending contact confirmation to customer:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
+      });
+
+      await transporter.sendMail(mailOptions);
+      console.log('[EmailService] Contact confirmation sent to customer successfully');
+    } catch (error) {
+      console.error('Error sending contact confirmation to customer:', error);
+      throw error;
+    }
+  }
+
+  // Get translations for contact email templates
+  getContactEmailTranslations(language = 'en') {
+    const translations = {
+      en: {
+        newContactMessage: 'New Contact Form Message',
+        newMessageReceived: 'A new message has been submitted through the contact form.',
+        senderInformation: 'Sender Information:',
+        messageContent: 'Message Content:',
+        name: 'Name',
+        email: 'Email',
+        subject: 'Subject',
+        actionRequired: 'Action Required:',
+        pleaseRespond: 'Please respond to this inquiry within 24 hours.',
+        automatedNotification: 'This is an automated notification from',
+        contactSystem: 'contact system.',
+        messageReceived: 'Message Received - We\'ll Be In Touch Soon!',
+        dear: 'Dear',
+        thankYouForContacting: 'Thank you for contacting',
+        weHaveReceivedYourMessage: 'We have successfully received your message and our team will review it shortly.',
+        messageConfirmed: 'Your message has been received and is being reviewed by our team.',
+        yourMessage: 'Your Message:',
+        whatHappensNext: 'What happens next?',
+        teamWillReview: 'Our team will review your message carefully',
+        contactWithin24Hours: 'We\'ll respond to your inquiry within 24 hours',
+        checkSpamFolder: 'Please check your spam folder if you don\'t see our response',
+        important: 'Important',
+        keepThisEmail: 'Please keep this email for your records. You can reply directly to this email if you have additional questions.',
+        urgentMatters: 'For urgent matters, please feel free to call us directly.',
+        thankYouForReachingOut: 'Thank you for reaching out to us!',
+        automatedConfirmation: 'This is an automated confirmation email.'
+      },
+      vi: {
+        newContactMessage: 'Tin Nhắn Liên Hệ Mới',
+        newMessageReceived: 'Một tin nhắn mới đã được gửi qua biểu mẫu liên hệ.',
+        senderInformation: 'Thông Tin Người Gửi:',
+        messageContent: 'Nội Dung Tin Nhắn:',
+        name: 'Họ Tên',
+        email: 'Email',
+        subject: 'Tiêu Đề',
+        actionRequired: 'Cần Thực Hiện:',
+        pleaseRespond: 'Vui lòng phản hồi yêu cầu này trong vòng 24 giờ.',
+        automatedNotification: 'Đây là thông báo tự động từ hệ thống liên hệ của',
+        contactSystem: '',
+        messageReceived: 'Đã Nhận Tin Nhắn - Chúng Tôi Sẽ Liên Hệ Sớm!',
+        dear: 'Kính gửi',
+        thankYouForContacting: 'Cảm ơn bạn đã liên hệ với',
+        weHaveReceivedYourMessage: 'Chúng tôi đã nhận được tin nhắn của bạn và đội ngũ sẽ xem xét ngay.',
+        messageConfirmed: 'Tin nhắn của bạn đã được nhận và đang được đội ngũ của chúng tôi xem xét.',
+        yourMessage: 'Tin Nhắn Của Bạn:',
+        whatHappensNext: 'Các bước tiếp theo?',
+        teamWillReview: 'Đội ngũ của chúng tôi sẽ xem xét tin nhắn của bạn cẩn thận',
+        contactWithin24Hours: 'Chúng tôi sẽ phản hồi yêu cầu của bạn trong vòng 24 giờ',
+        checkSpamFolder: 'Vui lòng kiểm tra thư mục spam nếu bạn không thấy phản hồi của chúng tôi',
+        important: 'Quan Trọng',
+        keepThisEmail: 'Vui lòng lưu email này để theo dõi. Bạn có thể trả lời trực tiếp email này nếu có thêm câu hỏi.',
+        urgentMatters: 'Đối với các vấn đề khẩn cấp, vui lòng gọi trực tiếp cho chúng tôi.',
+        thankYouForReachingOut: 'Cảm ơn bạn đã liên hệ với chúng tôi!',
+        automatedConfirmation: 'Đây là email xác nhận tự động.'
+      }
+    };
+    return translations[language] || translations.en;
+  }
 }
 
 module.exports = new EmailService();

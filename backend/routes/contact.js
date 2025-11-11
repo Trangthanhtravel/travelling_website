@@ -6,6 +6,9 @@ const { requireAuth } = require('../middleware/auth');
 // Get contact information (public)
 router.get('/', contactController.getContactInfo);
 
+// Submit contact form (public)
+router.post('/submit', contactController.submitContactForm);
+
 // Update contact information (admin only)
 router.put('/', requireAuth, contactController.updateContactInfo);
 

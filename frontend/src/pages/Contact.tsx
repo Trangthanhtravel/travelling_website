@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 const Contact: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { contactInfo, isLoading, error } = useContactInfo();
 
@@ -40,14 +40,28 @@ const Contact: React.FC = () => {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      // Here you would typically send the data to your backend
-      // For now, we'll just simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/contact/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          language: language
+        }),
+      });
 
-      toast.success(t('Message sent successfully!') + ' ' + t('We\'ll get back to you soon.'));
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send message');
+      }
+
+      toast.success(result.message || t('Message sent successfully!') + ' ' + t('We\'ll get back to you soon.'));
       reset();
-    } catch (error) {
-      toast.error(t('Failed to send message. Please try again.'));
+    } catch (error: any) {
+      console.error('Error submitting contact form:', error);
+      toast.error(error.message || t('Failed to send message. Please try again.'));
     } finally {
       setIsSubmitting(false);
     }
