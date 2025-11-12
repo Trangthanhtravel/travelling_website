@@ -69,8 +69,14 @@ const adminLogin = async (req, res) => {
 
     console.log('✅ Authentication successful');
 
+    // Log is_super_admin value for debugging
+    console.log('🔍 is_super_admin value:', admin.is_super_admin, 'type:', typeof admin.is_super_admin);
+
     // Generate token with role based on is_super_admin flag
-    const userRole = admin.is_super_admin === 1 ? 'super_admin' : 'admin';
+    // Handle both number and string (SQLite might return as string)
+    const userRole = (admin.is_super_admin === 1 || admin.is_super_admin === '1') ? 'super_admin' : 'admin';
+    console.log('🔍 Computed userRole:', userRole);
+
     const token = generateToken(admin.id, userRole);
 
     // Return response in ApiResponse format to match frontend expectations
@@ -82,8 +88,8 @@ const adminLogin = async (req, res) => {
         user: {
           id: admin.id,
           email: admin.email,
-            name: admin.name,
-          role:userRole // Use computed role (super_admin or admin)
+          name: admin.name,
+          role: userRole // Use computed role (super_admin or admin)
         }
       }
     });

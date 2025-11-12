@@ -9,9 +9,9 @@ class User {
     this.password = data.password;
     this.phone = data.phone;
     this.role = data.role || 'admin'; // Always 'admin' in database
-    this.is_super_admin = data.is_super_admin || 0; // 1 for super_admin, 0 for regular admin
+    this.is_super_admin = Number(data.is_super_admin) || 0; // Convert to number, 1 = super_admin, 0 = regular admin
     this.created_by = data.created_by; // ID of super_admin who created this user
-    this.is_active = data.is_active !== undefined ? data.is_active : 1;
+    this.is_active = data.is_active !== undefined ? Number(data.is_active) : 1;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || new Date().toISOString();
   }
