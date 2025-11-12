@@ -331,9 +331,25 @@ export const adminAPI_functions = {
     getDashboardStats: (): Promise<AxiosResponse<ApiResponse<any>>> =>
         adminAPI.get('/admin/stats'),
 
-        getProfile: (): Promise<AxiosResponse<ApiResponse<User>>> =>
-            adminAPI.get('/admin/profile'),
-    };
+    getProfile: (): Promise<AxiosResponse<ApiResponse<User>>> =>
+        adminAPI.get('/admin/profile'),
+
+    // Admin Management (Super Admin only)
+    getAllAdmins: (): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.get('/admin-management'),
+
+    createAdmin: (adminData: { name: string; email: string; phone: string }): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.post('/admin-management', adminData),
+
+    updateAdmin: (id: number, adminData: any): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.put(`/admin-management/${id}`, adminData),
+
+    deleteAdmin: (id: number): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.delete(`/admin-management/${id}`),
+
+    resetAdminPassword: (id: number): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.post(`/admin-management/${id}/reset-password`),
+};
 
 
 export default api;
