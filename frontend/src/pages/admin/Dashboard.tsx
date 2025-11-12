@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
+import { useAuth } from '../../contexts/AuthContext';
 import TourManagement from './TourManagement';
 import BlogManagement from './BlogManagement';
 import ServiceManagement from './ServiceManagement';
@@ -13,6 +14,7 @@ import SocialLinksManagement from './SocialLinksManagement';
 import EmailSettingsManagement from './EmailSettingsManagement';
 import ContentManagement from './ContentManagement';
 import ContactInformationManagement from './ContactInformationManagement';
+import AdminManagement from './AdminManagement';
 
 interface DashboardStats {
   totalBookings: number;
@@ -172,6 +174,19 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onQuickAction }) 
 };
 
 const AdminDashboard: React.FC = () => {
+  const { state } = useAuth();
+
+  // Check if user is super admin
+  const isSuperAdmin = state.admin?.role === 'super_admin';
+
+  // Debug logging
+  console.log('🔍 Dashboard - Auth state:', {
+    hasAdmin: !!state.admin,
+    adminRole: state.admin?.role,
+    adminEmail: state.admin?.email,
+    isSuperAdmin: isSuperAdmin,
+  });
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -189,6 +204,8 @@ const AdminDashboard: React.FC = () => {
     { id: 'social-links', name: 'Social Links', icon: Icons.FiMessageCircle },
     { id: 'email-settings', name: 'Email Settings', icon: Icons.FiMail },
     { id: 'contact-information', name: 'Contact Information', icon: Icons.FiPhone },
+    // Only show Admin Management for super admins
+    ...(isSuperAdmin ? [{ id: 'admin-management', name: 'Admin Management', icon: Icons.FiUserPlus }] : []),
   ];
 
   const renderContent = () => {
@@ -217,6 +234,8 @@ const AdminDashboard: React.FC = () => {
         return <EmailSettingsManagement />;
       case 'contact-information':
         return <ContactInformationManagement />;
+      case 'admin-management':
+        return <AdminManagement />;
       case 'dashboard':
       default:
         return <DashboardOverview onQuickAction={setActiveTab} />;
