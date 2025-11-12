@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth, adminAuth } = require('../middleware/auth');
+const { requireAuth, adminAuth, superAdminAuth } = require('../middleware/auth');
 const {
   getTours,
   getFeaturedTours,
@@ -47,8 +47,8 @@ router.put('/:id', adminAuth, upload.single('image'), updateTour);
 
 // @route   DELETE /api/tours/:id
 // @desc    Delete tour
-// @access  Private (Admin only)
-router.delete('/:id', adminAuth, deleteTour);
+// @access  Private (Super Admin only)
+router.delete('/:id', superAdminAuth, deleteTour);
 
 // @route   PUT /api/tours/:id/gallery
 // @desc    Update tour gallery photos
@@ -57,7 +57,7 @@ router.put('/:id/gallery', adminAuth, galleryUpload.array('gallery', 10), update
 
 // @route   DELETE /api/tours/:id/gallery/:photoUrl
 // @desc    Delete specific gallery photo
-// @access  Private (Admin only)
-router.delete('/:id/gallery/:photoUrl', adminAuth, deleteGalleryPhoto);
+// @access  Private (Super Admin only)
+router.delete('/:id/gallery/:photoUrl', superAdminAuth, deleteGalleryPhoto);
 
 module.exports = router;

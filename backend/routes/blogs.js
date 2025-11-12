@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const blogController = require('../controllers/blogController');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireRole, adminAuth, superAdminAuth } = require('../middleware/auth');
 const multer = require('multer');
 
 // Configure multer for image upload
@@ -25,15 +25,15 @@ router.get('/featured', blogController.getFeaturedBlogs);
 router.get('/slug/:slug', blogController.getBlogBySlug);
 
 // Admin routes
-router.get('/admin', requireAuth, requireRole('admin'), blogController.getBlogs);
-router.get('/admin/:id', requireAuth, requireRole('admin'), blogController.getBlogById);
-router.post('/admin', requireAuth, requireRole('admin'), blogController.createBlog);
-router.put('/admin/:id', requireAuth, requireRole('admin'), blogController.updateBlog);
-router.delete('/admin/:id', requireAuth, requireRole('admin'), blogController.deleteBlog);
-router.patch('/admin/:id/status', requireAuth, requireRole('admin'), blogController.updateBlogStatus);
+router.get('/admin', adminAuth, blogController.getBlogs);
+router.get('/admin/:id', adminAuth, blogController.getBlogById);
+router.post('/admin', adminAuth, blogController.createBlog);
+router.put('/admin/:id', adminAuth, blogController.updateBlog);
+router.delete('/admin/:id', superAdminAuth, blogController.deleteBlog);
+router.patch('/admin/:id/status', adminAuth, blogController.updateBlogStatus);
 
 // Image upload routes
-router.post('/upload-featured-image', requireAuth, requireRole('admin'), upload.single('image'), blogController.uploadFeaturedImage);
-router.post('/upload-content-image', requireAuth, requireRole('admin'), upload.single('image'), blogController.uploadContentImage);
+router.post('/upload-featured-image', adminAuth, upload.single('image'), blogController.uploadFeaturedImage);
+router.post('/upload-content-image', adminAuth, upload.single('image'), blogController.uploadContentImage);
 
 module.exports = router;

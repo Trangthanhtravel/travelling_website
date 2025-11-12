@@ -42,7 +42,7 @@ const adminLogin = async (req, res) => {
       hasPassword: !!admin?.password
     });
 
-    if (!admin || admin.role !== 'admin') {
+    if (!admin || (admin.role !== 'admin' && admin.role !== 'super_admin')) {
       console.log('❌ Admin user not found or invalid role');
       return res.status(401).json({
         success: false,
@@ -69,8 +69,9 @@ const adminLogin = async (req, res) => {
 
     console.log('✅ Authentication successful');
 
-    // Generate token
-    const token = generateToken(admin.id, admin.role);
+    // Generate token with role based on is_super_admin flag
+    const userRole = admin.is_super_admin === 1 ? 'super_admin' : 'admin';
+    const token = generateToken(admin.id, userRole);
 
     // Return response in ApiResponse format to match frontend expectations
     res.json({
@@ -81,8 +82,8 @@ const adminLogin = async (req, res) => {
         user: {
           id: admin.id,
           email: admin.email,
-          name: admin.name,
-          role: admin.role
+            name: admin.name,
+          role:userRole // Use computed role (super_admin or admin)
         }
       }
     });

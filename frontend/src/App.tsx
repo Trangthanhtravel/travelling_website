@@ -25,6 +25,7 @@ import Login from './pages/auth/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import BlogManagement from './pages/admin/BlogManagement';
 import ContentManagement from './pages/admin/ContentManagement';
+import AdminManagement from './pages/admin/AdminManagement';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
@@ -87,6 +88,11 @@ const AppContent: React.FC = () => {
             <Route path="/admin/content" element={
               <ProtectedRoute requiredRole="admin">
                 <ContentManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/admins" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminManagement />
               </ProtectedRoute>
             } />
           </Routes>

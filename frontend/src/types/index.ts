@@ -1,12 +1,17 @@
 // User types
 export interface User {
-  id: string;
+  id: string | number;
   name: string;
   email: string;
   phone?: string;
-  role: 'customer' | 'admin' | 'editor';
-  createdAt: string;
-  updatedAt: string;
+  role: 'customer' | 'admin' | 'super_admin' | 'editor';
+  is_super_admin?: number; // 1 = super_admin, 0 = regular admin (backend flag)
+  is_active?: number; // 1 = active, 0 = inactive
+  created_by?: number | null; // ID of super_admin who created this user
+  createdAt?: string;
+  updatedAt?: string;
+  created_at?: string; // Backend uses snake_case
+  updated_at?: string; // Backend uses snake_case
 }
 
 // Tour types (matching corrected backend implementation)

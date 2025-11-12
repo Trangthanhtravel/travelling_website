@@ -8,7 +8,10 @@ class User {
     this.email = data.email?.toLowerCase();
     this.password = data.password;
     this.phone = data.phone;
-    this.role = data.role || 'admin'; // Only admin users now
+    this.role = data.role || 'admin'; // Always 'admin' in database
+    this.is_super_admin = data.is_super_admin || 0; // 1 for super_admin, 0 for regular admin
+    this.created_by = data.created_by; // ID of super_admin who created this user
+    this.is_active = data.is_active !== undefined ? data.is_active : 1;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || new Date().toISOString();
   }
@@ -30,13 +33,14 @@ class User {
     await this.hashPassword();
     const db = getDB();
     const sql = `
-      INSERT INTO users (name, email, password, phone, role, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (name, email, password, phone, role, is_super_admin, created_by, is_active, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const params = [
       this.name, this.email, this.password,
-      this.phone, this.role, this.created_at, this.updated_at
+      this.phone, this.role, this.is_super_admin, this.created_by, this.is_active,
+      this.created_at, this.updated_at
     ];
 
     const result = await db.prepare(sql).bind(...params).run();
@@ -44,18 +48,19 @@ class User {
     return result;
   }
 
-  // Find user by email (admin only)
+  // Find user by email (admin role, check is_super_admin flag)
   static async findByEmail(email) {
     try {
       console.log('🔍 Database query - Finding user by email:', email.toLowerCase());
       const db = getDB();
-      const user = await db.prepare('SELECT * FROM users WHERE email = ? AND role = ?')
+      const user = await db.prepare('SELECT * FROM users WHERE email = ? AND role = ? AND is_active = 1')
         .bind(email.toLowerCase(), 'admin')
         .first();
       console.log('🔍 Database result:', {
         found: !!user,
         userEmail: user?.email,
         userRole: user?.role,
+        isSuperAdmin: user?.is_super_admin === 1,
         userId: user?.id,
         passwordHashExists: !!user?.password,
         passwordHashLength: user?.password?.length
@@ -67,10 +72,10 @@ class User {
     }
   }
 
-  // Find user by ID (admin only)
+  // Find user by ID (admin role, check is_super_admin flag)
   static async findById(id) {
     const db = getDB();
-    const user = await db.prepare('SELECT * FROM users WHERE id = ? AND role = ?')
+    const user = await db.prepare('SELECT * FROM users WHERE id = ? AND role = ? AND is_active = 1')
       .bind(id, 'admin')
       .first();
     return user ? new User(user) : null;
@@ -83,6 +88,13 @@ class User {
     const sql = 'SELECT * FROM users WHERE role = ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
     const result = await db.prepare(sql).bind('admin', limit, offset).all();
     return result.results.map(user => new User(user));
+  }
+
+  // Delete admin user (soft delete by setting is_active to 0)
+  static async delete(id) {
+    const db = getDB();
+    const sql = 'UPDATE users SET is_active = 0, updated_at = ? WHERE id = ?';
+    return await db.prepare(sql).bind(new Date().toISOString(), id).run();
   }
 
   // Update admin user
@@ -100,23 +112,10 @@ class User {
     return await db.prepare(sql).bind(...values, this.id).run();
   }
 
-  // Delete admin user
-  async delete() {
-    const db = getDB();
-    return await db.prepare('DELETE FROM users WHERE id = ?').bind(this.id).run();
-  }
-
   // Convert to JSON (without password)
   toJSON() {
-    return {
-      id: this.id,
-      name: this.name,
-      email: this.email,
-      phone: this.phone,
-      role: this.role,
-      created_at: this.created_at,
-      updated_at: this.updated_at
-    };
+    const { password, ...userWithoutPassword } = this;
+    return userWithoutPassword;
   }
 }
 

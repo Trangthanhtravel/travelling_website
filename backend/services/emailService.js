@@ -790,6 +790,157 @@ class EmailService {
     };
     return translations[language] || translations.en;
   }
+
+  // Send admin invitation email with credentials
+  async sendAdminInvitationEmail(db, adminData) {
+    try {
+      console.log('[EmailService] Starting admin invitation email...');
+
+      const settings = await this.getEmailSettings(db);
+      const transporter = this.createTransporter();
+
+      const emailTemplate = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+            Welcome to ${settings.company_name} Admin Team!
+          </h2>
+          
+          <p>Dear <strong>${adminData.name}</strong>,</p>
+          
+          <p>You have been assigned as an administrator for ${settings.company_name}. This role allows you to manage tours, services, bookings, and content on the platform.</p>
+          
+          <div style="background-color: #f0f9ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
+            <h3 style="color: #1e40af; margin-top: 0;">Your Admin Credentials:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 120px;">Email:</td>
+                <td style="padding: 8px 0; font-family: monospace; color: #2563eb;">${adminData.email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Password:</td>
+                <td style="padding: 8px 0; font-family: monospace; background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px;">${adminData.password}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #dc2626; font-weight: bold;">⚠️ Important Security Notice:</p>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
+              <li>Please change your password immediately after your first login</li>
+              <li>Do not share your credentials with anyone</li>
+              <li>Keep this email in a secure location or delete it after changing your password</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #15803d; margin-top: 0;">Admin Permissions:</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #15803d;">
+              <li>Manage tours and services</li>
+              <li>View and update bookings</li>
+              <li>Manage blog posts and content</li>
+              <li>Receive booking and contact form notifications</li>
+              <li>Update website content and settings</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #92400e; margin-top: 0;">Note:</h3>
+            <p style="margin: 0; color: #92400e;">As an admin, you can perform most operations but cannot delete data or assign new administrators. Only super admins have those privileges.</p>
+          </div>
+          
+          <p>If you have any questions or need assistance, please contact the super admin who assigned you this role.</p>
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          
+          <div style="text-align: center; color: #6b7280;">
+            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated invitation email.</p>
+          </div>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: `"${settings.email_from_name}" <${process.env.EMAIL_USER}>`,
+        to: adminData.email,
+        subject: `Admin Access Granted - ${settings.company_name}`,
+        html: emailTemplate
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log('[EmailService] Admin invitation email sent successfully');
+    } catch (error) {
+      console.error('Error sending admin invitation email:', error);
+      throw error;
+    }
+  }
+
+  // Send password reset email
+  async sendPasswordResetEmail(db, adminData) {
+    try {
+      console.log('[EmailService] Starting password reset email...');
+
+      const settings = await this.getEmailSettings(db);
+      const transporter = this.createTransporter();
+
+      const emailTemplate = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #f59e0b; border-bottom: 2px solid #f59e0b; padding-bottom: 10px;">
+            Password Reset - ${settings.company_name}
+          </h2>
+          
+          <p>Dear <strong>${adminData.name}</strong>,</p>
+          
+          <p>Your password has been reset by a super administrator. Below are your new login credentials:</p>
+          
+          <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+            <h3 style="color: #92400e; margin-top: 0;">New Login Credentials:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 120px;">Email:</td>
+                <td style="padding: 8px 0; font-family: monospace; color: #2563eb;">${adminData.email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold;">New Password:</td>
+                <td style="padding: 8px 0; font-family: monospace; background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px;">${adminData.password}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #dc2626; font-weight: bold;">⚠️ Important Security Notice:</p>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
+              <li>Please change this password immediately after logging in</li>
+              <li>Choose a strong, unique password</li>
+              <li>Do not share your credentials with anyone</li>
+              <li>Delete this email after changing your password</li>
+            </ul>
+          </div>
+          
+          <p>If you did not request this password reset, please contact the super administrator immediately.</p>
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          
+          <div style="text-align: center; color: #6b7280;">
+            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated password reset email.</p>
+          </div>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: `"${settings.email_from_name}" <${process.env.EMAIL_USER}>`,
+        to: adminData.email,
+        subject: `Password Reset - ${settings.company_name}`,
+        html: emailTemplate
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log('[EmailService] Password reset email sent successfully');
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new EmailService();

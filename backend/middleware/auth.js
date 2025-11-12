@@ -79,8 +79,8 @@ const adminAuth = async (req, res, next) => {
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
 
-    // Check if user is admin
-    if (!decoded || decoded.role !== 'admin') {
+    // Check if user is admin or super_admin
+    if (!decoded || (decoded.role !== 'admin' && decoded.role !== 'super_admin')) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. Admin privileges required.'
@@ -113,8 +113,64 @@ const adminAuth = async (req, res, next) => {
   }
 };
 
+// Super admin only middleware
+const superAdminAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        message: 'No token, authorization denied'
+      });
+    }
+
+    const token = authHeader.replace('Bearer ', '').trim();
+
+    if (!token || token === 'null' || token === 'undefined') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token format'
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+
+    // Check if user is super_admin
+    if (!decoded || decoded.role !== 'super_admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Super admin privileges required.'
+      });
+    }
+
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.error('Super admin auth middleware error:', error);
+
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token format'
+      });
+    } else if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Token expired'
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: 'Token verification failed'
+      });
+    }
+  }
+};
+
 module.exports = {
   requireAuth,
   requireRole,
-  adminAuth
+  adminAuth,
+  superAdminAuth
 };
