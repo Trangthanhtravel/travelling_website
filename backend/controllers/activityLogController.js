@@ -1,4 +1,4 @@
-const db = require('../config/database');
+const { getDB } = require('../config/database');
 
 /**
  * Get activity logs with pagination and filters
@@ -53,9 +53,11 @@ const getActivityLogs = async (req, res) => {
       ? 'WHERE ' + whereConditions.join(' AND ')
       : '';
 
+    const db = getDB();
+
     // Get total count
     const countQuery = `SELECT COUNT(*) as total FROM activity_logs ${whereClause}`;
-    const countResult = await db.getDB().prepare(countQuery).bind(...params).first();
+    const countResult = await db.prepare(countQuery).bind(...params).first();
     const total = countResult?.total || 0;
 
     // Get paginated logs
@@ -78,7 +80,7 @@ const getActivityLogs = async (req, res) => {
       LIMIT ? OFFSET ?
     `;
 
-    const logsResult = await db.getDB().prepare(logsQuery)
+    const logsResult = await db.prepare(logsQuery)
       .bind(...params, parseInt(limit), offset)
       .all();
 
@@ -114,6 +116,8 @@ const getActivityLogs = async (req, res) => {
  */
 const getActivityStats = async (req, res) => {
   try {
+    const db = getDB();
+
     // Get stats for last 30 days
     const statsQuery = `
       SELECT 
@@ -126,7 +130,7 @@ const getActivityStats = async (req, res) => {
       ORDER BY count DESC
     `;
 
-    const statsResult = await db.getDB().prepare(statsQuery).all();
+    const statsResult = await db.prepare(statsQuery).all();
     const stats = statsResult.results || [];
 
     // Get most active admins
@@ -143,7 +147,7 @@ const getActivityStats = async (req, res) => {
       LIMIT 10
     `;
 
-    const adminStatsResult = await db.getDB().prepare(adminStatsQuery).all();
+    const adminStatsResult = await db.prepare(adminStatsQuery).all();
     const adminStats = adminStatsResult.results || [];
 
     // Get recent activity count by day
@@ -157,7 +161,7 @@ const getActivityStats = async (req, res) => {
       ORDER BY date DESC
     `;
 
-    const dailyStatsResult = await db.getDB().prepare(dailyStatsQuery).all();
+    const dailyStatsResult = await db.prepare(dailyStatsQuery).all();
     const dailyStats = dailyStatsResult.results || [];
 
     res.json({
@@ -191,12 +195,14 @@ const cleanupOldLogs = async (req, res) => {
       });
     }
 
+    const db = getDB();
+
     const deleteQuery = `
       DELETE FROM activity_logs 
       WHERE created_at < datetime('now', '-365 days')
     `;
 
-    const result = await db.getDB().prepare(deleteQuery).run();
+    const result = await db.prepare(deleteQuery).run();
     const deletedCount = result.meta?.changes || 0;
 
     res.json({
