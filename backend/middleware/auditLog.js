@@ -1,4 +1,4 @@
-const db = require('../config/database');
+const { getDB } = require('../config/database');
 
 /**
  * Audit logging middleware
@@ -26,7 +26,8 @@ const logActivity = async (req, action_type, resource_type, resource_id, resourc
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    await db.getDB().prepare(query).bind(
+    const db = getDB();
+    await db.prepare(query).bind(
       admin_id,
       admin_name,
       admin_email,
