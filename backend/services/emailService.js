@@ -826,7 +826,6 @@ class EmailService {
           <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
             <p style="margin: 0; color: #dc2626; font-weight: bold;">⚠️ Important Security Notice:</p>
             <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
-              <li>Please change your password immediately after your first login</li>
               <li>Do not share your credentials with anyone</li>
               <li>Keep this email in a secure location or delete it after changing your password</li>
             </ul>
