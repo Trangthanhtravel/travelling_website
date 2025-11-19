@@ -17,6 +17,7 @@ const categoryRoutes = require('./routes/categories');
 const socialLinksRoutes = require('./routes/socialLinks');
 const emailSettingsRoutes = require('./routes/emailSettings');
 const contactRoutes = require('./routes/contact');
+const activityLogRoutes = require('./routes/activityLogs');
 
 const app = express();
 
