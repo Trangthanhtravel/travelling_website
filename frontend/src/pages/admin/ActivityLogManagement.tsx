@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { activityLogsAPI } from '../../utils/api';
 
 interface ActivityLog {
@@ -36,7 +36,7 @@ const ActivityLogManagement: React.FC = () => {
   const [filterResourceType, setFilterResourceType] = useState("");
   const [filterAdminId, setFilterAdminId] = useState("");
 
-  const fetchActivityLogs = async (page = 1) => {
+  const fetchActivityLogs = useCallback(async (page = 1) => {
     setLoading(true);
     setError("");
     try {
@@ -67,9 +67,9 @@ const ActivityLogManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterActionType, filterResourceType, filterAdminId]);
 
-  const fetchActivityStats = async () => {
+  const fetchActivityStats = useCallback(async () => {
     try {
       const response = await activityLogsAPI.getActivityStats();
       if (response.data.success) {
@@ -78,12 +78,12 @@ const ActivityLogManagement: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchActivityLogs();
     fetchActivityStats();
-  }, []);
+  }, [fetchActivityLogs, fetchActivityStats]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
