@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, adminAuth, superAdminAuth } = require('../middleware/auth');
+const { createAuditMiddleware } = require('../middleware/auditLog');
 const {
   getTours,
   getFeaturedTours,

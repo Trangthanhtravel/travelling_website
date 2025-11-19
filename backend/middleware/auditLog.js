@@ -80,4 +80,3 @@ module.exports = {
   logActivity,
   createAuditMiddleware
 };
-
