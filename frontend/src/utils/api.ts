@@ -351,5 +351,16 @@ export const adminAPI_functions = {
         adminAPI.post(`/admin-management/${id}/reset-password`),
 };
 
+// Activity Logs API
+export const activityLogsAPI = {
+    getActivityLogs: (params?: URLSearchParams): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.get(`/activity-logs${params ? '?' + params.toString() : ''}`),
+
+    getActivityStats: (): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.get('/activity-logs/stats'),
+
+    cleanupOldLogs: (): Promise<AxiosResponse<ApiResponse<any>>> =>
+        adminAPI.post('/activity-logs/cleanup'),
+};
 
 export default api;

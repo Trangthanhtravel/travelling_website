@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const blogController = require('../controllers/blogController');
 const { requireAuth, requireRole, adminAuth, superAdminAuth } = require('../middleware/auth');
+const { createAuditMiddleware } = require('../middleware/auditLog');
 const multer = require('multer');
 
 // Configure multer for image upload
@@ -27,10 +28,10 @@ router.get('/slug/:slug', blogController.getBlogBySlug);
 // Admin routes
 router.get('/admin', adminAuth, blogController.getBlogs);
 router.get('/admin/:id', adminAuth, blogController.getBlogById);
-router.post('/admin', adminAuth, blogController.createBlog);
-router.put('/admin/:id', adminAuth, blogController.updateBlog);
-router.delete('/admin/:id', superAdminAuth, blogController.deleteBlog);
-router.patch('/admin/:id/status', adminAuth, blogController.updateBlogStatus);
+router.post('/admin', adminAuth, createAuditMiddleware('create', 'blog'), blogController.createBlog);
+router.put('/admin/:id', adminAuth, createAuditMiddleware('update', 'blog'), blogController.updateBlog);
+router.delete('/admin/:id', superAdminAuth, createAuditMiddleware('delete', 'blog'), blogController.deleteBlog);
+router.patch('/admin/:id/status', adminAuth, createAuditMiddleware('update', 'blog'), blogController.updateBlogStatus);
 
 // Image upload routes
 router.post('/upload-featured-image', adminAuth, upload.single('image'), blogController.uploadFeaturedImage);

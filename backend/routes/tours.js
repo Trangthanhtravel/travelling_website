@@ -38,26 +38,26 @@ router.get('/:tourId/availability', checkAvailability);
 // @route   POST /api/tours
 // @desc    Create new tour
 // @access  Private (Admin only)
-router.post('/', adminAuth, upload.single('image'), createTour);
+router.post('/', adminAuth, createAuditMiddleware('create', 'tour'), upload.single('image'), createTour);
 
 // @route   PUT /api/tours/:id
 // @desc    Update tour
 // @access  Private (Admin only)
-router.put('/:id', adminAuth, upload.single('image'), updateTour);
+router.put('/:id', adminAuth, createAuditMiddleware('update', 'tour'), upload.single('image'), updateTour);
 
 // @route   DELETE /api/tours/:id
 // @desc    Delete tour
 // @access  Private (Super Admin only)
-router.delete('/:id', superAdminAuth, deleteTour);
+router.delete('/:id', superAdminAuth, createAuditMiddleware('delete', 'tour'), deleteTour);
 
 // @route   PUT /api/tours/:id/gallery
 // @desc    Update tour gallery photos
 // @access  Private (Admin only)
-router.put('/:id/gallery', adminAuth, galleryUpload.array('gallery', 10), updateTourGallery);
+router.put('/:id/gallery', adminAuth, createAuditMiddleware('update', 'tour'), galleryUpload.array('gallery', 10), updateTourGallery);
 
 // @route   DELETE /api/tours/:id/gallery/:photoUrl
 // @desc    Delete specific gallery photo
 // @access  Private (Super Admin only)
-router.delete('/:id/gallery/:photoUrl', superAdminAuth, deleteGalleryPhoto);
+router.delete('/:id/gallery/:photoUrl', superAdminAuth, createAuditMiddleware('update', 'tour'), deleteGalleryPhoto);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {  adminAuth } = require('../middleware/auth');
+const { createAuditMiddleware } = require('../middleware/auditLog');
 const {
   getCategories,
   getCategoryById,
@@ -16,10 +17,10 @@ router.get('/', getCategories);
 router.get('/:id', getCategoryById);
 
 // Admin routes
-router.post('/', adminAuth, createCategory);
-router.put('/:id', adminAuth, updateCategory);
+router.post('/', adminAuth, createAuditMiddleware('create', 'category'), createCategory);
+router.put('/:id', adminAuth, createAuditMiddleware('update', 'category'), updateCategory);
 router.get('/:id/usage', adminAuth, checkCategoryUsage);
-router.delete('/:id', adminAuth, deleteCategory);
-router.post('/reorder', adminAuth, reorderCategories);
+router.delete('/:id', adminAuth, createAuditMiddleware('delete', 'category'), deleteCategory);
+router.post('/reorder', adminAuth, createAuditMiddleware('update', 'category'), reorderCategories);
 
 module.exports = router;

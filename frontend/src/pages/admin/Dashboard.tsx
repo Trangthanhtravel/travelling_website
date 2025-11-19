@@ -14,6 +14,7 @@ import SocialLinksManagement from './SocialLinksManagement';
 import EmailSettingsManagement from './EmailSettingsManagement';
 import ContentManagement from './ContentManagement';
 import ContactInformationManagement from './ContactInformationManagement';
+import ActivityLogManagement from './ActivityLogManagement';
 import AdminManagement from './AdminManagement';
 
 interface DashboardStats {
@@ -204,6 +205,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'social-links', name: 'Social Links', icon: Icons.FiMessageCircle },
     { id: 'email-settings', name: 'Email Settings', icon: Icons.FiMail },
     { id: 'contact-information', name: 'Contact Information', icon: Icons.FiPhone },
+    { id: 'activity-logs', name: 'Activity Logs', icon: Icons.FiActivity },
     // Only show Admin Management for super admins
     ...(isSuperAdmin ? [{ id: 'admin-management', name: 'Admin Management', icon: Icons.FiUserPlus }] : []),
   ];
@@ -234,6 +236,8 @@ const AdminDashboard: React.FC = () => {
         return <EmailSettingsManagement />;
       case 'contact-information':
         return <ContactInformationManagement />;
+      case 'activity-logs':
+        return <ActivityLogManagement />;
       case 'admin-management':
         return <AdminManagement />;
       case 'dashboard':

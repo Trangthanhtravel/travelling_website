@@ -28,6 +28,7 @@ import ContentManagement from './pages/admin/ContentManagement';
 import AdminManagement from './pages/admin/AdminManagement';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
+import ActivityLogManagement from "./pages/admin/ActivityLogManagement";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +94,11 @@ const AppContent: React.FC = () => {
             <Route path="/admin/admins" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/activity-logs" element={
+              <ProtectedRoute requiredRole="admin">
+                <ActivityLogManagement />
               </ProtectedRoute>
             } />
           </Routes>

@@ -229,6 +229,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/social-links', socialLinksRoutes);
 app.use('/api/email-settings', emailSettingsRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/activity-logs', activityLogRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
