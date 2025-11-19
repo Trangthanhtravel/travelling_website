@@ -130,7 +130,7 @@ const getActivityStats = async (req, res) => {
       ORDER BY count DESC
     `;
 
-    const statsResult = await db.prepare(statsQuery).all();
+    const statsResult = await db.prepare(statsQuery).bind().all();
     const stats = statsResult.results || [];
 
     // Get most active admins
@@ -147,7 +147,7 @@ const getActivityStats = async (req, res) => {
       LIMIT 10
     `;
 
-    const adminStatsResult = await db.prepare(adminStatsQuery).all();
+    const adminStatsResult = await db.prepare(adminStatsQuery).bind().all();
     const adminStats = adminStatsResult.results || [];
 
     // Get recent activity count by day
@@ -161,7 +161,7 @@ const getActivityStats = async (req, res) => {
       ORDER BY date DESC
     `;
 
-    const dailyStatsResult = await db.prepare(dailyStatsQuery).all();
+    const dailyStatsResult = await db.prepare(dailyStatsQuery).bind().all();
     const dailyStats = dailyStatsResult.results || [];
 
     res.json({
@@ -202,7 +202,7 @@ const cleanupOldLogs = async (req, res) => {
       WHERE created_at < datetime('now', '-365 days')
     `;
 
-    const result = await db.prepare(deleteQuery).run();
+    const result = await db.prepare(deleteQuery).bind().run();
     const deletedCount = result.meta?.changes || 0;
 
     res.json({
