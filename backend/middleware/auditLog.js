@@ -6,8 +6,19 @@ const { getDB } = require('../config/database');
  */
 const logActivity = async (req, action_type, resource_type, resource_id, resource_name, changes = null) => {
   try {
+    console.log(`[Audit] logActivity called:`, {
+      hasUser: !!req.user,
+      userId: req.user?.id,
+      userName: req.user?.name,
+      userEmail: req.user?.email,
+      action_type,
+      resource_type,
+      resource_id,
+      resource_name
+    });
+
     if (!req.user || !req.user.id) {
-      console.warn('No user in request for audit log');
+      console.warn('[Audit] No user in request for audit log - SKIPPING');
       return;
     }
 
@@ -26,8 +37,18 @@ const logActivity = async (req, action_type, resource_type, resource_id, resourc
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
+    console.log(`[Audit] Preparing to insert log with params:`, {
+      admin_id,
+      admin_name,
+      admin_email,
+      action_type,
+      resource_type,
+      resource_id,
+      resource_name
+    });
+
     const db = getDB();
-    await db.prepare(query).bind(
+    const result = await db.prepare(query).bind(
       admin_id,
       admin_name,
       admin_email,
@@ -40,10 +61,10 @@ const logActivity = async (req, action_type, resource_type, resource_id, resourc
       user_agent
     ).run();
 
-    console.log(`✓ Audit log: ${admin_email} ${action_type}d ${resource_type} #${resource_id}`);
+    console.log(`✓ Audit log created: ${admin_email} ${action_type}d ${resource_type} #${resource_id}`, result);
   } catch (error) {
     // Don't fail the main operation if logging fails
-    console.error('Failed to log activity:', error);
+    console.error('[Audit] Failed to log activity:', error);
   }
 };
 
@@ -57,6 +78,14 @@ const createAuditMiddleware = (action_type, resource_type) => {
 
     // Override json method to capture response
     res.json = function(data) {
+      console.log(`[Audit] Response for ${action_type} ${resource_type}:`, {
+        success: data.success,
+        statusCode: res.statusCode,
+        hasData: !!data.data,
+        dataKeys: data.data ? Object.keys(data.data) : [],
+        params: req.params
+      });
+
       // Log after successful operation
       if (data.success && res.statusCode < 400) {
         // Extract resource info from response or request
@@ -64,9 +93,17 @@ const createAuditMiddleware = (action_type, resource_type) => {
         const resource_name = data.data?.name || data.data?.title || data.name || data.title || null;
         const changes = data.data || null;
 
+        console.log(`[Audit] Extracted info:`, {
+          resource_id,
+          resource_name,
+          hasChanges: !!changes
+        });
+
         // Fire and forget - don't wait for logging
         logActivity(req, action_type, resource_type, resource_id, resource_name, changes)
           .catch(err => console.error('Audit log error:', err));
+      } else {
+        console.log(`[Audit] Skipping log - success: ${data.success}, statusCode: ${res.statusCode}`);
       }
 
       // Call original json method

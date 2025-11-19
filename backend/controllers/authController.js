@@ -2,9 +2,15 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 // Generate JWT Token for admin
-const generateToken = (userId, role) => {
+const generateToken = (userId, role, email, name) => {
   return jwt.sign(
-    { userId, role },
+    {
+      id: userId,      // Changed from userId to id
+      userId,          // Keep for backward compatibility
+      role,
+      email,           // Added for audit logging
+      name             // Added for audit logging
+    },
     process.env.JWT_SECRET || 'fallback_secret',
     { expiresIn: '30d' }
   );
@@ -77,7 +83,7 @@ const adminLogin = async (req, res) => {
     const userRole = (admin.is_super_admin === 1 || admin.is_super_admin === '1') ? 'super_admin' : 'admin';
     console.log('🔍 Computed userRole:', userRole);
 
-    const token = generateToken(admin.id, userRole);
+    const token = generateToken(admin.id, userRole, admin.email, admin.name);
 
     // Return response in ApiResponse format to match frontend expectations
     res.json({
