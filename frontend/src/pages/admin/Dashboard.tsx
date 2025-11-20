@@ -300,8 +300,12 @@ const AdminDashboard: React.FC = () => {
             {/* Optional: Add user menu or other header actions here */}
             <div className="flex items-center space-x-3">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Admin User</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {state.admin?.name || state.admin?.email || 'Admin User'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {state.admin?.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                </p>
               </div>
               <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
                 <Icon icon={Icons.FiUser} className="w-4 h-4 text-white" />
