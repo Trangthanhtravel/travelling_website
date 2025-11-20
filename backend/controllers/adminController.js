@@ -89,6 +89,9 @@ const getProfile = async (req, res) => {
       });
     }
 
+    // Compute role based on is_super_admin flag (same logic as login)
+    const userRole = (user.is_super_admin === 1 || user.is_super_admin === '1') ? 'super_admin' : 'admin';
+
     // Return user profile without password
     res.json({
       success: true,
@@ -96,7 +99,7 @@ const getProfile = async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role
+        role: userRole // Use computed role (super_admin or admin)
       }
     });
   } catch (error) {
