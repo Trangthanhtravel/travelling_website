@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const sharp = require('sharp');
 
 // Initialize R2 bucket connection
 let r2Bucket = null;
@@ -77,15 +78,25 @@ const r2Helpers = {
       // Validate file first
       this.validateImage(file);
 
-      const fileExtension = file.originalname?.split('.').pop() || 'jpg';
-      const fileName = `${folder}/${uuidv4()}.${fileExtension}`;
-      
-      // Convert file buffer to proper format for R2
-      const fileBuffer = file.buffer;
+      // Generate unique filename with .webp extension
+      const fileName = `${folder}/${uuidv4()}.webp`;
 
-      await r2Bucket.put(fileName, fileBuffer, {
+      // Convert image to WebP format with optimization
+      const processedBuffer = await sharp(file.buffer)
+        .webp({
+          quality: 85,           // High quality WebP
+          effort: 6,             // Compression effort (0-6, higher = better compression but slower)
+          smartSubsample: true   // Better quality at low bitrates
+        })
+        .resize(2000, 2000, {   // Max dimensions while maintaining aspect ratio
+          fit: 'inside',
+          withoutEnlargement: true
+        })
+        .toBuffer();
+
+      await r2Bucket.put(fileName, processedBuffer, {
         httpMetadata: {
-          contentType: file.mimetype,
+          contentType: 'image/webp',
           cacheControl: 'public, max-age=31536000', // 1 year
         },
       });
@@ -166,6 +177,62 @@ const r2Helpers = {
       return await Promise.all(uploadPromises);
     } catch (error) {
       console.error('R2 multiple upload error:', error);
+      throw error;
+    }
+  },
+
+  // Upload image in multiple sizes for responsive design (optional advanced feature)
+  async uploadResponsiveImage(r2Bucket, file, folder = 'tours') {
+    try {
+      this.validateImage(file);
+
+      const baseFileName = uuidv4();
+      const sizes = [
+        { width: 400, suffix: 'thumb' },   // Thumbnail
+        { width: 800, suffix: 'medium' },  // Medium
+        { width: 1200, suffix: 'large' },  // Large
+        { width: 2000, suffix: 'original' } // Original (max)
+      ];
+
+      const uploadPromises = sizes.map(async ({ width, suffix }) => {
+        const fileName = `${folder}/${baseFileName}-${suffix}.webp`;
+
+        const processedBuffer = await sharp(file.buffer)
+          .webp({
+            quality: 85,
+            effort: 6,
+            smartSubsample: true
+          })
+          .resize(width, width, {
+            fit: 'inside',
+            withoutEnlargement: true
+          })
+          .toBuffer();
+
+        await r2Bucket.put(fileName, processedBuffer, {
+          httpMetadata: {
+            contentType: 'image/webp',
+            cacheControl: 'public, max-age=31536000',
+          },
+        });
+
+        // Return URL for this size
+        const cleanPublicDomain = process.env.R2_PUBLIC_DOMAIN?.replace(/^https?:\/\//, '');
+        const cleanBucketName = process.env.R2_BUCKET_NAME?.replace(/^https?:\/\//, '');
+        const cleanAccountId = process.env.CLOUDFLARE_ACCOUNT_ID?.replace(/^https?:\/\//, '');
+
+        if (cleanPublicDomain) {
+          return { [suffix]: `https://${cleanPublicDomain}/${fileName}` };
+        } else if (cleanBucketName && cleanAccountId) {
+          return { [suffix]: `https://${cleanBucketName}.${cleanAccountId}.r2.cloudflarestorage.com/${fileName}` };
+        }
+      });
+
+      const urls = await Promise.all(uploadPromises);
+      // Merge all size URLs into one object
+      return Object.assign({}, ...urls);
+    } catch (error) {
+      console.error('R2 responsive upload error:', error);
       throw error;
     }
   },
