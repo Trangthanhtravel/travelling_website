@@ -64,7 +64,7 @@ const Header: React.FC = () => {
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center space-x-2">
                             <img
-                                src="/company_logo.png"
+                                src={isDarkMode ? "/B_Primary_logo_dark_theme_blue_background.png" : "/A_Primary_logo_Light_theme.png"}
                                 alt="Company Logo"
                                 className={`h-10 w-auto ${logoTextClasses}`}
                             />
