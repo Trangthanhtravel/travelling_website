@@ -25,9 +25,6 @@ const Footer: React.FC = () => {
                 className="h-12 w-auto"
               />
             </div>
-            <p className={`mb-6 max-w-md ${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>
-              {t('TRANG THANH TRAVEL')}
-            </p>
             <div className={`space-y-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>
               <div className="flex items-center">
                 <Icon icon={Icons.FiMapPin} className="w-4 h-4 mr-2" />
