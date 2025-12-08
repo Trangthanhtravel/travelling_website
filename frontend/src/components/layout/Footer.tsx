@@ -20,9 +20,9 @@ const Footer: React.FC = () => {
           <div className="col-span-1 lg:col-span-2">
             <div className="flex items-center mb-4">
               <img
-                src={isDarkMode ? "/B_Primary_logo_dark_theme_blue_background.png" : "/A_Primary_logo_Light_theme.png"}
+                src="/B_Primary_logo_dark_theme_blue_background.png"
                 alt="Company Logo"
-                className="h-12 w-auto"
+                className="h-24 w-auto"
               />
             </div>
             <div className={`space-y-2 ${isDarkMode ? 'text-dark-text-muted' : 'text-light-200'}`}>

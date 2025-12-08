@@ -59,14 +59,14 @@ const Header: React.FC = () => {
                 : 'bg-transparent'
         }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
+                <div className="flex justify-between items-center h-24">
                     {/* Logo */}
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center space-x-2">
                             <img
                                 src={isDarkMode ? "/B_Primary_logo_dark_theme_blue_background.png" : "/A_Primary_logo_Light_theme.png"}
                                 alt="Company Logo"
-                                className={`h-10 w-auto ${logoTextClasses}`}
+                                className={`h-20 w-auto ${logoTextClasses}`}
                             />
                         </Link>
                     </div>
