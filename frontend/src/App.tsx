@@ -44,7 +44,7 @@ const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
-  return <div className={isHomePage ? '' : 'pt-16'}>{children}</div>;
+  return <div className={isHomePage ? '' : 'pt-24'}>{children}</div>;
 };
 
 const AppContent: React.FC = () => {
