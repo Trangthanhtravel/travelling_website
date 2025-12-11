@@ -154,7 +154,7 @@ const ActivityLogManagement: React.FC = () => {
       {showStats && stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Most Active Admins */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
               Most Active (30 days)
             </h3>
@@ -171,7 +171,7 @@ const ActivityLogManagement: React.FC = () => {
           </div>
 
           {/* Action Types */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
               Actions by Type
             </h3>
@@ -190,7 +190,7 @@ const ActivityLogManagement: React.FC = () => {
           </div>
 
           {/* Recent Activity */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
               Daily Activity
             </h3>
@@ -211,7 +211,7 @@ const ActivityLogManagement: React.FC = () => {
       )}
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -275,7 +275,7 @@ const ActivityLogManagement: React.FC = () => {
       )}
 
       {/* Activity Logs Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -297,7 +297,7 @@ const ActivityLogManagement: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-white dark:bg-dark-800 divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
@@ -379,14 +379,14 @@ const ActivityLogManagement: React.FC = () => {
                   <button
                     onClick={() => fetchActivityLogs(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-800 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => fetchActivityLogs(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-800 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
                   >
                     Next
                   </button>
