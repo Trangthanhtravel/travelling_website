@@ -110,7 +110,7 @@ const Tours: React.FC = () => {
     const duration = tour.duration;
 
     return (
-      <div className={`group bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
+      <div className={`group bg-dark-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
         isDarkMode ? 'border border-gray-700' : 'border border-gray-200'
       }`}>
         <div className="relative overflow-hidden">
