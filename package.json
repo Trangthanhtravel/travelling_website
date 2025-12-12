@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A comprehensive travel booking website",
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",

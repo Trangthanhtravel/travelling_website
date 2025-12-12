@@ -4,7 +4,7 @@
   "description": "Backend API for travelling website",
   "main": "server.js",
   "engines": {
-    "node": "20.x",
+    "node": "24.x",
     "npm": ">=10.0.0"
   },
   "scripts": {
@@ -28,7 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "node-fetch": "^2.7.0",
-    "nodemailer": "^6.9.13",
+    "nodemailer": "^6.9.16",
     "sharp": "^0.34.5",
     "stripe": "^14.21.0",
     "uuid": "^9.0.1",
