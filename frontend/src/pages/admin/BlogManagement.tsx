@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Icon, Icons } from '../../components/common/Icons';
-import { useTheme } from '../../contexts/ThemeContext';
 import { useTranslation } from '../../contexts/TranslationContext';
 import toast from 'react-hot-toast';
 import BlogEditor from './BlogEditor';
@@ -40,7 +39,6 @@ const BlogManagement: React.FC = () => {
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [currentDisplayLanguage] = useState<'en' | 'vi' | 'both'>('both'); // Add display language toggle
-  const { isDarkMode } = useTheme();
   const { t, language } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -193,12 +191,12 @@ const BlogManagement: React.FC = () => {
   }
 
   return (
-    <div className={`p-6 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+    <div className="p-6 bg-gray-50 dark:bg-dark-900 text-gray-900 dark:text-white">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">{t('Blog Management')}</h1>
-          <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {t('Manage your blog posts and content')}
           </p>
         </div>
@@ -212,22 +210,18 @@ const BlogManagement: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4 mb-6`}>
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Search */}
           <div className="lg:col-span-2">
             <div className="relative">
-              <Icon icon={Icons.FiSearch} className={`absolute left-3 top-3 h-4 w-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+              <Icon icon={Icons.FiSearch} className="absolute left-3 top-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
               <input
                 type="text"
                 placeholder={t('Search blogs...')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                }`}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -236,11 +230,7 @@ const BlogManagement: React.FC = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as any)}
-            className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              isDarkMode 
-                ? 'bg-gray-700 border-gray-600 text-white' 
-                : 'bg-white border-gray-300 text-gray-900'
-            }`}
+            className="px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">{t('All Status')}</option>
             <option value="published">{t('Published')}</option>
@@ -252,11 +242,7 @@ const BlogManagement: React.FC = () => {
           <select
             value={filterFeatured}
             onChange={(e) => setFilterFeatured(e.target.value as any)}
-            className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              isDarkMode
-                ? 'bg-gray-700 border-gray-600 text-white' 
-                : 'bg-white border-gray-300 text-gray-900'
-            }`}
+            className="px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">{t('All Blogs')}</option>
             <option value="featured">{t('Featured')}</option>
@@ -274,10 +260,10 @@ const BlogManagement: React.FC = () => {
 
       {/* Blogs Table */}
       {!isLoading && (
-        <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow overflow-hidden`}>
+        <div className="bg-white dark:bg-dark-800 rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+              <thead className="bg-gray-50 dark:bg-dark-700">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('Blog')}
@@ -296,9 +282,9 @@ const BlogManagement: React.FC = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {blogs.map((blog: Blog) => (
-                  <tr key={blog.id} className={`${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition-colors`}>
+                  <tr key={blog.id} className="hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         {blog.featured_image && (
@@ -310,7 +296,7 @@ const BlogManagement: React.FC = () => {
                         )}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center">
-                            <div className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
                               {/* Enhanced bilingual title display */}
                               {currentDisplayLanguage === 'both' ? (
                                 <div className="space-y-1">
@@ -335,7 +321,7 @@ const BlogManagement: React.FC = () => {
                               <Icon icon={Icons.FiStar} className="h-4 w-4 text-yellow-400 ml-2" />
                             )}
                           </div>
-                          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} truncate max-w-xs mt-1`}>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs mt-1">
                             {/* Enhanced bilingual excerpt display */}
                             {currentDisplayLanguage === 'both' ? (
                               <div className="space-y-1">
@@ -357,9 +343,7 @@ const BlogManagement: React.FC = () => {
                       <select
                         value={blog.status}
                         onChange={(e) => handleStatusChange(blog, e.target.value)}
-                        className={`text-xs font-semibold rounded-full px-2 py-1 border-0 ${getStatusBadge(blog.status)} ${
-                          isDarkMode ? 'bg-opacity-20' : ''
-                        }`}
+                        className={`text-xs font-semibold rounded-full px-2 py-1 border-0 ${getStatusBadge(blog.status)} dark:bg-opacity-20`}
                         disabled={updateStatusMutation.isPending}
                       >
                         <option value="draft">{t('Draft')}</option>
@@ -377,8 +361,8 @@ const BlogManagement: React.FC = () => {
                       <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => handleToggleFeatured(blog)}
-                          className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                            blog.featured ? 'text-yellow-600' : isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                          className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-dark-600 ${
+                            blog.featured ? 'text-yellow-600' : 'text-gray-600 dark:text-gray-400'
                           }`}
                           title={blog.featured ? t('Remove from featured') : t('Add to featured')}
                           disabled={toggleFeaturedMutation.isPending}
@@ -387,14 +371,14 @@ const BlogManagement: React.FC = () => {
                         </button>
                         <button
                           onClick={() => handleEdit(blog)}
-                          className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
+                          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-dark-600 text-gray-600 dark:text-gray-400"
                           title={t('Edit blog')}
                         >
                           <Icon icon={Icons.FiEdit2} className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(blog)}
-                          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 text-red-600"
+                          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-dark-600 text-red-600"
                           title={t('Delete blog')}
                           disabled={deleteBlogMutation.isPending}
                         >
@@ -411,11 +395,11 @@ const BlogManagement: React.FC = () => {
           {/* Empty State */}
           {blogs.length === 0 && (
             <div className="text-center py-12">
-              <Icon icon={Icons.FiFileText} className={`h-12 w-12 mx-auto ${isDarkMode ? 'text-gray-600' : 'text-gray-400'} mb-4`} />
-              <h3 className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
+              <Icon icon={Icons.FiFileText} className="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                 {t('No blogs found')}
               </h3>
-              <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mb-4`}>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
                 {t('Get started by creating your first blog post.')}
               </p>
               <button
