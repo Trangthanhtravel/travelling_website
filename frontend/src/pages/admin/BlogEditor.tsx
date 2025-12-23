@@ -246,13 +246,13 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
 
           <div className="flex items-center space-x-3">
             {/* Language Toggle */}
-            <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <div className={`flex items-center rounded-lg p-1 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
               <button
                 onClick={() => setCurrentLanguage('en')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                   currentLanguage === 'en'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    ? `${isDarkMode ? 'bg-gray-600 text-white' : 'bg-white text-gray-900'} shadow-sm`
+                    : `${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
                 }`}
               >
                 EN
@@ -261,8 +261,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                 onClick={() => setCurrentLanguage('vi')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                   currentLanguage === 'vi'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    ? `${isDarkMode ? 'bg-gray-600 text-white' : 'bg-white text-gray-900'} shadow-sm`
+                    : `${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
                 }`}
               >
                 VI
@@ -272,14 +272,14 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
             {/* Preview Toggle */}
             <button
               onClick={() => setIsPreviewMode(!isPreviewMode)}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
+              className={`px-4 py-2 rounded-lg border flex items-center space-x-2 transition-colors ${
                 isPreviewMode
                   ? 'bg-blue-600 text-white border-blue-600'
                   : `${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}`
               }`}
             >
               <Icon icon={Icons.FiEye} className="h-4 w-4" />
-              {isPreviewMode ? t('Edit') : t('Preview')}
+              <span>{isPreviewMode ? t('Edit') : t('Preview')}</span>
             </button>
 
             {/* Save Button */}
@@ -394,7 +394,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                     />
                   </div>
 
-                  {/* Content with Image Upload */}
+                  {/* Content with Image URL support */}
                   <div>
                     <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                       {t('Content')} *
@@ -406,7 +406,6 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                           onChange={(value) => handleFieldChange(currentLanguage === 'en' ? 'content' : 'content_vi', value)}
                           placeholder={t('Write your blog content here...')}
                           height={384}
-                          enableImageUpload={true}
                         />
                       </div>
                     ) : (
@@ -417,8 +416,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                       }`}>
                         <div className={`prose prose-lg max-w-none ${
                           isDarkMode 
-                            ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-primary-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-gray-800 prose-blockquote:border-primary-500 prose-blockquote:text-gray-300' 
-                            : 'prose-gray prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary-600 prose-strong:text-gray-900 prose-blockquote:border-primary-500'
+                            ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-gray-800 prose-blockquote:border-blue-500 prose-blockquote:text-gray-300' 
+                            : 'prose-gray prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-blockquote:border-blue-500'
                         }`}>
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
@@ -436,7 +435,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                                   href={href}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className={`${isDarkMode ? 'text-primary-400 hover:text-primary-300' : 'text-primary-600 hover:text-primary-700'} transition-colors duration-200`}
+                                  className={`${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors duration-200`}
                                 >
                                   {children}
                                 </a>
@@ -477,7 +476,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                                 </p>
                               ),
                               blockquote: ({ children }) => (
-                                <blockquote className={`border-l-4 ${isDarkMode ? 'border-primary-500 bg-gray-800' : 'border-primary-500 bg-gray-50'} pl-4 py-2 my-6 italic`}>
+                                <blockquote className={`border-l-4 ${isDarkMode ? 'border-blue-500 bg-gray-800' : 'border-blue-500 bg-gray-50'} pl-4 py-2 my-6 italic`}>
                                   <div className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
                                     {children}
                                   </div>
@@ -498,7 +497,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                                   {children}
                                 </li>
                               ),
-                              code: ({ inline, children, ...props }: any) => (
+                              code: ({ inline, children }: any) => (
                                 inline ? (
                                   <code className={`px-1 py-0.5 rounded text-sm ${isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'}`}>
                                     {children}
@@ -703,8 +702,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                 {/* Content Preview with Image Support */}
                 <div className={`prose prose-lg max-w-none ${
                   isDarkMode 
-                    ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-primary-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-gray-800 prose-blockquote:border-primary-500 prose-blockquote:text-gray-300' 
-                    : 'prose-gray prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary-600 prose-strong:text-gray-900 prose-blockquote:border-primary-500'
+                    ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-gray-800 prose-blockquote:border-blue-500 prose-blockquote:text-gray-300' 
+                    : 'prose-gray prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-blockquote:border-blue-500'
                 }`}>
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
@@ -722,7 +721,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`${isDarkMode ? 'text-primary-400 hover:text-primary-300' : 'text-primary-600 hover:text-primary-700'} transition-colors duration-200`}
+                          className={`${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors duration-200`}
                         >
                           {children}
                         </a>
@@ -763,7 +762,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                         </p>
                       ),
                       blockquote: ({ children }) => (
-                        <blockquote className={`border-l-4 ${isDarkMode ? 'border-primary-500 bg-gray-800' : 'border-primary-500 bg-gray-50'} pl-4 py-2 my-6 italic`}>
+                        <blockquote className={`border-l-4 ${isDarkMode ? 'border-blue-500 bg-gray-800' : 'border-blue-500 bg-gray-50'} pl-4 py-2 my-6 italic`}>
                           <div className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
                             {children}
                           </div>
@@ -784,7 +783,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                           {children}
                         </li>
                       ),
-                      code: ({ inline, children, ...props }: any) => (
+                      code: ({ inline, children }: any) => (
                         inline ? (
                           <code className={`px-1 py-0.5 rounded text-sm ${isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'}`}>
                             {children}

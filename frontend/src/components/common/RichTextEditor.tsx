@@ -1,8 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import MDEditor, { commands } from '@uiw/react-md-editor';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useTranslation } from '../../contexts/TranslationContext';
-import toast from 'react-hot-toast';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
 import ReactMarkdown from 'react-markdown';
@@ -15,121 +13,16 @@ interface RichTextEditorProps {
   placeholder?: string;
   height?: number;
   isDarkMode?: boolean;
-  enableImageUpload?: boolean;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
   onChange,
   placeholder = "Write your content here...",
-  height = 400,
-  enableImageUpload = false
+  height = 400
 }) => {
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
-  const [mode, setMode] = useState<'edit' | 'live' | 'preview'>('edit');
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Image upload function
-  const uploadImage = async (file: File): Promise<string> => {
-    setIsUploadingImage(true);
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/upload-content-image`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Upload failed');
-      }
-
-      const result = await response.json();
-      return result.data.imageUrl;
-    } catch (error: any) {
-      console.error('Image upload error:', error);
-      toast.error(error.message || t('Failed to upload image'));
-      throw error;
-    } finally {
-      setIsUploadingImage(false);
-    }
-  };
-
-  // Custom image upload command
-  const customImageCommand = {
-    name: 'image-upload',
-    keyCommand: 'image-upload',
-    buttonProps: { 'aria-label': 'Upload image', title: 'Upload image' },
-    icon: (
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7,10 12,15 17,10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-    ),
-    execute: () => {
-      if (enableImageUpload) {
-        fileInputRef.current?.click();
-      }
-    },
-  };
-
-  // Handle file selection
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || !files.length) return;
-
-    const file = files[0];
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error(t('Please select an image file'));
-      return;
-    }
-
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('Image must be less than 5MB'));
-      return;
-    }
-
-    try {
-      const imageUrl = await uploadImage(file);
-      const imageMarkdown = `![${file.name}](${imageUrl})`;
-
-      // Insert image markdown at cursor position
-      const textarea = document.querySelector('.w-md-editor-text-textarea') as HTMLTextAreaElement;
-      if (textarea) {
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const newValue = value.substring(0, start) + imageMarkdown + value.substring(end);
-        onChange(newValue);
-
-        // Set cursor position after inserted image
-        setTimeout(() => {
-          textarea.focus();
-          textarea.setSelectionRange(start + imageMarkdown.length, start + imageMarkdown.length);
-        }, 100);
-      } else {
-        // Fallback: append to end
-        onChange(value + '\n\n' + imageMarkdown);
-      }
-
-      toast.success(t('Image uploaded and inserted'));
-    } catch (error) {
-      // Error already handled in uploadImage function
-    }
-
-    // Clear file input
-    e.target.value = '';
-  };
+  const [mode] = useState<'edit' | 'live' | 'preview'>('edit');
 
   // Detect if content contains markdown syntax
   const hasMarkdownSyntax = (text: string) => {
@@ -137,8 +30,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       /#{1,6}\s/,           // Headers
       /\*\*.*\*\*/,         // Bold
       /\*.*\*/,             // Italic
-      /\[.*\]\(.*\)/,       // Links
-      /!\[.*\]\(.*\)/,      // Images
+      /\[.*]\(.*\)/,        // Links
+      /!\[.*]\(.*\)/,       // Images
       /```[\s\S]*```/,      // Code blocks
       /`.*`/,               // Inline code
       />\s/,                // Blockquotes
@@ -153,193 +46,24 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onChange(val || '');
   };
 
-  // Force text visibility with more aggressive approach
+  // Simplified text visibility effect - removed aggressive interference
   React.useEffect(() => {
-    let isApplyingStyles = false; // Prevent infinite loops
-
-    const forceTextVisibility = () => {
-      if (isApplyingStyles) return;
-      isApplyingStyles = true;
-
-      // Target all possible text input elements with more specific selectors
-      const selectors = [
-        '.rich-text-editor textarea',
-        '.rich-text-editor .w-md-editor-text-textarea',
-        '.rich-text-editor .w-md-editor-text-input',
-        '.w-md-editor-text-textarea',
-        'textarea[data-color-mode]',
-        '.w-md-editor textarea'
-      ];
-
-      let foundElements = 0;
-      selectors.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach((element: Element) => {
-          const htmlElement = element as HTMLElement;
-
-          // Debug: Log current computed styles before our changes (only once)
-          if (foundElements === 0) {
-            const computedStyle = window.getComputedStyle(htmlElement);
-            console.log('🔍 Main textarea element found:', selector);
-            console.log('📊 Before - Color:', computedStyle.color);
-            console.log('📊 Before - Background:', computedStyle.backgroundColor);
-            console.log('📊 Element tag:', htmlElement.tagName);
-            console.log('📊 Element type:', htmlElement.getAttribute('type'));
-            console.log('📊 Element value:', (htmlElement as HTMLTextAreaElement).value?.substring(0, 50));
-            console.log('📊 Element placeholder:', (htmlElement as HTMLTextAreaElement).placeholder);
-            console.log('📊 Font family:', computedStyle.fontFamily);
-            console.log('📊 Font size:', computedStyle.fontSize);
-            console.log('📊 Text shadow:', computedStyle.textShadow);
-            console.log('📊 Z-index:', computedStyle.zIndex);
-            console.log('📊 Position:', computedStyle.position);
-          }
-
-          // Force styles with maximum priority - more aggressive approach
-          htmlElement.style.setProperty('color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
-          htmlElement.style.setProperty('background-color', isDarkMode ? '#1F2937' : '#FFFFFF', 'important');
-          htmlElement.style.setProperty('border-color', isDarkMode ? '#374151' : '#D1D5DB', 'important');
-
-          // Additional properties to ensure visibility
-          htmlElement.style.setProperty('opacity', '1', 'important');
-          htmlElement.style.setProperty('visibility', 'visible', 'important');
-          htmlElement.style.setProperty('font-size', '14px', 'important');
-          htmlElement.style.setProperty('line-height', '1.6', 'important');
-          htmlElement.style.setProperty('caret-color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
-
-          // Force font properties
-          htmlElement.style.setProperty('font-family', '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', 'important');
-          htmlElement.style.setProperty('font-weight', 'normal', 'important');
-          htmlElement.style.setProperty('text-decoration', 'none', 'important');
-          htmlElement.style.setProperty('text-shadow', 'none', 'important');
-          htmlElement.style.setProperty('text-indent', '0', 'important');
-          htmlElement.style.setProperty('letter-spacing', 'normal', 'important');
-          htmlElement.style.setProperty('word-spacing', 'normal', 'important');
-
-          // Force positioning and z-index
-          htmlElement.style.setProperty('z-index', '1', 'important');
-          htmlElement.style.setProperty('position', 'relative', 'important');
-
-          // Remove any potential text selection styling
-          htmlElement.style.setProperty('user-select', 'text', 'important');
-          htmlElement.style.setProperty('-webkit-user-select', 'text', 'important');
-          htmlElement.style.setProperty('-moz-user-select', 'text', 'important');
-
-          // Force text rendering
-          htmlElement.style.setProperty('text-rendering', 'auto', 'important');
-          htmlElement.style.setProperty('-webkit-font-smoothing', 'auto', 'important');
-          htmlElement.style.setProperty('-moz-osx-font-smoothing', 'auto', 'important');
-
-          // Remove any transform that might hide text
-          htmlElement.style.setProperty('transform', 'none', 'important');
-          htmlElement.style.setProperty('filter', 'none', 'important');
-
-          // Ensure padding/margin don't hide text
-          htmlElement.style.setProperty('padding', '12px', 'important');
-          htmlElement.style.setProperty('margin', '0', 'important');
-
-          // Force focus to make text visible
-          if ((htmlElement as HTMLTextAreaElement).value && (htmlElement as HTMLTextAreaElement).value.length > 0) {
-            setTimeout(() => {
-              htmlElement.focus();
-              htmlElement.blur();
-              htmlElement.focus();
-              // Try to select and unselect to force text rendering
-              (htmlElement as HTMLTextAreaElement).setSelectionRange(0, 0);
-              setTimeout(() => {
-                const valueLength = (htmlElement as HTMLTextAreaElement).value.length;
-                (htmlElement as HTMLTextAreaElement).setSelectionRange(valueLength, valueLength);
-              }, 10);
-            }, 100);
-          }
-
-          foundElements++;
-        });
+    // Simple one-time style application on mount and theme change
+    const applyBasicStyles = () => {
+      const textareas = document.querySelectorAll('.rich-text-editor textarea, .w-md-editor-text-textarea');
+      textareas.forEach((textarea: Element) => {
+        const element = textarea as HTMLElement;
+        element.style.color = isDarkMode ? '#F9FAFB' : '#111827';
+        element.style.backgroundColor = isDarkMode ? '#1F2937' : '#FFFFFF';
+        element.style.caretColor = isDarkMode ? '#F9FAFB' : '#111827';
       });
-
-      // Force cursor visibility
-      const cursors = document.querySelectorAll('.CodeMirror-cursor, .w-md-editor-text-textarea, textarea');
-      cursors.forEach((cursor: Element) => {
-        const cursorElement = cursor as HTMLElement;
-        cursorElement.style.setProperty('caret-color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
-        cursorElement.style.setProperty('border-left-color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
-      });
-
-      console.log('✅ Applied text visibility styles to', foundElements, 'elements');
-
-      // Check if there are any overlaying elements that might hide the text
-      const allTextInputs = document.querySelectorAll('textarea, input[type="text"]');
-      console.log('🔍 Total text inputs found on page:', allTextInputs.length);
-      allTextInputs.forEach((input, index) => {
-        const computedStyle = window.getComputedStyle(input as HTMLElement);
-        if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden' || computedStyle.opacity === '0') {
-          console.log(`🚨 Hidden input ${index}:`, input, computedStyle.display, computedStyle.visibility, computedStyle.opacity);
-        }
-      });
-
-      setTimeout(() => {
-        isApplyingStyles = false;
-      }, 100);
     };
 
-    // Apply immediately and with delays
-    forceTextVisibility();
-    const timeouts = [100, 500, 1000];
-    const timeoutIds = timeouts.map(delay => setTimeout(forceTextVisibility, delay));
-
-    // Reduced MutationObserver scope to prevent infinite loops
-    const observer = new MutationObserver((mutations) => {
-      if (isApplyingStyles) return;
-
-      let shouldUpdate = false;
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          // Only trigger on new elements being added
-          shouldUpdate = true;
-        }
-      });
-
-      if (shouldUpdate) {
-        setTimeout(forceTextVisibility, 50);
-      }
-    });
-
-    const editorContainer = document.querySelector('.rich-text-editor');
-    if (editorContainer) {
-      observer.observe(editorContainer, {
-        childList: true,
-        subtree: true
-      });
-    }
-
-    return () => {
-      timeoutIds.forEach(clearTimeout);
-      observer.disconnect();
-    };
-  }, [isDarkMode, value]);
-
-  // Additional effect to handle focus events
-  React.useEffect(() => {
-    const handleFocus = () => {
-      setTimeout(() => {
-        const textareas = document.querySelectorAll('.rich-text-editor textarea, .w-md-editor-text-textarea');
-        textareas.forEach((textarea: Element) => {
-          const element = textarea as HTMLElement;
-          element.style.setProperty('color', isDarkMode ? '#FFFFFF' : '#000000', 'important');
-          element.style.setProperty('background-color', isDarkMode ? '#1F2937' : '#FFFFFF', 'important');
-        });
-      }, 10);
-    };
-
-    document.addEventListener('focusin', handleFocus);
-    document.addEventListener('click', handleFocus);
-
-    return () => {
-      document.removeEventListener('focusin', handleFocus);
-      document.removeEventListener('click', handleFocus);
-    };
+    // Apply once on mount and when theme changes
+    setTimeout(applyBasicStyles, 100);
   }, [isDarkMode]);
 
-  // Build commands array
+  // Build commands array - using default image command for URLs only
   const editorCommands = [
     // Basic formatting
     commands.bold,
@@ -351,8 +75,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     commands.link,
     commands.quote,
     commands.code,
-    commands.image,
-    ...(enableImageUpload ? [customImageCommand] : []), // Add custom image upload if enabled
+    commands.image, // Default image command for URL insertion
     commands.divider,
     commands.unorderedListCommand,
     commands.orderedListCommand,
@@ -365,74 +88,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   return (
     <div className={`rich-text-editor ${isDarkMode ? 'dark-theme' : 'light-theme'}`}>
-      {/* Hidden file input for image upload */}
-      {enableImageUpload && (
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-      )}
 
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            Content Editor
-          </span>
           {hasMarkdownSyntax(value) && (
             <span className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-blue-900/20 text-blue-400' : 'bg-blue-100 text-blue-800'}`}>
               Markdown Detected
             </span>
           )}
-          {enableImageUpload && (
-            <span className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'bg-green-900/20 text-green-400' : 'bg-green-100 text-green-800'}`}>
-              Image Upload Enabled
-            </span>
-          )}
-          {isUploadingImage && (
-            <span className={`text-xs px-2 py-1 rounded flex items-center ${isDarkMode ? 'bg-yellow-900/20 text-yellow-400' : 'bg-yellow-100 text-yellow-800'}`}>
-              <div className={`animate-spin rounded-full h-3 w-3 border-b mr-1 ${isDarkMode ? 'border-yellow-400' : 'border-yellow-600'}`}></div>
-              Uploading...
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center space-x-1">
-          <button
-            type="button"
-            onClick={() => setMode('edit')}
-            className={`px-3 py-1 text-xs rounded transition-colors ${
-              mode === 'edit'
-                ? 'bg-blue-500 text-white'
-                : `${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
-            }`}
-          >
-            Edit
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('live')}
-            className={`px-3 py-1 text-xs rounded transition-colors ${
-              mode === 'live'
-                ? 'bg-blue-500 text-white'
-                : `${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
-            }`}
-          >
-            Live
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('preview')}
-            className={`px-3 py-1 text-xs rounded transition-colors ${
-              mode === 'preview'
-                ? 'bg-blue-500 text-white'
-                : `${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
-            }`}
-          >
-            Preview
-          </button>
         </div>
       </div>
 
@@ -455,7 +118,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }}
           commands={editorCommands}
           components={{
-            preview: (source, state, dispatch) => {
+            preview: (source) => {
               return (
                 <div className={`prose prose-lg max-w-none p-4 ${
                   isDarkMode 
@@ -540,7 +203,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                           {children}
                         </li>
                       ),
-                      code: ({ inline, children, ...props }: any) => (
+                      code: ({ inline, children }: any) => (
                         inline ? (
                           <code className={`px-1 py-0.5 rounded text-sm ${isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-800'}`}>
                             {children}
@@ -598,12 +261,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className={`mt-2 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
         <p>
           💡 <strong className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>Tips:</strong> Use the toolbar for formatting, or type markdown directly.
-          Supports <strong className={isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}>**bold**</strong>, <em className={isDarkMode ? 'text-amber-400' : 'text-amber-600'}>*italic*</em>, <span className={isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}>[links](url)</span>, images, lists, and more!
-          {enableImageUpload && (
-            <span className="block mt-1">
-              📷 <strong className={isDarkMode ? 'text-green-400' : 'text-green-600'}>Images:</strong> Click the upload icon in the toolbar or drag & drop images directly into the editor.
-            </span>
-          )}
+          Supports <strong className={isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}>**bold**</strong>, <em className={isDarkMode ? 'text-amber-400' : 'text-amber-600'}>*italic*</em>, <span className={isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}>[links](url)</span>, and more!
+          <span className="block mt-1">
+            📷 <strong className={isDarkMode ? 'text-green-400' : 'text-green-600'}>Images:</strong> Use the image button in toolbar to insert images via URL: <code className={`${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-800'} px-1 rounded`}>![alt text](image-url)</code>
+          </span>
         </p>
       </div>
 
