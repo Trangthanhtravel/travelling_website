@@ -223,22 +223,22 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900">
       {/* Header */}
-      <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b px-6 py-4`}>
+      <div className="bg-white dark:bg-dark-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={onClose}
-              className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors`}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
             >
               <Icon icon={Icons.FiArrowLeft} className="h-5 w-5" />
             </button>
             <div>
-              <h1 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
                 {isEditing ? t('Edit Blog') : t('Create Blog')}
               </h1>
-              <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {isEditing ? t('Update your blog post') : t('Create a new blog post')}
               </p>
             </div>
@@ -246,13 +246,13 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
 
           <div className="flex items-center space-x-3">
             {/* Language Toggle */}
-            <div className={`flex items-center rounded-lg p-1 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+            <div className="flex items-center rounded-lg p-1 bg-gray-100 dark:bg-dark-700">
               <button
                 onClick={() => setCurrentLanguage('en')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                   currentLanguage === 'en'
-                    ? `${isDarkMode ? 'bg-gray-600 text-white' : 'bg-white text-gray-900'} shadow-sm`
-                    : `${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
+                    ? 'bg-white dark:bg-dark-600 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 EN
@@ -261,8 +261,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                 onClick={() => setCurrentLanguage('vi')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                   currentLanguage === 'vi'
-                    ? `${isDarkMode ? 'bg-gray-600 text-white' : 'bg-white text-gray-900'} shadow-sm`
-                    : `${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
+                    ? 'bg-white dark:bg-dark-600 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 VI
@@ -275,7 +275,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
               className={`px-4 py-2 rounded-lg border flex items-center space-x-2 transition-colors ${
                 isPreviewMode
                   ? 'bg-blue-600 text-white border-blue-600'
-                  : `${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}`
+                  : 'bg-white dark:bg-dark-700 border-gray-300 dark:border-dark-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-600'
               }`}
             >
               <Icon icon={Icons.FiEye} className="h-4 w-4" />
@@ -305,7 +305,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
             className={`pb-2 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'content'
                 ? 'border-blue-600 text-blue-600'
-                : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             {t('Content')}
@@ -315,7 +315,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
             className={`pb-2 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'seo'
                 ? 'border-blue-600 text-blue-600'
-                : `border-transparent ${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             {t('SEO & Settings')}
@@ -329,26 +329,22 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
             {/* Left Column - Form */}
             <div className="space-y-6">
               {/* Basic Info */}
-              <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-6`}>
-                <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+              <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   {t('Basic Information')} ({currentLanguage === 'en' ? 'English' : 'Tiếng Việt'})
                 </h2>
 
                 <div className="space-y-4">
                   {/* Title */}
                   <div>
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('Title')} *
                     </label>
                     <input
                       type="text"
                       value={currentLanguage === 'en' ? formData.title : formData.title_vi}
                       onChange={(e) => handleTitleChange(e.target.value, currentLanguage)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder={t('Enter blog title')}
                       required
                     />
@@ -357,18 +353,14 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                   {/* Slug (only for English) */}
                   {currentLanguage === 'en' && (
                     <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('URL Slug')} *
                       </label>
                       <input
                         type="text"
                         value={formData.slug}
                         onChange={(e) => handleFieldChange('slug', e.target.value)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder={t('url-slug-format')}
                         required
                       />
@@ -377,18 +369,14 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
 
                   {/* Excerpt */}
                   <div>
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('Excerpt')} *
                     </label>
                     <textarea
                       value={currentLanguage === 'en' ? formData.excerpt : formData.excerpt_vi}
                       onChange={(e) => handleFieldChange(currentLanguage === 'en' ? 'excerpt' : 'excerpt_vi', e.target.value)}
                       rows={3}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
-                        isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       placeholder={t('Brief description of your blog post')}
                       required
                     />
@@ -396,7 +384,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
 
                   {/* Content with Image URL support */}
                   <div>
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('Content')} *
                     </label>
                     {!isPreviewMode ? (
@@ -409,11 +397,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                         />
                       </div>
                     ) : (
-                      <div className={`min-h-96 p-4 border rounded-lg ${
-                        isDarkMode
-                          ? 'bg-gray-700 border-gray-600'
-                          : 'bg-gray-50 border-gray-300'
-                      }`}>
+                      <div className="min-h-96 p-4 border border-gray-300 dark:border-dark-600 rounded-lg bg-gray-50 dark:bg-dark-700">
                         <div className={`prose prose-lg max-w-none ${
                           isDarkMode 
                             ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:text-gray-300 prose-pre:bg-gray-800 prose-blockquote:border-blue-500 prose-blockquote:text-gray-300' 
@@ -553,25 +537,21 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
 
               {/* Settings (only show for English) */}
               {currentLanguage === 'en' && (
-                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-6`}>
-                  <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+                <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     {t('Settings')}
                   </h2>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Status */}
                     <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('Status')}
                       </label>
                       <select
                         value={formData.status}
                         onChange={(e) => handleFieldChange('status', e.target.value)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode
-                            ? 'bg-gray-700 border-gray-600 text-white'
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="draft">{t('Draft')}</option>
                         <option value="published">{t('Published')}</option>
@@ -581,17 +561,13 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
 
                     {/* Language */}
                     <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('Primary Language')}
                       </label>
                       <select
                         value={formData.language}
                         onChange={(e) => handleFieldChange('language', e.target.value)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode
-                            ? 'bg-gray-700 border-gray-600 text-white'
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="en">{t('English')}</option>
                         <option value="vi">{t('Vietnamese')}</option>
@@ -608,7 +584,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                         onChange={(e) => handleFieldChange('featured', e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                      <span className={`ml-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                         {t('Featured Blog')}
                       </span>
                     </label>
@@ -616,7 +592,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
 
                   {/* Featured Image Upload */}
                   <div className="mt-4">
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('Featured Image')}
                     </label>
                     <ImageUpload
@@ -629,36 +605,28 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
 
                   {/* Categories */}
                   <div className="mt-4">
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('Categories')}
                     </label>
                     <input
                       type="text"
                       value={formData.categories}
                       onChange={(e) => handleFieldChange('categories', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder={t('Travel, Adventure, Culture (comma separated)')}
                     />
                   </div>
 
                   {/* Tags */}
                   <div className="mt-4">
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('Tags')}
                     </label>
                     <input
                       type="text"
                       value={formData.tags}
                       onChange={(e) => handleFieldChange('tags', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder={t('vietnam, travel, food, culture (comma separated)')}
                     />
                   </div>
@@ -669,8 +637,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
             {/* Right Column - Preview */}
             <div className="space-y-6">
               {/* Preview */}
-              <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-6`}>
-                <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+              <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   {t('Preview')} ({currentLanguage === 'en' ? 'English' : 'Tiếng Việt'})
                 </h2>
 
@@ -690,12 +658,12 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                 )}
 
                 {/* Title Preview */}
-                <h3 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {currentLanguage === 'en' ? formData.title : formData.title_vi || t('No title')}
                 </h3>
 
                 {/* Excerpt Preview */}
-                <p className={`text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>
+                <p className="text-lg text-gray-600 dark:text-gray-300 mb-4">
                   {currentLanguage === 'en' ? formData.excerpt : formData.excerpt_vi || t('No excerpt')}
                 </p>
 
@@ -853,52 +821,44 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
           <div className="p-6">
             {/* SEO Tab Content */}
             <div className="max-w-4xl mx-auto space-y-6">
-              <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-6`}>
-                <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+              <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   {t('SEO Settings')} ({currentLanguage === 'en' ? 'English' : 'Tiếng Việt'})
                 </h2>
 
                 <div className="space-y-4">
                   {/* SEO Meta Title */}
                   <div>
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('Meta Title')}
                     </label>
                     <input
                       type="text"
                       value={currentLanguage === 'en' ? formData.seo_meta_title : formData.seo_meta_title_vi}
                       onChange={(e) => handleFieldChange(currentLanguage === 'en' ? 'seo_meta_title' : 'seo_meta_title_vi', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder={t('SEO optimized title (recommended: 50-60 characters)')}
                       maxLength={60}
                     />
-                    <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
                       {(currentLanguage === 'en' ? formData.seo_meta_title : formData.seo_meta_title_vi).length}/60 {t('characters')}
                     </p>
                   </div>
 
                   {/* SEO Meta Description */}
                   <div>
-                    <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('Meta Description')}
                     </label>
                     <textarea
                       value={currentLanguage === 'en' ? formData.seo_meta_description : formData.seo_meta_description_vi}
                       onChange={(e) => handleFieldChange(currentLanguage === 'en' ? 'seo_meta_description' : 'seo_meta_description_vi', e.target.value)}
                       rows={3}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
-                        isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                          : 'bg-white border-gray-300 text-gray-900'
-                      }`}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       placeholder={t('Brief description for search engines (recommended: 150-160 characters)')}
                       maxLength={160}
                     />
-                    <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
                       {(currentLanguage === 'en' ? formData.seo_meta_description : formData.seo_meta_description_vi).length}/160 {t('characters')}
                     </p>
                   </div>
@@ -906,18 +866,14 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                   {/* SEO Keywords (only for English) */}
                   {currentLanguage === 'en' && (
                     <div>
-                      <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('SEO Keywords')}
                       </label>
                       <input
                         type="text"
                         value={formData.seo_keywords}
                         onChange={(e) => handleFieldChange('seo_keywords', e.target.value)}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          isDarkMode
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder={t('travel, vietnam, culture, adventure (comma separated)')}
                       />
                     </div>
@@ -926,8 +882,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
               </div>
 
               {/* SEO Preview */}
-              <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-6`}>
-                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+              <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   {t('Search Engine Preview')}
                 </h3>
                 <div className="border rounded-lg p-4">
@@ -937,7 +893,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
                   <div className="text-green-700 text-sm mt-1">
                     {window.location.origin}/blog/{formData.slug || 'your-blog-slug'}
                   </div>
-                  <div className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <div className="text-sm mt-1 text-gray-700 dark:text-gray-300">
                     {(currentLanguage === 'en' ? formData.seo_meta_description : formData.seo_meta_description_vi) || (currentLanguage === 'en' ? formData.excerpt : formData.excerpt_vi) || t('Your blog description will appear here...')}
                   </div>
                 </div>
