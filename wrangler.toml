@@ -18,7 +18,7 @@ directory = "./frontend/build"
 not_found_handling = "single-page-application"
 
 [build]
-command = "cd frontend && npm ci && npm run build"
+command = "cd frontend && npm ci --legacy-peer-deps && npm run build"
 
 [env.production.vars]
 REACT_APP_API_URL = "https://travelling-website-mu.vercel.app/api"
