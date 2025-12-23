@@ -87,7 +87,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   ];
 
   return (
-    <div className={`rich-text-editor ${isDarkMode ? 'dark-theme' : 'light-theme'}`}>
+    <div className={`rich-text-editor ${isDarkMode ? 'dark-theme' : 'light-theme'}`} data-color-mode={isDarkMode ? 'dark' : 'light'}>
 
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center space-x-2">
@@ -114,6 +114,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               fontSize: 14,
               lineHeight: 1.6,
               fontFamily: '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              color: isDarkMode ? '#F9FAFB' : '#111827',
+              backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
             },
           }}
           commands={editorCommands}
@@ -411,15 +413,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
         }
         
-        /* Make sure no element has transparent or same-as-background color */
-        .rich-text-editor * {
-          color: inherit !important;
-        }
-        
+        /* Ultra-specific textarea targeting to override all library styles */
         .rich-text-editor input,
-        .rich-text-editor textarea {
+        .rich-text-editor textarea,
+        div.rich-text-editor textarea.w-md-editor-text-textarea,
+        div[data-color-mode] div.w-md-editor textarea {
           color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
           background-color: ${isDarkMode ? '#1F2937' : '#FFFFFF'} !important;
+          -webkit-text-fill-color: ${isDarkMode ? '#F9FAFB' : '#111827'} !important;
         }
         
         /* ===== ENHANCED MARKDOWN SYNTAX HIGHLIGHTING ===== */
