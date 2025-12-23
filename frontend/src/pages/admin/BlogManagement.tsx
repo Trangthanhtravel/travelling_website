@@ -36,10 +36,10 @@ const BlogManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
   const [filterFeatured, setFilterFeatured] = useState<'all' | 'featured' | 'normal'>('all');
-  const [filterLanguage, setFilterLanguage] = useState<'all' | 'en' | 'vi'>('all');
+  const [filterLanguage] = useState<'all' | 'en' | 'vi'>('all');
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [currentDisplayLanguage, setCurrentDisplayLanguage] = useState<'en' | 'vi' | 'both'>('both'); // Add display language toggle
+  const [currentDisplayLanguage] = useState<'en' | 'vi' | 'both'>('both'); // Add display language toggle
   const { isDarkMode } = useTheme();
   const { t, language } = useTranslation();
   const queryClient = useQueryClient();
@@ -262,37 +262,6 @@ const BlogManagement: React.FC = () => {
             <option value="featured">{t('Featured')}</option>
             <option value="normal">{t('Normal')}</option>
           </select>
-
-          {/* Language Filter */}
-          <select
-            value={filterLanguage}
-            onChange={(e) => setFilterLanguage(e.target.value as any)}
-            className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              isDarkMode 
-                ? 'bg-gray-700 border-gray-600 text-white' 
-                : 'bg-white border-gray-300 text-gray-900'
-            }`}
-          >
-            <option value="all">{t('All Languages')}</option>
-            <option value="en">{t('English')}</option>
-            <option value="vi">{t('Vietnamese')}</option>
-          </select>
-
-          {/* Display Language Toggle */}
-          <select
-            value={currentDisplayLanguage}
-            onChange={(e) => setCurrentDisplayLanguage(e.target.value as 'en' | 'vi' | 'both')}
-            className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              isDarkMode 
-                ? 'bg-gray-700 border-gray-600 text-white' 
-                : 'bg-white border-gray-300 text-gray-900'
-            }`}
-            title={t('Choose which language content to display in the table')}
-          >
-            <option value="both">{t('Show Both Languages')}</option>
-            <option value="en">{t('Show English Only')}</option>
-            <option value="vi">{t('Show Vietnamese Only')}</option>
-          </select>
         </div>
       </div>
 
@@ -312,9 +281,6 @@ const BlogManagement: React.FC = () => {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('Blog')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    {t('Language')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('Status')}
@@ -386,15 +352,6 @@ const BlogManagement: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        blog.language === 'vi' 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {blog.language === 'vi' ? 'Tiếng Việt' : 'English'}
-                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
