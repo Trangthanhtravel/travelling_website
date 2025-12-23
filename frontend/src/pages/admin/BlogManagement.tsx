@@ -320,9 +320,6 @@ const BlogManagement: React.FC = () => {
                     {t('Status')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    {t('Stats')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                     {t('Author')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
