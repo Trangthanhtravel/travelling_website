@@ -411,14 +411,6 @@ const BlogManagement: React.FC = () => {
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex items-center space-x-4">
-                        <span className="flex items-center">
-                          <Icon icon={Icons.FiEye} className="h-4 w-4 mr-1" />
-                          {blog.views || 0}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {blog.author_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
