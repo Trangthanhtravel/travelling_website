@@ -133,7 +133,7 @@ const ChangePassword: React.FC = () => {
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Current Password */}
             <div>
-              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Current Password
               </label>
               <div className="mt-1 relative">
@@ -158,7 +158,7 @@ const ChangePassword: React.FC = () => {
 
             {/* New Password */}
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 New Password
               </label>
               <div className="mt-1 relative">
@@ -168,13 +168,13 @@ const ChangePassword: React.FC = () => {
                   name="newPassword"
                   value={formData.newPassword}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility('new')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
                 >
                   {showPasswords.new ? '👁️' : '👁️‍🗨️'}
                 </button>
@@ -184,7 +184,7 @@ const ChangePassword: React.FC = () => {
                   <p className={`text-sm font-medium ${passwordStrength.color}`}>
                     Password Strength: {passwordStrength.label}
                   </p>
-                  <div className="mt-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="mt-1 h-2 bg-gray-200 dark:bg-dark-600 rounded-full overflow-hidden">
                     <div
                       className={`h-full ${
                         passwordStrength.strength <= 2 ? 'bg-red-500' :
@@ -195,14 +195,14 @@ const ChangePassword: React.FC = () => {
                   </div>
                 </div>
               )}
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 Password must be at least 8 characters long
               </p>
             </div>
 
             {/* Confirm New Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Confirm New Password
               </label>
               <div className="mt-1 relative">
@@ -212,19 +212,19 @@ const ChangePassword: React.FC = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => togglePasswordVisibility('confirm')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
                 >
                   {showPasswords.confirm ? '👁️' : '👁️‍🗨️'}
                 </button>
               </div>
               {formData.confirmPassword && formData.newPassword !== formData.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">Passwords do not match</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">Passwords do not match</p>
               )}
             </div>
 
@@ -240,14 +240,14 @@ const ChangePassword: React.FC = () => {
                   });
                   toast.success('Form cleared');
                 }}
-                className="flex-1 py-2 px-4 border border-gray-300 dark:border-dark-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-700 hover:bg-gray-50 dark:hover:bg-dark-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="flex-1 py-2 px-4 border border-gray-300 dark:border-dark-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-700 hover:bg-gray-50 dark:hover:bg-dark-600 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-dark-800 focus:ring-blue-500 transition-colors"
               >
                 Clear
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-dark-800 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Changing...' : 'Change Password'}
               </button>
@@ -259,4 +259,5 @@ const ChangePassword: React.FC = () => {
 };
 
 export default ChangePassword;
+
 

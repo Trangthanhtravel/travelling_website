@@ -17,7 +17,6 @@ import ContactInformationManagement from './ContactInformationManagement';
 import ActivityLogManagement from './ActivityLogManagement';
 import AdminManagement from './AdminManagement';
 import ChangePassword from '../ChangePassword';
-import AccountSettings from './AccountSettings';
 
 interface DashboardStats {
   totalBookings: number;
@@ -249,8 +248,6 @@ const AdminDashboard: React.FC = () => {
         return <AdminManagement />;
       case 'change-password':
         return <ChangePassword />;
-      case 'account-settings':
-        return <AccountSettings />;
       case 'dashboard':
       default:
         return <DashboardOverview onQuickAction={setActiveTab} />;
