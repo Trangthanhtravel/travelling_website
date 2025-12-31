@@ -1,6 +1,6 @@
 /**
  * Cloudflare Worker for URL redirects and asset serving
- * This worker ensures all traffic is redirected to www.trangthanhtravel.com
+ * This worker ensures all traffic is redirected to trangthanhtravel.com (non-www)
  */
 
 export default {
@@ -8,11 +8,11 @@ export default {
     const url = new URL(request.url);
     const hostname = url.hostname;
 
-    // Canonical domain (the preferred domain)
-    const CANONICAL_DOMAIN = 'www.trangthanhtravel.com';
+    // Canonical domain (the preferred domain - without www)
+    const CANONICAL_DOMAIN = 'trangthanhtravel.com';
 
-    // Redirect non-www to www
-    if (hostname === 'trangthanhtravel.com') {
+    // Redirect www to non-www
+    if (hostname === 'www.trangthanhtravel.com') {
       url.hostname = CANONICAL_DOMAIN;
       return Response.redirect(url.toString(), 301);
     }
