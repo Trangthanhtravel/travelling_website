@@ -70,8 +70,9 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
   preflightContinue: false,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 204
 }));
 
 // Rate limiting
@@ -97,6 +98,16 @@ app.use((req, res, next) => {
       message: 'Database connection failed'
     });
   }
+});
+
+// Additional CORS headers to ensure compatibility
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && (origin === 'https://trangthanhtravel.com' || origin === 'https://www.trangthanhtravel.com' || origin.startsWith('https://'))) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+  next();
 });
 
 // R2 Storage middleware - initialize R2 bucket for file uploads
