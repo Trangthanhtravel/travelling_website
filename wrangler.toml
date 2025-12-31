@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "travelling-website-db"
-database_id = "b0fd9bb8-ca9a-4ca7-a2d0-487618098a3a"
+database_id = "0b8e4e61-4bc6-4862-93e3-d26e92cf5096"
 
 # R2 Storage Configuration
 [[r2_buckets]]
@@ -21,14 +21,14 @@ not_found_handling = "single-page-application"
 command = "cd frontend && npm ci --legacy-peer-deps && npm run build"
 
 [env.production.vars]
-REACT_APP_API_URL = "https://travelling-website-mu.vercel.app/api"
+REACT_APP_API_URL = "https://travelling-website-henna-chi.vercel.app/api"
 REACT_APP_STRIPE_PUBLIC_KEY = ""
 
-# Custom domain routes for phongphan.me (without wildcards)
+# Custom domain routes for trangthanhtravel.com (without wildcards)
 [[routes]]
-pattern = "phongphan.me"
+pattern = "trangthanhtravel.com"
 custom_domain = true
 
 [[routes]]
-pattern = "www.phongphan.me"
+pattern = "www.trangthanhtravel.com"
 custom_domain = true

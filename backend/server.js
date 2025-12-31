@@ -31,8 +31,8 @@ app.use(helmet());
 const allowedOrigins = [
   'http://localhost:3000',
   'https://localhost:3000',
-  'https://www.phongphan.me',
-  'https://phongphan.me',
+    'https://www.trangthanhtravel.com',
+    'https://trangthanhtravel.com',
   process.env.FRONTEND_URL
 ].filter(Boolean); // Remove any undefined values
 
