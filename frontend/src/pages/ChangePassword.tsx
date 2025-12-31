@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const ChangePassword: React.FC = () => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -94,10 +92,6 @@ const ChangePassword: React.FC = () => {
           newPassword: '',
           confirmPassword: ''
         });
-        // Optionally redirect to dashboard after a delay
-        setTimeout(() => {
-          navigate('/admin/dashboard');
-        }, 2000);
       } else {
         toast.error(data.message || 'Failed to change password');
       }
@@ -127,17 +121,16 @@ const ChangePassword: React.FC = () => {
   const passwordStrength = getPasswordStrength(formData.newPassword);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto">
-        <div className="bg-white shadow-md rounded-lg p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Change Password</h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Update your password to keep your account secure
-            </p>
-          </div>
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="bg-white dark:bg-dark-800 shadow-md rounded-lg overflow-hidden">
+        <div className="border-b dark:border-dark-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-dark-700 dark:to-dark-700 p-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Change Password</h2>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Update your password to keep your account secure
+          </p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Current Password */}
             <div>
               <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
@@ -239,15 +232,22 @@ const ChangePassword: React.FC = () => {
             <div className="flex gap-4">
               <button
                 type="button"
-                onClick={() => navigate('/admin/dashboard')}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                onClick={() => {
+                  setFormData({
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                  });
+                  toast.success('Form cleared');
+                }}
+                className="flex-1 py-2 px-4 border border-gray-300 dark:border-dark-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-700 hover:bg-gray-50 dark:hover:bg-dark-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
-                Cancel
+                Clear
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Changing...' : 'Change Password'}
               </button>
@@ -255,7 +255,6 @@ const ChangePassword: React.FC = () => {
           </form>
         </div>
       </div>
-    </div>
   );
 };
 

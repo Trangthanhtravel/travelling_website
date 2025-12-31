@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -110,6 +110,16 @@ const AdminLogin: React.FC = () => {
                   'Sign in'
                 )}
               </button>
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="text-center">
+              <Link
+                to="/admin/forgot-password"
+                className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200"
+              >
+                Forgot your password?
+              </Link>
             </div>
           </form>
         </div>

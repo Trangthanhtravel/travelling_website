@@ -16,6 +16,8 @@ import ContentManagement from './ContentManagement';
 import ContactInformationManagement from './ContactInformationManagement';
 import ActivityLogManagement from './ActivityLogManagement';
 import AdminManagement from './AdminManagement';
+import ChangePassword from '../ChangePassword';
+import AccountSettings from './AccountSettings';
 
 interface DashboardStats {
   totalBookings: number;
@@ -208,6 +210,11 @@ const AdminDashboard: React.FC = () => {
     { id: 'activity-logs', name: 'Activity Logs', icon: Icons.FiActivity },
     // Only show Admin Management for super admins
     ...(isSuperAdmin ? [{ id: 'admin-management', name: 'Admin Management', icon: Icons.FiUserPlus }] : []),
+    // Divider for account settings section
+    { id: 'divider-1', name: 'divider', icon: null },
+    // Account & Security section
+    { id: 'change-password', name: 'Change Password', icon: Icons.FiLock },
+    { id: 'account-settings', name: 'Account Settings', icon: Icons.FiSettings },
   ];
 
   const renderContent = () => {
@@ -240,6 +247,10 @@ const AdminDashboard: React.FC = () => {
         return <ActivityLogManagement />;
       case 'admin-management':
         return <AdminManagement />;
+      case 'change-password':
+        return <ChangePassword />;
+      case 'account-settings':
+        return <AccountSettings />;
       case 'dashboard':
       default:
         return <DashboardOverview onQuickAction={setActiveTab} />;
@@ -270,23 +281,39 @@ const AdminDashboard: React.FC = () => {
         {/* Navigation Menu */}
         <nav className="p-4">
           <div className="space-y-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-start'} p-3 rounded-lg font-medium text-sm transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-700 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
-                title={sidebarCollapsed ? tab.name : undefined}
-              >
-                <Icon icon={tab.icon} className={`w-5 h-5 ${sidebarCollapsed ? '' : 'mr-3'} flex-shrink-0`} />
-                {!sidebarCollapsed && (
-                  <span className="truncate">{tab.name}</span>
-                )}
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              // Render divider with label
+              if (tab.id.startsWith('divider-')) {
+                return (
+                  <div key={tab.id} className="py-2">
+                    <div className="border-t dark:border-dark-700"></div>
+                    {!sidebarCollapsed && (
+                      <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mt-3 mb-1 px-2">
+                        Account & Security
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-start'} p-3 rounded-lg font-medium text-sm transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-700 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                  title={sidebarCollapsed ? tab.name : undefined}
+                >
+                  <Icon icon={tab.icon} className={`w-5 h-5 ${sidebarCollapsed ? '' : 'mr-3'} flex-shrink-0`} />
+                  {!sidebarCollapsed && (
+                    <span className="truncate">{tab.name}</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </nav>
       </div>

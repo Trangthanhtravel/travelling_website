@@ -22,6 +22,8 @@ import Blogs from './pages/Blogs';
 import BlogDetail from './pages/BlogDetail';
 import Contact from './pages/Contact'; // Add Contact import
 import Login from './pages/auth/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import AdminDashboard from './pages/admin/Dashboard';
 import BlogManagement from './pages/admin/BlogManagement';
 import ContentManagement from './pages/admin/ContentManagement';
@@ -69,6 +71,10 @@ const AppContent: React.FC = () => {
             <Route path="/blog/:slug" element={<BlogDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
+
+            {/* Password Management Routes - Public */}
+            <Route path="/admin/forgot-password" element={<ForgotPassword />} />
+            <Route path="/admin/reset-password" element={<ResetPassword />} />
 
             {/* Customer Booking Routes - No authentication required */}
             <Route path="/booking/:slug" element={<Booking />} />
