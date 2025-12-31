@@ -213,7 +213,6 @@ const AdminDashboard: React.FC = () => {
     { id: 'divider-1', name: 'divider', icon: null },
     // Account & Security section
     { id: 'change-password', name: 'Change Password', icon: Icons.FiLock },
-    { id: 'account-settings', name: 'Account Settings', icon: Icons.FiSettings },
   ];
 
   const renderContent = () => {
