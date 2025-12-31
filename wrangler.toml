@@ -28,9 +28,7 @@ REACT_APP_STRIPE_PUBLIC_KEY = ""
 [[routes]]
 pattern = "trangthanhtravel.com"
 custom_domain = true
-override_existing_origin_record = true
 
 [[routes]]
 pattern = "www.trangthanhtravel.com"
 custom_domain = true
-override_existing_origin_record = true
