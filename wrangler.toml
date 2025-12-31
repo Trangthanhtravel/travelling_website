@@ -27,3 +27,11 @@ command = "cd frontend && npm ci --legacy-peer-deps && npm run build"
 REACT_APP_API_URL = "https://travelling-website-henna-chi.vercel.app/api"
 REACT_APP_STRIPE_PUBLIC_KEY = ""
 
+# Custom domain routes for trangthanhtravel.com (without wildcards)
+[[routes]]
+pattern = "trangthanhtravel.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.trangthanhtravel.com"
+custom_domain = true

@@ -29,9 +29,26 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// CORS configuration - allow all HTTPS origins and localhost
+// CORS configuration - allow both www and non-www domains
+const allowedOrigins = [
+  'https://trangthanhtravel.com',
+  'https://www.trangthanhtravel.com',
+  'http://localhost:3000',
+  'http://localhost:5000'
+];
+
 app.use(cors({
-  origin: true, // This will reflect the origin back
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+
+    // Allow any HTTPS origin or localhost for development
+    if (origin.startsWith('https://') || origin.startsWith('http://localhost')) {
+      return callback(null, true);
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
