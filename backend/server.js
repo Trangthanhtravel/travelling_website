@@ -25,48 +25,13 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
-// CORS configuration for multiple origins
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://localhost:3000',
-  'https://trangthanhtravel.com',
-  'https://www.trangthanhtravel.com',
-  process.env.FRONTEND_URL
-].filter(Boolean); // Remove any undefined values
-
+// CORS configuration - allow all HTTPS origins and localhost
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl requests, or same-origin requests)
-    if (!origin) return callback(null, true);
-
-    // Check if the origin is in our allowed list
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    }
-
-    // Allow any HTTPS origin for production deployment flexibility
-    if (origin.startsWith('https://')) {
-      // You can add additional domain validation here if needed
-      // For now, we'll allow all HTTPS origins to fix the device compatibility issue
-      return callback(null, true);
-    }
-
-    // Allow localhost with any port for development
-    if (origin.match(/^https?:\/\/localhost(:\d+)?$/)) {
-      return callback(null, true);
-    }
-
-    // Allow 127.0.0.1 with any port for development
-    if (origin.match(/^https?:\/\/127\.0\.0\.1(:\d+)?$/)) {
-      return callback(null, true);
-    }
-
-    // Log blocked origin for debugging
-    console.warn(`CORS blocked origin: ${origin}`);
-    callback(null, false); // Don't throw error, just deny
-  },
+  origin: true, // This will reflect the origin back
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
@@ -98,16 +63,6 @@ app.use((req, res, next) => {
       message: 'Database connection failed'
     });
   }
-});
-
-// Additional CORS headers to ensure compatibility
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin && (origin === 'https://trangthanhtravel.com' || origin === 'https://www.trangthanhtravel.com' || origin.startsWith('https://'))) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  }
-  next();
 });
 
 // R2 Storage middleware - initialize R2 bucket for file uploads
