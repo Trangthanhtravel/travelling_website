@@ -42,7 +42,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && npm run postbuild",
+    "postbuild": "node -e \"const fs=require('fs');const path=require('path');console.log('Copying redirect files...');['_redirects','_headers'].forEach(f=>{const src=path.join('public',f);const dest=path.join('build',f);if(fs.existsSync(src)){fs.copyFileSync(src,dest);console.log('Copied',f);}});const funcDir='functions';if(fs.existsSync(funcDir)){const dest='build/functions';fs.mkdirSync(dest,{recursive:true});fs.readdirSync(funcDir).forEach(f=>{fs.copyFileSync(path.join(funcDir,f),path.join(dest,f));console.log('Copied function',f);});}console.log('Postbuild complete!');\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
