@@ -17,6 +17,9 @@ bucket_name = "travelling-website-images"
 directory = "./frontend/build"
 not_found_handling = "single-page-application"
 
+# Worker configuration for URL redirects
+main = "./frontend/_worker.js"
+
 [build]
 command = "cd frontend && npm ci --legacy-peer-deps && npm run build"
 
