@@ -940,6 +940,77 @@ class EmailService {
       throw error;
     }
   }
+
+  // Send forgot password email with reset link
+  async sendForgotPasswordEmail(db, user, token) {
+    try {
+      console.log('[EmailService] Starting forgot password email...');
+
+      const settings = await this.getEmailSettings(db);
+      const transporter = this.createTransporter();
+
+      // Build reset link - adjust the frontend URL as needed
+      const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/reset-password?token=${token}`;
+
+      const emailTemplate = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #3b82f6; border-bottom: 2px solid #3b82f6; padding-bottom: 10px;">
+            Password Reset Request - ${settings.company_name}
+          </h2>
+          
+          <p>Dear <strong>${user.name}</strong>,</p>
+          
+          <p>We received a request to reset your password for your admin account. If you made this request, please click the button below to reset your password:</p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px;">
+              Reset Password
+            </a>
+          </div>
+          
+          <p style="color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
+          <p style="background-color: #f3f4f6; padding: 12px; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 12px;">
+            ${resetLink}
+          </p>
+          
+          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #92400e; font-weight: bold;">⏰ Important:</p>
+            <p style="margin: 5px 0 0 0; color: #92400e;">This password reset link will expire in <strong>1 hour</strong> for security reasons.</p>
+          </div>
+          
+          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #dc2626; font-weight: bold;">🛡️ Security Notice:</p>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
+              <li>If you did not request this password reset, please ignore this email</li>
+              <li>Your password will remain unchanged unless you click the link above</li>
+              <li>Never share your password reset link with anyone</li>
+              <li>Contact us immediately if you suspect unauthorized access</li>
+            </ul>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+          
+          <div style="text-align: center; color: #6b7280;">
+            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated security email.</p>
+          </div>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: `"${settings.email_from_name}" <${process.env.EMAIL_USER}>`,
+        to: user.email,
+        subject: `Password Reset Request - ${settings.company_name}`,
+        html: emailTemplate
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log('[EmailService] Forgot password email sent successfully');
+    } catch (error) {
+      console.error('Error sending forgot password email:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new EmailService();

@@ -117,6 +117,83 @@ class User {
     const { password, ...userWithoutPassword } = this;
     return userWithoutPassword;
   }
+
+  // Create password reset token
+  static async createPasswordResetToken(userId) {
+    const crypto = require('crypto');
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 3600000).toISOString(); // 1 hour from now
+
+    const db = getDB();
+    const sql = `
+      INSERT INTO password_reset_tokens (user_id, token, expires_at, created_at)
+      VALUES (?, ?, ?, ?)
+    `;
+
+    await db.prepare(sql).bind(userId, token, expiresAt, new Date().toISOString()).run();
+    return token;
+  }
+
+  // Verify password reset token
+  static async verifyPasswordResetToken(token) {
+    const db = getDB();
+    const sql = `
+      SELECT * FROM password_reset_tokens 
+      WHERE token = ? AND used = 0 AND expires_at > ?
+    `;
+
+    const resetToken = await db.prepare(sql).bind(token, new Date().toISOString()).first();
+    return resetToken;
+  }
+
+  // Mark password reset token as used
+  static async markTokenAsUsed(token) {
+    const db = getDB();
+    const sql = 'UPDATE password_reset_tokens SET used = 1 WHERE token = ?';
+    return await db.prepare(sql).bind(token).run();
+  }
+
+  // Change password (for authenticated users)
+  static async changePassword(userId, currentPassword, newPassword) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Verify current password
+    const isValid = await user.comparePassword(currentPassword);
+    if (!isValid) {
+      throw new Error('Current password is incorrect');
+    }
+
+    // Hash new password and update
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const db = getDB();
+    const sql = 'UPDATE users SET password = ?, updated_at = ? WHERE id = ?';
+
+    return await db.prepare(sql).bind(hashedPassword, new Date().toISOString(), userId).run();
+  }
+
+  // Reset password using token (for forgot password)
+  static async resetPassword(token, newPassword) {
+    const resetToken = await User.verifyPasswordResetToken(token);
+    if (!resetToken) {
+      throw new Error('Invalid or expired password reset token');
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const db = getDB();
+
+    // Update password
+    const sql = 'UPDATE users SET password = ?, updated_at = ? WHERE id = ?';
+    await db.prepare(sql).bind(hashedPassword, new Date().toISOString(), resetToken.user_id).run();
+
+    // Mark token as used
+    await User.markTokenAsUsed(token);
+
+    return true;
+  }
 }
 
 module.exports = User;
