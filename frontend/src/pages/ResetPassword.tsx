@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
@@ -21,11 +21,7 @@ const ResetPassword: React.FC = () => {
   const [verifying, setVerifying] = useState(true);
   const [tokenValid, setTokenValid] = useState(false);
 
-  useEffect(() => {
-    verifyToken();
-  }, [token]);
-
-  const verifyToken = async () => {
+  const verifyToken = useCallback(async () => {
     if (!token) {
       toast.error('Invalid password reset link');
       setVerifying(false);
@@ -49,7 +45,11 @@ const ResetPassword: React.FC = () => {
     } finally {
       setVerifying(false);
     }
-  };
+  }, [token]); // Add token as dependency for useCallback
+
+  useEffect(() => {
+    verifyToken();
+  }, [verifyToken]); // Now verifyToken is stable and can be in dependencies
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
