@@ -40,7 +40,7 @@ const Footer: React.FC = () => {
                 </div>
               <div className="flex items-center">
                 <Icon icon={Icons.FiMail} className="w-4 h-4 mr-2" />
-                <span>{contactInfo?.email || 'goodtrip@trangthanhtravel.com.vn'}</span>
+                <span>{contactInfo?.email || 'info.trangthanhtravel@gmail.com'}</span>
               </div>
             </div>
           </div>
