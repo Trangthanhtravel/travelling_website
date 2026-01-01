@@ -159,8 +159,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ blog, onClose, onSave }) => {
   const saveBlogMutation = useMutation({
     mutationFn: async (data: BlogFormData) => {
       const url = isEditing
-        ? `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/${blog!.id}`
-        : `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs`;
+        ? `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/admin/${blog!.id}`
+        : `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/admin`;
 
       const method = isEditing ? 'PUT' : 'POST';
 

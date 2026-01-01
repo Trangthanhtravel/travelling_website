@@ -66,7 +66,7 @@ const BlogManagement: React.FC = () => {
   // Delete blog mutation
   const deleteBlogMutation = useMutation({
     mutationFn: async (blogId: number) => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/${blogId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/admin/${blogId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
@@ -114,8 +114,8 @@ const BlogManagement: React.FC = () => {
   // Update blog status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ blogId, status }: { blogId: number; status: string }) => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/${blogId}/status`, {
-        method: 'PUT',
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/blogs/admin/${blogId}/status`, {
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
