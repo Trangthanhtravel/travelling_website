@@ -2,9 +2,11 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '../contexts/ThemeContext';
 import ReactMarkdown from 'react-markdown';
+import { useTranslation } from "../contexts/TranslationContext";
 
 const BookingPolicy: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
 
   // Fetch booking policy content
   const { data: policyData, isLoading } = useQuery({
@@ -28,7 +30,7 @@ const BookingPolicy: React.FC = () => {
   });
 
   const policyContent = policyData?.data?.content || '';
-  const policyTitle = titleData?.data?.content || 'Booking Terms & Conditions';
+  const policyTitle = titleData?.data?.content || t('Booking Terms & Conditions');
 
   if (isLoading) {
     return (
@@ -55,7 +57,7 @@ const BookingPolicy: React.FC = () => {
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{policyTitle}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Please read our booking terms and conditions carefully before making a reservation
+                {t('Please read our booking terms and conditions carefully before making a reservation.')}
             </p>
           </div>
         </div>
@@ -129,13 +131,13 @@ const BookingPolicy: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href="mailto:info@trangthanh.travel"
+                href="mailto:info.trangthanhtravel@gmail.com"
                 className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
               >
                 Email Us
               </a>
               <a
-                href="tel:+84123456789"
+                href="tel:+842838388007"
                 className={`inline-flex items-center justify-center px-6 py-3 rounded-lg border transition-colors duration-200 ${
                   isDarkMode
                     ? 'border-dark-600 text-dark-text-secondary hover:bg-dark-700'
