@@ -6,7 +6,7 @@ import { useTranslation } from "../contexts/TranslationContext";
 
 const BookingPolicy: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { t } = useTranslation();
+  const { t, getLocalizedContent } = useTranslation();
 
   // Fetch booking policy content
   const { data: policyData, isLoading } = useQuery({
@@ -29,8 +29,11 @@ const BookingPolicy: React.FC = () => {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Make title reactive to language changes
   const policyContent = policyData?.data?.content || '';
-  const policyTitle = titleData?.data?.content || t('Booking Terms & Conditions');
+  const policyTitle = titleData?.data?.content
+    ? getLocalizedContent(titleData.data, 'content')
+    : t('Booking Terms & Conditions');
 
   if (isLoading) {
     return (
