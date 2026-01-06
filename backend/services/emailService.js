@@ -40,9 +40,12 @@ class EmailService {
       // If no settings found in database, return defaults
       if (Object.keys(settings).length === 0) {
         return {
-          company_email: process.env.COMPANY_EMAIL || 'info@travelcompany.com',
-          company_name: process.env.COMPANY_NAME || 'Travel Company',
-          email_from_name: 'Travel Company Team',
+          company_email: process.env.COMPANY_EMAIL || 'info.trangthanhtravel@gmail.com',
+          company_name: process.env.COMPANY_NAME || 'Trang Thanh Travel',
+          company_logo: 'https://cdn.trangthanhtravel.com/A_Primary_Light_theme.png',
+          company_phone: process.env.COMPANY_PHONE || '(+84) 28 38 388 007',
+          company_address: process.env.COMPANY_ADDRESS || '193 Cô Bắc, P. Cầu Ông Lãnh, TP. Hồ Chí Minh, Việt Nam',
+          email_from_name: 'Trang Thanh Travel Team',
           booking_notification_enabled: 'true',
           customer_confirmation_enabled: 'true',
           admin_notification_subject: 'New Booking Received - {booking_number}',
@@ -52,14 +55,23 @@ class EmailService {
         };
       }
 
+      // Ensure company details have default values if not set
+      if (!settings.company_name) settings.company_name = 'Trang Thanh Travel';
+      if (!settings.company_logo) settings.company_logo = 'https://cdn.trangthanhtravel.com/A_Primary_Light_theme.png';
+      if (!settings.company_phone) settings.company_phone = '(+84) 28 38 388 007';
+      if (!settings.company_address) settings.company_address = '193 Cô Bắc, P. Cầu Ông Lãnh, TP. Hồ Chí Minh, Việt Nam';
+
       return settings;
     } catch (error) {
       console.error('Error fetching email settings:', error);
       // Return default settings if database query fails
       return {
-        company_email: process.env.COMPANY_EMAIL || 'info@travelcompany.com',
-        company_name: process.env.COMPANY_NAME || 'Travel Company',
-        email_from_name: 'Travel Company Team',
+        company_email: process.env.COMPANY_EMAIL || 'info.trangthanhtravel@gmail.com',
+        company_name: process.env.COMPANY_NAME || 'Trang Thanh Travel',
+        company_logo: 'https://cdn.trangthanhtravel.com/A_Primary_Light_theme.png',
+        company_phone: process.env.COMPANY_PHONE || '(+84) 28 38 388 007',
+        company_address: process.env.COMPANY_ADDRESS || '193 Cô Bắc, P. Cầu Ông Lãnh, TP. Hồ Chí Minh, Việt Nam',
+        email_from_name: 'Trang Thanh Travel Team',
         booking_notification_enabled: 'true',
         customer_confirmation_enabled: 'true',
         admin_notification_subject: 'New Booking Received - {booking_number}',
@@ -68,6 +80,42 @@ class EmailService {
         customer_email_body: ''
       };
     }
+  }
+
+  // Generate company header HTML for emails
+  getCompanyHeader(settings) {
+    return `
+      <div style="text-align: center; padding: 20px 0; background-color: #ffffff; border-bottom: 3px solid #2563eb;">
+        <img src="${settings.company_logo}" alt="${settings.company_name}" style="max-width: 200px; height: auto; margin-bottom: 10px;" />
+        <h1 style="color: #2563eb; margin: 10px 0; font-size: 28px;">${settings.company_name}</h1>
+      </div>
+    `;
+  }
+
+  // Generate company footer HTML for emails
+  getCompanyFooter(settings) {
+    return `
+      <div style="background-color: #f8fafc; padding: 30px 20px; margin-top: 30px; border-top: 3px solid #2563eb;">
+        <div style="text-align: center; max-width: 600px; margin: 0 auto;">
+          <img src="${settings.company_logo}" alt="${settings.company_name}" style="max-width: 150px; height: auto; margin-bottom: 15px;" />
+          <h3 style="color: #2563eb; margin: 10px 0; font-size: 20px;">${settings.company_name}</h3>
+          <div style="color: #475569; font-size: 14px; line-height: 1.6; margin: 15px 0;">
+            <p style="margin: 5px 0;">
+              <strong style="color: #1e40af;">📍 Address:</strong> ${settings.company_address}
+            </p>
+            <p style="margin: 5px 0;">
+              <strong style="color: #1e40af;">📞 Phone:</strong> <a href="tel:${settings.company_phone}" style="color: #2563eb; text-decoration: none;">${settings.company_phone}</a>
+            </p>
+            <p style="margin: 5px 0;">
+              <strong style="color: #1e40af;">✉️ Email:</strong> <a href="mailto:${settings.company_email}" style="color: #2563eb; text-decoration: none;">${settings.company_email}</a>
+            </p>
+          </div>
+          <p style="color: #64748b; font-size: 12px; margin-top: 20px;">
+            © ${new Date().getFullYear()} ${settings.company_name}. All rights reserved.
+          </p>
+        </div>
+      </div>
+    `;
   }
 
   // Replace template variables in text
@@ -205,72 +253,78 @@ class EmailService {
       );
 
       const emailTemplate = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
-            ${t.newBookingReceived} - ${tourOrService.title}
-          </h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${this.getCompanyHeader(settings)}
           
-          <p>${t.aNewBookingHasBeenSubmitted}</p>
-          
-          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1e40af; margin-top: 0;">${t.customerInformation}</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; width: 120px;">${t.name}:</td>
-                <td style="padding: 8px 0;">${customerInfo.name}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.email}:</td>
-                <td style="padding: 8px 0;"><a href="mailto:${customerInfo.email}">${customerInfo.email}</a></td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.phone}:</td>
-                <td style="padding: 8px 0;"><a href="tel:${customerInfo.phone}">${customerInfo.phone}</a></td>
-              </tr>
-            </table>
+          <div style="padding: 20px;">
+            <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+              ${t.newBookingReceived} - ${tourOrService.title}
+            </h2>
+            
+            <p>${t.aNewBookingHasBeenSubmitted}</p>
+            
+            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1e40af; margin-top: 0;">${t.customerInformation}</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; width: 120px;">${t.name}:</td>
+                  <td style="padding: 8px 0;">${customerInfo.name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.email}:</td>
+                  <td style="padding: 8px 0;"><a href="mailto:${customerInfo.email}">${customerInfo.email}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.phone}:</td>
+                  <td style="padding: 8px 0;"><a href="tel:${customerInfo.phone}">${customerInfo.phone}</a></td>
+                </tr>
+              </table>
+            </div>
+            
+            <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1e40af; margin-top: 0;">${t.bookingDetails}</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; width: 140px;">${t.bookingNumber}:</td>
+                  <td style="font-family: monospace; background: #e0e7ff; padding: 4px 8px; border-radius: 4px;">${booking.bookingNumber}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${booking.type === 'tour' ? t.tour : t.service}:</td>
+                  <td style="padding: 8px 0;">${tourOrService.title}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.startDate}:</td>
+                  <td style="padding: 8px 0;">${new Date(booking.startDate).toLocaleDateString()}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.travelers}:</td>
+                  <td style="padding: 8px 0;">${booking.totalTravelers} ${t.persons}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.totalAmount}:</td>
+                  <td style="padding: 8px 0; color: #059669; font-weight: bold;">${currency.formatCurrency(booking.totalAmount)}</td>
+                </tr>
+                ${booking.specialRequests ? `
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">${t.specialRequests}:</td>
+                  <td style="background: #fef3c7; padding: 8px; border-radius: 4px;">${booking.specialRequests}</td>
+                </tr>
+                ` : ''}
+              </table>
+            </div>
+            
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #dc2626; font-weight: bold;">${t.actionRequired}</p>
+              <p style="margin: 5px 0 0 0;">${t.pleaseContactCustomer}</p>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            <p style="color: #6b7280; font-size: 14px;">
+              ${t.automatedNotification} ${settings.company_name} ${t.bookingSystem}
+            </p>
           </div>
           
-          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1e40af; margin-top: 0;">${t.bookingDetails}</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; width: 140px;">${t.bookingNumber}:</td>
-                <td style="padding: 8px 0; font-family: monospace; background: #e0e7ff; padding: 4px 8px; border-radius: 4px;">${booking.bookingNumber}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${booking.type === 'tour' ? t.tour : t.service}:</td>
-                <td style="padding: 8px 0;">${tourOrService.title}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.startDate}:</td>
-                <td style="padding: 8px 0;">${new Date(booking.startDate).toLocaleDateString()}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.travelers}:</td>
-                <td style="padding: 8px 0;">${booking.totalTravelers} ${t.persons}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.totalAmount}:</td>
-                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${currency.formatCurrency(booking.totalAmount)}</td>
-              </tr>
-              ${booking.specialRequests ? `
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; vertical-align: top;">${t.specialRequests}:</td>
-                <td style="padding: 8px 0; background: #fef3c7; padding: 8px; border-radius: 4px;">${booking.specialRequests}</td>
-              </tr>
-              ` : ''}
-            </table>
-          </div>
-          
-          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0; color: #dc2626; font-weight: bold;">${t.actionRequired}</p>
-            <p style="margin: 5px 0 0 0;">${t.pleaseContactCustomer}</p>
-          </div>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-          <p style="color: #6b7280; font-size: 14px;">
-            ${t.automatedNotification} ${settings.company_name} ${t.bookingSystem}
-          </p>
+          ${this.getCompanyFooter(settings)}
         </div>
       `;
 
@@ -340,64 +394,70 @@ class EmailService {
       );
 
       const emailTemplate = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
-            ${t.bookingRequestReceived} - ${tourOrService.title}
-          </h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${this.getCompanyHeader(settings)}
           
-          <p>${t.dear} <strong>${customerInfo.name}</strong>,</p>
-          
-          <p>${t.thankYouForChoosing} ${settings.company_name}! ${t.weHaveReceivedYourBooking}</p>
-          
-          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1e40af; margin-top: 0;">${t.yourBookingDetails}</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; width: 140px;">${t.bookingNumber}:</td>
-                <td style="padding: 8px 0; font-family: monospace; background: #e0e7ff; padding: 4px 8px; border-radius: 4px;">${booking.bookingNumber}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${booking.type === 'tour' ? t.tour : t.service}:</td>
-                <td style="padding: 8px 0;">${tourOrService.title}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.startDate}:</td>
-                <td style="padding: 8px 0;">${new Date(booking.startDate).toLocaleDateString()}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.travelers}:</td>
-                <td style="padding: 8px 0;">${booking.totalTravelers} ${t.persons}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.totalAmount}:</td>
-                <td style="padding: 8px 0; color: #059669; font-weight: bold;">${currency.formatCurrency(booking.totalAmount)}</td>
-              </tr>
-            </table>
+          <div style="padding: 20px;">
+            <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+              ${t.bookingRequestReceived} - ${tourOrService.title}
+            </h2>
+            
+            <p>${t.dear} <strong>${customerInfo.name}</strong>,</p>
+            
+            <p>${t.thankYouForChoosing} ${settings.company_name}! ${t.weHaveReceivedYourBooking}</p>
+            
+            <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1e40af; margin-top: 0;">${t.yourBookingDetails}</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; width: 140px;">${t.bookingNumber}:</td>
+                  <td style="font-family: monospace; background: #e0e7ff; padding: 4px 8px; border-radius: 4px;">${booking.bookingNumber}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${booking.type === 'tour' ? t.tour : t.service}:</td>
+                  <td style="padding: 8px 0;">${tourOrService.title}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.startDate}:</td>
+                  <td style="padding: 8px 0;">${new Date(booking.startDate).toLocaleDateString()}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.travelers}:</td>
+                  <td style="padding: 8px 0;">${booking.totalTravelers} ${t.persons}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.totalAmount}:</td>
+                  <td style="padding: 8px 0; color: #059669; font-weight: bold;">${currency.formatCurrency(booking.totalAmount)}</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0;">
+              <h4 style="margin: 0 0 10px 0; color: #15803d;">${t.whatHappensNext}</h4>
+              <ul style="margin: 0; padding-left: 20px; color: #166534;">
+                <li>${t.teamWillReview}</li>
+                <li>${t.contactWithin24Hours}</li>
+                <li>${t.receivePaymentInstructions}</li>
+                <li>${t.finalConfirmation}</li>
+              </ul>
+            </div>
+            
+            <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; color: #92400e;"><strong>${t.important}:</strong> ${t.keepBookingNumber}</p>
+            </div>
+            
+            <p>${t.questionsContact}</p>
+            
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            
+            <div style="text-align: center; color: #6b7280;">
+              <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+              <p style="margin: 5px 0;">${t.thankYouForTravelNeeds}</p>
+              <p style="margin: 0; font-size: 14px;">${t.automatedConfirmation}</p>
+            </div>
           </div>
           
-          <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0;">
-            <h4 style="margin: 0 0 10px 0; color: #15803d;">${t.whatHappensNext}</h4>
-            <ul style="margin: 0; padding-left: 20px; color: #166534;">
-              <li>${t.teamWillReview}</li>
-              <li>${t.contactWithin24Hours}</li>
-              <li>${t.receivePaymentInstructions}</li>
-              <li>${t.finalConfirmation}</li>
-            </ul>
-          </div>
-          
-          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #92400e;"><strong>${t.important}:</strong> ${t.keepBookingNumber}</p>
-          </div>
-          
-          <p>${t.questionsContact}</p>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-          
-          <div style="text-align: center; color: #6b7280;">
-            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
-            <p style="margin: 5px 0;">${t.thankYouForTravelNeeds}</p>
-            <p style="margin: 0; font-size: 14px;">${t.automatedConfirmation}</p>
-          </div>
+          ${this.getCompanyFooter(settings)}
         </div>
       `;
 
@@ -470,50 +530,56 @@ class EmailService {
       };
 
       const emailTemplate = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: ${statusInfo.color}; border-bottom: 2px solid ${statusInfo.color}; padding-bottom: 10px;">
-            ${statusInfo.title}
-          </h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${this.getCompanyHeader(settings)}
           
-          <p>Dear <strong>${customerInfo.name}</strong>,</p>
-          
-          <div style="background-color: ${statusInfo.bgColor}; border-left: 4px solid ${statusInfo.color}; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0; color: ${statusInfo.color}; font-weight: bold;">${statusInfo.message}</p>
+          <div style="padding: 20px;">
+            <h2 style="color: ${statusInfo.color}; border-bottom: 2px solid ${statusInfo.color}; padding-bottom: 10px;">
+              ${statusInfo.title}
+            </h2>
+            
+            <p>Dear <strong>${customerInfo.name}</strong>,</p>
+            
+            <div style="background-color: ${statusInfo.bgColor}; border-left: 4px solid ${statusInfo.color}; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: ${statusInfo.color}; font-weight: bold;">${statusInfo.message}</p>
+            </div>
+            
+            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1e40af; margin-top: 0;">Booking Information:</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; width: 140px;">Booking Number:</td>
+                  <td style="padding: 8px 0; font-family: monospace;">${booking.bookingNumber}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${booking.type === 'tour' ? 'Tour' : 'Service'}:</td>
+                  <td style="padding: 8px 0;">${tourOrService.title}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">Status:</td>
+                  <td style="padding: 8px 0; text-transform: capitalize; font-weight: bold; color: ${statusInfo.color};">${newStatus}</td>
+                </tr>
+              </table>
+            </div>
+            
+            ${notes ? `
+            <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h4 style="margin: 0 0 10px 0; color: #92400e;">Additional Notes:</h4>
+              <p style="margin: 0; color: #92400e;">${notes}</p>
+            </div>
+            ` : ''}
+            
+            <p>If you have any questions, please don't hesitate to contact us.</p>
+            
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            
+            <div style="text-align: center; color: #6b7280;">
+              <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+              <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated update email.</p>
+            </div>
           </div>
           
-          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1e40af; margin-top: 0;">Booking Information:</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; width: 140px;">Booking Number:</td>
-                <td style="padding: 8px 0; font-family: monospace;">${booking.bookingNumber}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${booking.type === 'tour' ? 'Tour' : 'Service'}:</td>
-                <td style="padding: 8px 0;">${tourOrService.title}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">Status:</td>
-                <td style="padding: 8px 0; text-transform: capitalize; font-weight: bold; color: ${statusInfo.color};">${newStatus}</td>
-              </tr>
-            </table>
-          </div>
-          
-          ${notes ? `
-          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <h4 style="margin: 0 0 10px 0; color: #92400e;">Additional Notes:</h4>
-            <p style="margin: 0; color: #92400e;">${notes}</p>
-          </div>
-          ` : ''}
-          
-          <p>If you have any questions, please don't hesitate to contact us.</p>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-          
-          <div style="text-align: center; color: #6b7280;">
-            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
-            <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated update email.</p>
-          </div>
+          ${this.getCompanyFooter(settings)}
         </div>
       `;
 
@@ -561,47 +627,53 @@ class EmailService {
       );
 
       const emailTemplate = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
-            ${t.newContactMessage}
-          </h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${this.getCompanyHeader(settings)}
           
-          <p>${t.newMessageReceived}</p>
-          
-          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1e40af; margin-top: 0;">${t.senderInformation}</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; width: 120px;">${t.name}:</td>
-                <td style="padding: 8px 0;">${contactData.name}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.email}:</td>
-                <td style="padding: 8px 0;"><a href="mailto:${contactData.email}">${contactData.email}</a></td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">${t.subject}:</td>
-                <td style="padding: 8px 0; font-weight: bold; color: #2563eb;">${contactData.subject}</td>
-              </tr>
-            </table>
-          </div>
-          
-          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1e40af; margin-top: 0;">${t.messageContent}</h3>
-            <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
-              <p style="margin: 0; white-space: pre-wrap; color: #1f2937;">${contactData.message}</p>
+          <div style="padding: 20px;">
+            <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+              ${t.newContactMessage}
+            </h2>
+            
+            <p>${t.newMessageReceived}</p>
+            
+            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1e40af; margin-top: 0;">${t.senderInformation}</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; width: 120px;">${t.name}:</td>
+                  <td style="padding: 8px 0;">${contactData.name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.email}:</td>
+                  <td style="padding: 8px 0;"><a href="mailto:${contactData.email}">${contactData.email}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">${t.subject}:</td>
+                  <td style="padding: 8px 0; font-weight: bold; color: #2563eb;">${contactData.subject}</td>
+                </tr>
+              </table>
             </div>
+            
+            <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1e40af; margin-top: 0;">${t.messageContent}</h3>
+              <div style="background: white; padding: 15px; border-radius: 4px; border-left: 4px solid #2563eb;">
+                <p style="margin: 0; white-space: pre-wrap; color: #1f2937;">${contactData.message}</p>
+              </div>
+            </div>
+            
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #dc2626; font-weight: bold;">${t.actionRequired}</p>
+              <p style="margin: 5px 0 0 0;">${t.pleaseRespond}</p>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            <p style="color: #6b7280; font-size: 14px;">
+              ${t.automatedNotification} ${settings.company_name} ${t.contactSystem}
+            </p>
           </div>
           
-          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0; color: #dc2626; font-weight: bold;">${t.actionRequired}</p>
-            <p style="margin: 5px 0 0 0;">${t.pleaseRespond}</p>
-          </div>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-          <p style="color: #6b7280; font-size: 14px;">
-            ${t.automatedNotification} ${settings.company_name} ${t.contactSystem}
-          </p>
+          ${this.getCompanyFooter(settings)}
         </div>
       `;
 
@@ -656,54 +728,60 @@ class EmailService {
       );
 
       const emailTemplate = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
-            ${t.messageReceived}
-          </h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${this.getCompanyHeader(settings)}
           
-          <p>${t.dear} <strong>${contactData.name}</strong>,</p>
-          
-          <p>${t.thankYouForContacting} ${settings.company_name}! ${t.weHaveReceivedYourMessage}</p>
-          
-          <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0; color: #15803d; font-weight: bold;">${t.messageConfirmed}</p>
-          </div>
-          
-          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1e40af; margin-top: 0;">${t.yourMessage}</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; width: 100px;">${t.subject}:</td>
-                <td style="padding: 8px 0; color: #2563eb; font-weight: bold;">${contactData.subject}</td>
-              </tr>
-            </table>
-            <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 10px; border-left: 4px solid #2563eb;">
-              <p style="margin: 0; white-space: pre-wrap; color: #6b7280;">${contactData.message}</p>
+          <div style="padding: 20px;">
+            <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+              ${t.messageReceived}
+            </h2>
+            
+            <p>${t.dear} <strong>${contactData.name}</strong>,</p>
+            
+            <p>${t.thankYouForContacting} ${settings.company_name}! ${t.weHaveReceivedYourMessage}</p>
+            
+            <div style="background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #15803d; font-weight: bold;">${t.messageConfirmed}</p>
+            </div>
+            
+            <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #1e40af; margin-top: 0;">${t.yourMessage}</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; width: 100px;">${t.subject}:</td>
+                  <td style="padding: 8px 0; color: #2563eb; font-weight: bold;">${contactData.subject}</td>
+                </tr>
+              </table>
+              <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 10px; border-left: 4px solid #2563eb;">
+                <p style="margin: 0; white-space: pre-wrap; color: #6b7280;">${contactData.message}</p>
+              </div>
+            </div>
+            
+            <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+              <h4 style="margin: 0 0 10px 0; color: #1e40af;">${t.whatHappensNext}</h4>
+              <ul style="margin: 0; padding-left: 20px; color: #1e40af;">
+                <li>${t.teamWillReview}</li>
+                <li>${t.contactWithin24Hours}</li>
+                <li>${t.checkSpamFolder}</li>
+              </ul>
+            </div>
+            
+            <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; color: #92400e;"><strong>${t.important}:</strong> ${t.keepThisEmail}</p>
+            </div>
+            
+            <p>${t.urgentMatters}</p>
+            
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            
+            <div style="text-align: center; color: #6b7280;">
+              <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+              <p style="margin: 5px 0;">${t.thankYouForReachingOut}</p>
+              <p style="margin: 0; font-size: 14px;">${t.automatedConfirmation}</p>
             </div>
           </div>
           
-          <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
-            <h4 style="margin: 0 0 10px 0; color: #1e40af;">${t.whatHappensNext}</h4>
-            <ul style="margin: 0; padding-left: 20px; color: #1e40af;">
-              <li>${t.teamWillReview}</li>
-              <li>${t.contactWithin24Hours}</li>
-              <li>${t.checkSpamFolder}</li>
-            </ul>
-          </div>
-          
-          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #92400e;"><strong>${t.important}:</strong> ${t.keepThisEmail}</p>
-          </div>
-          
-          <p>${t.urgentMatters}</p>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-          
-          <div style="text-align: center; color: #6b7280;">
-            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
-            <p style="margin: 5px 0;">${t.thankYouForReachingOut}</p>
-            <p style="margin: 0; font-size: 14px;">${t.automatedConfirmation}</p>
-          </div>
+          ${this.getCompanyFooter(settings)}
         </div>
       `;
 
@@ -800,61 +878,67 @@ class EmailService {
       const transporter = this.createTransporter();
 
       const emailTemplate = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
-            Welcome to ${settings.company_name} Admin Team!
-          </h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${this.getCompanyHeader(settings)}
           
-          <p>Dear <strong>${adminData.name}</strong>,</p>
-          
-          <p>You have been assigned as an administrator for ${settings.company_name}. This role allows you to manage tours, services, bookings, and content on the platform.</p>
-          
-          <div style="background-color: #f0f9ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
-            <h3 style="color: #1e40af; margin-top: 0;">Your Admin Credentials:</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; width: 120px;">Email:</td>
-                <td style="padding: 8px 0; font-family: monospace; color: #2563eb;">${adminData.email}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">Password:</td>
-                <td style="padding: 8px 0; font-family: monospace; background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px;">${adminData.password}</td>
-              </tr>
-            </table>
+          <div style="padding: 20px;">
+            <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+              Welcome to ${settings.company_name} Admin Team!
+            </h2>
+            
+            <p>Dear <strong>${adminData.name}</strong>,</p>
+            
+            <p>You have been assigned as an administrator for ${settings.company_name}. This role allows you to manage tours, services, bookings, and content on the platform.</p>
+            
+            <div style="background-color: #f0f9ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
+              <h3 style="color: #1e40af; margin-top: 0;">Your Admin Credentials:</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; width: 120px;">Email:</td>
+                  <td style="padding: 8px 0; font-family: monospace; color: #2563eb;">${adminData.email}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">Password:</td>
+                  <td style="padding: 8px 0; font-family: monospace; background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px;">${adminData.password}</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #dc2626; font-weight: bold;">⚠️ Important Security Notice:</p>
+              <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
+                <li>Do not share your credentials with anyone</li>
+                <li>Keep this email in a secure location or delete it after changing your password</li>
+              </ul>
+            </div>
+            
+            <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #15803d; margin-top: 0;">Admin Permissions:</h3>
+              <ul style="margin: 0; padding-left: 20px; color: #15803d;">
+                <li>Manage tours and services</li>
+                <li>View and update bookings</li>
+                <li>Manage blog posts and content</li>
+                <li>Receive booking and contact form notifications</li>
+                <li>Update website content and settings</li>
+              </ul>
+            </div>
+            
+            <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #92400e; margin-top: 0;">Note:</h3>
+              <p style="margin: 0; color: #92400e;">As an admin, you can perform most operations but cannot delete data or assign new administrators. Only super admins have those privileges.</p>
+            </div>
+            
+            <p>If you have any questions or need assistance, please contact the super admin who assigned you this role.</p>
+            
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            
+            <div style="text-align: center; color: #6b7280;">
+              <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+              <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated invitation email.</p>
+            </div>
           </div>
           
-          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0; color: #dc2626; font-weight: bold;">⚠️ Important Security Notice:</p>
-            <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
-              <li>Do not share your credentials with anyone</li>
-              <li>Keep this email in a secure location or delete it after changing your password</li>
-            </ul>
-          </div>
-          
-          <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #15803d; margin-top: 0;">Admin Permissions:</h3>
-            <ul style="margin: 0; padding-left: 20px; color: #15803d;">
-              <li>Manage tours and services</li>
-              <li>View and update bookings</li>
-              <li>Manage blog posts and content</li>
-              <li>Receive booking and contact form notifications</li>
-              <li>Update website content and settings</li>
-            </ul>
-          </div>
-          
-          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #92400e; margin-top: 0;">Note:</h3>
-            <p style="margin: 0; color: #92400e;">As an admin, you can perform most operations but cannot delete data or assign new administrators. Only super admins have those privileges.</p>
-          </div>
-          
-          <p>If you have any questions or need assistance, please contact the super admin who assigned you this role.</p>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-          
-          <div style="text-align: center; color: #6b7280;">
-            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
-            <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated invitation email.</p>
-          </div>
+          ${this.getCompanyFooter(settings)}
         </div>
       `;
 
@@ -882,47 +966,53 @@ class EmailService {
       const transporter = this.createTransporter();
 
       const emailTemplate = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #f59e0b; border-bottom: 2px solid #f59e0b; padding-bottom: 10px;">
-            Password Reset - ${settings.company_name}
-          </h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${this.getCompanyHeader(settings)}
           
-          <p>Dear <strong>${adminData.name}</strong>,</p>
-          
-          <p>Your password has been reset by a super administrator. Below are your new login credentials:</p>
-          
-          <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-            <h3 style="color: #92400e; margin-top: 0;">New Login Credentials:</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; width: 120px;">Email:</td>
-                <td style="padding: 8px 0; font-family: monospace; color: #2563eb;">${adminData.email}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold;">New Password:</td>
-                <td style="padding: 8px 0; font-family: monospace; background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px;">${adminData.password}</td>
-              </tr>
-            </table>
+          <div style="padding: 20px;">
+            <h2 style="color: #f59e0b; border-bottom: 2px solid #f59e0b; padding-bottom: 10px;">
+              Password Reset - ${settings.company_name}
+            </h2>
+            
+            <p>Dear <strong>${adminData.name}</strong>,</p>
+            
+            <p>Your password has been reset by a super administrator. Below are your new login credentials:</p>
+            
+            <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+              <h3 style="color: #92400e; margin-top: 0;">New Login Credentials:</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; width: 120px;">Email:</td>
+                  <td style="padding: 8px 0; font-family: monospace; color: #2563eb;">${adminData.email}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold;">New Password:</td>
+                  <td style="padding: 8px 0; font-family: monospace; background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px;">${adminData.password}</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #dc2626; font-weight: bold;">⚠️ Important Security Notice:</p>
+              <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
+                <li>Please change this password immediately after logging in</li>
+                <li>Choose a strong, unique password</li>
+                <li>Do not share your credentials with anyone</li>
+                <li>Delete this email after changing your password</li>
+              </ul>
+            </div>
+            
+            <p>If you did not request this password reset, please contact the super administrator immediately.</p>
+            
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            
+            <div style="text-align: center; color: #6b7280;">
+              <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+              <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated password reset email.</p>
+            </div>
           </div>
           
-          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0; color: #dc2626; font-weight: bold;">⚠️ Important Security Notice:</p>
-            <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
-              <li>Please change this password immediately after logging in</li>
-              <li>Choose a strong, unique password</li>
-              <li>Do not share your credentials with anyone</li>
-              <li>Delete this email after changing your password</li>
-            </ul>
-          </div>
-          
-          <p>If you did not request this password reset, please contact the super administrator immediately.</p>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-          
-          <div style="text-align: center; color: #6b7280;">
-            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
-            <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated password reset email.</p>
-          </div>
+          ${this.getCompanyFooter(settings)}
         </div>
       `;
 
@@ -953,47 +1043,53 @@ class EmailService {
       const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/reset-password?token=${token}`;
 
       const emailTemplate = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #3b82f6; border-bottom: 2px solid #3b82f6; padding-bottom: 10px;">
-            Password Reset Request - ${settings.company_name}
-          </h2>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          ${this.getCompanyHeader(settings)}
           
-          <p>Dear <strong>${user.name}</strong>,</p>
-          
-          <p>We received a request to reset your password for your admin account. If you made this request, please click the button below to reset your password:</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px;">
-              Reset Password
-            </a>
+          <div style="padding: 20px;">
+            <h2 style="color: #3b82f6; border-bottom: 2px solid #3b82f6; padding-bottom: 10px;">
+              Password Reset Request - ${settings.company_name}
+            </h2>
+            
+            <p>Dear <strong>${user.name}</strong>,</p>
+            
+            <p>We received a request to reset your password for your admin account. If you made this request, please click the button below to reset your password:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px;">
+                Reset Password
+              </a>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
+            <p style="background-color: #f3f4f6; padding: 12px; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 12px;">
+              ${resetLink}
+            </p>
+            
+            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #92400e; font-weight: bold;">⏰ Important:</p>
+              <p style="margin: 5px 0 0 0; color: #92400e;">This password reset link will expire in <strong>1 hour</strong> for security reasons.</p>
+            </div>
+            
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #dc2626; font-weight: bold;">🛡️ Security Notice:</p>
+              <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
+                <li>If you did not request this password reset, please ignore this email</li>
+                <li>Your password will remain unchanged unless you click the link above</li>
+                <li>Never share your password reset link with anyone</li>
+                <li>Contact us immediately if you suspect unauthorized access</li>
+              </ul>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            
+            <div style="text-align: center; color: #6b7280;">
+              <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
+              <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated security email.</p>
+            </div>
           </div>
           
-          <p style="color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
-          <p style="background-color: #f3f4f6; padding: 12px; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 12px;">
-            ${resetLink}
-          </p>
-          
-          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0; color: #92400e; font-weight: bold;">⏰ Important:</p>
-            <p style="margin: 5px 0 0 0; color: #92400e;">This password reset link will expire in <strong>1 hour</strong> for security reasons.</p>
-          </div>
-          
-          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0; color: #dc2626; font-weight: bold;">🛡️ Security Notice:</p>
-            <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #dc2626;">
-              <li>If you did not request this password reset, please ignore this email</li>
-              <li>Your password will remain unchanged unless you click the link above</li>
-              <li>Never share your password reset link with anyone</li>
-              <li>Contact us immediately if you suspect unauthorized access</li>
-            </ul>
-          </div>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-          
-          <div style="text-align: center; color: #6b7280;">
-            <p style="margin: 0; font-size: 18px; color: #2563eb;"><strong>${settings.company_name}</strong></p>
-            <p style="margin: 5px 0 0 0; font-size: 14px;">This is an automated security email.</p>
-          </div>
+          ${this.getCompanyFooter(settings)}
         </div>
       `;
 
