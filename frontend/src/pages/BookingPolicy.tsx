@@ -57,7 +57,7 @@ const BookingPolicy: React.FC = () => {
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{policyTitle}</h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                {t('Please read our booking terms and conditions carefully before making a reservation.')}
+                {t('Please read our booking terms and conditions carefully before making a reservation')}
             </p>
           </div>
         </div>
