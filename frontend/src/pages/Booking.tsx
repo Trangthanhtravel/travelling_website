@@ -81,10 +81,12 @@ const DirectBooking: React.FC = () => {
 
   // Calculate total travelers when individual counts change
   useEffect(() => {
-    const { adults, children, infants } = watchedValues.numberOfTravelers || { adults: 1, children: 0, infants: 0 };
-    const total = adults + children + infants;
+    const adults = Number(watchedValues.numberOfTravelers?.adults) || 0;
+    const children = Number(watchedValues.numberOfTravelers?.children) || 0;
+    const infants = Number(watchedValues.numberOfTravelers?.infants) || 0;
+    const total = adults + children + infants || 1;
     setValue('totalTravelers', total);
-  }, [watchedValues.numberOfTravelers, setValue]);
+  }, [watchedValues.numberOfTravelers?.adults, watchedValues.numberOfTravelers?.children, watchedValues.numberOfTravelers?.infants, setValue]);
 
   // Calculate pricing when form values change
   useEffect(() => {

@@ -69,8 +69,8 @@ const ServiceBooking: React.FC = () => {
 
   // Calculate total travelers when individual counts change
   React.useEffect(() => {
-    const total = (watchedValues.adults || 0) + (watchedValues.children || 0);
-    setValue('totalTravelers', total);
+    const total = (Number(watchedValues.adults) || 0) + (Number(watchedValues.children) || 0);
+    setValue('totalTravelers', total || 1);
   }, [watchedValues.adults, watchedValues.children, setValue]);
 
   const createBookingMutation = useMutation({
@@ -272,7 +272,8 @@ const ServiceBooking: React.FC = () => {
                       min="1"
                       {...register('adults', {
                         required: t('Number of adults is required'),
-                        min: { value: 1, message: t('At least 1 adult is required') }
+                        min: { value: 1, message: t('At least 1 adult is required') },
+                        valueAsNumber: true
                       })}
                       className={`w-full p-3 border rounded-lg ${
                         isDarkMode
@@ -292,7 +293,7 @@ const ServiceBooking: React.FC = () => {
                     <input
                       type="number"
                       min="0"
-                      {...register('children')}
+                      {...register('children', { valueAsNumber: true })}
                       className={`w-full p-3 border rounded-lg ${
                         isDarkMode
                           ? 'bg-dark-700 border-dark-600 text-white'
