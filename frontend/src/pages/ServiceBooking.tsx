@@ -455,7 +455,7 @@ const ServiceBooking: React.FC = () => {
                       {t('Total Amount')}
                     </span>
                     <span className="font-bold text-accent-orange text-xl">
-                      ${(service.price * (watchedValues.totalTravelers || 1)).toFixed(2)}
+                      {formatCurrency(service.price * (watchedValues.totalTravelers || 1))}
                     </span>
                   </div>
                 )}
