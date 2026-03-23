@@ -65,11 +65,16 @@ const AdminManagement: React.FC = () => {
       setError('');
       setSuccess('');
 
-      await adminAPI_functions.createAdmin(newAdmin);
+      const response = await adminAPI_functions.createAdmin(newAdmin);
+      const created = response.data.data;
 
       setSuccess('Admin created successfully! Invitation email sent.');
       setShowCreateModal(false);
       setNewAdmin({ name: '', email: '', phone: '' });
+      // Optimistic: add to list immediately, refetch in background
+      if (created) {
+        setAdmins(prev => [...prev, created]);
+      }
       fetchAdmins();
 
       setTimeout(() => setSuccess(''), 5000);
@@ -93,9 +98,12 @@ const AdminManagement: React.FC = () => {
         is_active: selectedAdmin.is_active
       });
 
+      // Optimistic update: update local state immediately
+      setAdmins(prev => prev.map(a => a.id === selectedAdmin.id ? { ...a, ...selectedAdmin } : a));
       setSuccess('Admin updated successfully!');
       setShowEditModal(false);
       setSelectedAdmin(null);
+      // Background refetch
       fetchAdmins();
 
       setTimeout(() => setSuccess(''), 5000);
@@ -115,7 +123,10 @@ const AdminManagement: React.FC = () => {
 
       await adminAPI_functions.deleteAdmin(adminId);
 
+      // Optimistic update: remove from list immediately
+      setAdmins(prev => prev.filter(a => a.id !== adminId));
       setSuccess('Admin deleted successfully!');
+      // Background refetch
       fetchAdmins();
 
       setTimeout(() => setSuccess(''), 5000);
@@ -148,11 +159,16 @@ const AdminManagement: React.FC = () => {
       setError('');
       setSuccess('');
 
+      const newIsActive = admin.is_active === 1 ? 0 : 1;
+
       await adminAPI_functions.updateAdmin(admin.id, {
-        is_active: admin.is_active === 1 ? 0 : 1
+        is_active: newIsActive
       });
 
+      // Optimistic update: toggle active status immediately
+      setAdmins(prev => prev.map(a => a.id === admin.id ? { ...a, is_active: newIsActive } : a));
       setSuccess(`Admin ${admin.is_active === 1 ? 'deactivated' : 'activated'} successfully!`);
+      // Background refetch
       fetchAdmins();
 
       setTimeout(() => setSuccess(''), 5000);
