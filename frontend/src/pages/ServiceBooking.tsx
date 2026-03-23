@@ -44,7 +44,6 @@ const ServiceBooking: React.FC = () => {
   });
 
   const service = serviceData?.data;
-
   const {
     register,
     handleSubmit,
@@ -432,7 +431,7 @@ const ServiceBooking: React.FC = () => {
                 {service.price && (
                   <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-dark-600">
                     <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
-                      {t('Price per person')}
+                      {t('Price per Person')}
                     </span>
                     <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                       {formatCurrency(service.price)}
