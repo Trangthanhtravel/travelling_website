@@ -330,7 +330,7 @@ const TourDetail: React.FC = () => {
                 : [];
               if (!Array.isArray(infoArray) || infoArray.length === 0) return null;
               return (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg shadow-lg p-6 mb-6">
+                <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
                   <h2 className="text-2xl font-bold text-amber-800 mb-4 flex items-center">
                     <Icon icon={Icons.FiAlertCircle} className="w-6 h-6 mr-2" />
                     {language === 'vi' ? 'Lưu ý' : t('Important Information')}
@@ -339,7 +339,7 @@ const TourDetail: React.FC = () => {
                     {infoArray.map((info: string, index: number) => (
                       <li key={index} className="flex items-start">
                         <span className="text-amber-600 mr-2 mt-0.5 flex-shrink-0">•</span>
-                        <span className="text-amber-900 text-sm">{info}</span>
+                        <span className="text-amber-900">{info}</span>
                       </li>
                     ))}
                   </ul>
