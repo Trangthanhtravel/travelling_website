@@ -179,7 +179,7 @@ const ServiceDetail: React.FC = () => {
               const infoArray = typeof rawInfo === 'string' ? JSON.parse(rawInfo) : (rawInfo || []);
               if (!Array.isArray(infoArray) || infoArray.length === 0) return null;
               return (
-                <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-amber-900/20 border border-amber-700' : 'bg-amber-50 border border-amber-200'}`}>
+                <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
                   <h2 className={`text-2xl font-bold mb-4 flex items-center ${isDarkMode ? 'text-amber-300' : 'text-amber-800'}`}>
                     <Icon icon={Icons.FiAlertCircle} className="w-6 h-6 mr-2" />
                     {language === 'vi' ? 'Lưu ý' : t('Important Information')}
