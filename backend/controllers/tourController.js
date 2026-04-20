@@ -227,13 +227,13 @@ const createTour = async (req, res) => {
     const tourData = { ...req.body };
 
     // Parse JSON fields
-    ['itinerary', 'included', 'excluded', 'itinerary_vi', 'included_vi', 'excluded_vi'].forEach(field => {
+    ['itinerary', 'included', 'excluded', 'itinerary_vi', 'included_vi', 'excluded_vi', 'important_info', 'important_info_vi'].forEach(field => {
       if (tourData[field] && typeof tourData[field] === 'string') {
         try {
           tourData[field] = JSON.parse(tourData[field]);
         } catch (e) {
           // If parsing fails, keep as string or set to appropriate default
-          if (field.includes('included') || field.includes('excluded')) {
+          if (field.includes('included') || field.includes('excluded') || field.includes('important_info')) {
             tourData[field] = [];
           } else if (field.includes('itinerary')) {
             tourData[field] = {};
@@ -296,7 +296,7 @@ const updateTour = async (req, res) => {
     const updateData = { ...req.body };
 
     // Parse JSON fields
-    ['itinerary', 'included', 'excluded', 'itinerary_vi', 'included_vi', 'excluded_vi'].forEach(field => {
+    ['itinerary', 'included', 'excluded', 'itinerary_vi', 'included_vi', 'excluded_vi', 'important_info', 'important_info_vi'].forEach(field => {
       if (updateData[field] && typeof updateData[field] === 'string') {
         try {
           updateData[field] = JSON.parse(updateData[field]);

@@ -281,11 +281,9 @@ const TourDetail: React.FC = () => {
                   </h3>
                   <ul className="space-y-2">
                     {(() => {
-                        // Parse included if it's a string, or use as-is if it's an array
                         const includedArray = tour?.included
                             ? (typeof tour.included === 'string' ? JSON.parse(tour.included) : tour.included)
                             : [];
-
                         return Array.isArray(includedArray) && includedArray.length > 0 ? (
                             includedArray.map((included, index) => (
                                 <li key={index} className="flex items-start">
@@ -306,11 +304,9 @@ const TourDetail: React.FC = () => {
                   </h3>
                   <ul className="space-y-2">
                     {(() => {
-                        // Parse excluded if it's a string, or use as-is if it's an array
                         const excludedArray = tour?.excluded
                             ? (typeof tour.excluded === 'string' ? JSON.parse(tour.excluded) : tour.excluded)
                             : [];
-
                         return Array.isArray(excludedArray) && excludedArray.length > 0 ? (
                             excludedArray.map((excluded, index) => (
                                 <li key={index} className="flex items-start">
@@ -326,6 +322,30 @@ const TourDetail: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Important Information */}
+            {(() => {
+              const infoArray = tour?.important_info
+                ? (typeof tour.important_info === 'string' ? JSON.parse(tour.important_info) : tour.important_info)
+                : [];
+              if (!Array.isArray(infoArray) || infoArray.length === 0) return null;
+              return (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg shadow-lg p-6 mb-6">
+                  <h2 className="text-2xl font-bold text-amber-800 mb-4 flex items-center">
+                    <Icon icon={Icons.FiAlertCircle} className="w-6 h-6 mr-2" />
+                    {language === 'vi' ? 'Lưu ý' : t('Important Information')}
+                  </h2>
+                  <ul className="space-y-2">
+                    {infoArray.map((info: string, index: number) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-amber-600 mr-2 mt-0.5 flex-shrink-0">•</span>
+                        <span className="text-amber-900 text-sm">{info}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
 
             {/* Map */}
             {tour?.location?.coordinates && (

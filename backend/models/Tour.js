@@ -29,6 +29,8 @@ class Tour {
     this.itinerary_vi = data.itinerary_vi ? (typeof data.itinerary_vi === 'string' ? JSON.parse(data.itinerary_vi) : data.itinerary_vi) : {};
     this.included_vi = data.included_vi ? (typeof data.included_vi === 'string' ? JSON.parse(data.included_vi) : data.included_vi) : [];
     this.excluded_vi = data.excluded_vi ? (typeof data.excluded_vi === 'string' ? JSON.parse(data.excluded_vi) : data.excluded_vi) : [];
+    this.important_info = data.important_info ? (typeof data.important_info === 'string' ? JSON.parse(data.important_info) : data.important_info) : [];
+    this.important_info_vi = data.important_info_vi ? (typeof data.important_info_vi === 'string' ? JSON.parse(data.important_info_vi) : data.important_info_vi) : [];
 
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
@@ -86,12 +88,14 @@ class Tour {
       duration_vi: this.duration_vi,
       itinerary_vi: JSON.stringify(this.itinerary_vi),
       included_vi: JSON.stringify(this.included_vi),
-      excluded_vi: JSON.stringify(this.excluded_vi)
+      excluded_vi: JSON.stringify(this.excluded_vi),
+      important_info: JSON.stringify(this.important_info),
+      important_info_vi: JSON.stringify(this.important_info_vi)
     };
 
     const sql = `
-      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, image, gallery, itinerary, included, excluded, status, featured, title_vi, description_vi, location_vi, duration_vi, itinerary_vi, included_vi, excluded_vi, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      INSERT INTO tours (title, slug, description, price, duration, location, max_participants, category_slug, image, gallery, itinerary, included, excluded, status, featured, title_vi, description_vi, location_vi, duration_vi, itinerary_vi, included_vi, excluded_vi, important_info, important_info_vi, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     const params = [
@@ -101,7 +105,8 @@ class Tour {
       tourData.itinerary, tourData.included, tourData.excluded,
       tourData.status, tourData.featured,
       tourData.title_vi, tourData.description_vi, tourData.location_vi,
-      tourData.duration_vi, tourData.itinerary_vi, tourData.included_vi, tourData.excluded_vi
+      tourData.duration_vi, tourData.itinerary_vi, tourData.included_vi, tourData.excluded_vi,
+      tourData.important_info, tourData.important_info_vi
     ];
 
     const result = await db.prepare(sql).bind(...params).run();
@@ -321,6 +326,12 @@ class Tour {
     if (processedData.excluded && typeof processedData.excluded !== 'string') {
       processedData.excluded = JSON.stringify(processedData.excluded);
     }
+    if (processedData.important_info && typeof processedData.important_info !== 'string') {
+      processedData.important_info = JSON.stringify(processedData.important_info);
+    }
+    if (processedData.important_info_vi && typeof processedData.important_info_vi !== 'string') {
+      processedData.important_info_vi = JSON.stringify(processedData.important_info_vi);
+    }
 
     const fields = Object.keys(processedData).map(key => `${key} = ?`).join(', ');
     const values = Object.values(processedData);
@@ -403,7 +414,9 @@ class Tour {
       // Parse Vietnamese fields as well
       itinerary_vi: typeof this.itinerary_vi === 'string' ? JSON.parse(this.itinerary_vi) : this.itinerary_vi,
       included_vi: typeof this.included_vi === 'string' ? JSON.parse(this.included_vi) : this.included_vi,
-      excluded_vi: typeof this.excluded_vi === 'string' ? JSON.parse(this.excluded_vi) : this.excluded_vi
+      excluded_vi: typeof this.excluded_vi === 'string' ? JSON.parse(this.excluded_vi) : this.excluded_vi,
+      important_info: typeof this.important_info === 'string' ? JSON.parse(this.important_info) : this.important_info,
+      important_info_vi: typeof this.important_info_vi === 'string' ? JSON.parse(this.important_info_vi) : this.important_info_vi
     };
   }
 
@@ -417,7 +430,8 @@ class Tour {
         duration: this.duration_vi || this.duration,
         itinerary: this.itinerary_vi && Object.keys(this.itinerary_vi).length > 0 ? this.itinerary_vi : this.itinerary,
         included: this.included_vi && this.included_vi.length > 0 ? this.included_vi : this.included,
-        excluded: this.excluded_vi && this.excluded_vi.length > 0 ? this.excluded_vi : this.excluded
+        excluded: this.excluded_vi && this.excluded_vi.length > 0 ? this.excluded_vi : this.excluded,
+        important_info: this.important_info_vi && this.important_info_vi.length > 0 ? this.important_info_vi : this.important_info
       };
     }
     return {
@@ -427,7 +441,8 @@ class Tour {
       duration: this.duration,
       itinerary: this.itinerary,
       included: this.included,
-      excluded: this.excluded
+      excluded: this.excluded,
+      important_info: this.important_info
     };
   }
 }

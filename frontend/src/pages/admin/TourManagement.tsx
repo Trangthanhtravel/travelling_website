@@ -104,6 +104,8 @@ const TourManagement: React.FC = () => {
       formData.append('category_slug', tourData.category); // Fix: use category_slug
       formData.append('included', JSON.stringify(tourData.included));
       formData.append('excluded', JSON.stringify(tourData.excluded));
+      formData.append('important_info', JSON.stringify(tourData.important_info?.en || []));
+      formData.append('important_info_vi', JSON.stringify(tourData.important_info?.vi || []));
       formData.append('status', tourData.status);
       formData.append('featured', tourData.featured.toString());
 
@@ -156,6 +158,8 @@ const TourManagement: React.FC = () => {
       formData.append('category_slug', data.category); // Fix: use category_slug
       formData.append('included', JSON.stringify(data.included));
       formData.append('excluded', JSON.stringify(data.excluded));
+      formData.append('important_info', JSON.stringify(data.important_info?.en || []));
+      formData.append('important_info_vi', JSON.stringify(data.important_info?.vi || []));
       formData.append('status', data.status);
       formData.append('featured', data.featured.toString());
 

@@ -28,6 +28,7 @@ const TourModal: React.FC<TourModalProps> = ({
     duration: { en: '', vi: '' },
     included: { en: '', vi: '' },
     excluded: { en: '', vi: '' },
+    important_info: { en: '', vi: '' },
     price: 0,
     max_participants: 1,
     category: '',
@@ -95,6 +96,22 @@ const TourModal: React.FC<TourModalProps> = ({
             return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
           })()
         },
+        important_info: {
+          en: (() => {
+            let data = initialData.important_info;
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch (e) { data = []; }
+            }
+            return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
+          })(),
+          vi: (() => {
+            let data = initialData.important_info_vi;
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch (e) { data = []; }
+            }
+            return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
+          })()
+        },
         price: initialData.price || 0,
         max_participants: initialData.max_participants || 1,
         category: initialData.category || '',
@@ -111,6 +128,7 @@ const TourModal: React.FC<TourModalProps> = ({
         duration: { en: '', vi: '' },
         included: { en: '', vi: '' },
         excluded: { en: '', vi: '' },
+        important_info: { en: '', vi: '' },
         price: 0,
         max_participants: 1,
         category: '',
@@ -141,6 +159,10 @@ const TourModal: React.FC<TourModalProps> = ({
       excluded: {
         en: formData.excluded.en.split('\n').filter(item => item.trim()),
         vi: formData.excluded.vi.split('\n').filter(item => item.trim())
+      },
+      important_info: {
+        en: formData.important_info.en.split('\n').filter(item => item.trim()),
+        vi: formData.important_info.vi.split('\n').filter(item => item.trim())
       }
     };
 
@@ -316,6 +338,20 @@ const TourModal: React.FC<TourModalProps> = ({
               placeholder={{
                 en: "Enter what's excluded (one per line)",
                 vi: "Nhập những gì không được bao gồm (mỗi dòng một mục)"
+              }}
+            />
+
+            {/* Important Information */}
+            <BilingualInput
+              label="Important Information (Lưu ý)"
+              name="important_info"
+              value={formData.important_info}
+              onChange={handleBilingualChange}
+              type="textarea"
+              rows={4}
+              placeholder={{
+                en: "Enter important notes (one per line)",
+                vi: "Nhập các lưu ý quan trọng (mỗi dòng một mục)"
               }}
             />
 
