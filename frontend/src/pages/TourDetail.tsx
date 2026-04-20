@@ -220,7 +220,6 @@ const TourDetail: React.FC = () => {
                               return;
                             }
 
-                            console.error('Gallery image failed to load:', photo);
                             target.dataset.errorHandled = 'true';
 
                             // Hide the failed image and show error state
@@ -242,7 +241,6 @@ const TourDetail: React.FC = () => {
                             const target = e.target as HTMLImageElement;
                             delete target.dataset.errorHandled;
                             target.style.display = 'block';
-                            console.log('Gallery image loaded successfully:', photo);
                           }}
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">

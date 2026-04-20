@@ -41,11 +41,6 @@ const TourModal: React.FC<TourModalProps> = ({
   // Populate form data when editing
   useEffect(() => {
     if (initialData) {
-      console.log('TourModal initialData:', initialData);
-      console.log('initialData.included:', initialData.included, 'Type:', typeof initialData.included);
-      console.log('initialData.excluded:', initialData.excluded, 'Type:', typeof initialData.excluded);
-      console.log('initialData.included_vi:', initialData.included_vi, 'Type:', typeof initialData.included_vi);
-      console.log('initialData.excluded_vi:', initialData.excluded_vi, 'Type:', typeof initialData.excluded_vi);
 
       setFormData({
         title: {

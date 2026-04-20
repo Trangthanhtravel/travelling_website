@@ -82,30 +82,19 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
   const uploadMutation = useMutation({
     mutationFn: updateGallery,
     onSuccess: (data) => {
-      console.log('Upload success:', data);
-
-      // Update local state immediately
       if (data?.data?.gallery) {
         setLocalGallery(data.data.gallery);
-        // Update parent component with the fresh data but don't close modal
         onSuccess?.();
       }
-
-      // Clear selected files
       setSelectedFiles(null);
-
-      // Safely invalidate queries with error handling
       try {
         queryClient.invalidateQueries({ queryKey: ['admin-services'] });
         if (service?.id) {
           queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
         }
       } catch (queryError) {
-        console.warn('Query invalidation failed:', queryError);
         // Continue without throwing error since the operation succeeded
       }
-
-      // Success notification
       toast.success('Service gallery updated successfully! Modal will stay open for more uploads.');
     },
     onError: (error: any) => {
@@ -117,27 +106,18 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
   const deleteMutation = useMutation({
     mutationFn: deleteGalleryPhoto,
     onSuccess: (data) => {
-      console.log('Delete success:', data);
-
-      // Update local state immediately
       if (data?.data?.gallery !== undefined) {
         setLocalGallery(data.data.gallery);
-        // Update parent component with the fresh data
         onSuccess?.();
       }
-
-      // Safely invalidate queries with error handling
       try {
         queryClient.invalidateQueries({ queryKey: ['admin-services'] });
         if (service?.id) {
           queryClient.invalidateQueries({ queryKey: ['admin-service', service.id] });
         }
       } catch (queryError) {
-        console.warn('Query invalidation failed:', queryError);
         // Continue without throwing error since the operation succeeded
       }
-
-      // Success notification
       toast.success('Photo deleted successfully!');
     },
     onError: (error: any) => {
@@ -253,7 +233,6 @@ const ServiceGalleryManager: React.FC<ServiceGalleryManagerProps> = ({
                           const target = e.target as HTMLImageElement;
                           delete target.dataset.errorHandled;
                           target.style.display = 'block';
-                          console.log('Image loaded successfully:', photo);
                         }}
                       />
                       <button

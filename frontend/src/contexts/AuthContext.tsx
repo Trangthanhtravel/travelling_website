@@ -135,20 +135,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await authAPI.adminLogin(email, password);
 
-      console.log('🔍 Frontend - Full response:', response.data);
-
-      // Backend now returns data in ApiResponse format: { success, message, data: { token, user } }
       const { token, user } = response.data.data;
 
-      console.log('🔍 Frontend - Extracted:', { token: !!token, user: !!user, userRole: user?.role });
-      console.log('🔍 Frontend - User object:', user);
-
-      // Store both token and user data
       localStorage.setItem('adminToken', token);
       localStorage.setItem('adminUser', JSON.stringify(user));
 
-      console.log('🔍 Frontend - Stored in localStorage');
-      console.log('🔍 Frontend - adminUser from storage:', localStorage.getItem('adminUser'));
 
       dispatch({
         type: 'LOGIN_SUCCESS',

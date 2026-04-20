@@ -181,13 +181,6 @@ const AdminDashboard: React.FC = () => {
   // Check if user is super admin
   const isSuperAdmin = state.admin?.role === 'super_admin';
 
-  // Debug logging
-  console.log('🔍 Dashboard - Auth state:', {
-    hasAdmin: !!state.admin,
-    adminRole: state.admin?.role,
-    adminEmail: state.admin?.email,
-    isSuperAdmin: isSuperAdmin,
-  });
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

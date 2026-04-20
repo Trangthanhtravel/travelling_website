@@ -43,9 +43,6 @@ const Contact: React.FC = () => {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       const endpoint = `${apiUrl}/api/contact/submit`;
 
-      console.log('Submitting contact form to:', endpoint);
-      console.log('Form data:', { ...data, language });
-
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -57,14 +54,10 @@ const Contact: React.FC = () => {
         }),
       });
 
-      console.log('Response status:', response.status);
-
       let result;
       try {
         result = await response.json();
-        console.log('Response data:', result);
       } catch (parseError) {
-        console.error('Error parsing response:', parseError);
         throw new Error('Invalid response from server');
       }
 

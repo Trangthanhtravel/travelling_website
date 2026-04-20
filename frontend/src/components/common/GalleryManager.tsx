@@ -85,8 +85,6 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   const uploadMutation = useMutation({
     mutationFn: updateGallery,
     onSuccess: (data) => {
-      console.log('Upload success:', data);
-
       // Update local state immediately
       if (data?.data?.gallery) {
         setLocalGallery(data.data.gallery);
@@ -114,8 +112,6 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
   const deleteMutation = useMutation({
     mutationFn: deleteGalleryPhoto,
     onSuccess: (data) => {
-      console.log('Delete success:', data);
-
       // Update local state immediately
       if (data?.data?.gallery !== undefined) {
         setLocalGallery(data.data.gallery);
@@ -244,7 +240,6 @@ const GalleryManager: React.FC<GalleryManagerProps> = ({
                           const target = e.target as HTMLImageElement;
                           delete target.dataset.errorHandled;
                           target.style.display = 'block';
-                          console.log('Image loaded successfully:', photo);
                         }}
                       />
                       <button
