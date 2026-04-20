@@ -18,7 +18,7 @@ const ServiceDetail: React.FC = () => {
     enabled: !!slug,
   });
 
-  const service = serviceData?.data;
+  const service: any = serviceData?.data;
 
   if (isLoading) {
     return (
@@ -149,26 +149,17 @@ const ServiceDetail: React.FC = () => {
                 <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Photo Gallery</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {service.gallery.map((photo: string, index: number) => {
-                    // Skip rendering if photo URL is malformed or empty
                     if (!photo || photo.includes('undefined') || photo.startsWith('https://https://')) {
                       return null;
                     }
-
                     return (
                       <div key={`gallery-${index}`} className="relative group cursor-pointer">
                         <img
                           src={photo}
                           alt={`${service.title} Gallery ${index + 1}`}
                           className="w-full h-32 md:h-40 object-cover rounded-lg border border-gray-200 dark:border-dark-600 transition-transform duration-200 group-hover:scale-105"
-                          onClick={() => {
-                            // Open image in a new tab for full view
-                            window.open(photo, '_blank');
-                          }}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            // Hide broken images
-                            target.style.display = 'none';
-                          }}
+                          onClick={() => { window.open(photo, '_blank'); }}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 rounded-lg flex items-center justify-center">
                           <Icon icon={Icons.FiEye} className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
@@ -179,6 +170,31 @@ const ServiceDetail: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Important Information */}
+            {(() => {
+              const rawInfo = language === 'vi' && service.important_info_vi?.length
+                ? service.important_info_vi
+                : service.important_info;
+              const infoArray = typeof rawInfo === 'string' ? JSON.parse(rawInfo) : (rawInfo || []);
+              if (!Array.isArray(infoArray) || infoArray.length === 0) return null;
+              return (
+                <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-amber-900/20 border border-amber-700' : 'bg-amber-50 border border-amber-200'}`}>
+                  <h2 className={`text-2xl font-bold mb-4 flex items-center ${isDarkMode ? 'text-amber-300' : 'text-amber-800'}`}>
+                    <Icon icon={Icons.FiAlertCircle} className="w-6 h-6 mr-2" />
+                    {language === 'vi' ? 'Lưu ý' : t('Important Information')}
+                  </h2>
+                  <ul className="space-y-2">
+                    {infoArray.map((info: string, index: number) => (
+                      <li key={index} className="flex items-start">
+                        <span className={`mr-2 mt-0.5 flex-shrink-0 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>•</span>
+                        <span className={isDarkMode ? 'text-amber-200' : 'text-amber-900'}>{info}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Booking Card */}

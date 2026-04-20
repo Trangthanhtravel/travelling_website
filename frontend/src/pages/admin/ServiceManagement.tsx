@@ -123,6 +123,8 @@ const ServiceManagement: React.FC = () => {
       formData.append('excluded', JSON.stringify(serviceData.excluded || []));
       if (serviceData.included_vi) formData.append('included_vi', JSON.stringify(serviceData.included_vi));
       if (serviceData.excluded_vi) formData.append('excluded_vi', JSON.stringify(serviceData.excluded_vi));
+      formData.append('important_info', JSON.stringify(serviceData.important_info || []));
+      formData.append('important_info_vi', JSON.stringify(serviceData.important_info_vi || []));
 
       // Add image if provided
       if (serviceData.image) {
@@ -181,6 +183,8 @@ const ServiceManagement: React.FC = () => {
       formData.append('excluded', JSON.stringify(data.excluded || []));
       if (data.included_vi) formData.append('included_vi', JSON.stringify(data.included_vi));
       if (data.excluded_vi) formData.append('excluded_vi', JSON.stringify(data.excluded_vi));
+      formData.append('important_info', JSON.stringify(data.important_info || []));
+      formData.append('important_info_vi', JSON.stringify(data.important_info_vi || []));
 
       // Add new image if provided
       if (data.image) {

@@ -249,6 +249,8 @@ const getServiceBySlug = async (req, res) => {
       gallery: result.gallery ? JSON.parse(result.gallery) : [],
       included: result.included ? JSON.parse(result.included) : [],
       excluded: result.excluded ? JSON.parse(result.excluded) : [],
+      important_info: result.important_info ? JSON.parse(result.important_info) : [],
+      important_info_vi: result.important_info_vi ? JSON.parse(result.important_info_vi) : [],
       location: result.location ? JSON.parse(result.location) : null,
       category: result.category_id ? {
         id: result.category_id,
@@ -487,6 +489,12 @@ const createService = async (req, res) => {
     if (serviceData.excluded && typeof serviceData.excluded === 'string') {
       serviceData.excluded = JSON.parse(serviceData.excluded);
     }
+    if (serviceData.important_info && typeof serviceData.important_info === 'string') {
+      serviceData.important_info = JSON.parse(serviceData.important_info);
+    }
+    if (serviceData.important_info_vi && typeof serviceData.important_info_vi === 'string') {
+      serviceData.important_info_vi = JSON.parse(serviceData.important_info_vi);
+    }
 
     // Convert string values to appropriate types
     serviceData.price = parseFloat(serviceData.price);
@@ -547,6 +555,12 @@ const updateService = async (req, res) => {
     }
     if (updateData.excluded && typeof updateData.excluded === 'string') {
       updateData.excluded = JSON.parse(updateData.excluded);
+    }
+    if (updateData.important_info && typeof updateData.important_info === 'string') {
+      updateData.important_info = JSON.parse(updateData.important_info);
+    }
+    if (updateData.important_info_vi && typeof updateData.important_info_vi === 'string') {
+      updateData.important_info_vi = JSON.parse(updateData.important_info_vi);
     }
 
     // Convert string values to appropriate types

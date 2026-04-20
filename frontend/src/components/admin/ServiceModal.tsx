@@ -28,6 +28,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
     duration: { en: '', vi: '' },
     included: { en: '', vi: '' },
     excluded: { en: '', vi: '' },
+    important_info: { en: '', vi: '' },
     price: 0,
     category_id: '',
     status: 'active',
@@ -95,6 +96,22 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
             return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
           })()
         },
+        important_info: {
+          en: (() => {
+            let data = initialData.important_info;
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch (e) { data = []; }
+            }
+            return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
+          })(),
+          vi: (() => {
+            let data = initialData.important_info_vi;
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch (e) { data = []; }
+            }
+            return Array.isArray(data) && data.length > 0 ? data.join('\n') : '';
+          })()
+        },
         price: initialData.price || 0,
         category_id: initialData.category_id || '',
         status: initialData.status || 'active',
@@ -110,6 +127,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
         duration: { en: '', vi: '' },
         included: { en: '', vi: '' },
         excluded: { en: '', vi: '' },
+        important_info: { en: '', vi: '' },
         price: 0,
         category_id: '',
         status: 'active',
@@ -149,7 +167,9 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
       included: formData.included.en.split('\n').filter(item => item.trim()),
       excluded: formData.excluded.en.split('\n').filter(item => item.trim()),
       included_vi: formData.included.vi.split('\n').filter(item => item.trim()),
-      excluded_vi: formData.excluded.vi.split('\n').filter(item => item.trim())
+      excluded_vi: formData.excluded.vi.split('\n').filter(item => item.trim()),
+      important_info: formData.important_info.en.split('\n').filter(item => item.trim()),
+      important_info_vi: formData.important_info.vi.split('\n').filter(item => item.trim())
     };
 
     onSubmit(processedData);
@@ -322,6 +342,20 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
                   placeholder={{
                     en: "Enter each excluded service on a new line",
                     vi: "Nhập mỗi dịch vụ không bao gồm trên một dòng mới"
+                  }}
+                />
+
+                {/* Important Information */}
+                <BilingualInput
+                  label="Important Information (Lưu ý)"
+                  name="important_info"
+                  value={formData.important_info}
+                  onChange={handleBilingualChange}
+                  type="textarea"
+                  rows={4}
+                  placeholder={{
+                    en: "Enter important notes (one per line)",
+                    vi: "Nhập các lưu ý quan trọng (mỗi dòng một mục)"
                   }}
                 />
 

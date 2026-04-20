@@ -24,6 +24,8 @@ class Service {
     this.duration_vi = data.duration_vi;
     this.included_vi = data.included_vi ? (typeof data.included_vi === 'string' ? JSON.parse(data.included_vi) : data.included_vi) : [];
     this.excluded_vi = data.excluded_vi ? (typeof data.excluded_vi === 'string' ? JSON.parse(data.excluded_vi) : data.excluded_vi) : [];
+    this.important_info = data.important_info ? (typeof data.important_info === 'string' ? JSON.parse(data.important_info) : data.important_info) : [];
+    this.important_info_vi = data.important_info_vi ? (typeof data.important_info_vi === 'string' ? JSON.parse(data.important_info_vi) : data.important_info_vi) : [];
 
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
@@ -51,8 +53,8 @@ class Service {
         title, slug, subtitle, description, price, duration,
         included, excluded, category_id, service_type, image, gallery,
         status, title_vi, subtitle_vi, description_vi, duration_vi,
-        included_vi, excluded_vi, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        included_vi, excluded_vi, important_info, important_info_vi, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `;
 
     const params = [
@@ -74,7 +76,9 @@ class Service {
       this.description_vi,
       this.duration_vi,
       JSON.stringify(this.included_vi),
-      JSON.stringify(this.excluded_vi)
+      JSON.stringify(this.excluded_vi),
+      JSON.stringify(this.important_info),
+      JSON.stringify(this.important_info_vi)
     ];
 
     const result = await db.prepare(sql).bind(...params).run();
@@ -178,7 +182,9 @@ class Service {
       description_vi: this.description_vi,
       duration_vi: this.duration_vi,
       included_vi: JSON.stringify(this.included_vi),
-      excluded_vi: JSON.stringify(this.excluded_vi)
+      excluded_vi: JSON.stringify(this.excluded_vi),
+      important_info: JSON.stringify(this.important_info),
+      important_info_vi: JSON.stringify(this.important_info_vi)
     };
 
     console.log('🔧 Service.update() - serviceData being prepared:', {
@@ -310,6 +316,8 @@ class Service {
       duration: this.duration,
       included: typeof this.included === 'string' ? JSON.parse(this.included) : this.included,
       excluded: typeof this.excluded === 'string' ? JSON.parse(this.excluded) : this.excluded,
+      important_info: typeof this.important_info === 'string' ? JSON.parse(this.important_info) : this.important_info,
+      important_info_vi: typeof this.important_info_vi === 'string' ? JSON.parse(this.important_info_vi) : this.important_info_vi,
       category_id: this.category_id,
       service_type: this.service_type,
       image: this.image,
@@ -329,7 +337,8 @@ class Service {
         description: this.description_vi || this.description,
         duration: this.duration_vi || this.duration,
         included: this.included_vi && this.included_vi.length > 0 ? this.included_vi : this.included,
-        excluded: this.excluded_vi && this.excluded_vi.length > 0 ? this.excluded_vi : this.excluded
+        excluded: this.excluded_vi && this.excluded_vi.length > 0 ? this.excluded_vi : this.excluded,
+        important_info: this.important_info_vi && this.important_info_vi.length > 0 ? this.important_info_vi : this.important_info
       };
     }
     return {
@@ -338,7 +347,8 @@ class Service {
       description: this.description,
       duration: this.duration,
       included: this.included,
-      excluded: this.excluded
+      excluded: this.excluded,
+      important_info: this.important_info
     };
   }
 }
