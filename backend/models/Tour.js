@@ -323,8 +323,14 @@ class Tour {
     if (processedData.included && typeof processedData.included !== 'string') {
       processedData.included = JSON.stringify(processedData.included);
     }
+    if (processedData.included_vi && typeof processedData.included_vi !== 'string') {
+      processedData.included_vi = JSON.stringify(processedData.included_vi);
+    }
     if (processedData.excluded && typeof processedData.excluded !== 'string') {
       processedData.excluded = JSON.stringify(processedData.excluded);
+    }
+    if (processedData.excluded_vi && typeof processedData.excluded_vi !== 'string') {
+      processedData.excluded_vi = JSON.stringify(processedData.excluded_vi);
     }
     if (processedData.important_info && typeof processedData.important_info !== 'string') {
       processedData.important_info = JSON.stringify(processedData.important_info);

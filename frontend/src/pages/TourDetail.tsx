@@ -297,11 +297,11 @@ const TourDetail: React.FC = () => {
                   </h3>
                   <ul className="space-y-2">
                     {(() => {
-                        const includedArray = tour?.included
-                            ? (typeof tour.included === 'string' ? JSON.parse(tour.included) : tour.included)
-                            : [];
-                        return Array.isArray(includedArray) && includedArray.length > 0 ? (
-                            includedArray.map((included, index) => (
+                        const raw = (language === 'vi' && tour?.included_vi) ? tour.included_vi : tour?.included;
+                        let includedArray = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : [];
+                        if (!Array.isArray(includedArray)) includedArray = [];
+                        return includedArray.length > 0 ? (
+                            includedArray.map((included: string, index: number) => (
                                 <li key={index} className="flex items-start">
                                     <Icon icon={Icons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                                     <span className="text-gray-600 text-sm">{included}</span>
@@ -320,11 +320,11 @@ const TourDetail: React.FC = () => {
                   </h3>
                   <ul className="space-y-2">
                     {(() => {
-                        const excludedArray = tour?.excluded
-                            ? (typeof tour.excluded === 'string' ? JSON.parse(tour.excluded) : tour.excluded)
-                            : [];
-                        return Array.isArray(excludedArray) && excludedArray.length > 0 ? (
-                            excludedArray.map((excluded, index) => (
+                        const raw = (language === 'vi' && tour?.excluded_vi) ? tour.excluded_vi : tour?.excluded;
+                        let excludedArray = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : [];
+                        if (!Array.isArray(excludedArray)) excludedArray = [];
+                        return excludedArray.length > 0 ? (
+                            excludedArray.map((excluded: string, index: number) => (
                                 <li key={index} className="flex items-start">
                                     <Icon icon={Icons.FiX} className="w-4 h-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
                                     <span className="text-gray-600 text-sm">{excluded}</span>

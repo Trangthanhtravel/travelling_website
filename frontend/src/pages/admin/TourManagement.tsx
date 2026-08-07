@@ -102,8 +102,10 @@ const TourManagement: React.FC = () => {
       formData.append('location_vi', tourData.location.vi);
       formData.append('max_participants', tourData.max_participants.toString());
       formData.append('category_slug', tourData.category); // Fix: use category_slug
-      formData.append('included', JSON.stringify(tourData.included));
-      formData.append('excluded', JSON.stringify(tourData.excluded));
+      formData.append('included', JSON.stringify(tourData.included?.en || []));
+      formData.append('included_vi', JSON.stringify(tourData.included?.vi || []));
+      formData.append('excluded', JSON.stringify(tourData.excluded?.en || []));
+      formData.append('excluded_vi', JSON.stringify(tourData.excluded?.vi || []));
       formData.append('important_info', JSON.stringify(tourData.important_info?.en || []));
       formData.append('important_info_vi', JSON.stringify(tourData.important_info?.vi || []));
       formData.append('status', tourData.status);
@@ -156,8 +158,10 @@ const TourManagement: React.FC = () => {
       formData.append('location_vi', data.location.vi);
       formData.append('max_participants', data.max_participants.toString());
       formData.append('category_slug', data.category); // Fix: use category_slug
-      formData.append('included', JSON.stringify(data.included));
-      formData.append('excluded', JSON.stringify(data.excluded));
+      formData.append('included', JSON.stringify(data.included?.en || []));
+      formData.append('included_vi', JSON.stringify(data.included?.vi || []));
+      formData.append('excluded', JSON.stringify(data.excluded?.en || []));
+      formData.append('excluded_vi', JSON.stringify(data.excluded?.vi || []));
       formData.append('important_info', JSON.stringify(data.important_info?.en || []));
       formData.append('important_info_vi', JSON.stringify(data.important_info?.vi || []));
       formData.append('status', data.status);
