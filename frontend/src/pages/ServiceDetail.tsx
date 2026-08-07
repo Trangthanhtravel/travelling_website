@@ -132,9 +132,28 @@ const ServiceDetail: React.FC = () => {
               </h2>
               <div className={`prose max-w-none ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {service.description ? (
-                  <div dangerouslySetInnerHTML={{
-                    __html: getLocalizedContent(service, 'description') || service.description
-                  }} />
+                  (() => {
+                    const raw = getLocalizedContent(service, 'description') || service.description;
+                    // If it looks like HTML, render it as HTML; otherwise render as plain text with preserved whitespace
+                    const isHtml = /<[a-z][\s\S]*>/i.test(raw);
+                    if (isHtml) {
+                      return <div dangerouslySetInnerHTML={{ __html: raw }} />;
+                    }
+                    return (
+                      <div>
+                        {raw.split('\n\n').map((para: string, i: number) => (
+                          <p key={i} className={`mb-4 last:mb-0 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                            {para.split('\n').map((line: string, j: number) => (
+                              <React.Fragment key={j}>
+                                {j > 0 && <br />}
+                                {line}
+                              </React.Fragment>
+                            ))}
+                          </p>
+                        ))}
+                      </div>
+                    );
+                  })()
                 ) : (
                   <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
                     {getLocalizedContent(service, 'description') || t('No description available for this service.')}

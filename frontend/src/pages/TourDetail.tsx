@@ -125,7 +125,25 @@ const TourDetail: React.FC = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('About This Tour')}</h2>
               <div className="prose max-w-none text-gray-600">
                 {tour?.description ? (
-                  <div dangerouslySetInnerHTML={{ __html: tour.description }} />
+                  (() => {
+                    const raw = (language === 'vi' && tour.description_vi) ? tour.description_vi : tour.description;
+                    const isHtml = /<[a-z][\s\S]*>/i.test(raw);
+                    if (isHtml) return <div dangerouslySetInnerHTML={{ __html: raw }} />;
+                    return (
+                      <div>
+                        {raw.split('\n\n').map((para: string, i: number) => (
+                          <p key={i} className="mb-4 last:mb-0">
+                            {para.split('\n').map((line: string, j: number) => (
+                              <React.Fragment key={j}>
+                                {j > 0 && <br />}
+                                {line}
+                              </React.Fragment>
+                            ))}
+                          </p>
+                        ))}
+                      </div>
+                    );
+                  })()
                 ) : (
                   <p>{t('Tour description coming soon...')}</p>
                 )}
