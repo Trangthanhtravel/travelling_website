@@ -32,6 +32,25 @@ class Tour {
     this.important_info = data.important_info ? (typeof data.important_info === 'string' ? JSON.parse(data.important_info) : data.important_info) : [];
     this.important_info_vi = data.important_info_vi ? (typeof data.important_info_vi === 'string' ? JSON.parse(data.important_info_vi) : data.important_info_vi) : [];
 
+    // Fix legacy bilingual-object format: {en:[...], vi:[...]} stored in a single column.
+    // Always extract VI from the object when it has data — don't skip if _vi column has content.
+    const _fixBilingual = (enField, viField) => {
+      if (enField && !Array.isArray(enField) && typeof enField === 'object') {
+        const viFromObj = Array.isArray(enField.vi) ? enField.vi : [];
+        return {
+          en: Array.isArray(enField.en) ? enField.en : [],
+          vi: viFromObj.length > 0 ? viFromObj : (Array.isArray(viField) ? viField : [])
+        };
+      }
+      return { en: Array.isArray(enField) ? enField : [], vi: Array.isArray(viField) ? viField : [] };
+    };
+    const incFixed = _fixBilingual(this.included, this.included_vi);
+    this.included = incFixed.en;
+    this.included_vi = incFixed.vi;
+    const excFixed = _fixBilingual(this.excluded, this.excluded_vi);
+    this.excluded = excFixed.en;
+    this.excluded_vi = excFixed.vi;
+
     this.created_at = data.created_at;
     this.updated_at = data.updated_at;
   }

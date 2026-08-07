@@ -162,6 +162,61 @@ const ServiceDetail: React.FC = () => {
               </div>
             </div>
 
+            {/* Included / Excluded */}
+            {(() => {
+              const parseArr = (v: any) => { try { let a = v ? (typeof v === 'string' ? JSON.parse(v) : v) : []; return Array.isArray(a) ? a : []; } catch(e) { return []; } };
+              const enInc = parseArr(service?.included);
+              const viInc = parseArr(service?.included_vi);
+              const enExc = parseArr(service?.excluded);
+              const viExc = parseArr(service?.excluded_vi);
+              const incArr = language === 'vi' ? (viInc.length > 0 ? viInc : enInc) : (enInc.length > 0 ? enInc : viInc);
+              const excArr = language === 'vi' ? (viExc.length > 0 ? viExc : enExc) : (enExc.length > 0 ? enExc : viExc);
+              if (incArr.length === 0 && excArr.length === 0) return null;
+              return (
+                <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
+                  <h2 className={`text-2xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{t("What's Included")}</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {incArr.length > 0 && (
+                      <div>
+                        <h3 className={`text-lg font-semibold mb-4 flex items-center ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
+                          <Icon icon={Icons.FiCheck} className="w-5 h-5 mr-2" />
+                          {t('Included')}
+                        </h3>
+                        <ul className="space-y-2">
+                          {incArr.map((item: string, i: number) =>
+                            item.trim() === '' ? <li key={i} className="list-none h-2" /> : (
+                              <li key={i} className="flex items-start">
+                                <Icon icon={Icons.FiCheck} className={`w-4 h-4 mr-2 mt-0.5 flex-shrink-0 ${isDarkMode ? 'text-green-400' : 'text-green-500'}`} />
+                                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{item}</span>
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {excArr.length > 0 && (
+                      <div>
+                        <h3 className={`text-lg font-semibold mb-4 flex items-center ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>
+                          <Icon icon={Icons.FiX} className="w-5 h-5 mr-2" />
+                          {t('Not Included')}
+                        </h3>
+                        <ul className="space-y-2">
+                          {excArr.map((item: string, i: number) =>
+                            item.trim() === '' ? <li key={i} className="list-none h-2" /> : (
+                              <li key={i} className="flex items-start">
+                                <Icon icon={Icons.FiX} className={`w-4 h-4 mr-2 mt-0.5 flex-shrink-0 ${isDarkMode ? 'text-red-400' : 'text-red-500'}`} />
+                                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{item}</span>
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Photo Gallery */}
             {service.gallery && service.gallery.length > 0 && (
               <div className={`rounded-lg shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-dark-800 border border-dark-700' : 'bg-white'}`}>
