@@ -63,11 +63,13 @@ const Services: React.FC = () => {
 
   const categories = [
     { id: 'all', name: t('Our Services'), slug: 'all', icon: Icons.FiGrid },
-    ...(categoriesData?.data?.map((cat: any) => ({
-      ...cat,
-      name: getLocalizedContent(cat, 'name') || cat.name,
-      icon: getIconFromString(cat.icon)
-    })) || [])
+    ...(categoriesData?.data
+      ?.filter((cat: any) => !cat.slug?.toLowerCase().includes('car-rental') && !cat.name?.toLowerCase().includes('car rental'))
+      ?.map((cat: any) => ({
+        ...cat,
+        name: getLocalizedContent(cat, 'name') || cat.name,
+        icon: getIconFromString(cat.icon)
+      })) || [])
   ];
 
   // Fetch services from API with pagination and language support
