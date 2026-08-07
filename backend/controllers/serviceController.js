@@ -36,6 +36,35 @@ const galleryUpload = multer({
   }
 });
 
+// Safely parse a JSON array field from DB. Handles null, plain arrays, JSON strings,
+// and the broken {en:[],vi:[]} bilingual-object format.
+// Returns { en: [], vi: [] } so callers can extract the right language.
+function safeParseArray(raw) {
+  try {
+    if (!raw) return { en: [], vi: [] };
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (Array.isArray(parsed)) return { en: parsed, vi: [] };
+    if (parsed && typeof parsed === 'object') {
+      return {
+        en: Array.isArray(parsed.en) ? parsed.en : [],
+        vi: Array.isArray(parsed.vi) ? parsed.vi : []
+      };
+    }
+    return { en: [], vi: [] };
+  } catch (e) {
+    return { en: [], vi: [] };
+  }
+}
+
+function safeParseJSON(raw, fallback = []) {
+  try {
+    if (!raw) return fallback;
+    return typeof raw === 'string' ? JSON.parse(raw) : raw;
+  } catch (e) {
+    return fallback;
+  }
+}
+
 // Get all services with filtering
 const getServices = async (req, res) => {
   try {
@@ -199,10 +228,13 @@ const getServiceById = async (req, res) => {
             ...result,
             images: result.images ? JSON.parse(result.images) : [],
             gallery: result.gallery ? JSON.parse(result.gallery) : [],
-            included: (() => { const r = repairArrayField(result.included); return Array.isArray(r) ? r : (r.en || []); })(),
-            included_vi: (() => { const r = repairArrayField(result.included); if (!Array.isArray(r)) return r.vi || []; const vi = result.included_vi ? repairArrayField(result.included_vi) : []; return Array.isArray(vi) ? vi : (vi.vi || []); })(),
-            excluded: (() => { const r = repairArrayField(result.excluded); return Array.isArray(r) ? r : (r.en || []); })(),
-            excluded_vi: (() => { const r = repairArrayField(result.excluded); if (!Array.isArray(r)) return r.vi || []; const vi = result.excluded_vi ? repairArrayField(result.excluded_vi) : []; return Array.isArray(vi) ? vi : (vi.vi || []); })(),
+            ...(() => {
+              const inc = safeParseArray(result.included);
+              const incVi = inc.vi.length > 0 ? inc.vi : safeParseArray(result.included_vi).en;
+              const exc = safeParseArray(result.excluded);
+              const excVi = exc.vi.length > 0 ? exc.vi : safeParseArray(result.excluded_vi).en;
+              return { included: inc.en, included_vi: incVi, excluded: exc.en, excluded_vi: excVi };
+            })(),
             // Remove itinerary reference since it doesn't exist in database
             location: result.location ? JSON.parse(result.location) : null,
             category: result.category_id ? {
@@ -249,13 +281,16 @@ const getServiceBySlug = async (req, res) => {
       ...result,
       images: result.images ? JSON.parse(result.images) : [],
       gallery: result.gallery ? JSON.parse(result.gallery) : [],
-      included: (() => { const r = repairArrayField(result.included); return Array.isArray(r) ? r : (r.en || []); })(),
-      included_vi: (() => { const r = repairArrayField(result.included); if (!Array.isArray(r)) return r.vi || []; const vi = result.included_vi ? repairArrayField(result.included_vi) : []; return Array.isArray(vi) ? vi : (vi.vi || []); })(),
-      excluded: (() => { const r = repairArrayField(result.excluded); return Array.isArray(r) ? r : (r.en || []); })(),
-      excluded_vi: (() => { const r = repairArrayField(result.excluded); if (!Array.isArray(r)) return r.vi || []; const vi = result.excluded_vi ? repairArrayField(result.excluded_vi) : []; return Array.isArray(vi) ? vi : (vi.vi || []); })(),
-      important_info: result.important_info ? JSON.parse(result.important_info) : [],
-      important_info_vi: result.important_info_vi ? JSON.parse(result.important_info_vi) : [],
-      location: result.location ? JSON.parse(result.location) : null,
+      ...(() => {
+        const inc = safeParseArray(result.included);
+        const incVi = inc.vi.length > 0 ? inc.vi : safeParseArray(result.included_vi).en;
+        const exc = safeParseArray(result.excluded);
+        const excVi = exc.vi.length > 0 ? exc.vi : safeParseArray(result.excluded_vi).en;
+        return { included: inc.en, included_vi: incVi, excluded: exc.en, excluded_vi: excVi };
+      })(),
+      important_info: safeParseJSON(result.important_info, []),
+      important_info_vi: safeParseJSON(result.important_info_vi, []),
+      location: result.location ? safeParseJSON(result.location, null) : null,
       category: result.category_id ? {
         id: result.category_id,
         name: result.category_name,
