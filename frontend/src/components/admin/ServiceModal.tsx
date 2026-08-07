@@ -159,12 +159,12 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
     // Convert included/excluded from text to arrays
     const processedData = {
       ...formData,
-      included: formData.included.en.split('\n').filter(item => item.trim()),
-      excluded: formData.excluded.en.split('\n').filter(item => item.trim()),
-      included_vi: formData.included.vi.split('\n').filter(item => item.trim()),
-      excluded_vi: formData.excluded.vi.split('\n').filter(item => item.trim()),
-      important_info: formData.important_info.en.split('\n').filter(item => item.trim()),
-      important_info_vi: formData.important_info.vi.split('\n').filter(item => item.trim())
+      included: formData.included.en.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
+      excluded: formData.excluded.en.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
+      included_vi: formData.included.vi.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
+      excluded_vi: formData.excluded.vi.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
+      important_info: formData.important_info.en.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
+      important_info_vi: formData.important_info.vi.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1))
     };
 
     onSubmit(processedData);

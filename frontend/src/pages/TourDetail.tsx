@@ -334,12 +334,16 @@ const TourDetail: React.FC = () => {
                     {language === 'vi' ? 'Lưu ý' : t('Important Information')}
                   </h2>
                   <ul className="space-y-2">
-                    {infoArray.map((info: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-amber-600 mr-2 mt-0.5 flex-shrink-0">•</span>
-                        <span className="text-amber-900">{info}</span>
-                      </li>
-                    ))}
+                    {infoArray.map((info: string, index: number) =>
+                      info.trim() === '' ? (
+                        <li key={index} className="list-none h-3" />
+                      ) : (
+                        <li key={index} className="flex items-start">
+                          <span className="text-amber-600 mr-2 mt-0.5 flex-shrink-0">•</span>
+                          <span className="text-amber-900">{info}</span>
+                        </li>
+                      )
+                    )}
                   </ul>
                 </div>
               );

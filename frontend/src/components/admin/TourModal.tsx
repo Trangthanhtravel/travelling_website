@@ -148,16 +148,16 @@ const TourModal: React.FC<TourModalProps> = ({
     const submitData = {
       ...formData,
       included: {
-        en: formData.included.en.split('\n').filter(item => item.trim()),
-        vi: formData.included.vi.split('\n').filter(item => item.trim())
+        en: formData.included.en.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
+        vi: formData.included.vi.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1))
       },
       excluded: {
-        en: formData.excluded.en.split('\n').filter(item => item.trim()),
-        vi: formData.excluded.vi.split('\n').filter(item => item.trim())
+        en: formData.excluded.en.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
+        vi: formData.excluded.vi.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1))
       },
       important_info: {
-        en: formData.important_info.en.split('\n').filter(item => item.trim()),
-        vi: formData.important_info.vi.split('\n').filter(item => item.trim())
+        en: formData.important_info.en.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
+        vi: formData.important_info.vi.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1))
       }
     };
 
