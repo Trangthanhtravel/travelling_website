@@ -31,6 +31,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
     important_info: { en: '', vi: '' },
     price: 0,
     category_id: '',
+    service_type: 'other-services',
     status: 'active',
     featured: false,
     image: undefined as File | undefined
@@ -109,6 +110,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
         },
         price: initialData.price || 0,
         category_id: initialData.category_id || '',
+        service_type: initialData.service_type || 'other-services',
         status: initialData.status || 'active',
         featured: initialData.featured || false,
         image: undefined
@@ -125,6 +127,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
         important_info: { en: '', vi: '' },
         price: 0,
         category_id: '',
+        service_type: 'other-services',
         status: 'active',
         featured: false,
         image: undefined
@@ -159,6 +162,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
     // Convert included/excluded from text to arrays
     const processedData = {
       ...formData,
+      service_type: formData.service_type,
       included: formData.included.en.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
       excluded: formData.excluded.en.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
       included_vi: formData.included.vi.split('\n').filter((item, i, arr) => item.trim() || (i > 0 && i < arr.length - 1)),
@@ -274,6 +278,23 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
                         {category.name}
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                {/* Service Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Service Type <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    required
+                    value={formData.service_type}
+                    onChange={(e) => setFormData(prev => ({ ...prev, service_type: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-dark-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="other-services">Other Services</option>
+                    <option value="car-rental">Car Rental</option>
+                    <option value="tours">Tours</option>
                   </select>
                 </div>
 

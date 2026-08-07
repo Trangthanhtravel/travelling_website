@@ -106,6 +106,7 @@ const ServiceManagement: React.FC = () => {
       formData.append('description', serviceData.description.en);
       formData.append('price', serviceData.price.toString());
       formData.append('category_id', serviceData.category_id);
+      formData.append('service_type', serviceData.service_type || 'other-services');
       formData.append('status', serviceData.status);
       formData.append('featured', serviceData.featured.toString());
 
@@ -166,6 +167,7 @@ const ServiceManagement: React.FC = () => {
       formData.append('description', data.description.en);
       formData.append('price', data.price.toString());
       formData.append('category_id', data.category_id);
+      formData.append('service_type', data.service_type || 'other-services');
       formData.append('status', data.status);
       formData.append('featured', data.featured.toString());
 

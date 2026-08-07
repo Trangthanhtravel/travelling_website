@@ -83,8 +83,12 @@ class Service {
 
     const result = await db.prepare(sql).bind(...params).run();
 
+    if (!result.success) {
+      throw new Error('Failed to save service to database');
+    }
+
     // Get the auto-generated ID
-    if (result.success && result.meta?.last_row_id) {
+    if (result.meta?.last_row_id) {
       this.id = result.meta.last_row_id;
     }
 
