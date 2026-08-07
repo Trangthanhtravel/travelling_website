@@ -199,8 +199,10 @@ const getServiceById = async (req, res) => {
             ...result,
             images: result.images ? JSON.parse(result.images) : [],
             gallery: result.gallery ? JSON.parse(result.gallery) : [],
-            included: result.included ? JSON.parse(result.included) : [],
-            excluded: result.excluded ? JSON.parse(result.excluded) : [],
+            included: (() => { const r = repairArrayField(result.included); return Array.isArray(r) ? r : (r.en || []); })(),
+            included_vi: (() => { const r = repairArrayField(result.included); if (!Array.isArray(r)) return r.vi || []; const vi = result.included_vi ? repairArrayField(result.included_vi) : []; return Array.isArray(vi) ? vi : (vi.vi || []); })(),
+            excluded: (() => { const r = repairArrayField(result.excluded); return Array.isArray(r) ? r : (r.en || []); })(),
+            excluded_vi: (() => { const r = repairArrayField(result.excluded); if (!Array.isArray(r)) return r.vi || []; const vi = result.excluded_vi ? repairArrayField(result.excluded_vi) : []; return Array.isArray(vi) ? vi : (vi.vi || []); })(),
             // Remove itinerary reference since it doesn't exist in database
             location: result.location ? JSON.parse(result.location) : null,
             category: result.category_id ? {
@@ -247,8 +249,10 @@ const getServiceBySlug = async (req, res) => {
       ...result,
       images: result.images ? JSON.parse(result.images) : [],
       gallery: result.gallery ? JSON.parse(result.gallery) : [],
-      included: result.included ? JSON.parse(result.included) : [],
-      excluded: result.excluded ? JSON.parse(result.excluded) : [],
+      included: (() => { const r = repairArrayField(result.included); return Array.isArray(r) ? r : (r.en || []); })(),
+      included_vi: (() => { const r = repairArrayField(result.included); if (!Array.isArray(r)) return r.vi || []; const vi = result.included_vi ? repairArrayField(result.included_vi) : []; return Array.isArray(vi) ? vi : (vi.vi || []); })(),
+      excluded: (() => { const r = repairArrayField(result.excluded); return Array.isArray(r) ? r : (r.en || []); })(),
+      excluded_vi: (() => { const r = repairArrayField(result.excluded); if (!Array.isArray(r)) return r.vi || []; const vi = result.excluded_vi ? repairArrayField(result.excluded_vi) : []; return Array.isArray(vi) ? vi : (vi.vi || []); })(),
       important_info: result.important_info ? JSON.parse(result.important_info) : [],
       important_info_vi: result.important_info_vi ? JSON.parse(result.important_info_vi) : [],
       location: result.location ? JSON.parse(result.location) : null,
@@ -489,6 +493,12 @@ const createService = async (req, res) => {
     if (serviceData.excluded && typeof serviceData.excluded === 'string') {
       serviceData.excluded = JSON.parse(serviceData.excluded);
     }
+    if (serviceData.included_vi && typeof serviceData.included_vi === 'string') {
+      serviceData.included_vi = JSON.parse(serviceData.included_vi);
+    }
+    if (serviceData.excluded_vi && typeof serviceData.excluded_vi === 'string') {
+      serviceData.excluded_vi = JSON.parse(serviceData.excluded_vi);
+    }
     if (serviceData.important_info && typeof serviceData.important_info === 'string') {
       serviceData.important_info = JSON.parse(serviceData.important_info);
     }
@@ -555,6 +565,12 @@ const updateService = async (req, res) => {
     }
     if (updateData.excluded && typeof updateData.excluded === 'string') {
       updateData.excluded = JSON.parse(updateData.excluded);
+    }
+    if (updateData.included_vi && typeof updateData.included_vi === 'string') {
+      updateData.included_vi = JSON.parse(updateData.included_vi);
+    }
+    if (updateData.excluded_vi && typeof updateData.excluded_vi === 'string') {
+      updateData.excluded_vi = JSON.parse(updateData.excluded_vi);
     }
     if (updateData.important_info && typeof updateData.important_info === 'string') {
       updateData.important_info = JSON.parse(updateData.important_info);
